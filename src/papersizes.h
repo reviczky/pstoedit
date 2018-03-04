@@ -112,7 +112,7 @@ static const PaperInfo* getPaperInfo(const char * pname) {
 	const PaperInfo * pi = &paperformats[0];
 	while (pi && pi->name) {
 #ifdef _MSC_VER
-		if (stricmp(pi->name,pname) == 0) return pi;
+		if (_stricmp(pi->name,pname) == 0) return pi;
 #else
 		if (strcasecmp(pi->name,pname) == 0) return pi;
 #endif

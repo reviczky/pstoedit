@@ -216,7 +216,7 @@ void drvPIC::print_coords()
 			outf << " to " << x_coord(move_x, move_y) << "," << y_coord(move_x, move_y);
 			break;
 		default:
-			errf << "\tFatal: unexpected case in drvpdf " << endl;
+			errf << "\tFatal: unexpected case in drvpic " << endl;
 			abort();
 			break;
 		}

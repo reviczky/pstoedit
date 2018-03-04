@@ -75,16 +75,17 @@ libp2edrvstd_la_SOURCES=			\
 	drvnoi.cpp 	drvnoi.h		\
 	drvpic.cpp 	drvpic.h		\
 	drvhpgl.cpp 	drvhpgl.h		\
-	drvpcb1.cpp	drvpcb1.h                 \
-	drvpcb2.cpp	drvpcb2.h                 \
-	drvpcbfill.cpp	drvpcbfill.h                 \
-	drvgschem.cpp	drvgschem.h                 \
+	drvpcb1.cpp	drvpcb1.h               \
+	drvpcb2.cpp	drvpcb2.h               \
+	drvpcbfill.cpp	drvpcbfill.h            \
+	drvgschem.cpp	drvgschem.h             \
+	drvcfdg.cpp     drvcfdg.h               \
 	drvtk.cpp	drvtk.h                 \
-	drvvtk.cpp	drvvtk.h                 \
+	drvvtk.cpp	drvvtk.h                \
 	drvsvm.cpp	drvsvm.h svm_actions.h	\
 	$(specific_drivers_src)                 \
         $(sample_drivers_src)                   
-libp2edrvstd_la_LIBADD=-L. libpstoedit.la
+libp2edrvstd_la_LIBADD=libpstoedit.la
 libp2edrvstd_la_LDFLAGS=-no-undefined -module
 
 #libp2edrvplugins_la_SOURCES=drvmif.cpp drvcgm.cpp drvrtf.cpp drvwwmf.cpp
@@ -93,25 +94,27 @@ libp2edrvstd_la_LDFLAGS=-no-undefined -module
 #libp2edrvplugins_la_CFLAGS=-I../Check/ -I../othersrc/cdlib
 
 libp2edrvlplot_la_SOURCES=drvlplot.cpp drvlplot.h initlibrary.cpp
-libp2edrvlplot_la_LIBADD=$(LIBPLOTTER_LDFLAGS) -L. libpstoedit.la
+libp2edrvlplot_la_LIBADD=$(LIBPLOTTER_LDFLAGS) libpstoedit.la
 libp2edrvlplot_la_LDFLAGS=-no-undefined -module
 
 libp2edrvswf_la_SOURCES=drvswf.cpp drvswf.h initlibrary.cpp
-libp2edrvswf_la_LIBADD=$(LIBMING_LDFLAGS) -L. libpstoedit.la
+libp2edrvswf_la_LIBADD=$(LIBMING_LDFLAGS) libpstoedit.la
 libp2edrvswf_la_LDFLAGS=-no-undefined -module
 
 # note the __ stand for ++ - automake treats all no alphanums chars as _
 libp2edrvmagick___la_SOURCES=drvmagick++.cpp drvmagick++.h initlibrary.cpp
-libp2edrvmagick___la_LIBADD=-L. libpstoedit.la
-libp2edrvmagick___la_LDFLAGS=-no-undefined ${LIBMAGICK_LDFLAGS}  -module
+libp2edrvmagick___la_LIBADD=${LIBMAGICK_LDFLAGS} libpstoedit.la
+libp2edrvmagick___la_LDFLAGS=-no-undefined -module
 # moved to configure.ac because needed only for g++ libp2edrvmagick___la_CPPFLAGS=$(LIBMAGICK_CFLAGS) $(AM_CPPFLAGS) -Wno-long-long
 
 if USE_EMFBYSOURCE
 libp2edrvwmf_la_SOURCES=emflib.cpp drvwmf.cpp drvwmf.h initlibrary.cpp
-libp2edrvwmf_la_LDFLAGS=-no-undefined -L. libpstoedit.la -module
+libp2edrvwmf_la_LIBADD=libpstoedit.la 
+libp2edrvwmf_la_LDFLAGS=-no-undefined -module
 else
 libp2edrvwmf_la_SOURCES=drvwmf.cpp drvwmf.h initlibrary.cpp
-libp2edrvwmf_la_LDFLAGS=-no-undefined $(LIBEMF_LDFLAGS) -L. libpstoedit.la -module
+libp2edrvwmf_la_LIBADD=$(LIBEMF_LDFLAGS) libpstoedit.la 
+libp2edrvwmf_la_LDFLAGS=-no-undefined -module
 endif
 
 libpstoedit_la_SOURCES =			\
@@ -134,7 +137,8 @@ libpstoedit_la_LIBADD = ${CXX_STD_LIB} ${CXX_RUNTIME_LIB} -ldl -lm
 libpstoedit_la_LDFLAGS = -no-undefined
 
 pstoedit_SOURCES = cmdmain.cpp
-pstoedit_LDFLAGS = -no-undefined -L. libpstoedit.la ${LIBLD_LDFLAGS}
+pstoedit_LDADD = libpstoedit.la ${LIBLD_LDFLAGS}
+pstoedit_LDFLAGS = -no-undefined
 
 pkginclude_HEADERS =				\
 	pstoedit.h				\

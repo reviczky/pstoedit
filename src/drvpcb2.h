@@ -37,12 +37,13 @@ public:
 
 	class DriverOptions : public ProgramOptions {
 	public:
-		Option < double, DoubleValueExtractor > grid;
-		Option < double, DoubleValueExtractor > snapdist;
-		Option < double, DoubleValueExtractor > tshiftx;
-		Option < double, DoubleValueExtractor > tshifty;
-		Option < bool, BoolTrueExtractor > mm;
-		Option < bool, BoolTrueExtractor > stdnames;
+		OptionT < double, DoubleValueExtractor > grid;
+		OptionT < double, DoubleValueExtractor > snapdist;
+		OptionT < double, DoubleValueExtractor > tshiftx;
+		OptionT < double, DoubleValueExtractor > tshifty;
+		OptionT < bool, BoolTrueExtractor > mm;
+		OptionT < bool, BoolTrueExtractor > stdnames;
+		OptionT < bool, BoolTrueExtractor > forcepoly;
 
 		DriverOptions():
 		grid(true,"-grid",0,0,"attempt to snap relevant output to grid (mils) and put failed objects to a different layer",0,0),
@@ -50,7 +51,8 @@ public:
 		tshiftx(true,"-tshiftx",0,0,"additional x shift measured in target units (mils)",0,0),
 		tshifty(true,"-tshifty",0,0,"additional y shift measured in target units (mils)",0,0),
 		mm(true,"-mm",0,0,"Switch to metric units (mm)",0,false),
-		stdnames(true,"-stdnames",0,0,"use standard layer names instead of descriptive names",0,false)
+		stdnames(true,"-stdnames",0,0,"use standard layer names instead of descriptive names",0,false),
+		forcepoly(true,"-forcepoly",0,0,"force all objects to be interpreted as polygons",0,false)
 		{
 			ADD(grid);
 			ADD(snapdist);
@@ -59,6 +61,7 @@ public:
 			ADD(grid);
 			ADD(mm);
 			ADD(stdnames);
+			ADD(forcepoly);
 		}
 	}*options;
 
@@ -71,6 +74,7 @@ private:
 	void try_grid_snap(int value, bool & success) const;
 	static int _grid_snap (int value, double grid) ;
 	int grid_snap(int value, bool success) const;
+	void gen_preamble();
 
 	C_ostrstream layer_polygons, layer_polygons_nogrid;
 	C_ostrstream layer_pads, layer_pads_nogrid;

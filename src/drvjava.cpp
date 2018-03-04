@@ -2,7 +2,7 @@
    drvJAVA.cpp : This file is part of pstoedit
    backend to generate a Java(TM) applet
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -55,7 +55,7 @@ static int getFontNumber(const char *const fontname)
 {
 	const size_t fntlength = strlen(fontname);
 	for (unsigned int i = 0; i < numberOfFonts; i++) {
-		const unsigned int JavaFntLengh = strlen(JavaFonts[i].psname);
+		const size_t JavaFntLengh = strlen(JavaFonts[i].psname);
 		if (fntlength == JavaFntLengh) {
 			if (strncmp(fontname, JavaFonts[i].psname, fntlength) == 0) {
 				return i;

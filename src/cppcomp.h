@@ -4,7 +4,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -226,11 +226,30 @@ const bool true  = 1;
 // for other systems we have to "emulate" them
 #define TARGETWITHLEN(str,len) str,len
 
+// MSVC moans: 'open': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _open. See online help for details.
+
+#define OPEN _open
+#define CLOSE _close
+#define READ _read
+#define STRICMP _stricmp
+#define FILENO _fileno
+#define SETMODE _setmode
+#define TEMPNAM _tempnam
+#define GETCWD _getcwd
 #else
 
 #include I_iostream
 #include I_string_h	// for strlen
 #include I_stdlib	// for exit
+
+#define OPEN open
+#define CLOSE close
+#define READ read
+#define STRICMP stricmp
+#define FILENO fileno
+#define SETMODE setmode
+#define TEMPNAM tempnam
+#define GETCWD getcwd
 
 USESTD
 

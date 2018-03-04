@@ -46,14 +46,14 @@ static const unsigned char table_b2a_base64[] =
 #define FBUFLEN 2048
 #define BASE64_PAD '='
 
-int Base64Writer::write_base64(const unsigned char *buf, unsigned int length)
+int Base64Writer::write_base64(const unsigned char *buf, size_t length)
 {
 	unsigned char encoded[FBUFLEN];
 	unsigned char *ascii_data = encoded;
 	const unsigned char *bin_data = buf;
 	unsigned char this_ch;
 	int ascii_left;
-	unsigned int bin_len = ((FBUFLEN / 4) * 3);
+	size_t bin_len = ((FBUFLEN / 4) * 3);
 
 	if (bin_len > length)
 		bin_len = length;

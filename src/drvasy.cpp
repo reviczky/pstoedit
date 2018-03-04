@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_geocities.com
+  Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ drvASY::derivedConstructor(drvASY):
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2009 Wolfgang Glunz"
+       << "// pstoedit is Copyright (C) 1993 - 2011 Wolfgang Glunz"
        << " <wglunz35_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
@@ -332,7 +332,7 @@ void drvASY::show_text(const TextInfo & textinfo)
   if (thisFontName != prevFontName || thisFontWeight != prevFontWeight) {
     if(textinfo.is_non_standard_font) {
       size_t n = thisFontName.length();
-      for(size_t i=0; i < n; i++) thisFontName[i] = tolower(thisFontName[i]);
+      for(size_t i=0; i < n; i++) thisFontName[i] = (char) tolower(thisFontName[i]);
       outf << "textpen += font(\"" << thisFontName << "\"";
       if(textinfo.currentFontSize > 0) 
 	outf << "," << textinfo.currentFontSize*ps2tex;
@@ -426,9 +426,9 @@ void drvASY::show_path()
 	 << prevB << ");" << endl;
   }
   // Change line width
-  double linewidth=currentLineWidth();
+  float linewidth=currentLineWidth();
   // Fix up zero linewidths resulting from a dtransform truncate idtransform
-  if(linewidth == 0.0) linewidth=0.5;
+  if(linewidth == 0.0) linewidth=0.5f;
   if(linewidth != prevLineWidth) {
     prevLineWidth = linewidth;
     outf << "currentpen += " << prevLineWidth << "bp;" << endl;

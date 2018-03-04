@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -118,13 +118,13 @@ private:
 };
 
 template <class ValueType, class ExtractorType >
-class Option : public OptionBase {
+class OptionT : public OptionBase {
 public:
-	Option < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue)	:
+	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue)	:
 		OptionBase(optional_p,flag_p, argname_p, propsheet_p, description_p,TeXhelp_p),
 		value(initialvalue) {
 	};
-	Option < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p )	:
+	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p )	:
 		OptionBase(optional_p,flag_p, argname_p, propsheet_p, description_p, TeXhelp_p) 
 	{
 			//lint -esym(1401,*::value) // not initialized - we use the default ctor here
@@ -177,14 +177,14 @@ public:
 	ValueType value;
 
 private:
-	Option();// disabled
-	Option(const Option&);// disabled
-	const Option& operator=(const Option&); // disabled
+	OptionT();// disabled
+	OptionT(const OptionT&);// disabled
+	const OptionT& operator=(const OptionT&); // disabled
 };
 
 
 template <class ValueType, class ExtractorType >
-ostream & Option<ValueType, ExtractorType>::writevalue(ostream & out) const {
+ostream & OptionT<ValueType, ExtractorType>::writevalue(ostream & out) const {
 		out << value;
 		return out;
 }

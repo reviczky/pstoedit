@@ -73,7 +73,7 @@ static int GSDLLCALL std_inHandler(void * /*caller_handle*/, char *  buf , int  
 { 
 	// return 0; 
 	const size_t result = fread(buf,1,len,stdin);
-	return result;
+	return (int) result;
 }
 
 /* main handler for the GS DLL */
@@ -121,7 +121,10 @@ gs_load_dll(const char * szDllName)
 
 	// long version;
     hmodule = LoadLibrary(szDllName);
-    if (hmodule < (HINSTANCE)HINSTANCE_ERROR) return false;
+    if (hmodule < (HINSTANCE)HINSTANCE_ERROR) {
+		/* fprintf(stderr,"loading  %s failed\n", szDllName); */
+		return false;
+	}
 
 	// fprintf(stderr, "loaded %s\n", szDllName);
 
@@ -192,13 +195,13 @@ callgsDLL(int argc, char *argv[])
 {
 
 	GSDLL gsapi;
-    (void) setmode(fileno(stdin), O_BINARY);
+    (void) SETMODE(FILENO(stdin), O_BINARY);
 
 	// const char szDllName[] = "gsdll32.dll";
 	const char * const szDllName = argv[0]; // 
 
     if (!gsapi.gs_load_dll(szDllName)) {
-		sprintf_s(TARGETWITHLEN(messagebuffer,1000), "Can't load %s\n", szDllName);
+		sprintf_s(TARGETWITHLEN(messagebuffer,1000), "Can't load %s (possibly due to 32/64 bit mix - will try gswin32c.exe instead\n", szDllName);
 		writemessage();
 		return -1;
     }

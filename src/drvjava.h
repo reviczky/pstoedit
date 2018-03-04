@@ -6,7 +6,7 @@
    Class declaration for a sample output driver with no additional attributes
    and methods (minimal interface)
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,7 +34,7 @@ public:
 	~drvJAVA(); // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
-		Option < RSString, RSStringValueExtractor> jClassName;
+		OptionT < RSString, RSStringValueExtractor> jClassName;
 		DriverOptions():
 			jClassName(true,"java class name","string",0,"name of java class to generate",0,(const char *)"PSJava")
 		{

@@ -42,21 +42,25 @@
 /* Ghostscript may be known in the Windows Registry by
  * the following names.
  */
-#define GS_PRODUCT_AFPL "AFPL Ghostscript"
-#define GS_PRODUCT_ALADDIN "Aladdin Ghostscript"
-#define GS_PRODUCT_GPL "GPL Ghostscript"
-#define GS_PRODUCT_GNU "GNU Ghostscript"
+static const char * const gs_products[] = {
+/* #define GS_PRODUCT_AFPL		*/ "AFPL Ghostscript",
+/* #define GS_PRODUCT_ALADDIN	*/ "Aladdin Ghostscript",
+/* #define GS_PRODUCT_GPL		*/ "GPL Ghostscript",
+/* #define GS_PRODUCT_GNU		*/ "GNU Ghostscript",
+	0};
+
 
 /* Get Ghostscript versions for given product.
  * Store results starting at pver + 1 + offset.
  * Returns total number of versions in pver.
  */
 static int get_gs_versions_product(int *pver, int offset, 
-  const char *gs_productfamily, const char *gsregbase)
+	HKEY hkeyroot, REGSAM regopenflags,
+	const char *gs_productfamily, const char *gsregbase)
 {
     HKEY hkey;
     DWORD cbData;
-    HKEY hkeyroot;
+    
     char key[256];
     int ver;
     char *p;
@@ -67,9 +71,10 @@ static int get_gs_versions_product(int *pver, int offset,
 	else
 	  sprintf_s(TARGETWITHLEN(key,256) ,"Software\\%s", gs_productfamily);
 
-    hkeyroot = HKEY_LOCAL_MACHINE;
-    if (RegOpenKeyExA(hkeyroot, key, 0, KEY_READ, &hkey) == ERROR_SUCCESS) {
-	/* Now enumerate the keys */
+	long regtestresult = RegOpenKeyExA(hkeyroot, key, 0, KEY_READ|regopenflags , &hkey);
+    if (regtestresult == ERROR_SUCCESS) {
+	/* Now enumerate the keys 
+		fprintf(stdout," return code for \"%s\" is %d\n", key, regtestresult);*/
 	cbData = sizeof(key) / sizeof(char);
 	while (RegEnumKeyA(hkey, n, key, cbData) == ERROR_SUCCESS) {
 	    n++;
@@ -87,10 +92,16 @@ static int get_gs_versions_product(int *pver, int offset,
 	    }
 	    if (*p)
 		ver += (*p - '0');
-	    if (n + offset < pver[0])
-		pver[n+offset] = ver;
+	    if (n + offset < pver[0]) {  /* the pver[0] item contains the lenght of the pver vector */
+								     /* this function is called also just for counting purposes */
+			pver[n+offset] = ver;
+		}
 	}
-    }
+    } else {
+		/* 
+		fprintf(stdout," return code for \"%s\" is %d\n", key, regtestresult);
+		*/
+	}
     return n+offset;
 }
 
@@ -112,23 +123,26 @@ static int get_gs_versions_product(int *pver, int offset,
  */
 BOOL get_gs_versions(int *pver, const char *gsregbase)
 {
-    int n;
+    int n=0;
     if (pver == (int *)NULL)
 	    return FALSE;
-
-    n = get_gs_versions_product(pver, 0, GS_PRODUCT_AFPL, gsregbase);
-    n = get_gs_versions_product(pver, n, GS_PRODUCT_ALADDIN, gsregbase);
-    n = get_gs_versions_product(pver, n, GS_PRODUCT_GPL, gsregbase);
-    n = get_gs_versions_product(pver, n, GS_PRODUCT_GNU, gsregbase);
+	const char * const * productptr = &gs_products[0];
+	while (productptr && *productptr) {
+	    n = get_gs_versions_product(pver, n, HKEY_LOCAL_MACHINE, 0,					*productptr, gsregbase);
+		n = get_gs_versions_product(pver, n, HKEY_CURRENT_USER,  0,					*productptr, gsregbase);
+		n = get_gs_versions_product(pver, n, HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY,	*productptr, gsregbase);
+		n = get_gs_versions_product(pver, n, HKEY_CURRENT_USER,  KEY_WOW64_64KEY,	*productptr, gsregbase);
+		productptr++;
+	}
 
     if (n >= pver[0]) {
-	pver[0] = n;
-	return FALSE;	/* too small */
+		pver[0] = n;
+		return FALSE;	/* too small */
     }
 
     if (n == 0) {
-	pver[0] = 0;
-	return FALSE;	/* not installed */
+		pver[0] = 0;
+		return FALSE;	/* not installed */
     }
     pver[0] = n;
     return TRUE;
@@ -141,8 +155,8 @@ BOOL get_gs_versions(int *pver, const char *gsregbase)
  * name, ptr, plen and return values are the same as in gp_getenv();
  */
 
-int 
-gp_getenv_registry(HKEY hkeyroot, const char *key, const char *name, 
+static int 
+gp_getenv_registry(HKEY hkeyroot, REGSAM regopenflags, const char *key, const char *name, 
     char *ptr, int *plen)
 {
     HKEY hkey;
@@ -150,9 +164,11 @@ gp_getenv_registry(HKEY hkeyroot, const char *key, const char *name,
     BYTE b;
     LONG rc;
     BYTE *bptr = (BYTE *)ptr;
+	/*
+	fprintf(stdout,"checking key %s %s\n",key,name);
+	*/
 
-    if (RegOpenKeyExA(hkeyroot, key, 0, KEY_READ, &hkey)
-	== ERROR_SUCCESS) {
+    if (RegOpenKeyExA(hkeyroot, key, 0, KEY_READ |  regopenflags , &hkey)	== ERROR_SUCCESS) {
 	keytype = REG_SZ;
 	cbData = *plen;
 	if (bptr == (BYTE *)NULL)
@@ -207,30 +223,33 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
 	  sprintf_s(TARGETWITHLEN(key,256), "Software\\%s\\%s", gs_productfamily, dotversion);
 
     length = len;
-    code = gp_getenv_registry(HKEY_CURRENT_USER, key, name, ptr, &length);
-    if ( code == 0 )
-	return TRUE;	/* found it */
+    code = gp_getenv_registry(HKEY_CURRENT_USER, 0, key, name, ptr, &length);
+    if ( code == 0 ) return TRUE;	/* found it */
 
     length = len;
-    code = gp_getenv_registry(HKEY_LOCAL_MACHINE, key, name, ptr, &length);
+    code = gp_getenv_registry(HKEY_LOCAL_MACHINE, 0, key, name, ptr, &length);
+    if ( code == 0 ) return TRUE;	/* found it */
 
-    if ( code == 0 )
-	return TRUE;	/* found it */
+	length = len;
+    code = gp_getenv_registry(HKEY_CURRENT_USER, KEY_WOW64_64KEY, key, name, ptr, &length);
+    if ( code == 0 ) return TRUE;	/* found it */
 
-    return FALSE;
+    length = len;
+    code = gp_getenv_registry(HKEY_LOCAL_MACHINE, KEY_WOW64_64KEY, key, name, ptr, &length);
+    if ( code == 0 ) return TRUE;	/* found it */
+
+	return FALSE;
 }
 
 BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len, 
   const char *gsregbase)
 {
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_AFPL, gsregbase))
-	return TRUE;
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_ALADDIN, gsregbase))
-	return TRUE;
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GPL, gsregbase))
-	return TRUE;
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GNU, gsregbase))
-	return TRUE;
+	const char * const * productptr = &gs_products[0];
+	while (productptr && *productptr) {
+		if (get_gs_string_product(gs_revision, name, ptr, len, *productptr, gsregbase))
+		return TRUE;
+		productptr++;
+	}
     return FALSE;
 }
 

@@ -4,7 +4,7 @@
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -42,10 +42,14 @@ int drvPCB2::pcbScale_x(const Point & p) const
 {
 	return (int)((double)p.x_ * SCALE + (double)options->tshiftx * unit + (double)0.5);
 }
+
 int drvPCB2::pcbScale_y(const Point & p) const 
 {
-	return (int)((double)500000.0 - (double)p.y_ * SCALE + (double)options->tshifty * unit + (double)0.5);
+	// return (int)((double)500000.0 - (double)p.y_ * SCALE + (double)options->tshifty * unit + (double)0.5);
+	// patched 7/2011 XXX p.y_ appears to be off by one, why???
+	return (int)((double)currentDeviceHeight * SCALE - ((double)(p.y_) + (double)1.0) * SCALE + (double)options->tshifty * unit + (double)0.5);
 }
+
 int drvPCB2::pcbScale(const double & f)  
 {
 	return (int)((double)f * SCALE + (double)0.5);
@@ -82,7 +86,13 @@ constructBase
 {
 	unit = (options->mm ? MM100 : 100.0);
 	grid = (double)(options->grid) * unit;
-	outf << "PCB[\"\" 600000 500000]\n\n";
+}
+
+void drvPCB2::gen_preamble(){
+	const int width = pcbScale(currentDeviceWidth);
+	const int height = pcbScale(currentDeviceHeight);
+	outf << "PCB[\"\" " << width << " " << height << "]\n\n";
+//	outf << "PCB[\"\" 600000 500000]\n\n";
 	if (options->grid != 0.0) {
 		outf << "Grid[";
 		outf << fixed << setprecision(6) << grid;
@@ -92,7 +102,7 @@ constructBase
 	}
 }
 
-static void gen_layer (ostream & outf, C_ostrstream & layer, const char * layer_def, const bool & force)
+static void gen_layer(ostream & outf, C_ostrstream & layer, const char * layer_def, const bool & force)
 {
 	if (layer.tellp() || force) {
 		outf << "Layer(" << layer_def << "\")\n(\n"
@@ -106,6 +116,7 @@ static void gen_layer (ostream & outf, C_ostrstream & layer, const char * layer_
 
 drvPCB2::~drvPCB2()
 {
+	gen_preamble ();
 	if (options->stdnames)
 	{
 		gen_layer (outf, layer_polygons, "1 \"component", false);
@@ -141,7 +152,7 @@ void drvPCB2::show_path()
 {
 	bool round_success;
 	ostream *layer, *layer_nogrid;
-	if (isPolygon()) {
+	if (options->forcepoly || isPolygon()) {
 		switch (currentShowType()) {
 		case drvbase::fill:
 		case drvbase::eofill:
@@ -153,14 +164,11 @@ void drvPCB2::show_path()
 
 			{
 				const Point & p0 = pathElement(0).getPoint(0);
-				const Point & pl = pathElement(numberOfElementsInPath()-1).getPoint(0);
-
+				numberofvalidelements = numberOfElementsInPath();
+				if (pathElement(numberofvalidelements-1).getType() == closepath ) numberofvalidelements--; // closepath can be ignored
+				const Point & pl = pathElement(numberofvalidelements-1).getPoint(0);
 				/* Polygons are closed automatically. Skip last element for already closed polygons. */
-				if (p0.x_ == pl.x_ && p0.y_ == pl.y_) {
-					numberofvalidelements = numberOfElementsInPath() - 1;
-				} else {
-					numberofvalidelements = numberOfElementsInPath();
-				}
+				if (p0.x_ == pl.x_ && p0.y_ == pl.y_) numberofvalidelements--;
 			}
 			/* If snap to grid fails for any of points draw into layer_polygons_nogrid layer */
 			round_success = true;

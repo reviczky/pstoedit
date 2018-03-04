@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Mon Aug 10 18:45:59 WEDT 2009
+.\" Manual page created with latex2man on Sat Aug 27 20:45:56     2011
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "August 2009" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "August 2011" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -27,7 +27,6 @@ pstoedit
 .br 
 .PP
 pstoedit
-.PP
 [\fB\-include\fP\fI name of a PostScript file to be included\fP]
 [\fB\-df\fP\fI font name\fP]
 [\fB\-nomaptoisolatin1\fP]
@@ -50,6 +49,7 @@ pstoedit
 [\fB\-xshift\fP\fI number\fP]
 [\fB\-yshift\fP\fI number\fP]
 [\fB\-centered\fP]
+[\fB\-minlinewidth\fP\fI number\fP]
 [\fB\-split\fP]
 [\fB\-v\fP]
 [\fB\-usebbfrominput\fP]
@@ -76,6 +76,7 @@ pstoedit
 [\fB\-gs\fP\fI path to the ghostscript executable/DLL \fP]
 [\fB\-bo\fP]
 [\fB\-psarg\fP\fI argument string\fP]
+[\fB\-pslanguagelevel\fP\fI PostScript Language Level to be used 1,2, or 3\fP]
 \fB\-f\fP\fI "format[:options]"\fP
 [\fB\-gsregbase\fP\fI GhostScript base registry path\fP]
 [ inputfile [outputfile] ] 
@@ -99,7 +100,7 @@ details.
 .PP
 .SS RELEASE LEVEL
 .PP
-This manpage documents release 3.50 of pstoedit\&.
+This manpage documents release 3.60 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -181,6 +182,10 @@ recommended for processing PDF and PostScript files.
  center image before scaling or shifting 
 .PP
 .TP
+[\fB\-minlinewidth\fP\fI number\fP]
+ minimal line width. All lines thinner than this will be drawn in this line width \- especially zero\-width lines 
+.PP
+.TP
 [\fB\-split\fP]
  Create a new file for each page of the input. For this the output filename must contain a %d which is replaced with the current page number. This option is automatically switched on for output formats that don\&'t support multiple pages within one file, e.g. fig or gnuplot. 
 .PP
@@ -238,11 +243,15 @@ and then running \fBpstoedit\fP
  The string given with this option is passed directly to Ghostscript when Ghostscript is called to process the PostScript file for pstoedit\&.
 For example: \fB\-psarg\fP\fB "\fP\fB\-r300x300\fP\fB"\fP\&.
 This causes the resolution to be changed to 300x300 dpi. (With older versions of GhostScript, changing the resolution this way has an effect only if the \fB\-dis\fP
-option is given.) You can switch Ghostscript into PostScript Level 1 only mode by \fB\-psarg "level1.ps"\fP\&.
-This can be useful for example if the PostScript file to be converted uses some Level 2 specific custom color models that are not supported by pstoedit. However, this requires that the PostScript program checks for the PostScript level supported by the interpreter and "acts" accordingly. If you want to pass multiple options to Ghostscript you can use multiple \-psarg options \fB\-psarg opt1\fP
+option is given.) If you want to pass multiple options to Ghostscript you can use multiple \-psarg options \fB\-psarg opt1\fP
 \fB\-psarg opt2\fP
 \fB\-psarg opt2\fP\&.
 See the GhostScript manual for other possible options. 
+.PP
+.TP
+[\fB\-pslanguagelevel\fP\fI PostScript Language Level to be used 1,2, or 3\fP]
+ PostScript Language Level to be used 1,2, or 3 You can switch Ghostscript into PostScript Level 1 only mode by \fB\-pslanguagelevel 1\fP\&.
+This can be useful for example if the PostScript file to be converted uses some Level 2 specific custom color models that are not supported by pstoedit. However, this requires that the PostScript program checks for the PostScript level supported by the interpreter and "acts" accordingly. The default language level is 3. 
 .PP
 .TP
 \fB\-f\fP\fI "format[:options]"\fP
@@ -765,16 +774,57 @@ No driver specific options
 .PP
 .SS hpgl \- HPGL code
 .TP
-[\fB\-pen\fP]
- plotter is pen plotter 
+[\fB\-penplotter\fP]
+ plotter is pen plotter (i.e. no support for specific line widths) 
+.PP
+.TP
+[\fB\-pencolorsfromfile\fP]
+ read pen colors from file drvhpgl.pencolors in pstoedit data directory 
 .PP
 .TP
 [\fB\-pencolors\fP\fI number\fP]
- number of pen colors available 
+ maximum number of pen colors to be used by pstoedit (default 0) \- 
 .PP
 .TP
 [\fB\-filltype\fP\fI string\fP]
  select fill type e.g. FT 1 
+.PP
+.TP
+[\fB\-hpgl2\fP]
+ Use HPGL/2 instead of HPGL/1 
+.PP
+.TP
+[\fB\-rot90\fP]
+ rotate hpgl by 90 degrees 
+.PP
+.TP
+[\fB\-rot180\fP]
+ rotate hpgl by 180 degrees 
+.PP
+.TP
+[\fB\-rot270\fP]
+ rotate hpgl by 270 degrees 
+.PP
+.SS pcl \- PCL code
+.TP
+[\fB\-penplotter\fP]
+ plotter is pen plotter (i.e. no support for specific line widths) 
+.PP
+.TP
+[\fB\-pencolorsfromfile\fP]
+ read pen colors from file drvhpgl.pencolors in pstoedit data directory 
+.PP
+.TP
+[\fB\-pencolors\fP\fI number\fP]
+ maximum number of pen colors to be used by pstoedit (default 0) \- 
+.PP
+.TP
+[\fB\-filltype\fP\fI string\fP]
+ select fill type e.g. FT 1 
+.PP
+.TP
+[\fB\-hpgl2\fP]
+ Use HPGL/2 instead of HPGL/1 
 .PP
 .TP
 [\fB\-rot90\fP]
@@ -814,6 +864,25 @@ No driver specific options
  enable debug output 
 .PP
 .SS asy \- Asymptote Format
+No driver specific options 
+.SS cairo \- cairo driver
+generates compilable c code for rendering with cairo 
+.PP
+.TP
+[\fB\-pango\fP]
+ use pango for font rendering 
+.PP
+.TP
+[\fB\-funcname\fP\fI string\fP]
+ sets the base name for the generated functions and variables. e.g. myfig 
+.PP
+.TP
+[\fB\-header\fP\fI string\fP]
+ sets the output file name for the generated C header file. e.g. myfig.h 
+.PP
+.SS cfdg \- Context Free Design Grammar
+Context Free Design Grammar, usable by Context Free Art (http://www.contextfreeart.org/) 
+.PP
 No driver specific options 
 .SS dxf \- CAD exchange format
 .TP
@@ -974,6 +1043,29 @@ See fig format for more details.
 [\fB\-depth\fP\fI number\fP]
  Set the page depth in inches (default 11) 
 .PP
+.SS tfig \- .fig format for xfig
+Test only 
+.PP
+.TP
+[\fB\-startdepth\fP\fI number\fP]
+ Set the initial depth (default 999) 
+.PP
+.TP
+[\fB\-metric\fP]
+ Switch to centimeter display (default inches) 
+.PP
+.TP
+[\fB\-usecorrectfontsize\fP]
+ don\&'t scale fonts for xfig. Use this if you also use this option with xfig 
+.PP
+.TP
+[\fB\-depth\fP\fI number\fP]
+ Set the page depth in inches (default 11) 
+.PP
+.SS gcode \- emc2 gcode format
+See also: \fBhttp://linuxcnc.org/\fP
+.PP
+No driver specific options 
 .SS gnuplot \- gnuplot format
 No driver specific options 
 .SS gschem \- gschem format
@@ -1056,6 +1148,10 @@ and \fBhttp://www.penguin.cz/~utx/pstoedit\-pcb/\fP
 [\fB\-stdnames\fP]
  use standard layer names instead of descriptive names 
 .PP
+.TP
+[\fB\-forcepoly\fP]
+ force all objects to be interpreted as polygons 
+.PP
 .SS pcbfill \- pcb format with fills
 See also: \fBhttp://pcb.sourceforge.net\fP
 .PP
@@ -1116,6 +1212,13 @@ StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.
 .TP
 [\fB\-n\fP\fI string\fP]
  tagnames 
+.PP
+.SS vtk \- VTK driver: if you don\&'t want to see this, uncomment the corresponding line in makefile and make again
+this is a long description for the VTKe driver 
+.PP
+.TP
+[\fB\-VTKeoption\fP\fI integer\fP]
+ just an example 
 .PP
 .SS wmf \- Windows metafile
 .TP
@@ -1214,6 +1317,15 @@ even\-odd fill rule, even though many specify it.
 For more on MetaPost see: 
 .PP
 \fBhttp://cm.bell\-labs.com/who/hobby/MetaPost.html\fP
+.PP
+.SS CONTEXT FREE \- CFDG
+The driver for the CFDG format (drvcfdg) defines 
+one shape per page of PostScript, but only the first shape is actually 
+rendered (unless the user edits the generated CFDG code, of course). 
+CFDG doesn\&'t support multi\-page output, so this probably a reasonable thing to do. 
+.PP
+For more on Context Free see: 
+\fBhttp://www.contextfreeart.org/\fP
 .PP
 .SS LATEX2E
 .PP
@@ -1408,7 +1520,8 @@ Try to use PostScript fonts instead of the bitmap fonts when generating a PostSc
 .SH AUTHOR
 
 .PP
-Wolfgang Glunz, \fBwglunz35_AT_pstoedit.net\fP
+Wolfgang Glunz, \fBwglunz35_AT_pstoedit.net\fP,
+\fBhttp://de.linkedin.com/in/wolfgangglunz\fP
 .PP
 .SH CANONICAL ARCHIVE SITE
 
@@ -1419,6 +1532,8 @@ At this site you also find more information about pstoedit
 and related 
 programs and hints how to subscribe to a mailing list in order to get informed 
 about new releases and bug\-fixes. 
+.PP
+If you like pstoedit \- please express so also at Facebook \fBhttp://www.facebook.com/pages/pstoedit/260606183958062\fP\&.
 .PP
 .SH ACKNOWLEDGEMENTS
 

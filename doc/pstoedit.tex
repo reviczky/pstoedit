@@ -1,3 +1,5 @@
+
+
 \documentclass[english,a4paper]{article}
 \usepackage[latin1]{inputenc}
 \usepackage{babel}
@@ -15,8 +17,8 @@
 }}
 
 \setVersionWord{Version}  %%% that's the default, no need to set it.
-\setVersion{3.50}
-\setDate{August 2009}    
+\setVersion{3.60}
+\setDate{August 2011}    
 
 \setlength{\emergencystretch}{1.5em}
 
@@ -39,7 +41,6 @@
 \\  
 
 \Prog{pstoedit} 
-
 \oOptArg{-include}{~name of a PostScript file to be included} 
 \oOptArg{-df}{~font name} 
 \oOpt{-nomaptoisolatin1} 
@@ -62,6 +63,7 @@
 \oOptArg{-xshift}{~number} 
 \oOptArg{-yshift}{~number} 
 \oOpt{-centered} 
+\oOptArg{-minlinewidth}{~number} 
 \oOpt{-split} 
 \oOpt{-v} 
 \oOpt{-usebbfrominput} 
@@ -88,6 +90,7 @@
 \oOptArg{-gs}{~path to the ghostscript executable/DLL } 
 \oOpt{-bo} 
 \oOptArg{-psarg}{~argument string} 
+\oOptArg{-pslanguagelevel}{~PostScript Language Level to be used 1,2, or 3} 
 \OptArg{-f}{~"format\Lbr:options\Rbr"} 
 \oOptArg{-gsregbase}{~GhostScript base registry path} 
 [ inputfile [outputfile] ] 
@@ -157,7 +160,6 @@ recommended for processing PDF and PostScript files.
 
 \section{Options}
 
-
 \subsection{General options}
 \begin{description}
 \item[\oOptArg{-include}{~name of a PostScript file to be included}] 
@@ -182,6 +184,10 @@ shift image in y-direction
 
 \item[\oOpt{-centered}] 
 center image before scaling or shifting
+
+
+\item[\oOptArg{-minlinewidth}{~number}] 
+minimal line width. All lines thinner than this will be drawn in this line width - especially zero-width lines
 
 
 \item[\oOpt{-split}] 
@@ -230,7 +236,11 @@ You can run backend processing only (without the PostScript interpreter frontend
 
 
 \item[\oOptArg{-psarg}{~argument string}] 
-The string given with this option is passed directly to Ghostscript when Ghostscript is called to process the PostScript file for \Prog{pstoedit}. For example:      \textbf{-psarg}\textbf{~"}\textbf{-r300x300}\textbf{"}. This causes the resolution to be changed to 300x300 dpi. (With older versions of GhostScript, changing the resolution this way has an effect only if the \Opt{-dis} option is given.)   You can switch Ghostscript into PostScript Level 1 only mode by  \Opt{-psarg "level1.ps"}. This can be useful for example if the PostScript file to be converted uses some Level 2 specific custom color models that are not supported by pstoedit. However, this requires that the PostScript program checks for the PostScript level supported by the interpreter and "acts" accordingly. If you want to pass multiple options to Ghostscript you can use multiple  -psarg options \Opt{-psarg opt1} \Opt{-psarg opt2} \Opt{-psarg opt2}. See the GhostScript manual for other possible options. 
+The string given with this option is passed directly to Ghostscript when Ghostscript is called to process the PostScript file for \Prog{pstoedit}. For example:      \textbf{-psarg}\textbf{~"}\textbf{-r300x300}\textbf{"}. This causes the resolution to be changed to 300x300 dpi. (With older versions of GhostScript, changing the resolution this way has an effect only if the \Opt{-dis} option is given.)  If you want to pass multiple options to Ghostscript you can use multiple  -psarg options \Opt{-psarg opt1} \Opt{-psarg opt2} \Opt{-psarg opt2}. See the GhostScript manual for other possible options. 
+
+
+\item[\oOptArg{-pslanguagelevel}{~PostScript Language Level to be used 1,2, or 3}] 
+PostScript Language Level to be used 1,2, or 3 You can switch Ghostscript into PostScript Level 1 only mode by  \Opt{-pslanguagelevel 1}. This can be useful for example if the PostScript file to be converted uses some Level 2 specific custom color models that are not supported by pstoedit. However, this requires that the PostScript program checks for the PostScript level supported by the interpreter and "acts" accordingly. The default language level is 3.
 
 
 \item[\OptArg{-f}{~"format\Lbr:options\Rbr"}] 
@@ -420,7 +430,6 @@ To see which options are supported by a specific format, type:
      \\ 
 
 The following description of the different formats supported by pstoedit is extracted from the source code of the individual drivers.
-
 
 \subsubsection{psf - Flattened PostScript (no curves)}
 No driver specific options
@@ -771,16 +780,60 @@ generate OpenOffice compatible EMF file
 %%// end of options 
 \subsubsection{hpgl - HPGL code}
 \begin{description}
-\item[\oOpt{-pen}] 
-plotter is pen plotter
+\item[\oOpt{-penplotter}] 
+plotter is pen plotter (i.e. no support for specific line widths)
+
+
+\item[\oOpt{-pencolorsfromfile}] 
+read pen colors from file drvhpgl.pencolors in pstoedit data directory
 
 
 \item[\oOptArg{-pencolors}{~number}] 
-number of pen colors available
+maximum number of pen colors to be used by pstoedit (default 0) - 
 
 
 \item[\oOptArg{-filltype}{~string}] 
 select fill type e.g. FT 1
+
+
+\item[\oOpt{-hpgl2}] 
+Use HPGL/2 instead of HPGL/1
+
+
+\item[\oOpt{-rot90}] 
+rotate hpgl by 90 degrees
+
+
+\item[\oOpt{-rot180}] 
+rotate hpgl by 180 degrees
+
+
+\item[\oOpt{-rot270}] 
+rotate hpgl by 270 degrees
+
+
+\end{description}
+%%// end of options 
+\subsubsection{pcl - PCL code}
+\begin{description}
+\item[\oOpt{-penplotter}] 
+plotter is pen plotter (i.e. no support for specific line widths)
+
+
+\item[\oOpt{-pencolorsfromfile}] 
+read pen colors from file drvhpgl.pencolors in pstoedit data directory
+
+
+\item[\oOptArg{-pencolors}{~number}] 
+maximum number of pen colors to be used by pstoedit (default 0) - 
+
+
+\item[\oOptArg{-filltype}{~string}] 
+select fill type e.g. FT 1
+
+
+\item[\oOpt{-hpgl2}] 
+Use HPGL/2 instead of HPGL/1
 
 
 \item[\oOpt{-rot90}] 
@@ -826,6 +879,29 @@ enable debug output
 \end{description}
 %%// end of options 
 \subsubsection{asy - Asymptote Format}
+No driver specific options
+%%// end of options 
+\subsubsection{cairo - cairo driver}
+generates compilable c code for rendering with cairo
+
+\begin{description}
+\item[\oOpt{-pango}] 
+use pango for font rendering
+
+
+\item[\oOptArg{-funcname}{~string}] 
+sets the base name for the generated functions and variables.  e.g. myfig
+
+
+\item[\oOptArg{-header}{~string}] 
+sets the output file name for the generated C header file.  e.g. myfig.h
+
+
+\end{description}
+%%// end of options 
+\subsubsection{cfdg - Context Free Design Grammar}
+Context Free Design Grammar, usable by Context Free Art (http://www.contextfreeart.org/)
+
 No driver specific options
 %%// end of options 
 \subsubsection{dxf - CAD exchange format}
@@ -997,6 +1073,33 @@ Set the page depth in inches (default 11)
 
 \end{description}
 %%// end of options 
+\subsubsection{tfig - .fig format for xfig}
+Test only
+
+\begin{description}
+\item[\oOptArg{-startdepth}{~number}] 
+Set the initial depth (default 999)
+
+
+\item[\oOpt{-metric}] 
+Switch to centimeter display (default inches)
+
+
+\item[\oOpt{-usecorrectfontsize}] 
+don't scale fonts for xfig. Use this if you also use this option with xfig
+
+
+\item[\oOptArg{-depth}{~number}] 
+Set the page depth in inches (default 11)
+
+
+\end{description}
+%%// end of options 
+\subsubsection{gcode - emc2 gcode format}
+See also:  \URL{http://linuxcnc.org/} 
+
+No driver specific options
+%%// end of options 
 \subsubsection{gnuplot - gnuplot format}
 No driver specific options
 %%// end of options 
@@ -1100,6 +1203,10 @@ Switch to metric units (mm)
 use standard layer names instead of descriptive names
 
 
+\item[\oOpt{-forcepoly}] 
+force all objects to be interpreted as polygons
+
+
 \end{description}
 %%// end of options 
 \subsubsection{pcbfill - pcb format with fills}
@@ -1179,6 +1286,16 @@ no impress
 
 \item[\oOptArg{-n}{~string}] 
 tagnames
+
+
+\end{description}
+%%// end of options 
+\subsubsection{vtk - VTK driver: if you don't want to see this, uncomment the corresponding line in makefile and make again}
+this is a long description for the VTKe driver
+
+\begin{description}
+\item[\oOptArg{-VTKeoption}{~integer}] 
+just an example
 
 
 \end{description}
@@ -1286,6 +1403,15 @@ generate OpenOffice compatible EMF file
     For more on MetaPost see: 
     
     \URL{http://cm.bell-labs.com/who/hobby/MetaPost.html}
+
+  \subsection{Context Free - CFDG} 
+	The driver for the CFDG format (drvcfdg) defines
+	one shape per page of PostScript, but only the first shape is actually
+	rendered (unless the user edits the generated CFDG code, of course).
+	CFDG doesn't support multi-page output, so this probably a reasonable thing to do.
+ 
+	For more on Context Free see:
+	\URL{http://www.contextfreeart.org/}
 
   \subsection{LaTeX2e} 
 
@@ -1441,7 +1567,7 @@ Try to use PostScript fonts instead of the bitmap fonts when generating a PostSc
 
 \section{AUTHOR}
 
-Wolfgang Glunz, \Email{wglunz35_AT_pstoedit.net}
+Wolfgang Glunz, \Email{wglunz35_AT_pstoedit.net}, \URL{http://de.linkedin.com/in/wolfgangglunz}
 
 
 \section{CANONICAL ARCHIVE SITE}
@@ -1451,6 +1577,8 @@ Wolfgang Glunz, \Email{wglunz35_AT_pstoedit.net}
 At this site you also find more information about \Prog{pstoedit} and related
 programs and hints how to subscribe to a mailing list in order to get informed
 about new releases and bug-fixes.
+
+If you like pstoedit - please express so also at Facebook \URL{http://www.facebook.com/pages/pstoedit/260606183958062}.
 
 
 \section{ACKNOWLEDGEMENTS}

@@ -60,7 +60,7 @@ private:
 	int closed;
    
 public:
-    int write_base64(const unsigned char * buf, unsigned int length);
+    int write_base64(const unsigned char * buf, size_t length);
     void close_base64();
 
 private:

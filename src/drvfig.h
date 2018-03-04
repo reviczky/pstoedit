@@ -5,7 +5,7 @@
    drvFIG.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,10 +35,10 @@ public:
 	~drvFIG(); // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
-		Option < int, IntValueExtractor > startdepth ; 
-		Option < bool, BoolTrueExtractor > metric ;
-		Option < bool, BoolTrueExtractor > use_correct_font_size ;
-		Option < int, IntValueExtractor > depth_in_inches ; 
+		OptionT < int, IntValueExtractor > startdepth ; 
+		OptionT < bool, BoolTrueExtractor > metric ;
+		OptionT < bool, BoolTrueExtractor > use_correct_font_size ;
+		OptionT < int, IntValueExtractor > depth_in_inches ; 
 
 
 		DriverOptions():

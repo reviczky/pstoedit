@@ -2,7 +2,7 @@
    drvPDF.cpp : This file is part of pstoedit
    Backend for PDF(TM) format
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -545,7 +545,7 @@ static int getFontNumber(const char *const fontname)
 {
 	const size_t fntlength = strlen(fontname);
 	for (unsigned int i = 0; i < numberOfFonts; i++) {
-		const unsigned int pdfFntLengh = strlen(PDFFonts[i]);
+		const size_t pdfFntLengh = strlen(PDFFonts[i]);
 		if (fntlength == pdfFntLengh) {
 			if (strncmp(fontname, PDFFonts[i], fntlength) == 0) {
 				return i;
@@ -559,10 +559,10 @@ static int getSubStringFontNumber(const char *const fontname)
 {
 	// searches for a font name which is the longest substring of the current font name
 	int index = -1;
-	int longest = -1;
-	int fntlength = strlen(fontname);
+	size_t longest = 0;
+	const size_t fntlength = strlen(fontname);
 	for (unsigned int i = 0; i < numberOfFonts; i++) {
-		int pdfFntLength = strlen(PDFFonts[i]);
+		const size_t pdfFntLength = strlen(PDFFonts[i]);
 		if (fntlength >= pdfFntLength) {
 			if (strncmp(fontname, PDFFonts[i], pdfFntLength) == 0) {
 				if (pdfFntLength > longest) {

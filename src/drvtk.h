@@ -11,7 +11,7 @@
    drvsample.h
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -42,9 +42,9 @@ public:
 	class DriverOptions : public ProgramOptions { 
 	public:
 
-		Option < bool, BoolTrueExtractor> swapHW;
-		Option < bool, BoolTrueExtractor> noImPress;
-		Option < RSString, RSStringValueExtractor> tagNames;
+		OptionT < bool, BoolTrueExtractor> swapHW;
+		OptionT < bool, BoolTrueExtractor> noImPress;
+		OptionT < RSString, RSStringValueExtractor> tagNames;
 
 		DriverOptions() :
 			swapHW(true,"-R",0,0,"swap HW",0,false),

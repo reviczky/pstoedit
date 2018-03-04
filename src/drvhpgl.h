@@ -38,26 +38,50 @@ protected:
    ~drvHPGL(); // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
-		Option < bool, BoolTrueExtractor > penplotter ;
-		Option < int, IntValueExtractor > maxPenColors; 
-		Option < RSString, RSStringValueExtractor> fillinstruction;
-	//	Option < bool, BoolTrueExtractor > useRGBcolors ;
-		Option < bool, BoolTrueExtractor > rot90 ;
-		Option < bool, BoolTrueExtractor > rot180 ;
-		Option < bool, BoolTrueExtractor > rot270 ;
+		OptionT < bool, BoolTrueExtractor > penplotter ;
+		OptionT < bool, BoolTrueExtractor > pencolorsfromfile ;
+		OptionT < int,  IntValueExtractor > maxPenColors; 
+		OptionT < RSString, RSStringValueExtractor> fillinstruction;
+	//	OptionT < bool, BoolTrueExtractor > useRGBcolors ;
+		OptionT < bool, BoolTrueExtractor > hpgl2 ;
+		OptionT < bool, BoolTrueExtractor > rot90 ;
+		OptionT < bool, BoolTrueExtractor > rot180 ;
+		OptionT < bool, BoolTrueExtractor > rot270 ;
 
 			// penColors(0), maxPenColors(0)
 		DriverOptions():
-			penplotter(true,"-pen",0, 0, "plotter is pen plotter", 0,false),
-			maxPenColors(true,"-pencolors", "number", 0, "number of pen colors available" ,0,0),
+			penplotter(true,"-penplotter",0, 0, "plotter is pen plotter (i.e. no support for specific line widths)", 0,false),
+			pencolorsfromfile(true,"-pencolorsfromfile",0, 0, "read pen colors from file drvhpgl.pencolors in pstoedit data directory", 0,false),
+			maxPenColors(true,"-pencolors", "number", 0, "maximum number of pen colors to be used by pstoedit (default 0) - " ,0,0),
 			fillinstruction(true,"-filltype", "string", 0, "select fill type e.g. FT 1" ,0,(const char*)"FT1"),
+			/*
+			   Fill Type (FT) Command 
+			   ========================================= 
+			   This command selects the shading pattern used to fill polygons ( FP ), rectangles 
+			   ( RA or RR ), wedges ( WG ), or characters ( CF ). The Fill Type command ( FT 
+			   ), can use solid, shading, parallel lines (hatching), cross hatching, patterned 
+			   (raster) fill, or PCL user-defined patterns. For more information see the PCL 5 
+			   Printer Language Technical Reference Manual. The syntax for this command is 
+			   as follows: 
+
+			   FT fill type,[option1,[option2]]; or FT; 
+			 */
+			// known fill types:
+			// FT 1 - solid black
+			// FT 3 - parallel lines FT 3[,delta,angle]
+			// FT 4 - cross hatching FT 4[,delta,angle]
+			// FT 10 - shading FT 10,[percentage]
+
+			hpgl2 (true,"-hpgl2" ,0, 0, "Use HPGL/2 instead of HPGL/1",0,false),
 			rot90 (true,"-rot90" ,0, 0, "rotate hpgl by 90 degrees",0,false),
 			rot180(true,"-rot180",0, 0, "rotate hpgl by 180 degrees",0,false),
 			rot270(true,"-rot270",0, 0, "rotate hpgl by 270 degrees",0,false)
 		{
 			ADD( penplotter );
+			ADD( pencolorsfromfile );
 			ADD( maxPenColors );
 			ADD( fillinstruction );
+			ADD( hpgl2 );
 			ADD( rot90 );
 			ADD( rot180 );
 			ADD( rot270 );
@@ -71,11 +95,15 @@ protected:
 
    private:
 	   void print_coords();
+	   unsigned int readPenColors(ostream & errstream, const char *filename, bool justcount);
+	   void SelectPen(float R, float G, float B);
 
 	   //  Start DA hpgl color addition
+	   struct HPGLColor { float R; float G; float B; unsigned int intColor;};
        unsigned int prevColor;
        unsigned int maxPen;
-	   unsigned int * penColors;	
+	   unsigned int currentPen;
+	   HPGLColor * penColors;	
        //  End DA hpgl color addition
 
 	   int rotation;

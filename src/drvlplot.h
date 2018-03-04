@@ -36,7 +36,7 @@ class drvplot : public drvbase
   ~drvplot();			// dtor
 	class DriverOptions : public ProgramOptions {
 	public:
-		Option < RSString, RSStringValueExtractor> type;
+		OptionT < RSString, RSStringValueExtractor> type;
 		DriverOptions():
 			type(true,"plotformat","string",0,"plotutil format to generate",0,(const char *)"meta")
 	// pagesize(true,"-pagesize","string",0,"page size, e.g. a4",0,)

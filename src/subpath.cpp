@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2009  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1999 - 2011  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -452,7 +452,7 @@ insert_subpath( basedrawingelement **  parent_path,
 
 void drvbase::PathInfo::rearrange()
 {
-	unsigned int test_parent_index, test_child_index;
+	unsigned int test_parent_index= 0, test_child_index = 0;
 	unsigned int parent_index = 0, child_index = 0;
 	//  write(*this);
 	sub_path_list list;

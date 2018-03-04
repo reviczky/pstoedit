@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<!-- Manual page created with latex2man on Mon Aug 10 18:46:03 WEDT 2009 --
+<!-- Manual page created with latex2man on Sat Aug 27 20:45:57     2011 --
 -- Author of latex2man: Juergen.Vollmer@informatik-vollmer.de --
 -- NOTE: This file is generated, DO NOT EDIT. -->
 <html>
@@ -9,8 +9,8 @@
 PSTOEDIT 
 </h1>
 <h4 align=center>Dr. Wolfgang Glunz </h4>
-<h4 align=center>August 2009</h4>
-<h4 align=center>Version 3.50</h4>
+<h4 align=center>August 2011</h4>
+<h4 align=center>Version 3.60</h4>
 <tt>pstoedit</tt>
 - a tool converting PostScript and PDF files into various 
 vector graphic formats 
@@ -69,56 +69,63 @@ vector graphic formats
 <li><a href="#section_44">wemfc - Wogls version of EMF with experimental clip support </a></li>
 <li><a href="#section_45">wemfnss - Wogls version of EMF - no subpathes  </a></li>
 <li><a href="#section_46">hpgl - HPGL code </a></li>
-<li><a href="#section_47">pic - PIC format for troff et.al. </a></li>
-<li><a href="#section_48">asy - Asymptote Format </a></li>
-<li><a href="#section_49">dxf - CAD exchange format </a></li>
-<li><a href="#section_50">dxf_s - CAD exchange format with splines </a></li>
-<li><a href="#section_51">fig - .fig format for xfig </a></li>
-<li><a href="#section_52">xfig - .fig format for xfig </a></li>
-<li><a href="#section_53">gnuplot - gnuplot format </a></li>
-<li><a href="#section_54">gschem - gschem format </a></li>
-<li><a href="#section_55">idraw - Interviews draw format (EPS) </a></li>
-<li><a href="#section_56">java1 - java 1 applet source code </a></li>
-<li><a href="#section_57">java2 - java 2 source code </a></li>
-<li><a href="#section_58">kil - .kil format for Kontour </a></li>
-<li><a href="#section_59">latex2e - LaTeX2e picture format </a></li>
-<li><a href="#section_60">lwo - LightWave 3D Object Format </a></li>
-<li><a href="#section_61">mma - Mathematica Graphics </a></li>
-<li><a href="#section_62">mpost - MetaPost Format </a></li>
-<li><a href="#section_63">noixml - Nemetschek NOI XML format </a></li>
-<li><a href="#section_64">pcbi - engrave data - insulate/PCB format </a></li>
-<li><a href="#section_65">pcb - pcb format </a></li>
-<li><a href="#section_66">pcbfill - pcb format with fills </a></li>
-<li><a href="#section_67">pdf - Adobe's Portable Document Format </a></li>
-<li><a href="#section_68">rib - RenderMan Interface Bytestream </a></li>
-<li><a href="#section_69">rpl - Real3D Programming Language Format </a></li>
-<li><a href="#section_70">sample - sample driver: if you don't want to see this, uncomment the corresponding line in makefile and make again </a></li>
-<li><a href="#section_71">sk - Sketch Format </a></li>
-<li><a href="#section_72">svm - StarView/OpenOffice.org metafile </a></li>
-<li><a href="#section_73">text - text in different forms  </a></li>
-<li><a href="#section_74">tgif - Tgif .obj format </a></li>
-<li><a href="#section_75">tk - tk and/or tk applet source code </a></li>
-<li><a href="#section_76">wmf - Windows metafile </a></li>
-<li><a href="#section_77">emf - Enhanced Windows metafile </a></li>
+<li><a href="#section_47">pcl - PCL code </a></li>
+<li><a href="#section_48">pic - PIC format for troff et.al. </a></li>
+<li><a href="#section_49">asy - Asymptote Format </a></li>
+<li><a href="#section_50">cairo - cairo driver </a></li>
+<li><a href="#section_51">cfdg - Context Free Design Grammar </a></li>
+<li><a href="#section_52">dxf - CAD exchange format </a></li>
+<li><a href="#section_53">dxf_s - CAD exchange format with splines </a></li>
+<li><a href="#section_54">fig - .fig format for xfig </a></li>
+<li><a href="#section_55">xfig - .fig format for xfig </a></li>
+<li><a href="#section_56">tfig - .fig format for xfig </a></li>
+<li><a href="#section_57">gcode - emc2 gcode format </a></li>
+<li><a href="#section_58">gnuplot - gnuplot format </a></li>
+<li><a href="#section_59">gschem - gschem format </a></li>
+<li><a href="#section_60">idraw - Interviews draw format (EPS) </a></li>
+<li><a href="#section_61">java1 - java 1 applet source code </a></li>
+<li><a href="#section_62">java2 - java 2 source code </a></li>
+<li><a href="#section_63">kil - .kil format for Kontour </a></li>
+<li><a href="#section_64">latex2e - LaTeX2e picture format </a></li>
+<li><a href="#section_65">lwo - LightWave 3D Object Format </a></li>
+<li><a href="#section_66">mma - Mathematica Graphics </a></li>
+<li><a href="#section_67">mpost - MetaPost Format </a></li>
+<li><a href="#section_68">noixml - Nemetschek NOI XML format </a></li>
+<li><a href="#section_69">pcbi - engrave data - insulate/PCB format </a></li>
+<li><a href="#section_70">pcb - pcb format </a></li>
+<li><a href="#section_71">pcbfill - pcb format with fills </a></li>
+<li><a href="#section_72">pdf - Adobe's Portable Document Format </a></li>
+<li><a href="#section_73">rib - RenderMan Interface Bytestream </a></li>
+<li><a href="#section_74">rpl - Real3D Programming Language Format </a></li>
+<li><a href="#section_75">sample - sample driver: if you don't want to see this, uncomment the corresponding line in makefile and make again </a></li>
+<li><a href="#section_76">sk - Sketch Format </a></li>
+<li><a href="#section_77">svm - StarView/OpenOffice.org metafile </a></li>
+<li><a href="#section_78">text - text in different forms  </a></li>
+<li><a href="#section_79">tgif - Tgif .obj format </a></li>
+<li><a href="#section_80">tk - tk and/or tk applet source code </a></li>
+<li><a href="#section_81">vtk - VTK driver: if you don't want to see this, uncomment the corresponding line in makefile and make again </a></li>
+<li><a href="#section_82">wmf - Windows metafile </a></li>
+<li><a href="#section_83">emf - Enhanced Windows metafile </a></li>
 </ul>
 </li>
 </ul>
-<li><a href="#section_78">NOTES </a>
+<li><a href="#section_84">NOTES </a>
 <ul>
-<li><a href="#section_79">autotrace </a></li>
-<li><a href="#section_80">Ps2ai </a></li>
-<li><a href="#section_81">MetaPost </a></li>
-<li><a href="#section_82">LaTeX2e </a></li>
-<li><a href="#section_83">Creating a new output format driver </a></li>
+<li><a href="#section_85">autotrace </a></li>
+<li><a href="#section_86">Ps2ai </a></li>
+<li><a href="#section_87">MetaPost </a></li>
+<li><a href="#section_88">Context Free - CFDG </a></li>
+<li><a href="#section_89">LaTeX2e </a></li>
+<li><a href="#section_90">Creating a new output format driver </a></li>
 </ul>
-<li><a href="#section_84">ENVIRONMENT VARIABLES </a></li>
-<li><a href="#section_85">TROUBLE SHOOTING </a></li>
-<li><a href="#section_86">RESTRICTIONS </a></li>
-<li><a href="#section_87">FAQs </a></li>
-<li><a href="#section_88">AUTHOR </a></li>
-<li><a href="#section_89">CANONICAL ARCHIVE SITE </a></li>
-<li><a href="#section_90">ACKNOWLEDGEMENTS </a></li>
-<li><a href="#section_91">LEGAL NOTICES </a></li>
+<li><a href="#section_91">ENVIRONMENT VARIABLES </a></li>
+<li><a href="#section_92">TROUBLE SHOOTING </a></li>
+<li><a href="#section_93">RESTRICTIONS </a></li>
+<li><a href="#section_94">FAQs </a></li>
+<li><a href="#section_95">AUTHOR </a></li>
+<li><a href="#section_96">CANONICAL ARCHIVE SITE </a></li>
+<li><a href="#section_97">ACKNOWLEDGEMENTS </a></li>
+<li><a href="#section_98">LEGAL NOTICES </a></li>
 </ul>
 <p>
 <h2><a name="section_1">Synopsis</a></h2>
@@ -132,7 +139,6 @@ vector graphic formats
 <br> 
 <p>
 <tt>pstoedit</tt>
-<p>
 [<b>-include</b><i>&nbsp;name of a PostScript file to be included</i>]
 [<b>-df</b><i>&nbsp;font name</i>]
 [<b>-nomaptoisolatin1</b>]
@@ -155,6 +161,7 @@ vector graphic formats
 [<b>-xshift</b><i>&nbsp;number</i>]
 [<b>-yshift</b><i>&nbsp;number</i>]
 [<b>-centered</b>]
+[<b>-minlinewidth</b><i>&nbsp;number</i>]
 [<b>-split</b>]
 [<b>-v</b>]
 [<b>-usebbfrominput</b>]
@@ -181,6 +188,7 @@ vector graphic formats
 [<b>-gs</b><i>&nbsp;path to the ghostscript executable/DLL </i>]
 [<b>-bo</b>]
 [<b>-psarg</b><i>&nbsp;argument string</i>]
+[<b>-pslanguagelevel</b><i>&nbsp;PostScript Language Level to be used 1,2, or 3</i>]
 <b>-f</b><i>&nbsp;"format[:options]"</i>
 [<b>-gsregbase</b><i>&nbsp;GhostScript base registry path</i>]
 [ inputfile [outputfile] ] 
@@ -207,7 +215,7 @@ details.
 <h4><a name="section_6">RELEASE LEVEL</a></h4>
 
 <p>
-This manpage documents release 3.50 of <tt>pstoedit</tt>.
+This manpage documents release 3.60 of <tt>pstoedit</tt>.
 <p>
 <h4><a name="section_7">USE</a></h4>
 
@@ -305,6 +313,12 @@ shift image in y-direction
 center image before scaling or shifting 
 <p>
 </dd>
+<dt>[<b>-minlinewidth</b><i>&nbsp;number</i>]
+</dt>
+<dd> 
+minimal line width. All lines thinner than this will be drawn in this line width - especially zero-width lines 
+<p>
+</dd>
 <dt>[<b>-split</b>]
 </dt>
 <dd> 
@@ -386,11 +400,17 @@ and then running <strong>pstoedit</strong>
 The string given with this option is passed directly to Ghostscript when Ghostscript is called to process the PostScript file for <tt>pstoedit</tt>.
 For example: <strong>-psarg</strong><strong>&nbsp;"</strong><strong>-r300x300</strong><strong>"</strong>.
 This causes the resolution to be changed to 300x300 dpi. (With older versions of GhostScript, changing the resolution this way has an effect only if the <b>-dis</b>
-option is given.) You can switch Ghostscript into PostScript Level 1 only mode by <b>-psarg "level1.ps"</b>.
-This can be useful for example if the PostScript file to be converted uses some Level 2 specific custom color models that are not supported by pstoedit. However, this requires that the PostScript program checks for the PostScript level supported by the interpreter and "acts" accordingly. If you want to pass multiple options to Ghostscript you can use multiple -psarg options <b>-psarg opt1</b>
+option is given.) If you want to pass multiple options to Ghostscript you can use multiple -psarg options <b>-psarg opt1</b>
 <b>-psarg opt2</b>
 <b>-psarg opt2</b>.
 See the GhostScript manual for other possible options. 
+<p>
+</dd>
+<dt>[<b>-pslanguagelevel</b><i>&nbsp;PostScript Language Level to be used 1,2, or 3</i>]
+</dt>
+<dd> 
+PostScript Language Level to be used 1,2, or 3 You can switch Ghostscript into PostScript Level 1 only mode by <b>-pslanguagelevel 1</b>.
+This can be useful for example if the PostScript file to be converted uses some Level 2 specific custom color models that are not supported by pstoedit. However, this requires that the PostScript program checks for the PostScript level supported by the interpreter and "acts" accordingly. The default language level is 3. 
 <p>
 </dd>
 <dt><b>-f</b><i>&nbsp;"format[:options]"</i>
@@ -1164,22 +1184,34 @@ generate OpenOffice compatible EMF file
 <h5><a name="section_46">hpgl - HPGL code</a></h5>
 
 <dl compact>
-<dt>[<b>-pen</b>]
+<dt>[<b>-penplotter</b>]
 </dt>
 <dd> 
-plotter is pen plotter 
+plotter is pen plotter (i.e. no support for specific line widths) 
+<p>
+</dd>
+<dt>[<b>-pencolorsfromfile</b>]
+</dt>
+<dd> 
+read pen colors from file drvhpgl.pencolors in pstoedit data directory 
 <p>
 </dd>
 <dt>[<b>-pencolors</b><i>&nbsp;number</i>]
 </dt>
 <dd> 
-number of pen colors available 
+maximum number of pen colors to be used by pstoedit (default 0) - 
 <p>
 </dd>
 <dt>[<b>-filltype</b><i>&nbsp;string</i>]
 </dt>
 <dd> 
 select fill type e.g. FT 1 
+<p>
+</dd>
+<dt>[<b>-hpgl2</b>]
+</dt>
+<dd> 
+Use HPGL/2 instead of HPGL/1 
 <p>
 </dd>
 <dt>[<b>-rot90</b>]
@@ -1201,7 +1233,59 @@ rotate hpgl by 270 degrees
 <p>
 </dd>
 </dl>
-<h5><a name="section_47">pic - PIC format for troff et.al.</a></h5>
+<h5><a name="section_47">pcl - PCL code</a></h5>
+
+<dl compact>
+<dt>[<b>-penplotter</b>]
+</dt>
+<dd> 
+plotter is pen plotter (i.e. no support for specific line widths) 
+<p>
+</dd>
+<dt>[<b>-pencolorsfromfile</b>]
+</dt>
+<dd> 
+read pen colors from file drvhpgl.pencolors in pstoedit data directory 
+<p>
+</dd>
+<dt>[<b>-pencolors</b><i>&nbsp;number</i>]
+</dt>
+<dd> 
+maximum number of pen colors to be used by pstoedit (default 0) - 
+<p>
+</dd>
+<dt>[<b>-filltype</b><i>&nbsp;string</i>]
+</dt>
+<dd> 
+select fill type e.g. FT 1 
+<p>
+</dd>
+<dt>[<b>-hpgl2</b>]
+</dt>
+<dd> 
+Use HPGL/2 instead of HPGL/1 
+<p>
+</dd>
+<dt>[<b>-rot90</b>]
+</dt>
+<dd> 
+rotate hpgl by 90 degrees 
+<p>
+</dd>
+<dt>[<b>-rot180</b>]
+</dt>
+<dd> 
+rotate hpgl by 180 degrees 
+<p>
+</dd>
+<dt>[<b>-rot270</b>]
+</dt>
+<dd> 
+rotate hpgl by 270 degrees 
+<p>
+</dd>
+</dl>
+<h5><a name="section_48">pic - PIC format for troff et.al.</a></h5>
 
 <dl compact>
 <dt>[<b>-troff</b>]
@@ -1241,10 +1325,39 @@ enable debug output
 <p>
 </dd>
 </dl>
-<h5><a name="section_48">asy - Asymptote Format</a></h5>
+<h5><a name="section_49">asy - Asymptote Format</a></h5>
 
 No driver specific options 
-<h5><a name="section_49">dxf - CAD exchange format</a></h5>
+<h5><a name="section_50">cairo - cairo driver</a></h5>
+
+generates compilable c code for rendering with cairo 
+<p>
+<dl compact>
+<dt>[<b>-pango</b>]
+</dt>
+<dd> 
+use pango for font rendering 
+<p>
+</dd>
+<dt>[<b>-funcname</b><i>&nbsp;string</i>]
+</dt>
+<dd> 
+sets the base name for the generated functions and variables. e.g. myfig 
+<p>
+</dd>
+<dt>[<b>-header</b><i>&nbsp;string</i>]
+</dt>
+<dd> 
+sets the output file name for the generated C header file. e.g. myfig.h 
+<p>
+</dd>
+</dl>
+<h5><a name="section_51">cfdg - Context Free Design Grammar</a></h5>
+
+Context Free Design Grammar, usable by Context Free Art (http://www.contextfreeart.org/) 
+<p>
+No driver specific options 
+<h5><a name="section_52">dxf - CAD exchange format</a></h5>
 
 <dl compact>
 <dt>[<b>-polyaslines</b>]
@@ -1326,7 +1439,7 @@ layers to be hidden (comma separated list of layer names, no space)
 <p>
 </dd>
 </dl>
-<h5><a name="section_50">dxf_s - CAD exchange format with splines</a></h5>
+<h5><a name="section_53">dxf_s - CAD exchange format with splines</a></h5>
 
 <dl compact>
 <dt>[<b>-polyaslines</b>]
@@ -1408,7 +1521,7 @@ layers to be hidden (comma separated list of layer names, no space)
 <p>
 </dd>
 </dl>
-<h5><a name="section_51">fig - .fig format for xfig</a></h5>
+<h5><a name="section_54">fig - .fig format for xfig</a></h5>
 
 The xfig format driver supports special fontnames, which may be produced by using a fontmap file. The following types of names are supported : <br>
  
@@ -1453,7 +1566,7 @@ Set the page depth in inches (default 11)
 <p>
 </dd>
 </dl>
-<h5><a name="section_52">xfig - .fig format for xfig</a></h5>
+<h5><a name="section_55">xfig - .fig format for xfig</a></h5>
 
 See fig format for more details. 
 <p>
@@ -1483,18 +1596,53 @@ Set the page depth in inches (default 11)
 <p>
 </dd>
 </dl>
-<h5><a name="section_53">gnuplot - gnuplot format</a></h5>
+<h5><a name="section_56">tfig - .fig format for xfig</a></h5>
+
+Test only 
+<p>
+<dl compact>
+<dt>[<b>-startdepth</b><i>&nbsp;number</i>]
+</dt>
+<dd> 
+Set the initial depth (default 999) 
+<p>
+</dd>
+<dt>[<b>-metric</b>]
+</dt>
+<dd> 
+Switch to centimeter display (default inches) 
+<p>
+</dd>
+<dt>[<b>-usecorrectfontsize</b>]
+</dt>
+<dd> 
+don't scale fonts for xfig. Use this if you also use this option with xfig 
+<p>
+</dd>
+<dt>[<b>-depth</b><i>&nbsp;number</i>]
+</dt>
+<dd> 
+Set the page depth in inches (default 11) 
+<p>
+</dd>
+</dl>
+<h5><a name="section_57">gcode - emc2 gcode format</a></h5>
+
+See also: <a href ="http://linuxcnc.org/"><tt>http://linuxcnc.org/</tt></a>
+<p>
+No driver specific options 
+<h5><a name="section_58">gnuplot - gnuplot format</a></h5>
 
 No driver specific options 
-<h5><a name="section_54">gschem - gschem format</a></h5>
+<h5><a name="section_59">gschem - gschem format</a></h5>
 
 See also: <a href ="http://www.geda.seul.org/tools/gschem/"><tt>http://www.geda.seul.org/tools/gschem/</tt></a>
 <p>
 No driver specific options 
-<h5><a name="section_55">idraw - Interviews draw format (EPS)</a></h5>
+<h5><a name="section_60">idraw - Interviews draw format (EPS)</a></h5>
 
 No driver specific options 
-<h5><a name="section_56">java1 - java 1 applet source code</a></h5>
+<h5><a name="section_61">java1 - java 1 applet source code</a></h5>
 
 <dl compact>
 <dt>[<b>java class name</b><i>&nbsp;string</i>]
@@ -1504,7 +1652,7 @@ name of java class to generate
 <p>
 </dd>
 </dl>
-<h5><a name="section_57">java2 - java 2 source code</a></h5>
+<h5><a name="section_62">java2 - java 2 source code</a></h5>
 
 <dl compact>
 <dt>[<b>java class name</b><i>&nbsp;string</i>]
@@ -1514,10 +1662,10 @@ name of java class to generate
 <p>
 </dd>
 </dl>
-<h5><a name="section_58">kil - .kil format for Kontour</a></h5>
+<h5><a name="section_63">kil - .kil format for Kontour</a></h5>
 
 No driver specific options 
-<h5><a name="section_59">latex2e - LaTeX2e picture format</a></h5>
+<h5><a name="section_64">latex2e - LaTeX2e picture format</a></h5>
 
 <dl compact>
 <dt>[<b>-integers</b>]
@@ -1527,10 +1675,10 @@ round all coordinates to the nearest integer
 <p>
 </dd>
 </dl>
-<h5><a name="section_60">lwo - LightWave 3D Object Format</a></h5>
+<h5><a name="section_65">lwo - LightWave 3D Object Format</a></h5>
 
 No driver specific options 
-<h5><a name="section_61">mma - Mathematica Graphics</a></h5>
+<h5><a name="section_66">mma - Mathematica Graphics</a></h5>
 
 <dl compact>
 <dt>[<b>-eofillfills</b>]
@@ -1540,10 +1688,10 @@ Filling is used for eofill (default is not to fill)
 <p>
 </dd>
 </dl>
-<h5><a name="section_62">mpost - MetaPost Format</a></h5>
+<h5><a name="section_67">mpost - MetaPost Format</a></h5>
 
 No driver specific options 
-<h5><a name="section_63">noixml - Nemetschek NOI XML format</a></h5>
+<h5><a name="section_68">noixml - Nemetschek NOI XML format</a></h5>
 
 Nemetschek Object Interface XML format 
 <p>
@@ -1561,13 +1709,13 @@ Bezier Split Level (default 3)
 <p>
 </dd>
 </dl>
-<h5><a name="section_64">pcbi - engrave data - insulate/PCB format</a></h5>
+<h5><a name="section_69">pcbi - engrave data - insulate/PCB format</a></h5>
 
 See <a href ="http://home.vr-web.de/~hans-juergen-jahn/software/devpcb.html"><tt>http://home.vr-web.de/~hans-juergen-jahn/software/devpcb.html</tt></a>
 for more details. 
 <p>
 No driver specific options 
-<h5><a name="section_65">pcb - pcb format</a></h5>
+<h5><a name="section_70">pcb - pcb format</a></h5>
 
 See also: <a href ="http://pcb.sourceforge.net"><tt>http://pcb.sourceforge.net</tt></a>
 and <a href ="http://www.penguin.cz/~utx/pstoedit-pcb/"><tt>http://www.penguin.cz/~utx/pstoedit-pcb/</tt></a>
@@ -1615,22 +1763,28 @@ Switch to metric units (mm)
 use standard layer names instead of descriptive names 
 <p>
 </dd>
+<dt>[<b>-forcepoly</b>]
+</dt>
+<dd> 
+force all objects to be interpreted as polygons 
+<p>
+</dd>
 </dl>
-<h5><a name="section_66">pcbfill - pcb format with fills</a></h5>
+<h5><a name="section_71">pcbfill - pcb format with fills</a></h5>
 
 See also: <a href ="http://pcb.sourceforge.net"><tt>http://pcb.sourceforge.net</tt></a>
 <p>
 No driver specific options 
-<h5><a name="section_67">pdf - Adobe's Portable Document Format</a></h5>
+<h5><a name="section_72">pdf - Adobe's Portable Document Format</a></h5>
 
 No driver specific options 
-<h5><a name="section_68">rib - RenderMan Interface Bytestream</a></h5>
+<h5><a name="section_73">rib - RenderMan Interface Bytestream</a></h5>
 
 No driver specific options 
-<h5><a name="section_69">rpl - Real3D Programming Language Format</a></h5>
+<h5><a name="section_74">rpl - Real3D Programming Language Format</a></h5>
 
 No driver specific options 
-<h5><a name="section_70">sample - sample driver: if you don't want to see this, uncomment the corresponding line in makefile and make again</a></h5>
+<h5><a name="section_75">sample - sample driver: if you don't want to see this, uncomment the corresponding line in makefile and make again</a></h5>
 
 this is a long description for the sample driver 
 <p>
@@ -1642,10 +1796,10 @@ just an example
 <p>
 </dd>
 </dl>
-<h5><a name="section_71">sk - Sketch Format</a></h5>
+<h5><a name="section_76">sk - Sketch Format</a></h5>
 
 No driver specific options 
-<h5><a name="section_72">svm - StarView/OpenOffice.org metafile</a></h5>
+<h5><a name="section_77">svm - StarView/OpenOffice.org metafile</a></h5>
 
 StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.0 and above. 
 <p>
@@ -1663,7 +1817,7 @@ emulate narrow fonts
 <p>
 </dd>
 </dl>
-<h5><a name="section_73">text - text in different forms </a></h5>
+<h5><a name="section_78">text - text in different forms </a></h5>
 
 <dl compact>
 <dt>[<b>-height</b><i>&nbsp;number</i>]
@@ -1685,7 +1839,7 @@ dump text pieces
 <p>
 </dd>
 </dl>
-<h5><a name="section_74">tgif - Tgif .obj format</a></h5>
+<h5><a name="section_79">tgif - Tgif .obj format</a></h5>
 
 <dl compact>
 <dt>[<b>-ta</b>]
@@ -1695,7 +1849,7 @@ text as attribute
 <p>
 </dd>
 </dl>
-<h5><a name="section_75">tk - tk and/or tk applet source code</a></h5>
+<h5><a name="section_80">tk - tk and/or tk applet source code</a></h5>
 
 <dl compact>
 <dt>[<b>-R</b>]
@@ -1717,7 +1871,19 @@ tagnames
 <p>
 </dd>
 </dl>
-<h5><a name="section_76">wmf - Windows metafile</a></h5>
+<h5><a name="section_81">vtk - VTK driver: if you don't want to see this, uncomment the corresponding line in makefile and make again</a></h5>
+
+this is a long description for the VTKe driver 
+<p>
+<dl compact>
+<dt>[<b>-VTKeoption</b><i>&nbsp;integer</i>]
+</dt>
+<dd> 
+just an example 
+<p>
+</dd>
+</dl>
+<h5><a name="section_82">wmf - Windows metafile</a></h5>
 
 <dl compact>
 <dt>[<b>-m</b>]
@@ -1763,7 +1929,7 @@ generate OpenOffice compatible EMF file
 <p>
 </dd>
 </dl>
-<h5><a name="section_77">emf - Enhanced Windows metafile</a></h5>
+<h5><a name="section_83">emf - Enhanced Windows metafile</a></h5>
 
 <dl compact>
 <dt>[<b>-m</b>]
@@ -1810,10 +1976,10 @@ generate OpenOffice compatible EMF file
 </dd>
 </dl>
 <p>
-<h2><a name="section_78">NOTES</a></h2>
+<h2><a name="section_84">NOTES</a></h2>
 
 <p>
-<h4><a name="section_79">autotrace</a></h4>
+<h4><a name="section_85">autotrace</a></h4>
 
 <p>
 pstoedit cooperates with autotrace. Autotrace can now produce a dump file 
@@ -1822,7 +1988,7 @@ for further processing by pstoedit using the <b>-bo</b>
 Autotrace is a program written by a group around Martin Weber and can be 
 found at <a href ="http://sourceforge.net/projects/autotrace/"><tt>http://sourceforge.net/projects/autotrace/</tt></a>.
 <p>
-<h4><a name="section_80">Ps2ai</a></h4>
+<h4><a name="section_86">Ps2ai</a></h4>
 
 <p>
 The ps2ai output format driver is not a native pstoedit output format driver. It does not use the 
@@ -1841,7 +2007,7 @@ An alternative to the ps2ai based driver is available via the -f plot:ai format 
 <p>
 You should use a version of GhostScript greater than or equal to 6.00 for using the ps2ai output format driver. 
 <p>
-<h4><a name="section_81">MetaPost</a></h4>
+<h4><a name="section_87">MetaPost</a></h4>
 
 <p>
 Note that, as far as Scott knows, MetaPost does not support PostScript's 
@@ -1853,7 +2019,17 @@ For more on MetaPost see:
 <p>
 <a href ="http://cm.bell-labs.com/who/hobby/MetaPost.html"><tt>http://cm.bell-labs.com/who/hobby/MetaPost.html</tt></a>
 <p>
-<h4><a name="section_82">LaTeX2e</a></h4>
+<h4><a name="section_88">Context Free - CFDG</a></h4>
+
+The driver for the CFDG format (drvcfdg) defines 
+one shape per page of PostScript, but only the first shape is actually 
+rendered (unless the user edits the generated CFDG code, of course). 
+CFDG doesn't support multi-page output, so this probably a reasonable thing to do. 
+<p>
+For more on Context Free see: 
+<a href ="http://www.contextfreeart.org/"><tt>http://www.contextfreeart.org/</tt></a>
+<p>
+<h4><a name="section_89">LaTeX2e</a></h4>
 
 <p>
 <ul compact>
@@ -1892,7 +2068,7 @@ surrounding document (with help from the hyperref package).
 </li>
 </ul>
 <p>
-<h4><a name="section_83">Creating a new output format driver</a></h4>
+<h4><a name="section_90">Creating a new output format driver</a></h4>
 
 <p>
 To implement a new output format driver you can start from <tt>drvsampl.cpp</tt>
@@ -1904,7 +2080,7 @@ and
 for an explanation of methods that should be implemented 
 for a new output format driver. 
 <p>
-<h2><a name="section_84">ENVIRONMENT VARIABLES</a></h2>
+<h2><a name="section_91">ENVIRONMENT VARIABLES</a></h2>
 
 <p>
 A default PostScript interpreter to be called by pstoedit is specified at 
@@ -1929,7 +2105,7 @@ for descriptions of environment variables used. On UNIX like system this is
 probably the <tt>TMPDIR</tt> variable, on DOS/WINDOWS either <tt>TMP</tt> or 
 <tt>TEMP</tt>. 
 <p>
-<h2><a name="section_85">TROUBLE SHOOTING</a></h2>
+<h2><a name="section_92">TROUBLE SHOOTING</a></h2>
 
 <p>
 If you have problems with <tt>pstoedit</tt>
@@ -1971,7 +2147,7 @@ So far I've seen redefinitions for:
 I've included work-arounds for the ones mentioned above, but some others 
 could show up in addition to those. 
 <p>
-<h2><a name="section_86">RESTRICTIONS</a></h2>
+<h2><a name="section_93">RESTRICTIONS</a></h2>
 
 <p>
 <ul compact>
@@ -2011,7 +2187,7 @@ file for more details.
 </li>
 </ul>
 <p>
-<h2><a name="section_87">FAQs</a></h2>
+<h2><a name="section_94">FAQs</a></h2>
 
 <p>
 <ol compact>
@@ -2042,12 +2218,13 @@ Try to use PostScript fonts instead of the bitmap fonts when generating a PostSc
 </li>
 </ol>
 <p>
-<h2><a name="section_88">AUTHOR</a></h2>
+<h2><a name="section_95">AUTHOR</a></h2>
 
 <p>
-Wolfgang Glunz, <a href ="mailto:wglunz35_AT_pstoedit.net"><tt>wglunz35_AT_pstoedit.net</tt></a>
+Wolfgang Glunz, <a href ="mailto:wglunz35_AT_pstoedit.net"><tt>wglunz35_AT_pstoedit.net</tt></a>,
+<a href ="http://de.linkedin.com/in/wolfgangglunz"><tt>http://de.linkedin.com/in/wolfgangglunz</tt></a>
 <p>
-<h2><a name="section_89">CANONICAL ARCHIVE SITE</a></h2>
+<h2><a name="section_96">CANONICAL ARCHIVE SITE</a></h2>
 
 <p>
 <a href ="http://www.pstoedit.net/pstoedit/"><tt>http://www.pstoedit.net/pstoedit/</tt></a>
@@ -2057,7 +2234,9 @@ and related
 programs and hints how to subscribe to a mailing list in order to get informed 
 about new releases and bug-fixes. 
 <p>
-<h2><a name="section_90">ACKNOWLEDGEMENTS</a></h2>
+If you like pstoedit - please express so also at Facebook <a href ="http://www.facebook.com/pages/pstoedit/260606183958062"><tt>http://www.facebook.com/pages/pstoedit/260606183958062</tt></a>.
+<p>
+<h2><a name="section_97">ACKNOWLEDGEMENTS</a></h2>
 
 <p>
 <ul compact>
@@ -2208,7 +2387,7 @@ GhostScript and gsview.
 </li>
 </ul>
 <p>
-<h2><a name="section_91">LEGAL NOTICES</a></h2>
+<h2><a name="section_98">LEGAL NOTICES</a></h2>
 
 <p>
 Trademarks mentioned are the property of their respective owners. 

@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to GhostScript
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -98,13 +98,12 @@ static RSString createCmdLine(int argc, const char *const argv[])
 // there can only be one instance of the DLL and GhostScript active
 // in one process. So - if being called from gsview - we need to start 
 // ghostscript via the EXE.
+// Same holds if 64 bit ghostscript should be called from 32 big pstoedit.
 #include <windows.h>
 #include I_stdio
 static int callgsEXE(int argc, const char * const argv[])
 {
 	int gsresult = 0;
-//cerr << "running-win " << commandline << endl;
-
 	STARTUPINFO MyStartupInfo; // process data
 	memset(&MyStartupInfo,'\0',sizeof(MyStartupInfo));
 	MyStartupInfo.cb = sizeof(STARTUPINFO);
@@ -115,6 +114,7 @@ static int callgsEXE(int argc, const char * const argv[])
     DWORD gs_status = 0;
 
 	const RSString& commandline = createCmdLine(argc,argv);
+	cerr << "running-win command line: " << commandline << endl;
 
 	BOOL status = CreateProcess(
               NULL, // Application Name 
@@ -153,6 +153,7 @@ static int callgsEXE(int argc, const char * const argv[])
 // define PSTOEDITDEBUG
 
 int callgs(int argc, const char * const argv[]) { 
+	const bool verbose = false; // debug only
 
 #ifdef PSTOEDITDEBUG
 	cerr << "Commandline " << endl;
@@ -170,13 +171,38 @@ int callgs(int argc, const char * const argv[]) {
 	if ((strstr(argv[0],"gsdll32.dll") != NULL) || (strstr(argv[0],"gsdll64.dll") != NULL)) {
 
 #ifdef WITHDLLSUPPORT
-		return callgsDLL(argc, (char **) argv);
+		int result = callgsDLL(argc, (char **) argv);
+		if (result == -1 ) /* could not even load the dll - so try the exe */
+		{ 
+			const char * * newargv = new const char *[argc];
+			for (int i = 0; i< argc; i++) { newargv[i] = argv[i]; }
+
+			char * dlldirname = cppstrdup(argv[0]);
+			char * p = strrchr(dlldirname, '\\'); 
+			if (p) {
+				p++;
+				*p = 0; 
+			}
+			RSString exename(dlldirname);
+			delete[] dlldirname;
+
+			exename += "gswin32c.exe";
+			if (verbose) {
+				cerr << "loading DLL: " << argv[0] << " failed (possibly due to 32/64 bit mix - reverting to call gs as exe via: " << exename << endl;
+			}
+			newargv[0] = exename.value();
+			result = callgsEXE(argc,newargv);
+			delete [] newargv; /* just the array - the content is not owned */ 
+			return  result;
+		} else return result;
 #else
 		cerr << "Sorry, but DLL support was not enabled in this version of pstoedit" << endl;
 		return 2;
 #endif
 	} else {
-		cerr << "calling gs as exe" << endl;
+		if (verbose) {
+			cerr << "calling gs as exe: " << argv[0] << endl;
+		}
 		return callgsEXE(argc,argv);
 	}
 }
@@ -318,7 +344,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 		} else {
 		    if (verbose) errstream<< "nothing found in gsview32.ini file - using find_gs to lookup latest version of GhostScript in registry " << endl;
 			static char buf[1000];
-			if (find_gs(buf, sizeof(buf), 550, getPstoeditsetDLLUsage() , gsregbase)) { 
+			if (find_gs(buf, sizeof(buf), 550 /* min ver*/ , getPstoeditsetDLLUsage() , gsregbase)) { 
 				if (verbose) {
 					(void)dumpgsvers(gsregbase);
 					if (getPstoeditsetDLLUsage()) errstream << "Latest GS DLL is " << buf << endl;

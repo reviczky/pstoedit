@@ -5,7 +5,7 @@
    drvDXF.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,19 +34,19 @@ public:
         ~drvDXF(); // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
-		Option < bool, BoolTrueExtractor > polyaslines ;
-		Option < bool, BoolTrueExtractor > mm ;
-		Option < bool, BoolTrueExtractor > colorsToLayers ;
-		Option < bool, BoolTrueExtractor > splineaspolyline ;
-		Option < bool, BoolTrueExtractor > splineasnurb ;
-		Option < bool, BoolTrueExtractor > splineasbspline ;
-		Option < bool, BoolTrueExtractor > splineassinglespline ;
-		Option < bool, BoolTrueExtractor > splineasmultispline ;
-		Option < bool, BoolTrueExtractor > splineasbezier ;
-		Option < int, IntValueExtractor >  splineprecision ;
-		Option < bool, BoolTrueExtractor > dumplayernames ;
-		Option < RSString, RSStringValueExtractor > layerpositivfilter;
-		Option < RSString, RSStringValueExtractor > layernegativfilter;
+		OptionT < bool, BoolTrueExtractor > polyaslines ;
+		OptionT < bool, BoolTrueExtractor > mm ;
+		OptionT < bool, BoolTrueExtractor > colorsToLayers ;
+		OptionT < bool, BoolTrueExtractor > splineaspolyline ;
+		OptionT < bool, BoolTrueExtractor > splineasnurb ;
+		OptionT < bool, BoolTrueExtractor > splineasbspline ;
+		OptionT < bool, BoolTrueExtractor > splineassinglespline ;
+		OptionT < bool, BoolTrueExtractor > splineasmultispline ;
+		OptionT < bool, BoolTrueExtractor > splineasbezier ;
+		OptionT < int, IntValueExtractor >  splineprecision ;
+		OptionT < bool, BoolTrueExtractor > dumplayernames ;
+		OptionT < RSString, RSStringValueExtractor > layerpositivfilter;
+		OptionT < RSString, RSStringValueExtractor > layernegativfilter;
 
 		DriverOptions():
 			polyaslines(true,"-polyaslines",0,0,"use LINE instead of POLYLINE in DXF",0,false),

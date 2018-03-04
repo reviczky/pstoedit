@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -909,10 +909,54 @@ void drvFIG::show_image(const PSImage & imageinfo)
 		errf << "images cannot be handled via standard output. Use an output file " << endl;
 		return;
 	}
+	if (imageinfo.isFileImage) {
+		// use imageinfo.FileName;
+		/* 
+		outf << "<image "		 
+			<< " transform=\"matrix("
+			<< imageinfo.normalizedImageCurrentMatrix[0] << ' '
+			<< -imageinfo.normalizedImageCurrentMatrix[1] << ' '
+			<< imageinfo.normalizedImageCurrentMatrix[2] << ' '
+			<< -imageinfo.normalizedImageCurrentMatrix[3] << ' '
+// transfer
+			<< imageinfo.normalizedImageCurrentMatrix[4] << ' '
+			<< currentDeviceHeight - imageinfo.normalizedImageCurrentMatrix[5]
+			<< ")\"" 
+			<< " width=\"" << imageinfo.width << "\"" 
+			<< " height=\"" << imageinfo.height << "\"" 
+			<< " xlink:href=\"" << imageinfo.FileName << "\"></image>" << endl;
+    */
 
-	const unsigned int filenamelen = strlen(outBaseName.value()) + 21;
+	Point ll, ur;
+	imageinfo.getBoundingBox(ll, ur);
+// Calculate BBox
+	addtobbox(ll);
+	addtobbox(ur);
+	Point fig_ur(PntFig * ur.x_, y_offset - PntFig * ll.y_);
+	Point fig_ll(PntFig * ll.x_, y_offset - PntFig * ur.y_);
+
+	// first output link to an external *.eps file into *.fig file
+	buffer << "# image\n";
+	new_depth();
+	buffer << "2 5 0 1 -1 -1 ";
+	if (objectId)
+		objectId--;				// don't let it get < 0
+	buffer << objectId << " 0 -1 0.000 0 0 -1 0 0 5\n";
+	buffer << "\t0 " << imageinfo.FileName << "\n";
+
+	buffer << "\t" << (int) fig_ll.x_ << " " << (int) fig_ll.y_ << " "
+		<< (int) fig_ur.x_ << " " << (int) fig_ll.y_ << " "
+		<< (int) fig_ur.x_ << " " << (int) fig_ur.y_ << " "
+		<< (int) fig_ll.x_ << " " << (int) fig_ur.y_ << " "
+		<< (int) fig_ll.x_ << " " << (int) fig_ll.y_;
+	buffer << "\n";
+
+
+
+	} else {
+	const size_t filenamelen = strlen(outBaseName.value()) + 21;
 	char *EPSoutFileName = new char[filenamelen];
-	const unsigned int fullfilenamelen = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
+	const size_t fullfilenamelen = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
 	char *EPSoutFullFileName = new char[fullfilenamelen];
 
 	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName.value(), imgcount++);
@@ -954,6 +998,7 @@ void drvFIG::show_image(const PSImage & imageinfo)
 
 	delete[]EPSoutFullFileName;
 	delete[]EPSoutFileName;
+	}
 }
 
 
@@ -981,5 +1026,9 @@ static DriverDescriptionT < drvFIG > D_fig( "fig", ".fig format for xfig",  addi
 										   false, false /*clipping */ );
 
 static DriverDescriptionT < drvFIG > D_xfig("xfig", ".fig format for xfig", "See fig format for more details.","fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images
+											DriverDescription::normalopen,
+											false, false /*clipping */ );
+static DriverDescriptionT < drvFIG > D_tfig("tfig", ".fig format for xfig", "Test only","fig", false, true, true, true, 
+											DriverDescription::png,	
 											DriverDescription::normalopen,
 											false, false /*clipping */ );

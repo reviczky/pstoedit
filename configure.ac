@@ -10,13 +10,17 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.50,wglunz35_AT_pstoedit.net)
+AC_INIT(pstoedit,3.60,wglunz35_AT_pstoedit.net)
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.50)
+AM_INIT_AUTOMAKE(pstoedit,3.60)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
+AC_CONFIG_MACRO_DIR([m4])
+dnl libtoolize: Consider adding `AC_CONFIG_MACRO_DIR([m4])' to configure.ac and
+dnl libtoolize: rerunning libtoolize, to keep the correct libtool macros in-tree.
+dnl libtoolize: Consider adding `-I m4' to ACLOCAL_AMFLAGS in Makefile.am.
 
 dnl We need only C++ and no other language
 dnl seems to be broken : AC_LIBTOOL_TAGS([CXX])
@@ -298,7 +302,7 @@ dnl use libemf source directly
 HAVE_LIBEMF=yes
 AM_CONDITIONAL(USE_EMFBYSOURCE, true )
 AM_CONDITIONAL(HAVE_LIBEMF, true )
-LIBEMF_CFLAGS="-DHAVE_LIBEMF -I${libemf_lib_src}/include -I${libemf_lib_src}/libemf "
+LIBEMF_CFLAGS="-DHAVE_LIBEMF -I${libemf_lib_src}/include -I${libemf_lib_src}/libemf -I${libemf_lib_src}/config "
 AC_SUBST(LIBEMF_CFLAGS)
 
 else
@@ -407,14 +411,12 @@ if test "$GXX" = yes; then
 #   need to disable long long warning here because of ImageMagick using it
     SPECIAL_CXXFLAGS="-DBUGGYGPP -pedantic -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long "
   fi
-  CXXFLAGS="-g" 
 elif test `echo "$CXX" | egrep -c 'xlC$'` -eq 1; then
   AC_MSG_RESULT([AIX xlC])
-  CXXFLAGS="-D__unix__ -g -+ -I/usr/lpp/xlC/src/nihC/aixinclude"  
+  SPECIAL_CXXFLAGS="-D__unix__ -g -+ -I/usr/lpp/xlC/src/nihC/aixinclude"
 elif test `echo "$CXX" | egrep -c 'cxx$'` -eq 1; then
   AC_MSG_RESULT([OSF/1 cxx])
-  SPECIAL_CXXFLAGS=-w
-  CXXFLAGS=-define_templates
+  SPECIAL_CXXFLAGS="-w -define_templates"
 elif test `echo "$CXX" | egrep -c 'CC$'` -eq 1; then
   if test "$host_os" = irix5.3; then
     AC_MSG_RESULT([Irix 5.3])
@@ -454,6 +456,7 @@ AC_CONFIG_FILES([Makefile
 src/Makefile 
 config/Makefile config/pstoedit.pc
 doc/Makefile
+m4/Makefile
 examples/Makefile 
 contrib/Makefile contrib/cairo/Makefile
 contrib/java/Makefile contrib/java/java1/Makefile contrib/java/java2/Makefile 

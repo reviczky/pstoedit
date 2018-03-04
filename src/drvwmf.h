@@ -55,13 +55,13 @@ public:
 	~drvWMF();						// Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
-		Option < bool, BoolTrueExtractor> mapToArial;
-		Option < bool, BoolTrueExtractor> emulateNarrowFonts;
-		Option < bool, BoolTrueExtractor> drawBoundingBox;
-		Option < bool, BoolTrueExtractor> pruneLineEnds;
-		Option < bool, BoolTrueExtractor> notforWindows;
-		Option < bool, BoolTrueExtractor> winbb;
-		Option < bool, BoolTrueExtractor> OpenOfficeMode ;
+		OptionT < bool, BoolTrueExtractor> mapToArial;
+		OptionT < bool, BoolTrueExtractor> emulateNarrowFonts;
+		OptionT < bool, BoolTrueExtractor> drawBoundingBox;
+		OptionT < bool, BoolTrueExtractor> pruneLineEnds;
+		OptionT < bool, BoolTrueExtractor> notforWindows;
+		OptionT < bool, BoolTrueExtractor> winbb;
+		OptionT < bool, BoolTrueExtractor> OpenOfficeMode ;
 
 		DriverOptions() :
 		mapToArial(true,"-m",0,0,"map to Arial",0,false),

@@ -42,8 +42,8 @@ public:
 
 	class DriverOptions : public ProgramOptions { 
 	public:
-		Option < bool, BoolTrueExtractor> mapToArial;
-		Option < bool, BoolTrueExtractor> emulateNarrowFonts;
+		OptionT < bool, BoolTrueExtractor> mapToArial;
+		OptionT < bool, BoolTrueExtractor> emulateNarrowFonts;
 
 		DriverOptions() :
 		mapToArial(true,"-m",0,0,"map to Arial",0,false),

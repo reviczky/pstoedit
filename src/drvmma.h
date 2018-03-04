@@ -8,7 +8,7 @@
    $Id: drvmma.h,v 1.4 2003/03/15 16:25:47 manfred Exp $
    Based on drvsampl.h
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
                              Manfred Thole, manfred@thole.org
 
     This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,7 @@ public:
 	~drvMMA(); // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
-		Option < bool, BoolTrueExtractor> eofillFills;
+		OptionT < bool, BoolTrueExtractor> eofillFills;
 		DriverOptions() :
 			eofillFills(true,"-eofillfills","",0,"Filling is used for eofill (default is not to fill)",0,false)
 		{

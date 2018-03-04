@@ -54,8 +54,8 @@ class drvNOI: public drvbase
 	class DriverOptions: public ProgramOptions 
 	  {	
 	  public:
-		Option <RSString, RSStringValueExtractor> ResourceFile;
-		Option <int, IntValueExtractor> BezierSplitLevel;
+		OptionT <RSString, RSStringValueExtractor> ResourceFile;
+		OptionT <int, IntValueExtractor> BezierSplitLevel;
 		DriverOptions(): 
 		  ResourceFile(true, RESOURCE_FILE_OPTION, "string", 0, 
 			RESOURCE_FILE_DESCR, 0, (const char*) ""),

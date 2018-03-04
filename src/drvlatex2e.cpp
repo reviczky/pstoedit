@@ -3,7 +3,7 @@
    Backend for Latex2E files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2009	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
+   Copyright (C) 1993 - 2011	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
 							Scott Pakin, <scott+ps2ed_AT_pakin.org>
 
     This program is free software; you can redistribute it and/or modify

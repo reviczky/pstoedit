@@ -3,7 +3,7 @@
    HPGL / HPGL2 Device driver supporting text commands
 
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
-   Copyright (C) 2000 - 2009 Katzmann & Glunz (fill stuff)
+   Copyright (C) 2000 - 2011 Katzmann & Glunz (fill stuff)
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
     This program is free software; you can redistribute it and/or modify
@@ -43,9 +43,9 @@ http://www.piclist.com/techref/language/hpgl/commands.htm
 
 
 
-
-
-static const float HPGLScale = 10.0f;
+//version up to 3.50 static const float HPGLScale = 10.0f;
+// see comments below in open-page area.
+static const float HPGLScale = 1016.0f/72.0f;
 
 
 
@@ -75,112 +75,130 @@ void drvHPGL::rot(double &x, double &y, int angle)
 drvHPGL::derivedConstructor(drvHPGL):
 constructBase, 
 	//  Start DA hpgl color addition
-	prevColor(5555),
+	prevColor(0),
 	maxPen(0),
+	currentPen(0),
 	penColors(0)
 
-	
 	//  End DA hpgl color addition
 {
 	// driver specific initializations
 	// and writing of header to output file
 
-// 	bool show_usage_line = false;
-
-//NN	savedtextinfo.thetext = "";
-
+	if (strcmp(Pdriverdesc->symbolicname, "pcl") == 0) {
+		options->hpgl2 = true;
+	}
 	if (options->rot90) rotation = 90; else 
-	if (options->rot180) rotation = 180; else 
-	if (options->rot270) rotation = 270; else rotation = 0;
+		if (options->rot180) rotation = 180; else 
+			if (options->rot270) rotation = 270; else rotation = 0;
 
-//NN	merge = 0;
-#if 0
-	for (unsigned int i = 0; i < d_argc; i++) {
-		assert(d_argv && d_argv[i]);	//lint !e796
-		if (Verbose())
-			outf << "% " << d_argv[i] << endl;
-		if (strcmp(d_argv[i], "-pen") == 0) {
-			penplotter = true;
-		} else if (strcmp(d_argv[i], "-pencolors") == 0) {
-			i++;
-			if (i >= d_argc) {
-				errf << "-pencolors requires a numeric argument " << endl;
-				show_usage_line = true;
-			} else {
-				maxPenColors = atoi(d_argv[i]);
-			}
-		} else if (strcmp(d_argv[i], "-fill") == 0) {
-			i++;
-			if (i >= d_argc) {
-				errf << "-fill requires a string argument " << endl;
-				show_usage_line = true;
-			} else {
-				fillinstruction = d_argv[i];
-			}
-			/*
-			   Fill Type (FT) Command 
-			   ========================================= 
-			   This command selects the shading pattern used to fill polygons ( FP ), rectangles 
-			   ( RA or RR ), wedges ( WG ), or characters ( CF ). The Fill Type command ( FT 
-			   ), can use solid, shading, parallel lines (hatching), cross hatching, patterned 
-			   (raster) fill, or PCL user-defined patterns. For more information see the PCL 5 
-			   Printer Language Technical Reference Manual. The syntax for this command is 
-			   as follows: 
+	//	if (0) {
+	//		const char esc = (char) 27;
+	//		outf << esc << ".(;";
+	//	}
 
-			   FT fill type,[option1,[option2]]; or FT; 
-			 */
-// known fill types:
-			// FT 1 - solid black
-			// FT 3 - parallel lines FT 3[,delta,angle]
-			// FT 4 - cross hatching FT 4[,delta,angle]
-			// FT 10 - shading FT 10,[percentage]
-		} else if (strcmp(d_argv[i], "-rot90") == 0) {
-			rotation = 90;
-		} else if (strcmp(d_argv[i], "-rot180") == 0) {
-			rotation = 180;
-		} else if (strcmp(d_argv[i], "-rot270") == 0) {
-			rotation = 270;
-	//NN	} else if (strcmp(d_argv[i], "-merge") == 0) {
-	//NN		merge = 1;
-		} else {
-			errf << "Unknown fig driver option: " << d_argv[i] << endl;
-			show_usage_line = true;
-		}
-	}
-
-	if (show_usage_line) {
-		errf <<
-			"Usage -f 'HPGL: [-fill fillstring] [-pen] [-pencolors number] [-rot90 | -rot180 | -rot270] '"
-			<< endl;
-	}
-#endif
-//	if (0) {
-//		const char esc = (char) 27;
-//		outf << esc << ".(;";
-//	}
-	errf << "Info: This HPGL driver is not very elaborated - consider using -f plot-hpgl instead."
+	errf << "Info: This HPGL/PCL driver is not very elaborated - consider using -f plot-hpgl or plot-pcl instead."
 		<< endl;
 
-	outf << "IN;SC;PU;PU;SP1;LT;VS" << (int) HPGLScale << "\n";
+	// will be written by open_page() 	outf << "IN;SC;PU;PU;SP1;LT;VS" << (int) HPGLScale << "\n";
 
-	penColors = new unsigned int[options->maxPenColors + 1 + 1];	// 1 offset - 0 is not used // one more for flint ;-)
-	for (unsigned int p = 0; p <= (unsigned int) options->maxPenColors + 1; p++) {
-		penColors[p] = 0;
+	// read pen colors from file.
+	if (options->pencolorsfromfile) {
+		if (drvbase::pstoeditDataDir() != "") {
+			// *p = '\0';
+			RSString test(drvbase::pstoeditDataDir());
+			test += directoryDelimiter;
+			test += "drvhpgl"; // options.drivername.value;
+			test += ".pencolors";
+			//	errf << "testing for :" << test.value() << endl;
+			if (fileExists(test.value())) {
+				if (Verbose()) {
+					errf <<
+						"loading pen colors from " << test.value() << endl;
+				}
+				const unsigned int numberofpens = readPenColors(errf, test.value(),true);
+				penColors = new HPGLColor[numberofpens];
+				const HPGLColor initvalue = {0.0f,0.0f,0.0f,0};
+				for (unsigned int p = 0; p < numberofpens; p++) {
+					penColors[p] = initvalue;
+				}
+				maxPen = numberofpens;
+				(void) readPenColors(errf, test.value(),false);
+				if (Verbose() ){ errf << "read " << numberofpens << " colors from file " << test.value() << endl; }
+			}
+			else {
+				errf << "could not read pen colors from file - " << test.value() << " does not exist" << endl; 
+			}
+		} else {
+			errf << "could not read pen colors from file - pstoedit Data Directory is unknown" << endl; 
+		}
+	} else {
+		penColors = new HPGLColor[options->maxPenColors + 1 + 1];	// 1 offset - 0 is not used // one more for flint ;-)
+		const HPGLColor initvalue = {0.0f,0.0f,0.0f,0};
+		for (unsigned int p = 0; p <= (unsigned int) options->maxPenColors + 1; p++) {
+			penColors[p] = initvalue;
+		}
 	}
-	//   float           x_offset;
-	//   float           y_offset;
 }
 
 drvHPGL::~drvHPGL()
 {
 	// driver specific deallocations
 	// and writing of trailer to output file
-	outf << "PU;PA0,0;SP;EC;PG1;EC1;OE\n";
+// should be done either here or in close_page      	outf << "PU;PA0,0;SP;EC;PG1;EC1;OE\n";
 	// fillinstruction = NIL;
 	delete [] penColors;
 	penColors = NIL;
-	options= NIL;
+	options = NIL;
 }
+
+
+static unsigned int intColor(float R, float G, float B) {
+	return  256 * (unsigned int) (R * 16) +	16 * (unsigned int) (G * 16) + (unsigned int) (B * 16);
+}
+
+
+unsigned int drvHPGL::readPenColors(ostream & errstream, const char *filename, bool justcount)
+{
+	if (!fileExists(filename)) {
+		errstream << "Could not open font map file " << filename << endl;
+		return 0;
+	}
+	ifstream infile(filename);
+	int count = 0;
+	unsigned int penid;
+	char c;
+	while (!infile.eof() ) {
+		infile >> penid;
+		if (!infile) {
+			infile.clear();
+			infile >> c;
+		//	cout << "read char " << c << endl;
+			if (c == '#') {
+				// skip chars till EOL
+				infile.ignore(256,'\n');
+			}
+		} else {
+		//	cout << "read float " << penid << endl;
+			float R,G,B;
+			// simple parsing: when reading first float, we expect 3 additional ones
+			infile >> R >> G >> B ;
+			if (!justcount) {
+				if (penid < maxPen) {
+					penColors[penid].R=R;
+					penColors[penid].G=G;
+					penColors[penid].B=B;
+					penColors[penid].intColor = intColor(R,G,B);
+				} else {
+					errf << "error in pen color file: Pen ID too high - " << penid << endl;
+				}
+			}
+			count++;
+		}
+	}
+	return count;
+}
+
 
 void drvHPGL::print_coords()
 {
@@ -263,19 +281,41 @@ void drvHPGL::print_coords()
 	}
 }
 
+// note: 23.2.2011 - VS doesn't really mean scale but velocity (which I do not know how it impacts scaling)
+// HPGL graphic units are 1/1016 of an inch
+// PostScript points are 1/72 of an inch - so there is a factor of 14.11111
+
+
+// from http://h20000.www2.hp.com/bc/docs/support/SupportManual/bpl13211/bpl13211.pdf Figure 17-7:
+
+// PlotterUnits EquivalentValue
+// 1 plu =  0.025 mm (~ 0.00098 in.)
+// 40 plu =  1 mm
+// 1016 plu =  1 in.
+// 3.39 plu =  1 dot @ 300 dp
+
+// http://h20000.www2.hp.com/bizsupport/TechSupport/Document.jsp?objectID=bpl04568
+
+
+static const unsigned char Ec = 0x1b;
 
 void drvHPGL::open_page()
 {
-	//  Start DA hpgl color addition
-	prevColor = 5555;
-	maxPen = 0;
-	//  End DA hpgl color addition
-	outf << "IN;SC;PU;PU;SP1;LT;VS" << (int) HPGLScale << "\n";
+	//IN - init
+	//SC - scaling off
+	//PU - pen up
+	//SP1 - select pen 1
+	//LT - line type - solid line
+	//VS - Speed
+//version up to 3.50	outf << "IN;SC;PU;PU;SP1;LT;VS" << (int) HPGLScale << "\n";
+	if (options->hpgl2) { outf << Ec << "E" << Ec << "%0B"; }
+	outf << "IN;SC;PU;SP1;LT;" <<  "\n";
 }
 
 void drvHPGL::close_page()
 {
 	outf << "PU;SP;EC;PG1;EC1;OE\n";
+	if (options->hpgl2) { outf << Ec << "%0A" << Ec <<"E" ; }
 }
 
 
@@ -289,29 +329,92 @@ void drvHPGL::endtext()
 }
 #endif
 
+
+void drvHPGL::SelectPen(float R, float G, float B)
+{
+	//  Start DA hpgl color addition
+
+	if (options->pencolorsfromfile) {
+
+		const unsigned int reducedColor = intColor(R,G,B);
+	// 	errf << " r " << reducedColor << " RGB " << R << G << B << " prev " << prevColor << endl;
+
+		if (prevColor != reducedColor) {
+			// If color changed, find best match in available colors
+
+			// use the pen colors as defined in the pen color file
+			// so we need to find the best matching color/pen for the current color
+			double bestquality = 1e+100;    // Arbitrary large number
+
+			// Linear search for a match
+			// 0th element is never used - 0 indicates "new" color
+			unsigned int bestIndex = 0;
+			for (unsigned int i = 1; i < maxPen; i++) {
+				const double quality = (R - penColors[i].R) * (R - penColors[i].R) +
+					(G - penColors[i].G) * (G - penColors[i].G) +
+					(B - penColors[i].B) * (B - penColors[i].B);
+				if (quality < bestquality) {
+					bestquality = quality;
+					bestIndex = i;
+				}
+			}
+
+			// errf << "After lookup  r " << " MP " << maxPen << " "<< reducedColor << " RGB " << R << G << B << " prev " << prevColor << " " << bestquality<< endl;
+			// Select new pen if best match is a different pen
+			prevColor = reducedColor; // to avoid the lookup in probable case that next item is drawn with same color
+			if (currentPen != bestIndex) {
+				currentPen=bestIndex;
+				outf << "PU; \nSP" << currentPen << ";\n";
+			}
+		}
+	} else if (options->maxPenColors > 0) {
+
+		/* 
+		*  The object is to generate pen switching commands when the color
+		*  changes.  We keep a list of pen colors, which approximate the 
+		*  desired rgb colors.  Choose an existing pen number when the 
+		*  rgb color approximates that color, and add a new color to the
+		*  list when the rgb color is distinctly new.
+		*/
+
+		const unsigned int reducedColor = intColor(R,G,B);
+
+		if (prevColor != reducedColor) {
+			// If color changed, see if color has been used before
+			unsigned int npen = 0;
+			if (maxPen > 0) {
+				for (unsigned int j = 1; j <= maxPen; j++) {	// 0th element is never used - 0 indicates "new" color
+					if (penColors[j].intColor == reducedColor) {
+						npen = j;
+					}
+				}
+			}
+			// If color is new, add it to list, if room
+			if (npen == 0) {
+				if (maxPen < (unsigned int)options->maxPenColors) {
+					maxPen++;
+				}
+				npen = maxPen;
+				//cout << "npen : " << npen << " maxPenColors" << maxPenColors << endl;
+				penColors[npen].intColor = reducedColor;
+				penColors[npen].R = R;
+				penColors[npen].G = G;
+				penColors[npen].B = B;
+			}
+			// Select new pen
+			prevColor = reducedColor;
+			outf << "PU; \nSP" << npen << ";\n";
+		}
+		//  End DA hpgl color addition
+	} else {
+		// errf << "nothing done for colors - no option selected " << endl;
+	}
+}
+
 void drvHPGL::show_text(const TextInfo & textinfo)
 {
 
-#if 0
-	// this is now handled by drvbase
-	if (merge) {
-		if (savedtextinfo.thetext == "") {
-			savedtextinfo = textinfo;
-		} else if ((textinfo.currentFontAngle == savedtextinfo.currentFontAngle)
-				   && (textinfo.currentFontSize == savedtextinfo.currentFontSize)
-				   && (fabs(textinfo.x - savedtextinfo.x_end) < textinfo.currentFontSize / HPGLScale)
-				   && (fabs(textinfo.y - savedtextinfo.y_end) < textinfo.currentFontSize / HPGLScale)) {
-			savedtextinfo.thetext += textinfo.thetext;
-			savedtextinfo.x_end = textinfo.x_end;
-			savedtextinfo.y_end = textinfo.y_end;
-		} else {
-			flush_text(savedtextinfo);
-			savedtextinfo = textinfo;
-		}
-	} else 
-#endif
 	const double pi = 3.1415926535;
-
 	const double angleofs = rotation * pi / 180;
 	const double dix = 100.0 * cos(textinfo.currentFontAngle * pi / 180.0 + angleofs);
 	const double diy = 100.0 * sin(textinfo.currentFontAngle * pi / 180.0 + angleofs);
@@ -326,6 +429,7 @@ drvhpgl.cpp:316: warning: ISO C++ does not support the `%lg' printf format
 drvhpgl.cpp:318: warning: ISO C++ does not support the `%lg' printf format
 drvhpgl.cpp:318: warning: ISO C++ does not support the `%lg' printf format
 */
+	SelectPen(textinfo.currentR, textinfo.currentG, textinfo.currentB);
 
 #if USESPRINTF
 	char str[256];
@@ -343,53 +447,13 @@ drvhpgl.cpp:318: warning: ISO C++ does not support the `%lg' printf format
 	outf << "LB" << textinfo.thetext.value() << "\003;" << endl;
 }
 
+
 void drvHPGL::show_path()
 {
-	//  Start DA hpgl color addition
-
-	/* 
-	 *  This block should be a separate subroutine, called by each of
-	 *  the hpgl subroutines.  
-	 *
-	 *  The object is to generate pen switching commands when the color
-	 *  changes.  We keep a list of pen colors, which approximate the 
-	 *  desired rgb colors.  Choose an existing pen number when the 
-	 *  rgb color approximates that color, and add a new color to the
-	 *  list when the rgb color is distinctly new.
-	 */
-
 	if (numberOfElementsInPath()) {
 
-		if (options->maxPenColors > 0) {
-			const unsigned int reducedColor = 256 * (unsigned int) (currentR() * 16) +
-				16 * (unsigned int) (currentG() * 16) + (unsigned int) (currentB() * 16);
-
-			if (prevColor != reducedColor) {
-				// If color changed, see if color has been used before
-				unsigned int npen = 0;
-				if (maxPen > 0) {
-					for (unsigned int j = 1; j <= maxPen; j++) {	// 0th element is never used - 0 indicates "new" color
-						if (penColors[j] == reducedColor) {
-							npen = j;
-						}
-					}
-				}
-				// If color is new, add it to list, if room
-				if (npen == 0) {
-					if (maxPen < (unsigned int)options->maxPenColors) {
-						maxPen++;
-					}
-					npen = maxPen;
-					//cout << "npen : " << npen << " maxPenColors" << maxPenColors << endl;
-					penColors[npen] = reducedColor;
-				}
-				// Select new pen
-				prevColor = reducedColor;
-				outf << "PU; \nSP" << npen << ";\n";
-			}
-			//  End DA hpgl color addition
-		}
-
+		SelectPen(currentR(), currentG(), currentB());
+		
 		switch (currentShowType()) {
 		case drvbase::stroke:
 			break;
@@ -443,21 +507,28 @@ void drvHPGL::show_path()
 	}
 }
 
-#if 0
-// not needed anymore - at least not as long the default is acceptable.
-void drvHPGL::show_rectangle(const float llx, const float lly, const float urx, const float ury)
-{
-	unused(&llx);
-	unused(&lly);
-	unused(&urx);
-	unused(&ury);
-
-	// just do show_path for a first guess
-	show_path();
-}
-#endif
 
 static DriverDescriptionT < drvHPGL > D_HPGL("hpgl", "HPGL code", "","hpgl", false,	// backend supports subpathes
+												 // if subpathes are supported, the backend must deal with
+												 // sequences of the following form
+												 // moveto (start of subpath)
+												 // lineto (a line segment)
+												 // lineto 
+												 // moveto (start of a new subpath)
+												 // lineto (a line segment)
+												 // lineto 
+												 //
+												 // If this argument is set to false each subpath is drawn 
+												 // individually which might not necessarily represent
+												 // the original drawing.
+												 false,	// backend supports curves
+												 false,	// backend supports elements which are filled and have edges
+												 true,	// backend supports text
+												 DriverDescription::noimage,	// no support for PNG file images
+												 DriverDescription::normalopen, false,	// backend support multiple pages
+												 false /*clipping */ );
+
+static DriverDescriptionT < drvHPGL > D_PCL("pcl", "PCL code", "","pcl", false,	// backend supports subpathes
 												 // if subpathes are supported, the backend must deal with
 												 // sequences of the following form
 												 // moveto (start of subpath)

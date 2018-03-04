@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,12 +22,16 @@
 
 #include "cppcomp.h"
 
+#include I_ostream 
+#include I_istream
+#include I_iostream
+
 class DLLEXPORT DynLoader 
 {
 public:
 	typedef void (*fptr)(); // any signature possible, but is has to be a function pointer.
 							// the new standard does not allow to mix normal and function pointers.
-	DynLoader(const char * libname_P = 0, int verbose_p = 0);
+	DynLoader(const char * libname_P = 0, std::ostream & errstream_p = std::cerr, int verbose_p = 0);
 	~DynLoader();
 	void open(const char * libname);
 	void close();
@@ -36,8 +40,9 @@ public:
 	int  valid() const { return handle != 0; }
 	const void * gethandle() const { return handle; }
 private:
-	const char * libname;
+	char * libname;
 	void* handle;	
+	std::ostream & errstream;
 	int verbose;
 };
 

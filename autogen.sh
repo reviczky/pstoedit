@@ -3,8 +3,10 @@ AMVERSION=1.xxx
 AMVERSION=1.7
 AMVERSION=local
 AMVERSION=1.9
+AMVERSION=1.11
 
 AMVERSION=any
+ACLOCALVERSION=any
 ACLOCAL_FLAGS=--force
 
 BINDIR=/usr/local/bin
@@ -17,8 +19,8 @@ echo "running libtoolize"
 libtoolize --force --copy 
 
 echo "running aclocal"
-if (aclocal-$AMVERSION --version)  < /dev/null > /dev/null 2>&1; then
-    aclocal-$AMVERSION ${ACLOCAL_FLAGS}
+if (aclocal-$ACLOCALVERSION --version)  < /dev/null > /dev/null 2>&1; then
+    aclocal-$ACLOCALVERSION ${ACLOCAL_FLAGS}
 else
     $BINDIR/aclocal ${ACLOCAL_FLAGS}
 fi

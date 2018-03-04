@@ -32,13 +32,13 @@ public:
 	~drvPIC(); // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
-		// Option < bool, BoolTrueExtractor > groff;
-		Option < bool, BoolTrueExtractor > troff_mode;
-		Option < bool, BoolTrueExtractor > landscape;
-		Option < bool, BoolTrueExtractor > portrait;
-		Option < bool, BoolTrueExtractor > keepFont;
-		Option < bool, BoolTrueExtractor > textAsText;
-		Option < bool, BoolTrueExtractor > debug;
+		// OptionT < bool, BoolTrueExtractor > groff;
+		OptionT < bool, BoolTrueExtractor > troff_mode;
+		OptionT < bool, BoolTrueExtractor > landscape;
+		OptionT < bool, BoolTrueExtractor > portrait;
+		OptionT < bool, BoolTrueExtractor > keepFont;
+		OptionT < bool, BoolTrueExtractor > textAsText;
+		OptionT < bool, BoolTrueExtractor > debug;
 
 		DriverOptions() : 
 			// groff(true,"-groff","",0,"groff mode",0,false),

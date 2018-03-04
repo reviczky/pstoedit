@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -320,7 +320,7 @@ public:
 
 	static bool Verbose();  // need a wrapper function because static initialized data cannot be DLLEXPORTed
 	static void SetVerbose(bool param);
-	static unsigned int totalNumberOfPages;
+	static unsigned int &totalNumberOfPages();
 	
 	static BBox	* bboxes() ; // [maxPages]; // array of bboxes - maxpages long
 	static RSString& pstoeditHomeDir(); // usually the place where the binary is installed
@@ -949,12 +949,13 @@ public:
 
 	virtual unsigned int getdrvbaseVersion() const { return 0; } // this is only needed for the driverless backends (ps/dump/gs)
 
+	const char * const additionalInfo() const;
  // Data members
 	const char * const symbolicname;
 	const char * const short_explanation;
 	const char * const long_explanation;
 	const char * const suffix;
-	const char * const additionalInfo;
+
 	const bool 	backendSupportsSubPathes;
 	const bool 	backendSupportsCurveto;
 	const bool 	backendSupportsMerging; // merge a separate outline and filling of a polygon -> 1. element
@@ -964,7 +965,13 @@ public:
 	const bool	backendSupportsMultiplePages;
 	const bool	backendSupportsClipping;
 	const bool	nativedriver;
-	RSString filename; // where this driver is loaded from
+	RSString filename; 
+	// where this driver is loaded from
+	// Note: formerly this was a RSString - but that caused problems under X64 / Windows
+	// it seems as constructing and deleting heap during start-up phase when not all DLLs are fully initialized
+	// can cause these problems (well - I know then order of init among DLLs/SOs is not guaranteed by C++)
+	// But the passed strings are temporary - so we need to take a copy to the heap (without destroying it later -> small leak)
+
 	const checkfuncptr checkfunc;
 
 	static const char * currentfilename; // the name of the file from which the plugin is loaded

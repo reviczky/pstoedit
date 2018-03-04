@@ -3,7 +3,7 @@
    simple backend for Pcbfill format.
    Contributed / Copyright 2004 by: Mark Rages 
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -64,9 +64,11 @@ void drvPCBFILL::show_path()
   outf << "\tPolygon(0x00000010)\n\t(\n\t\t";
 
 	for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
-		const Point & p = pathElement(n).getPoint(0);
-		outf << "[" << (int)(p.x_*SCALE) << " " 
+		if (pathElement(n).getType() != closepath) {
+			const Point & p = pathElement(n).getPoint(0);
+				outf << "[" << (int)(p.x_*SCALE) << " " 
                      << (int)(500000-p.y_*SCALE) << "] ";
+		}
 	}
   outf << "\n\t)\n";
 }

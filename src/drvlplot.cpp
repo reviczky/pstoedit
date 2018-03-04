@@ -797,15 +797,16 @@ drvplot::derivedConstructor(drvplot):constructBase
 			{
 				page_type = j;
 				const char *s = known_page_sizes[page_type].name;
-				char *t = (char *) malloc(strlen(s) + 1);
+				const size_t len = strlen(s) ;
+				char *t = new char[len + 1];
 				if (!t) {
 					errf << "ERROR: Can't allocate memory " << endl;
 					ctorOK = false;
 					return;
 				}
-				strcpy_s(t,strlen(s), s);
+				strcpy_s(t,len+1, s);
 				(void)Plotter::parampl("PAGESIZE", (void *) t);
-				free(t);
+				delete [] t; 
 			} else
 				errf << "unknown page size" << endl;
 		}
@@ -1088,7 +1089,7 @@ void drvplot::print_coords()
 
 void drvplot::open_page()
 {
-#define POINTS_PER_INCH 72.0
+	const double POINTS_PER_INCH = 72.0;
 	// height and width of a page of the specified type, in points; also size
 	// of the square viewport that libplot places on such a page
 	double height = POINTS_PER_INCH * (double) known_page_sizes[page_type].height;

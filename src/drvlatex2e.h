@@ -6,7 +6,7 @@
    Class declaration for a LaTeX2e output driver
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ public:
   ~drvLATEX2E(); // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
-		Option < bool, BoolTrueExtractor> integersonly;
+		OptionT < bool, BoolTrueExtractor> integersonly;
 
 		DriverOptions():
 			integersonly(true,"-integers","",0,"round all coordinates to the nearest integer",0,false)

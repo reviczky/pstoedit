@@ -6,7 +6,7 @@
    Class declaration for a SWF output driver with no additional attributes
    and methods (minimal interface)
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,8 +36,8 @@ public:
 	~drvSWF(); // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
-		Option < bool, BoolTrueExtractor > cubic;
-		Option < bool, BoolTrueExtractor > trace;
+		OptionT < bool, BoolTrueExtractor > cubic;
+		OptionT < bool, BoolTrueExtractor > trace;
 		DriverOptions():
 			cubic(true,"-cubic",0,0,"cubic ???",0,false),
 			trace(true,"-trace",0,0,"trace ???",0,false)

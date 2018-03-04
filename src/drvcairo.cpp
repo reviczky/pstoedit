@@ -1,6 +1,6 @@
 /*
   drvcairo.cpp : This file is part of pstoedit
-  Copyright (C) 2009 Dan McMahill dan_AT_mcmahill_DOT_net
+  Copyright (C) 2009 - 2011 Dan McMahill dan_AT_mcmahill_DOT_net
 
   This driver used drvSAMPL.cpp as a reference.
   
@@ -113,34 +113,34 @@ drvCAIRO::~drvCAIRO()
   outf << "int " << options->funcname.value << "_" << "total_pages;" << endl;
   outf << endl;
   outf << "/* Array of the individual page render functions */" << endl;
-  outf << "cairo_t * (*" << options->funcname.value << "_render[" << totalNumberOfPages << "])(cairo_surface_t *, cairo_t *);" << endl;
+  outf << "cairo_t * (*" << options->funcname.value << "_render[" << totalNumberOfPages() << "])(cairo_surface_t *, cairo_t *);" << endl;
   outf << endl;
   outf << "/* array of pointers to the widths and heights */" << endl;
-  outf << "int " << options->funcname.value << "_width[" << totalNumberOfPages << "];" << endl;
-  outf << "int " << options->funcname.value << "_height[" << totalNumberOfPages << "];" << endl;
+  outf << "int " << options->funcname.value << "_width[" << totalNumberOfPages() << "];" << endl;
+  outf << "int " << options->funcname.value << "_height[" << totalNumberOfPages() << "];" << endl;
   outf << endl;
 
   outf << "/* This function should be called at the beginning of the user program */" << endl;
   outf << "void " << options->funcname.value << "_init(void)" << endl;
   outf << "{" << endl;
   outf << endl;
-  outf << "  " << options->funcname.value << "_" << "total_pages = " << totalNumberOfPages << ";" << endl;
+  outf << "  " << options->funcname.value << "_" << "total_pages = " << totalNumberOfPages() << ";" << endl;
   outf << endl;
   
   // Now spit out an array of pointers to the render functions, so we can deal with multiple pages
-  for (i = 1 ; i <= totalNumberOfPages ; i++) {
+  for (i = 1 ; i <= drvbase::totalNumberOfPages() ; i++) { 
     outf << "  " << options->funcname.value << "_render[" << i-1 << "] = ";
     outf  << options->funcname.value << "_page_" << i << "_render;" << endl;
   }
   outf << endl;
 
-  for (i = 1 ; i <= totalNumberOfPages ; i++) {
+  for (i = 1 ; i <= drvbase::totalNumberOfPages() ; i++) {
     outf << "  " << options->funcname.value << "_width[" << i-1 << "] = ";
     outf << options->funcname.value << "_page_" << i << "_width;" << endl;
     
   }
 
-  for (i = 1 ; i <= totalNumberOfPages ; i++) {
+  for (i = 1 ; i <= drvbase::totalNumberOfPages() ; i++) {
     outf << "  " << options->funcname.value << "_height[" << i-1 << "] = ";
     outf << options->funcname.value << "_page_" << i << "_height;" << endl;
     

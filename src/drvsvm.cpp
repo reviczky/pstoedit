@@ -646,7 +646,7 @@ void drvSVM::show_text(const TextInfo& textinfo)
         fakeVersionCompat(outf, 2, 0);
 
         // font name
-        const int stringLen = fontName != NULL ? strlen(fontName) : 0;
+        const size_t stringLen = fontName != NULL ? strlen(fontName) : 0;
         writePod(outf,
                  (uInt16)stringLen);
         outf.write(fontName,stringLen);
@@ -761,7 +761,7 @@ void drvSVM::show_text(const TextInfo& textinfo)
         writePod(outf, 
                  (uInt32)l_transY(textinfo.y));
 
-        const int textLen = strlen(textinfo.thetext.value());
+        const size_t textLen = strlen(textinfo.thetext.value());
         writePod(outf,
                  (uInt16)textLen);
         outf.write(textinfo.thetext.value(),

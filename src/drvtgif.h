@@ -5,7 +5,7 @@
    drvTGIF.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,7 +35,7 @@ public:
 	~drvTGIF(); // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
-			Option < bool, BoolTrueExtractor> 		textAsAttribute; // show text a HREF attribute
+			OptionT < bool, BoolTrueExtractor> 		textAsAttribute; // show text a HREF attribute
 			DriverOptions() :
 				textAsAttribute(true,"-ta",0,0,"text as attribute",0,false)
 			{

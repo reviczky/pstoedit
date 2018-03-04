@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -359,7 +359,7 @@ public:
 
 DLLEXPORT RSString getRegistryValue(ostream& errstream, const char * typekey, const char * key);
 DLLEXPORT unsigned long P_GetPathToMyself(const char *name, char * returnbuffer, unsigned long buflen);
-DLLEXPORT unsigned long searchinpath(const char* EnvPath,const char* name, char *returnbuffer,unsigned long buflen);
+DLLEXPORT size_t searchinpath(const char* EnvPath,const char* name, char *returnbuffer,unsigned long buflen);
 DLLEXPORT void errorMessage(const char * text); // display an error message (cerr or msgbox)
 DLLEXPORT void copy_file(istream& infile,ostream& outfile) ;
 

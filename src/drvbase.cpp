@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -261,9 +261,9 @@ const BBox & drvbase::getCurrentBBox() const
 {
 	if ( verbose )
 		cout << " get getCurrentBBox for page: " << currentPageNumber <<
-			" of " << totalNumberOfPages << endl;
-	if ((totalNumberOfPages > 0)
-		&& (currentPageNumber <= totalNumberOfPages)) {
+			" of " << totalNumberOfPages() << endl;
+	if ((totalNumberOfPages() > 0)
+		&& (currentPageNumber <= totalNumberOfPages())) {
 		// page numbers start from 1.
 		return bboxes()[currentPageNumber > 0 ? (currentPageNumber - 1) : 0];
 	} else {
@@ -558,7 +558,7 @@ static unsigned short hexdecode( char high, char low) {
 
 void drvbase::pushHEXText(const char *const thetext, const float x, const float y, const char * const glyphnames)
 {
-	const unsigned int textlen = strlen(thetext);
+	const size_t textlen = strlen(thetext);
 	if (textlen) {
 		char * decodedText = new char[ (textlen / 2 ) + 1 ];
 		for (unsigned int i = 0, j = 0; i < (textlen/2); i++) {
@@ -1214,7 +1214,7 @@ unsigned int ColorTable::getColorIndex(float r, float g, float b)
 // j is either maxcolors or the index of the next free entry
 // add a copy to newColors
 	if (j < maxcolors) {
-		const unsigned int size = strlen(cmp) + 1;
+		const size_t size = strlen(cmp) + 1;
 		newColors[j] = new char[size];
 		strcpy_s(newColors[j], size, cmp);
 		return j + numberOfDefaultColors_;
@@ -1310,7 +1310,7 @@ void DescriptionRegister::explainformats(ostream & out, bool withdetails) const
 				out << '\t';
 			}
 			out << "\t." << rp[i]->suffix << ":\t";
-			out << rp[i]->short_explanation << " " << rp[i]->additionalInfo;
+			out << rp[i]->short_explanation << " " << rp[i]->additionalInfo();
 		}
 
 		if (!withdetails && rp[i]->checkfunc) {
@@ -1417,18 +1417,24 @@ DriverDescription::DriverDescription(	const char *const s_name,
 										const bool backendSupportsClipping_p, 
 										const bool nativedriver_p,
 										checkfuncptr checkfunc_p):
-symbolicname(s_name), short_explanation(short_expl), long_explanation(long_expl), suffix(suffix_p), additionalInfo((checkfunc_p != 0) ? (checkfunc_p()? "" : "(license key needed, see pstoedit manual)") : ""), backendSupportsSubPathes(backendSupportsSubPathes_p), backendSupportsCurveto(backendSupportsCurveto_p), backendSupportsMerging(backendSupportsMerging_p),	// merge a separate outline and filling of a polygon -> 1. element
+symbolicname(s_name), short_explanation(short_expl), long_explanation(long_expl), suffix(suffix_p), backendSupportsSubPathes(backendSupportsSubPathes_p), backendSupportsCurveto(backendSupportsCurveto_p), backendSupportsMerging(backendSupportsMerging_p),	// merge a separate outline and filling of a polygon -> 1. element
 	backendSupportsText(backendSupportsText_p), 
 	backendDesiredImageFormat(backendDesiredImageFormat_p),
 backendFileOpenType(backendFileOpenType_p),
 backendSupportsMultiplePages(backendSupportsMultiplePages_p),
 backendSupportsClipping(backendSupportsClipping_p), 
 nativedriver(nativedriver_p),
-filename(DriverDescription::currentfilename), checkfunc(checkfunc_p)
+filename(DriverDescription::currentfilename), 
+checkfunc(checkfunc_p)
+
 {
 	DescriptionRegister & registry = DescriptionRegister::getInstance();
 //dbg	cout << "registering driver " << s_name << "\t at registry " << (void*) &registry << endl;
 	registry.registerDriver(this);
+}
+
+const char * const DriverDescription::additionalInfo() const {
+	return ((checkfunc != 0) ? (checkfunc()? "" : "(license key needed, see pstoedit manual)") : "");
 }
 
 #if 0
@@ -1486,7 +1492,11 @@ BBox * drvbase::bboxes() {	// array of bboxes - maxpages long
 #endif
 }
 
-unsigned int drvbase::totalNumberOfPages = 0;
+unsigned int &drvbase::totalNumberOfPages() {
+	// using the singleton pattern for easier linkage
+	static unsigned int nrOfPages = 0;
+	return nrOfPages;
+}
 
 RSString& drvbase::pstoeditHomeDir(){// usually the place where the binary is installed
 #ifdef SINGLETONSONHEAP

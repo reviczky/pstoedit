@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -65,7 +65,7 @@ static int getFontNumber(const char *const fontname)
 {
 	const size_t fntlength = strlen(fontname);
 	for (unsigned int i = 0; i < numberOfFonts; i++) {
-		const unsigned int JavaFntLengh = strlen(JavaFonts[i].psname);
+		const size_t JavaFntLengh = strlen(JavaFonts[i].psname);
 		if (fntlength == JavaFntLengh) {
 			if (strncmp(fontname, JavaFonts[i].psname, fntlength) == 0) {
 				return i;
@@ -352,9 +352,9 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 		return;
 	}
 	// write image data to separate file
-	const unsigned int sizefilename = strlen(outBaseName.value()) + 21;
+	const size_t sizefilename = strlen(outBaseName.value()) + 21;
 	char *imgOutFileName = new char[sizefilename];
-	const unsigned int sizefullfilename = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
+	const size_t sizefullfilename = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
 	char *imgOutFullFileName = new char[sizefullfilename];
 
 	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%d.img", outBaseName.value(), numberOfImages);

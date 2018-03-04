@@ -1,5 +1,5 @@
 
-#line 3 "f:\\pstoedit\\devbase\\src\\lexyy.cpp"
+#line 3 "F:\\pstoedit\\devbase\\Src\\lexyy.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1510,7 +1510,7 @@ char *yytext;
    Simple parser to parse the intermediate flat PostScript and call the backend
    output routines.
 
-   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1530,7 +1530,7 @@ char *yytext;
 
 // define YY_NO_UNISTD_H 
 // define YY_NEVER_INTERACTIVE 1
-// to avoid usage of isatty
+// to avoid usage of isatty 
 
 #include "cppcomp.h"
 #include I_iostream
@@ -1563,7 +1563,7 @@ static void checkforlinefeed(const char * currenttext) {
 static void cleanyytext() {
 	// replaces \r or \n from the end with \0
 	char * beg = yytext;
-	char * cp = &yytext[strlen(yytext)-1];
+	char * cp = &yytext[strlen(yytext)-1]; 
 	while (cp != beg && ((*cp == '\n') || (*cp == '\r'))) {
 		*cp = '\0';
 		cp--;
@@ -1657,8 +1657,6 @@ extern int yywrap (void );
 #endif
 #endif
 
-    static void yyunput (int c,char *buf_ptr  );
-    
 #ifndef yytext_ptr
 static void yy_flex_strncpy (char *,yyconst char *,int );
 #endif
@@ -1937,7 +1935,7 @@ YY_RULE_SETUP
 			backend->showpage();
 
 			currentPageNumber++;
-			if (currentPageNumber <= drvbase::totalNumberOfPages) {
+			if (currentPageNumber <= drvbase::totalNumberOfPages()) {
 			if ( splitpages ) {
 				if(outfilename) {
 					if (strstr(outfilename,"%d") == NIL) {
@@ -1947,7 +1945,7 @@ YY_RULE_SETUP
 					} else  {
 						delete backend; backend = 0; // 
 						ofstream * outputFilePtr = (ofstream *) &outFile;
-						const unsigned int size = strlen(outfilename) + 30;
+						const size_t size = strlen(outfilename) + 30;
 						char * newname = new char[ size ];
 						sprintf_s(TARGETWITHLEN(newname,size),outfilename,currentPageNumber);
 						// not needed here since done in main program convertBackSlashes(nameOfOutputFile);
@@ -1988,7 +1986,7 @@ YY_RULE_SETUP
 			} // splitpages
 			} else {
 				// ignore any showpage for pages greater than totalNumberOfPages
-				if (backend->verbose) errf << "page " << currentPageNumber << " is greater than expected maximum number of pages " << drvbase::totalNumberOfPages << endl;
+				if (backend->verbose) errf << "page " << currentPageNumber << " is greater than expected maximum number of pages " << drvbase::totalNumberOfPages() << endl;
 				return 0; // normal return code;
 			}
 		      }
@@ -2658,7 +2656,11 @@ case 51:
 YY_RULE_SETUP
 {
 				lineNumber++;
-				backend->setCurrentLineWidth(pop() );
+				float width = pop();
+				if (width < (float) backend->globaloptions.minlinewidth) {
+					width = (float) backend->globaloptions.minlinewidth;
+				}
+				backend->setCurrentLineWidth(width);
 //				setCurrentLineWidth(number  );
 //				pop(); 
 			}
@@ -3319,43 +3321,6 @@ static int yy_get_next_buffer (void)
 	yy_is_jam = (yy_current_state == 978);
 
 	return yy_is_jam ? 0 : yy_current_state;
-}
-
-    static void yyunput (int c, register char * yy_bp )
-{
-	register char *yy_cp;
-    
-    yy_cp = (yy_c_buf_p);
-
-	/* undo effects of setting up yytext */
-	*yy_cp = (yy_hold_char);
-
-	if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-		{ /* need to shift things up to make room */
-		/* +2 for EOB chars. */
-		register int number_to_move = (yy_n_chars) + 2;
-		register char *dest = &YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[
-					YY_CURRENT_BUFFER_LVALUE->yy_buf_size + 2];
-		register char *source =
-				&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move];
-
-		while ( source > YY_CURRENT_BUFFER_LVALUE->yy_ch_buf )
-			*--dest = *--source;
-
-		yy_cp += (int) (dest - source);
-		yy_bp += (int) (dest - source);
-		YY_CURRENT_BUFFER_LVALUE->yy_n_chars =
-			(yy_n_chars) = YY_CURRENT_BUFFER_LVALUE->yy_buf_size;
-
-		if ( yy_cp < YY_CURRENT_BUFFER_LVALUE->yy_ch_buf + 2 )
-			YY_FATAL_ERROR( "flex scanner push-back overflow" );
-		}
-
-	*--yy_cp = (char) c;
-
-	(yytext_ptr) = yy_bp;
-	(yy_hold_char) = *yy_cp;
-	(yy_c_buf_p) = yy_cp;
 }
 
 #ifndef YY_NO_INPUT

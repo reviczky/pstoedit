@@ -7,7 +7,7 @@
    and methods (minimal interface)
 
    Copyright (C) 1993,1994,1995,1996,1997,1998 Peter Katzmann p.katzmann@thiesen.com 
-   Copyright (C) 2000 - 2012 Glunz (fill support,  improved color handling)
+   Copyright (C) 2000 - 2013 Glunz (fill support,  improved color handling)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

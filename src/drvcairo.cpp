@@ -1,6 +1,6 @@
 /*
   drvcairo.cpp : This file is part of pstoedit
-  Copyright (C) 2009 - 2012 Dan McMahill dan_AT_mcmahill_DOT_net
+  Copyright (C) 2009 - 2013 Dan McMahill dan_AT_mcmahill_DOT_net
 
   This driver used drvSAMPL.cpp as a reference.
   
@@ -276,7 +276,7 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
   outf << "   * " << "currentFontAngle: " << textinfo.currentFontAngle << endl;
 
   const float *CTM = getCurrentFontMatrix();
-  const char *weight, *slant, *family;
+  const char *family;
 
   outf << "   * " << "currentFontMatrix: [";
   for (unsigned int i = 0; i < 6; i++) {
@@ -352,6 +352,7 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
     outf << "    g_object_unref (layout);" << endl;
 
   } else {
+    const char *weight, *slant;
     // cairo_select_font_face (cairo_t *cr,
     //                         const char *family,
     //                         cairo_font_slant_t slant,
@@ -510,6 +511,7 @@ void drvCAIRO::show_path()
   case drvbase::eofill:
     outf << "  cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);" << endl;
     evenoddmode = true;
+    /* no break */
 
   case drvbase::fill:
 	  

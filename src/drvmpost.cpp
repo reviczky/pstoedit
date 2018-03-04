@@ -3,7 +3,7 @@
    Backend for MetaPost files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_geocities.com
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_geocities.com
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ constructBase,
 	outf << "% Converted from PostScript(TM) to MetaPost by pstoedit\n"
 		<<
 		"% MetaPost backend contributed by Scott Pakin <scott+ps2ed_AT_pakin.org>\n"
-		<< "% pstoedit is Copyright (C) 1993 - 2012 Wolfgang Glunz" <<
+		<< "% pstoedit is Copyright (C) 1993 - 2013 Wolfgang Glunz" <<
 		" <wglunz35_AT_pstoedit.net>\n\n";
 
 	/*

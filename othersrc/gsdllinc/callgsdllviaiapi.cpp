@@ -36,7 +36,7 @@
 #include "iapi.h"
 
 
-typedef int (GSDLLCALLPTR gs_write_callback_funcptr) (void * cb_data, const char* text, int length);
+typedef int (GSDLLCALLPTR gs_write_callback_funcptr) (void * cb_data, const char* text, int length); // length needs to be int because of gs api
 
 static int 
 GSDLLCALL default_gs_addmess(void * /* cb_data */ , const char* text, int length)
@@ -67,9 +67,9 @@ void set_gs_write_callback(gs_write_callback_funcptr new_cb) {
 
 static char messagebuffer[1000]; // just for local formatting
 static void writemessage(const char *msg = messagebuffer) {
-	(void)current_write_callback(0,msg,strlen(msg));
+	(void)current_write_callback(0,msg,(int) strlen(msg));
 }
-static int GSDLLCALL std_inHandler(void * /*caller_handle*/, char *  buf , int  len )
+static int GSDLLCALL std_inHandler(void * /*caller_handle*/, char *  buf , int  len ) // len needs to be int because of gs api
 { 
 	// return 0; 
 	const size_t result = fread(buf,1,len,stdin);

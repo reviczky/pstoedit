@@ -2,7 +2,7 @@
    poptions.cpp : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -164,6 +164,7 @@ void OptionBase::toString(RSString & result) const
 unsigned int ProgramOptions::parseoptions(ostream & outstr, unsigned int argc,
 										  const char *const *argv)
 {
+	unhandledCounter = 0;
 	unsigned int i = 1;			// argv[0] is not of interest
 	//debug outstr << "parsing options: argc : " << argc << endl;
 	while (i < argc) {

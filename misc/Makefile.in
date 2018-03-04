@@ -120,6 +120,8 @@ LIBPLOTTER_CFLAGS = @LIBPLOTTER_CFLAGS@
 LIBPLOTTER_LDFLAGS = @LIBPLOTTER_LDFLAGS@
 LIBPNG_CFLAGS = @LIBPNG_CFLAGS@
 LIBPNG_LDFLAGS = @LIBPNG_LDFLAGS@
+LIBPPTX_CFLAGS = @LIBPPTX_CFLAGS@
+LIBPPTX_LDFLAGS = @LIBPPTX_LDFLAGS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LINK = @LINK@
@@ -213,8 +215,8 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = swffonts
-EXTRA_DIST = drvhpgl.pencolors latex2e.fmp mpost.fmp safer.ps svg.fmp wemf.fmp examplefigmap.fmp
-pkgdata_DATA = drvhpgl.pencolors latex2e.fmp mpost.fmp safer.ps svg.fmp wemf.fmp examplefigmap.fmp
+EXTRA_DIST = drvhpgl.pencolors latex2e.fmp mpost.fmp safer.ps svg.fmp wemf.fmp examplefigmap.fmp unix.fmp windows.fmp
+pkgdata_DATA = drvhpgl.pencolors latex2e.fmp mpost.fmp safer.ps svg.fmp wemf.fmp examplefigmap.fmp unix.fmp windows.fmp
 all: all-recursive
 
 .SUFFIXES:

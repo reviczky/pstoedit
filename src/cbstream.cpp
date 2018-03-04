@@ -3,7 +3,7 @@
    callbackBuffer : This file is part of pstoedit
    streambuf that writes the data to a user defineable call back function
 
-   Copyright (C) 1998 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,10 +53,10 @@ write_callback_type *callbackBuffer::set_callback(void *cb_data_p, write_callbac
 	return old_cb;
 }
 
-int callbackBuffer::write_to_callback(const char *text, int length)
+int callbackBuffer::write_to_callback(const char *text, size_t length)
 {
 	if (write_callback) {
-		return (*write_callback) (cb_data, text, length);
+		return (*write_callback) (cb_data, text, (int) length); // cast to int - see comment in cbstream.h
 	} else {
 		return 0;
 	}

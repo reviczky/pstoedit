@@ -1041,7 +1041,7 @@ void drvSVM::show_image(const PSImage& image)
 }
 
 
-static const DriverDescriptionT < drvSVM > D_svm("svm", 
+static DriverDescriptionT < drvSVM > D_svm("svm",
                                            "StarView/OpenOffice.org metafile", 
                                            "StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.0 and above.",
                                            "svm", 

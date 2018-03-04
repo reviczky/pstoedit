@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options 
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -158,6 +158,7 @@ public:
 	OptionT < double, DoubleValueExtractor > minlinewidth;
 
 
+	OptionT < RSString, RSStringValueExtractor> pagenumberformat ;
 	OptionT < bool, BoolTrueExtractor > splitpages ;//= false;
 	OptionT < bool, BoolTrueExtractor > verbose ;//= false;
 	OptionT < bool, BoolTrueExtractor > useBBfrominput; //= false;
@@ -174,6 +175,7 @@ public:
 	OptionT < bool, BoolTrueExtractor > noclip ;//= false;
 	OptionT < bool, BoolTrueExtractor > t2fontsast1 ;//= false;	// handle T2 fonts (often come as embedded fonts in PDF files) same as T1
 	OptionT < bool, BoolTrueExtractor > keepinternalfiles ;//= false;
+	OptionT < bool, BoolTrueExtractor > fontdebug ;//= false;
 	OptionT < bool, BoolTrueExtractor > justgstest ;//= false;
 	OptionT < bool, BoolTrueExtractor > pscover ;//= false;
 	OptionT < bool, BoolTrueExtractor > nofontreplacement ;//= false;
@@ -205,6 +207,7 @@ public:
 	
 	PsToEditOptions() :
 
+	ProgramOptions(true), // expect additional parameters
 	nameOfInputFile  (0),
 	nameOfOutputFile (0),	// can contain %d for page splitting
 
@@ -347,6 +350,16 @@ public:
 		UseDefaultDoku,
 		0.0f),
 
+	pagenumberformat		(true, "-pagenumberformat","page number format specification",g_t,"format specification for page numbers in file name if -split is used. "
+		"The specification is used to create the page number using sprintf."
+		"The specification shall not include the leading % nor the trailing d. "
+		"Default is empty string which results in formatting the page number using %d. "
+		"This results in page numbers like 1, 2, ..., 10. "
+		"Sometimes you may want to have fixed length with leading 0, "
+		"so you might want to specify 02 which means 2 digits with leading 0.", 
+		UseDefaultDoku,
+		(const char *) ""),
+		
 	splitpages			(true, "-split",noArgument,g_t,"split multipage documents into single pages" ,
 		"Create a new file for each page of the input. For this the "
 		"output filename must contain a \\%d which is replaced with the current page "
@@ -438,6 +451,9 @@ public:
 	keepinternalfiles	(true, "-keep",noArgument,b_t,"keep the intermediate files produced by pstoedit - for debug purposes only" ,
 		UseDefaultDoku,
 		false),
+	fontdebug	(true, "-debugfonthandling",noArgument,b_t,"writes verbose messages related to internal font processing - for debug purposes only" ,
+		UseDefaultDoku,
+		false),
 	justgstest			(true, "-gstest",noArgument,b_t,"perform a basic test for the interworking with GhostScript" ,
 		UseDefaultDoku,
 		false),
@@ -467,6 +483,8 @@ public:
 		"If a font name contains spaces, use the "
 		"\\verb+\"font name with spaces\"+ notation. \n"
 		" \n"
+		"If a target\\_font\\_name starts with /, it is regarded as alias to a former entry. \n "
+		" \n"
 		"Each font name found in the document is checked against this mapping and if "
 		"there is a corresponding entry, the new name is used for the output. "
 		" \n\n"
@@ -491,9 +509,14 @@ public:
 		"\\TeX/\\LaTeX\\ and those programs don't use standard font names. This file and "
 		"the MetaPost output format driver are provided by Scott Pakin "
 		"(\\Email{scott+ps2ed_AT_pakin.org}).  "
-		" "
+		" \n"
 		"Another example is wemf.fmp to be used under Windows. See the misc "
-		"directory of the pstoedit source distribution. ",
+		"directory of the pstoedit source distribution. "
+		" \n"
+		"After loading the implicit (based on driver name) or explicit (based on the -fontmap option) font map file, a system specific "
+		"map file is searched and loaded from the installation directory (unix.fmp or windows.fmp). "
+		"This file can be used to redirect certain fonts to system specific names using the /AliasName notation described above."
+		,
 		(const char*) 0),
 	outputPageSize		(true, "-pagesize","page format",g_t,"set page size (e.g. a4) - used by TK and libplot output format driver only",
 		"set page size for output medium.  \n"
@@ -612,6 +635,7 @@ public:
 	ADD(centered);
 	ADD(minlinewidth);
 
+	ADD(pagenumberformat);
 	ADD(splitpages);
 	ADD(verbose );
 	ADD(useBBfrominput);
@@ -628,6 +652,7 @@ public:
 	ADD(noclip);
 	ADD(t2fontsast1);	
 	ADD(keepinternalfiles);
+	ADD(fontdebug);
 	ADD(justgstest);
 	ADD(pscover);
 	ADD(nofontreplacement);

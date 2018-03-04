@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -191,7 +191,7 @@ ostream & OptionT<ValueType, ExtractorType>::writevalue(ostream & out) const {
 
 class DLLEXPORT ProgramOptions {
 public:
-	ProgramOptions() : unhandledCounter(0), optcount(0)   { unhandledOptions[0]=0;alloptions[0]=0; };
+	ProgramOptions(bool expectUnhandled_p = false) : expectUnhandled(expectUnhandled_p), unhandledCounter(0), optcount(0)   { unhandledOptions[0]=0;alloptions[0]=0; };
 
 	virtual ~ProgramOptions() {}
 	unsigned int parseoptions(ostream & outstr, unsigned int argc, const char * const*argv) ;
@@ -209,6 +209,7 @@ public:
 	void add(OptionBase * op, const char * const membername) ;
 
   public:
+	bool expectUnhandled; // whether to expect unhandled arguments
 	unsigned int unhandledCounter;
 	const char *unhandledOptions[100];
 

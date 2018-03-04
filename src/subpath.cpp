@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2012  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1999 - 2013  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -145,7 +145,7 @@ int sub_path::read(const drvbase::PathInfo & main_path, int start)
 
 	// Count the number of elements is this path
 
-	while (true) {
+	for ( ; ; ) { // while true but without compiler warning
 		if (start + num_elements == main_path.numberOfElementsInPath)
 			break;
 		if (num_elements && (main_path.path[start + num_elements]->getType() == moveto))
@@ -452,8 +452,6 @@ insert_subpath( basedrawingelement **  parent_path,
 
 void drvbase::PathInfo::rearrange()
 {
-	unsigned int test_parent_index= 0, test_child_index = 0;
-	unsigned int parent_index = 0, child_index = 0;
 	//  write(*this);
 	sub_path_list list;
 	sub_path *child  = (sub_path *) 0;
@@ -467,8 +465,9 @@ void drvbase::PathInfo::rearrange()
 	clear();					// Clear the path
 	//  cerr << "Rearranging path" << endl;
 	// Write the elements back
-	unsigned int tmp_num = 0;
-	{for (unsigned int i = 0; i < list.num_paths; i++) {
+	{ 
+	 unsigned int tmp_num = 0;
+ 	 for (unsigned int i = 0; i < list.num_paths; i++) {
 		// Find the next parent
 
 		if (list.paths[i].parent)
@@ -482,7 +481,9 @@ void drvbase::PathInfo::rearrange()
 			// In this loop, we find the closest child and
 			// insert it into the path
 			float min_distance = FLT_MAX;
+			unsigned int parent_index = 0, child_index = 0;
 			for (unsigned int k = 0; k < parent->num_children; k++) {
+				unsigned int test_parent_index= 0, test_child_index = 0;
 				if (parent->children[k]->flags & PS_PATH_IS_CONNECTED)
 					continue;
 				const float test_distance =

@@ -4,7 +4,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -196,6 +196,17 @@ const bool true  = 1;
 
 #endif
 
+#if (defined (_MSC_VER) && _MSC_VER >= 1100) || defined (LINT)
+#define NOCOPYANDASSIGN(classname) \
+	private: \
+		classname(const classname&); \
+		const classname & operator=(const classname&);
+#else
+/* nothing - GNU has problems with this anyway. But, it doesn't harm. 
+   During compilation with VC++ potential misusages of the 
+   forbidden methods will be detected */
+#define NOCOPYANDASSIGN(classname) 
+#endif
 
 
 // rcw2: work round case insensitivity in RiscOS

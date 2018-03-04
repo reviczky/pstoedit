@@ -1,5 +1,5 @@
 
-#line 3 "F:\\pstoedit\\devbase\\Src\\lexyy.cpp"
+#line 3 "F:\\pstoedit\\devbase\\src\\lexyy.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -1510,7 +1510,7 @@ char *yytext;
    Simple parser to parse the intermediate flat PostScript and call the backend
    output routines.
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1938,16 +1938,14 @@ YY_RULE_SETUP
 			if (currentPageNumber <= drvbase::totalNumberOfPages()) {
 			if ( splitpages ) {
 				if(outfilename) {
-					if (strstr(outfilename,"%d") == NIL) {
-						errf << "Warning: no %d found in name of output file and page feed found in input and either the selected format does not support multiple pages or the -split option was specified.\nPlease insert a %d in the name of the output file if you want to split pages into different files" << endl;
+					const RSString newFileName = getOutputFileNameFromPageNumber(outfilename, backend->globaloptions.pagenumberformat, currentPageNumber);
+					if (newFileName == RSString(outfilename) ) {
+						errf << "Warning: no %d or %PAGENUMBER% found in name of output file and page feed found in input and either the selected format does not support multiple pages or the -split option was specified.\nPlease insert a %PAGENUMBER% or %d in the name of the output file if you want to split pages into different files. And potentially use the -pagenumberformat option" << endl;
 						// we cannot close the output file in this case otherwise
 						// we would overwrite the previous results
-					} else  {
+					} else  {				
 						delete backend; backend = 0; // 
 						ofstream * outputFilePtr = (ofstream *) &outFile;
-						const size_t size = strlen(outfilename) + 30;
-						char * newname = new char[ size ];
-						sprintf_s(TARGETWITHLEN(newname,size),outfilename,currentPageNumber);
 						// not needed here since done in main program convertBackSlashes(nameOfOutputFile);
 						if (driverDesc->backendFileOpenType != DriverDescription::noopen ){ 
 							outputFilePtr->close();
@@ -1955,24 +1953,22 @@ YY_RULE_SETUP
 // old if (defined(unix) || defined() || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) ) && !defined(DJGPP)
 #if defined(PSTOEDIT_UNIXLIKE)
 // binary is not available on UNIX, only on PC
-								outputFilePtr->open(newname,ios::out);
+								outputFilePtr->open(newFileName.value(),ios::out);
 #else
 								// use redundant ios::out because of bug in djgpp
-								outputFilePtr->open(newname,ios::out | ios::binary);
+								outputFilePtr->open(newFileName.value(),ios::out | ios::binary);
 #endif
-								// errf << "opened " << newname << " for binary output" << endl;
+								// errf << "opened " << newFileName.value() << " for binary output" << endl;
 							} else {
-								outputFilePtr->open(newname);
-								// errf << "opened " << newname << " for output" << endl;
+								outputFilePtr->open(newFileName.value());
+								// errf << "opened " << newFileName.value() << " for output" << endl;
 							}
 							if (outFile.fail() ) {
-								errf << "Could not open file " << newname << " for output" << endl;
-								delete [] newname;
+								errf << "Could not open file " << newFileName.value() << " for output" << endl;
 								return 1;
 							} // fail
 						} // backend opens file by itself
-						backend =  driverDesc->CreateBackend(driveroptions,*outputFilePtr,errf,infilename,newname,globaloptions);
-						delete [] newname;
+						backend =  driverDesc->CreateBackend(driveroptions,*outputFilePtr,errf,infilename,newFileName.value(),globaloptions);
 						if (!backend->driverOK()) {
 							errf << "Creation of driver for new page failed " << endl;
 							return (1);
@@ -2811,6 +2807,7 @@ YY_RULE_SETUP
 					backend->dumpPath();
 					// start new path
 //					Point p(origx,origy);
+					backend->setIsPolygon(false);
 					backend->addtopath(new Moveto(origx,origy));  
 					
 				}
@@ -2832,6 +2829,9 @@ YY_RULE_SETUP
 //			Point p(x,y);
 			backend->addtopath(new Lineto(x,y)); 
 			currentpoint = Point(x,y);
+
+			Point op(origx,origy);
+			backend->setIsPolygon(currentpoint == op); // dynamically track potential polygons
 			}
 	YY_BREAK
 case 63:
@@ -2867,6 +2867,8 @@ YY_RULE_SETUP
 //				return(1);			
 			}
 			currentpoint = Point(p[2].x_,p[2].y_);
+			Point op(origx,origy);
+			backend->setIsPolygon(currentpoint == op); // dynamically track potential polygons
 
 			}
 	YY_BREAK

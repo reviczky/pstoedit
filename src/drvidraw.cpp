@@ -4,7 +4,7 @@
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -663,8 +663,6 @@ const char *drvIDRAW::rgb2name(float red, float green, float blue) const
 // Output a standard idraw object header
 void drvIDRAW::print_header(const char *objtype)
 {
-	int i;
-	unsigned int j;
 
 	// Object type
 	outf << "Begin %I " << objtype << endl;
@@ -682,9 +680,11 @@ void drvIDRAW::print_header(const char *objtype)
 	int dashpieces = sscanf_s(dashPattern(), "[ %lf %lf %lf %lf",
 							&dash[0], &dash[1], &dash[2], &dash[3]);
 	if (dashpieces) {
+		int i;
 		unsigned short dashbits = 0;
 		for (i = 0; i < 4; i++) {
 			unsigned int numbits = iscale((float)dash[i % dashpieces]);
+			unsigned int j;
 			for (j = 0; j < numbits; j++)
 				dashbits = dashbits << 1 | (~i & 1);
 		}

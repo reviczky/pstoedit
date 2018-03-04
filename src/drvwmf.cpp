@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2012 Wolfgang Glunz
+   Copyright (C) 1998 - 2013 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -481,12 +481,11 @@ drvWMF::~drvWMF()
 		(void)DeleteMetaFile(CloseMetaFile(metaDC));
 
 		// add placeable header to standard metafile
-		const int BUFSIZE = 1024;
-		char buf[BUFSIZE];
+
 		PLACEABLEHEADER pHd;
 		FILE *inFile;
 		WORD checksum;
-		WORD *checksumField;
+	
 
 		if ((inFile = fopen(tempName.value(), "rb")) != 0L) {
 			if (outFile != 0L) {
@@ -502,7 +501,7 @@ drvWMF::~drvWMF()
 
 				// calculate checksum
 				checksum = 0;
-				checksumField = (WORD *) & pHd;
+				WORD *checksumField = (WORD *) & pHd;
 				for (unsigned int i = 0; i < 10; i++)
 					checksum ^= checksumField[i];
 
@@ -514,6 +513,8 @@ drvWMF::~drvWMF()
 				}
 				// append metafile data
 				do {
+					const int BUFSIZE = 1024;
+					char buf[BUFSIZE];
 					size_t read = fread(buf, 1, BUFSIZE, inFile);
 
 					if (read > 0) {

@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2012  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2013  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -167,7 +167,7 @@ RSString full_qualified_tempnam(const char *pref)
 		(path = getenv("TMPDIR")) == 0L
 		);
 	const unsigned int needed = strlen(path ? path:"" ) + 1 + strlen(pref) + 1 + strlen(XXXXXX) + 2;
-	filename = new char [ needed ];
+	filename = (char*) malloc(needed); // new char [ needed ];
 	filename[0] = '\0';
 // all getenvs returned 0
 	if (path) {
@@ -225,8 +225,9 @@ unsigned short hextoint(const char hexchar)
 	unsigned short r = ( h <= '9' ) ? (h - '0') : (h + 10 - 'A' ) ; //lint !e732
 	return r;
 }
-
+const bool regdebug = false;
 #if defined(_WIN32)
+
 RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 {
 	HKEY subkey;
@@ -237,7 +238,7 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 								  &subkey	//PHKEY phkResult
 		);
 	if (ret != ERROR_SUCCESS) {
-		// errstream << "RegOpenKeyEx failed with error code " << ret << endl;
+		if (regdebug) cerr << "RegOpenKeyEx failed with error code " << ret << endl;
 		return RSString( (char*) 0);
 	} else {
 		const int maxvaluelength = 1000;
@@ -253,10 +254,10 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 			);
 		(void) RegCloseKey(subkey);
 		if (retv != ERROR_SUCCESS) {
-//          errstream << "RegQueryValueEx failed with error code " << retv << endl;
+			if (regdebug)  cerr << "RegQueryValueEx failed with error code " << retv << endl;
 			return RSString( (char*) 0);
 		} else {
-//          errstream << "result is " << dirname << endl;
+			if (regdebug) cerr << "result is " << (char*) value << endl;
 			return RSString( (char*) value);
 		}
 	}
@@ -267,6 +268,7 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 #ifdef __OS2__
 #include "getini.c"
 #endif
+
 
 //lint -save -esym(715,errstream) -esym(1764,errstream)
 RSString getRegistryValue(ostream & errstream, const char *typekey, const char *key)
@@ -564,6 +566,52 @@ void errorMessage(const char *errortext)
 #endif
 }
 
+
+DLLEXPORT RSString getOutputFileNameFromPageNumber(const char * const outputFileTemplate, const RSString & pagenumberformatOption, unsigned int pagenumber)
+{
+	const char PAGENUMBER_String[] = "%PAGENUMBER%";
+	const char * pagestringptr_1 = strstr(outputFileTemplate,PAGENUMBER_String);
+	const char * pagestringptr_2 = strstr(outputFileTemplate,"%d");
+	if ((pagestringptr_1 == NIL) && (pagestringptr_2 == NIL)) {
+		return RSString(outputFileTemplate);
+	} else  {
+		const size_t size = strlen(outputFileTemplate) + 30;
+		char * newname = new char[ size ];
+
+		RSString formatting("%");
+		formatting += pagenumberformatOption;
+		formatting += RSString("d");
+		// in simplest case it is %d
+		// cout << "formatting " << formatting << endl;
+
+		char pagenumberstring[30] ;
+
+		sprintf_s(TARGETWITHLEN(pagenumberstring,sizeof(pagenumberstring)),formatting.value(),pagenumber);
+
+		// cout << "pagenumberstring : " << pagenumberstring << endl;
+
+		if (pagestringptr_1) // preference to %PAGENUMBER%
+		{
+			strncpy_s(newname,size,outputFileTemplate,pagestringptr_1-outputFileTemplate); // copy up to %PAGENUMBER%
+			// now copy page number
+			strcat_s(newname,size,pagenumberstring);
+			// now copy trailer
+			strcat_s(newname,size,pagestringptr_1+strlen(PAGENUMBER_String));
+
+		} else {
+			strncpy_s(newname,size,outputFileTemplate,pagestringptr_2-outputFileTemplate); // copy up to %PAGENUMBER%
+			// now copy page number
+			strcat_s(newname,size,pagenumberstring);
+			// now copy trailer
+			strcat_s(newname,size,pagestringptr_2+strlen("%d"));		
+		}
+		//cout << "newname " << newname << endl;
+		const RSString result (newname);
+		delete [] newname;
+		return result;
+	}
+}
+
 // a very very simple resizing string
 RSString::RSString(const char *arg) : content(0), allocatedLength(0), stringlength(0)
 {
@@ -775,7 +823,19 @@ void FontMapper::readMappingTable(ostream & errstream, const char *filename)
 		char *replacement = readword(lineptr);
 		if (original && replacement) {
 			// errstream << "\"" << original << "\" \"" << replacement <<"\""<< endl;
-			insert(original, replacement);
+		        if (replacement[0] == '/') {
+				// Map to an existing entry.
+			  	const RSString * prevEntry = getValue(replacement+1);
+				if (prevEntry == NULL)
+					errstream << "undefined font " <<
+					  replacement+1 <<
+					  " found in line (" << linenr <<
+					  ") of fontmap: " << save << endl;
+				else
+					insert(original, *prevEntry);
+			}
+			else
+				insert(original, replacement);
 		} else {
 			errstream << "unexpected line (" << linenr <<
 				") found in fontmap: " << save << endl;

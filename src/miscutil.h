@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,8 @@
 #include I_istream
 #include I_fstream
 #include I_string_h
+
+//lint -efile(451,math.h)
 #include <math.h>
 
 USESTD
@@ -40,24 +42,13 @@ USESTD
 
 // used to eliminate compiler warnings about unused parameters
 inline void unused(const void * const) { }
+//lint -esym(522,unused)
 
 
 #if defined(_WIN32) || defined(__OS2__)
 const char directoryDelimiter = '\\';
 #else
 const char directoryDelimiter = '/';
-#endif
-
-#if (defined (_MSC_VER) && _MSC_VER >= 1100) || defined (LINT)
-#define NOCOPYANDASSIGN(classname) \
-	private: \
-		classname(const classname&); \
-		const classname & operator=(const classname&);
-#else
-/* nothing - GNU has problems with this anyway. But, it doesn't harm. 
-   During compilation with VC++ potential misusages of the 
-   forbidden methods will be detected */
-#define NOCOPYANDASSIGN(classname) 
 #endif
 
 
@@ -162,7 +153,7 @@ public:
 
 //	bool operator<(const RSString & rs) const
 //	{	return strncmp(content,rs.content) < 0; }
-	char operator[](const int i) const
+	char operator[](const size_t i) const
 	{	return content[i]; }
 	friend ostream & operator<<(ostream & out,const RSString &outstring)
 	{	if (outstring.content) out << outstring.content; return out; }
@@ -179,6 +170,8 @@ private:
 	// is allocated by the DLL, it must be destroyed there as well.
 	//
 	virtual void clearContent();
+	// tell Flexelint: clearContent does cleanup
+	//lint -sem(RSString::clearContent,cleanup)
 	virtual char * newContent(size_t size);
 	char * content;
 	size_t allocatedLength;
@@ -212,21 +205,25 @@ public:
 
 	void addarg(const char * const arg) { 
 		assert(argc<maxargs); //lint !e1776
+		if (argc < maxargs) {
 #ifdef USE_RSSTRING
 		argv[argc] = RSString(arg);
 #else
 		argv[argc] = cppstrdup(arg); 
 #endif
 		argc++; 
+		}
 	}
 	void addarg(const RSString & arg) { 
 		assert(argc<maxargs); //lint !e1776
+		if (argc < maxargs) {
 #ifdef USE_RSSTRING
 		argv[argc] = arg;
 #else
 		argv[argc] = cppstrdup(arg.value()); 
 #endif
 		argc++; 
+		}
 	}
 
 	unsigned int parseFromString(const char * const argstring);
@@ -315,8 +312,8 @@ class DLLEXPORT KeyValuePair
 public:
 		typedef K K_Type;
 		typedef V V_Type;
-		KeyValuePair(const K_Type & k,const V_Type & v, KeyValuePair<K,V> * next = 0):
-			key_(k), value_(v), nextEntry(next) {}
+		KeyValuePair(const K_Type & k,const V_Type & v, KeyValuePair<K,V> * nextE = 0):
+			key_(k), value_(v), nextEntry(nextE) {}
 		const K_Type & key()	const { return key_;}
 		const V_Type & value()	const { return value_;}
 private:
@@ -362,8 +359,9 @@ DLLEXPORT unsigned long P_GetPathToMyself(const char *name, char * returnbuffer,
 DLLEXPORT size_t searchinpath(const char* EnvPath,const char* name, char *returnbuffer,unsigned long buflen);
 DLLEXPORT void errorMessage(const char * text); // display an error message (cerr or msgbox)
 DLLEXPORT void copy_file(istream& infile,ostream& outfile) ;
+DLLEXPORT RSString getOutputFileNameFromPageNumber(const char * const outputFileTemplate, const RSString & pagenumberformatOption, unsigned int pagenumber);
 
-inline double pythagoras(const float x, const float y) { return sqrt( x*x + y*y); }
+inline float pythagoras(const float x, const float y) { return sqrt( x*x + y*y); }
 
 
 #endif

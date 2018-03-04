@@ -73,6 +73,13 @@ libp2edrvmagick___la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(libp2edrvmagick___la_LDFLAGS) $(LDFLAGS) -o $@
 @HAVE_LIBMAGICK_TRUE@am_libp2edrvmagick___la_rpath = -rpath \
 @HAVE_LIBMAGICK_TRUE@	$(pkglibdir)
+libp2edrvpptx_la_DEPENDENCIES = $(am__DEPENDENCIES_1) libpstoedit.la
+am_libp2edrvpptx_la_OBJECTS = drvpptx.lo initlibrary.lo
+libp2edrvpptx_la_OBJECTS = $(am_libp2edrvpptx_la_OBJECTS)
+libp2edrvpptx_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(libp2edrvpptx_la_LDFLAGS) $(LDFLAGS) -o $@
+@HAVE_LIBZIP_TRUE@am_libp2edrvpptx_la_rpath = -rpath $(pkglibdir)
 libp2edrvstd_la_DEPENDENCIES = libpstoedit.la
 am__objects_1 = drvgnplt.lo drvtgif.lo drvfig.lo drvidraw.lo
 am__objects_2 = drvsampl.lo
@@ -144,13 +151,14 @@ LTCOMPILE = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
 CCLD = $(CC)
 SOURCES = $(libp2edrvlplot_la_SOURCES) $(libp2edrvmagick___la_SOURCES) \
-	$(libp2edrvstd_la_SOURCES) $(libp2edrvswf_la_SOURCES) \
-	$(libp2edrvwmf_la_SOURCES) $(libpstoedit_la_SOURCES) \
-	$(pstoedit_SOURCES)
-DIST_SOURCES = $(libp2edrvlplot_la_SOURCES) \
-	$(libp2edrvmagick___la_SOURCES) $(libp2edrvstd_la_SOURCES) \
-	$(libp2edrvswf_la_SOURCES) $(am__libp2edrvwmf_la_SOURCES_DIST) \
+	$(libp2edrvpptx_la_SOURCES) $(libp2edrvstd_la_SOURCES) \
+	$(libp2edrvswf_la_SOURCES) $(libp2edrvwmf_la_SOURCES) \
 	$(libpstoedit_la_SOURCES) $(pstoedit_SOURCES)
+DIST_SOURCES = $(libp2edrvlplot_la_SOURCES) \
+	$(libp2edrvmagick___la_SOURCES) $(libp2edrvpptx_la_SOURCES) \
+	$(libp2edrvstd_la_SOURCES) $(libp2edrvswf_la_SOURCES) \
+	$(am__libp2edrvwmf_la_SOURCES_DIST) $(libpstoedit_la_SOURCES) \
+	$(pstoedit_SOURCES)
 pkgincludeHEADERS_INSTALL = $(INSTALL_HEADER)
 HEADERS = $(pkginclude_HEADERS)
 ETAGS = etags
@@ -211,6 +219,8 @@ LIBPLOTTER_CFLAGS = @LIBPLOTTER_CFLAGS@
 LIBPLOTTER_LDFLAGS = @LIBPLOTTER_LDFLAGS@
 LIBPNG_CFLAGS = @LIBPNG_CFLAGS@
 LIBPNG_LDFLAGS = @LIBPNG_LDFLAGS@
+LIBPPTX_CFLAGS = @LIBPPTX_CFLAGS@
+LIBPPTX_LDFLAGS = @LIBPPTX_LDFLAGS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LINK = @LINK@
@@ -308,6 +318,7 @@ EXTRA_DIST = pstoedit.ph makefile.txt
 # LIBPLUGINS_ENTRY=libp2edrvplugins.la
 @HAVE_LIBPLOTTER_TRUE@LIBPLOTTER_ENTRY = libp2edrvlplot.la
 @HAVE_LIBMING_TRUE@LIBMING_ENTRY = libp2edrvswf.la
+@HAVE_LIBZIP_TRUE@LIBPPTX_ENTRY = libp2edrvpptx.la
 @HAVE_LIBMAGICK_TRUE@LIBMAGICK_ENTRY = libp2edrvmagick++.la
 @HAVE_LIBEMF_TRUE@LIBEMF_ENTRY = libp2edrvwmf.la
 AM_CPPFLAGS = \
@@ -327,6 +338,7 @@ pkglib_LTLIBRARIES = libp2edrvstd.la		\
 	${LIBPLUGINS_ENTRY}			\
 	${LIBPLOTTER_ENTRY}			\
 	${LIBMING_ENTRY}			\
+	${LIBPPTX_ENTRY}			\
 	${LIBMAGICK_ENTRY}			\
 	${LIBEMF_ENTRY}
 
@@ -381,6 +393,9 @@ libp2edrvstd_la_LDFLAGS = -no-undefined -module
 libp2edrvlplot_la_SOURCES = drvlplot.cpp drvlplot.h initlibrary.cpp
 libp2edrvlplot_la_LIBADD = $(LIBPLOTTER_LDFLAGS) libpstoedit.la
 libp2edrvlplot_la_LDFLAGS = -no-undefined -module
+libp2edrvpptx_la_SOURCES = drvpptx.cpp drvpptx.h initlibrary.cpp
+libp2edrvpptx_la_LIBADD = $(LIBPPTX_LDFLAGS) libpstoedit.la
+libp2edrvpptx_la_LDFLAGS = -no-undefined -module
 libp2edrvswf_la_SOURCES = drvswf.cpp drvswf.h initlibrary.cpp
 libp2edrvswf_la_LIBADD = $(LIBMING_LDFLAGS) libpstoedit.la
 libp2edrvswf_la_LDFLAGS = -no-undefined -module
@@ -542,6 +557,8 @@ libp2edrvlplot.la: $(libp2edrvlplot_la_OBJECTS) $(libp2edrvlplot_la_DEPENDENCIES
 	$(libp2edrvlplot_la_LINK) $(am_libp2edrvlplot_la_rpath) $(libp2edrvlplot_la_OBJECTS) $(libp2edrvlplot_la_LIBADD) $(LIBS)
 libp2edrvmagick++.la: $(libp2edrvmagick___la_OBJECTS) $(libp2edrvmagick___la_DEPENDENCIES) 
 	$(libp2edrvmagick___la_LINK) $(am_libp2edrvmagick___la_rpath) $(libp2edrvmagick___la_OBJECTS) $(libp2edrvmagick___la_LIBADD) $(LIBS)
+libp2edrvpptx.la: $(libp2edrvpptx_la_OBJECTS) $(libp2edrvpptx_la_DEPENDENCIES) 
+	$(libp2edrvpptx_la_LINK) $(am_libp2edrvpptx_la_rpath) $(libp2edrvpptx_la_OBJECTS) $(libp2edrvpptx_la_LIBADD) $(LIBS)
 libp2edrvstd.la: $(libp2edrvstd_la_OBJECTS) $(libp2edrvstd_la_DEPENDENCIES) 
 	$(libp2edrvstd_la_LINK) -rpath $(pkglibdir) $(libp2edrvstd_la_OBJECTS) $(libp2edrvstd_la_LIBADD) $(LIBS)
 libp2edrvswf.la: $(libp2edrvswf_la_OBJECTS) $(libp2edrvswf_la_DEPENDENCIES) 
@@ -618,6 +635,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpcbfill.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpdf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpptx.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvrib.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvrpl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvsampl.Plo@am__quote@

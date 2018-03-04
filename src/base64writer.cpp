@@ -52,7 +52,7 @@ int Base64Writer::write_base64(const unsigned char *buf, size_t length)
 	unsigned char *ascii_data = encoded;
 	const unsigned char *bin_data = buf;
 	unsigned char this_ch;
-	int ascii_left;
+
 	size_t bin_len = ((FBUFLEN / 4) * 3);
 
 	if (bin_len > length)
@@ -73,9 +73,9 @@ int Base64Writer::write_base64(const unsigned char *buf, size_t length)
 	}
 
 	/* now output the ascii data line by line */
-	ascii_left = ascii_data - encoded;
+	size_t ascii_left = ascii_data - encoded;
 	while (ascii_left > 0) {
-		int linelength = BASE64_MAXASCII - column;
+		size_t linelength = BASE64_MAXASCII - column;
 
 		if (ascii_left < linelength)
 			linelength = ascii_left;

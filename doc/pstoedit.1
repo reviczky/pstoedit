@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Tue Aug 28 12:47:36 CEST 2012
+.\" Manual page created with latex2man on Sun Apr 28 20:18:05 CEST 2013
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "August 2012" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "April 2013" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -52,6 +52,7 @@ pstoedit
 [\fB\-yshift\fP\fI number\fP]
 [\fB\-centered\fP]
 [\fB\-minlinewidth\fP\fI number\fP]
+[\fB\-pagenumberformat\fP\fI page number format specification\fP]
 [\fB\-split\fP]
 [\fB\-v\fP]
 [\fB\-usebbfrominput\fP]
@@ -67,6 +68,7 @@ pstoedit
 [\fB\-noclip\fP]
 [\fB\-t2fontsast1\fP]
 [\fB\-keep\fP]
+[\fB\-debugfonthandling\fP]
 [\fB\-gstest\fP]
 [\fB\-nfr\fP]
 [\fB\-glyphs\fP]
@@ -102,7 +104,7 @@ details.
 .PP
 .SS RELEASE LEVEL
 .PP
-This manpage documents release 3.61 of pstoedit\&.
+This manpage documents release 3.62 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -186,6 +188,10 @@ recommended for processing PDF and PostScript files.
 .TP
 [\fB\-minlinewidth\fP\fI number\fP]
  minimal line width. All lines thinner than this will be drawn in this line width \- especially zero\-width lines 
+.PP
+.TP
+[\fB\-pagenumberformat\fP\fI page number format specification\fP]
+ format specification for page numbers in file name if \-split is used. The specification is used to create the page number using sprintf.The specification shall not include the leading 
 .PP
 .TP
 [\fB\-split\fP]
@@ -353,6 +359,8 @@ Lines beginning with % are considerd comments
 .br 
 If a font name contains spaces, use the "font name with spaces" notation. 
 .PP
+If a target_font_name starts with /, it is regarded as alias to a former entry. 
+.PP
 Each font name found in the document is checked against this mapping and if there is a corresponding entry, the new name is used for the output. 
 .PP
 If the \fB\-fontmap\fP
@@ -384,6 +392,7 @@ Unix:
 .PP
 The mpost.fmp in the misc directory of the pstoedit distibution is a sample map file with mappings from over 5000 PostScript font names to their TeXequivalents. This is useful because MetaPost is frequently used with TeX/LaTeX and those programs don\&'t use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\fBscott+ps2ed_AT_pakin.org\fP).
 Another example is wemf.fmp to be used under Windows. See the misc directory of the pstoedit source distribution. 
+After loading the implicit (based on driver name) or explicit (based on the \-fontmap option) font map file, a system specific map file is searched and loaded from the installation directory (unix.fmp or windows.fmp). This file can be used to redirect certain fonts to system specific names using the /AliasName notation described above. 
 .PP
 .RE
 .PP
@@ -421,6 +430,10 @@ gives different results as before. In such a case please also contact the author
 .TP
 [\fB\-keep\fP]
  keep the intermediate files produced by pstoedit \- for debug purposes only 
+.PP
+.TP
+[\fB\-debugfonthandling\fP]
+ writes verbose messages related to internal font processing \- for debug purposes only 
 .PP
 .TP
 [\fB\-gstest\fP]
@@ -514,57 +527,57 @@ No driver specific options
 No driver specific options 
 .SS gmfa \- ASCII GNU metafile 
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS gmfb \- binary GNU metafile 
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
-.SS plot \- GNU libplot output types, e.g. plot:type X
+.SS plot \- GNU libplot output types, e.g. plot:\-plotformat X
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-cgm \- cgm via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-ai \- ai via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-svg \- svg via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-ps \- ps via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-fig \- fig via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-pcl \- pcl via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-hpgl \- hpgl via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS plot\-tek \- tek via GNU libplot
 .TP
-[\fBplotformat\fP\fI string\fP]
+[\fB\-plotformat\fP\fI string\fP]
  plotutil format to generate 
 .PP
 .SS magick \- MAGICK driver
@@ -1168,6 +1181,21 @@ See also: \fBhttp://pcb.sourceforge.net\fP
 No driver specific options 
 .SS pdf \- Adobe\&'s Portable Document Format
 No driver specific options 
+.SS pptx \- PresentationML (PowerPoint) format
+This is the format used internally by Microsoft PowerPoint. LibreOffice can also read/write PowerPoint files albeit with some lack of functionality. 
+.PP
+.TP
+[\fB\-colors\fP\fI string\fP]
+ "original" to retain original colors (default), "theme" to convert randomly to theme colors, or "theme\-lum" also to vary luminance 
+.PP
+.TP
+[\fB\-fonts\fP\fI string\fP]
+ use "windows" fonts (default), "native" fonts, or convert to the "theme" font 
+.PP
+.TP
+[\fB\-embed\fP\fI string\fP]
+ embed fonts, specified as a comma\-separated list of EOT\-format font files 
+.PP
 .SS rib \- RenderMan Interface Bytestream
 No driver specific options 
 .SS rpl \- Real3D Programming Language Format
@@ -1671,7 +1699,11 @@ output format driver for Kontour.
 .PP
 .TP
 .B *
-Scott Pakin, \fBscott+ps2ed_AT_pakin.org\fP provided the MetaPost and LaTeX2e output format driver.
+Scott Pakin, \fBscott+ps2ed_AT_pakin.org\fP provided the MetaPost and LaTeX2e and PowerPoint output format driver.
+.PP
+.TP
+.B *
+The PowerPoint driver uses the libzip library \- \fBhttp://www.nih.at/libzip\fP\&. Under Windows, this library is linked into the provided binary statically. Thanks to the whole libzip team.
 .PP
 .TP
 .B *

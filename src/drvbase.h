@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -82,6 +82,9 @@ public:
 	float y_;
 	bool operator==(const Point & p2) const { 
 		return (x_ == p2.x_) && (y_ == p2.y_); //lint !e777
+	}
+	bool operator!=(const Point & p2) const { 
+		return !(*this == p2);
 	}
 	Point operator+(const Point & p) const { return Point (x_+p.x_,y_+p.y_); }
 	const Point & operator+=(const Point & p) { x_+=p.x_; y_+=p.y_; return *this; }
@@ -160,6 +163,7 @@ public:
 		RSString	glyphnames;
 		bool		is_non_standard_font;
 		RSString    currentFontName;
+		RSString    currentFontUnmappedName;
 		RSString    currentFontFamilyName;
 		RSString    currentFontFullName;
 		RSString    currentFontWeight;
@@ -1016,7 +1020,7 @@ public:
 			checkfunc_p
 			)
 		{}
-	drvbase * CreateBackend (
+	virtual drvbase * CreateBackend (
 			const char * const driveroptions_P,
 		    ostream & theoutStream, 
 		    ostream & theerrStream,   

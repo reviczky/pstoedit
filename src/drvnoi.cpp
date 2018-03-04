@@ -383,7 +383,7 @@ void drvNOI::close_page()
   }
 
 // driver description, no clipping support
-static const DriverDescriptionT <drvNOI> D_noi(DRIVER_NAME, DRIVER_DESCR, 
+static DriverDescriptionT <drvNOI> D_noi(DRIVER_NAME, DRIVER_DESCR,
   DRIVER_LONG_DESCR, FILE_SUFFIX, true, true, true, true, 
   DriverDescription::png, DriverDescription::normalopen, true, false);
 

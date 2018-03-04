@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -78,7 +78,7 @@ static char *dlerror()
   //  LPVOID lpDisplayBuf;
     DWORD dw = GetLastError(); 
 
-    FormatMessage(
+    (void)FormatMessage(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 
         FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
@@ -163,7 +163,7 @@ void DynLoader::close()
 #if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 
 
-#if defined(__linux) || defined(__linux__)
+#if defined(__linux) || defined(__linux__) || defined(__GNU__)
 		// normally we should call dlclose here. But there is a very strange problem in Linux
 		// whenever a plugin.so indirectly loads libpthread (e.g. libdrvmagick++ does it because libMagick++ does it
 		// the call to dlclose crashes with a seg fault 
@@ -195,6 +195,7 @@ DynLoader::~DynLoader()
 		errstream << "destroying Dynloader for " << libname << endl;
 	delete[]libname;
 	libname=0;
+	handle=0;
 }
 
 int DynLoader::knownSymbol(const char *name) const

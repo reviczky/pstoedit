@@ -15,8 +15,8 @@
 }}
 
 \setVersionWord{Version}  %%% that's the default, no need to set it.
-\setVersion{3.61}
-\setDate{August 2012}    
+\setVersion{3.62}
+\setDate{April 2013}    
 
 \setlength{\emergencystretch}{1.5em}
 
@@ -64,6 +64,7 @@
 \oOptArg{-yshift}{~number} 
 \oOpt{-centered} 
 \oOptArg{-minlinewidth}{~number} 
+\oOptArg{-pagenumberformat}{~page number format specification} 
 \oOpt{-split} 
 \oOpt{-v} 
 \oOpt{-usebbfrominput} 
@@ -79,6 +80,7 @@
 \oOpt{-noclip} 
 \oOpt{-t2fontsast1} 
 \oOpt{-keep} 
+\oOpt{-debugfonthandling} 
 \oOpt{-gstest} 
 \oOpt{-nfr} 
 \oOpt{-glyphs} 
@@ -188,6 +190,10 @@ center image before scaling or shifting
 
 \item[\oOptArg{-minlinewidth}{~number}] 
 minimal line width. All lines thinner than this will be drawn in this line width - especially zero-width lines
+
+
+\item[\oOptArg{-pagenumberformat}{~page number format specification}] 
+format specification for page numbers in file name if -split is used. The specification is used to create the page number using sprintf.The specification shall not include the leading % nor the trailing d. Default is empty string which results in formatting the page number using %d. This results in page numbers like 1, 2, ..., 10. Sometimes you may want to have fixed length with leading 0, so you might want to specify 02 which means 2 digits with leading 0.
 
 
 \item[\oOpt{-split}] 
@@ -323,6 +329,8 @@ The font map is a simple text file containing lines in the following format:\\
 Lines beginning with \verb+%+ are considerd comments \\
  If a font name contains spaces, use the \verb+"font name with spaces"+ notation. 
  
+If a target\_font\_name starts with /, it is regarded as alias to a former entry. 
+  
 Each font name found in the document is checked against this mapping and if there is a corresponding entry, the new name is used for the output.  
 
 If  the \Opt{-fontmap} option is not specified, \Prog{pstoedit} automatically looks for the file \emph{drivername}.fmp in the installation directory and uses that file as a default fontmap file if available. The installation directory is:  
@@ -337,7 +345,9 @@ $<$\emph{The directory where the pstoedit executably is located}$>$\verb+/../lib
  
 \end{itemize} 
  
-The mpost.fmp in the misc directory of the pstoedit distibution is a sample map file with mappings from over 5000 PostScript font names to their \TeX equivalents. This is useful because MetaPost is frequently used with \TeX/\LaTeX\ and those programs don't use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\Email{scott+ps2ed_AT_pakin.org}).   Another example is wemf.fmp to be used under Windows. See the misc directory of the pstoedit source distribution. 
+The mpost.fmp in the misc directory of the pstoedit distibution is a sample map file with mappings from over 5000 PostScript font names to their \TeX equivalents. This is useful because MetaPost is frequently used with \TeX/\LaTeX\ and those programs don't use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\Email{scott+ps2ed_AT_pakin.org}).   
+Another example is wemf.fmp to be used under Windows. See the misc directory of the pstoedit source distribution.  
+After loading the implicit (based on driver name) or explicit (based on the -fontmap option) font map file, a system specific map file is searched and loaded from the installation directory (unix.fmp or windows.fmp). This file can be used to redirect certain fonts to system specific names using the /AliasName notation described above.
 
 
 \end{description}
@@ -369,6 +379,10 @@ write text as plain string instead of hex string in intermediate format - normal
 
 \item[\oOpt{-keep}] 
 keep the intermediate files produced by pstoedit - for debug purposes only
+
+
+\item[\oOpt{-debugfonthandling}] 
+writes verbose messages related to internal font processing - for debug purposes only
 
 
 \item[\oOpt{-gstest}] 
@@ -459,7 +473,7 @@ No driver specific options
 %%// end of options 
 \subsubsection{gmfa - ASCII GNU metafile }
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -467,15 +481,15 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{gmfb - binary GNU metafile }
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
 \end{description}
 %%// end of options 
-\subsubsection{plot - GNU libplot output types, e.g. plot:type X}
+\subsubsection{plot - GNU libplot output types, e.g. plot:-plotformat X}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -483,7 +497,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-cgm - cgm  via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -491,7 +505,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-ai - ai   via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -499,7 +513,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-svg - svg  via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -507,7 +521,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-ps - ps   via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -515,7 +529,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-fig - fig  via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -523,7 +537,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-pcl - pcl  via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -531,7 +545,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-hpgl - hpgl via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -539,7 +553,7 @@ plotutil format to generate
 %%// end of options 
 \subsubsection{plot-tek - tek  via GNU libplot}
 \begin{description}
-\item[\oOptArg{plotformat}{~string}] 
+\item[\oOptArg{-plotformat}{~string}] 
 plotutil format to generate
 
 
@@ -1225,6 +1239,24 @@ No driver specific options
 \subsubsection{pdf - Adobe's Portable Document Format}
 No driver specific options
 %%// end of options 
+\subsubsection{pptx - PresentationML (PowerPoint) format}
+This is the format used internally by Microsoft PowerPoint.  LibreOffice can also read/write PowerPoint files albeit with some lack of functionality.
+
+\begin{description}
+\item[\oOptArg{-colors}{~string}] 
+"original" to retain original colors (default), "theme" to convert randomly to theme colors, or "theme-lum" also to vary luminance
+
+
+\item[\oOptArg{-fonts}{~string}] 
+use "windows" fonts (default), "native" fonts, or convert to the "theme" font
+
+
+\item[\oOptArg{-embed}{~string}] 
+embed fonts, specified as a comma-separated list of EOT-format font files
+
+
+\end{description}
+%%// end of options 
 \subsubsection{rib - RenderMan Interface Bytestream}
 No driver specific options
 %%// end of options 
@@ -1664,7 +1696,9 @@ If you like pstoedit - please express so also at Facebook \URL{http://www.facebo
   \item Kai-Uwe Sattler \Email{kus_AT_iti.cs.uni-magdeburg.de} implemented the
      output format driver for Kontour.
 
-  \item Scott Pakin,  \Email{scott+ps2ed_AT_pakin.org}   provided the MetaPost and LaTeX2e output format driver.
+  \item Scott Pakin,  \Email{scott+ps2ed_AT_pakin.org}   provided the MetaPost and LaTeX2e and PowerPoint output format driver.
+ 
+  \item The PowerPoint driver uses the libzip library - \URL{http://www.nih.at/libzip}. Under Windows, this library is linked into the provided binary statically.  Thanks to the whole libzip team.
   
   \item Burkhard Plaum \Email{plaum_AT_IPF.Uni-Stuttgart.de} added support for
      complex filled paths for the xfig output format driver.
@@ -1694,6 +1728,7 @@ If you like pstoedit - please express so also at Facebook \URL{http://www.facebo
   \item But most important: Peter Deutsch \Email{ghost_AT_aladdin.com} and Russell
      Lang \Email{gsview_AT_ghostgum.com.au} for their help and answers regarding
      GhostScript and gsview.
+
 
 \end{itemize}
 

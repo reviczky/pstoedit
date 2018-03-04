@@ -269,7 +269,7 @@ void drvPIC::show_text(const TextInfo & textinfo)
 	// const unsigned int fontstringlen=80;
 	RSString selected_font;	// Could / should these be class members (wogl? ? ?) // Further, this is used before set !!
 	static bool font_selected = false;
-	static int selected_size = 0;	// ...
+
 	static int is_text = 0;		// ...
 
 	/* translate font to groff/troff style */
@@ -309,6 +309,7 @@ void drvPIC::show_text(const TextInfo & textinfo)
 	}
 
 	if (is_text) {
+		static int selected_size = 0;	// ...
 		ps_end();
 
 		if (!font_selected) {

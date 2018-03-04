@@ -22,13 +22,13 @@
    (global)"pagesize" options, you may request any of the other output types that
    libplot/libplotter can produce.  For example,
 
-   pstoedit -f "plot:type X"
+   pstoedit -f "plot:-plotformat X"
 
    will pop up an X window, and 
 
-   pstoedit -f "plot:type fig"
+   pstoedit -f "plot:-plotformat fig"
 
-   will produce Fig output.  The supported output types are:
+   will produce Fig output.  The supported output formats are:
 
    "X", "png", "pnm", "gif", "svg", "ai", "ps", "cgm", "fig",
    "pcl", "hpgl", "regis", "tek", or "meta" (the default).
@@ -47,9 +47,9 @@
    the size of the PS page that it is rendering.  (The default is "letter",
    i.e., 8.5in by 11in.)  For example,
 
-    pstoedit -f "plot:type X" -pagesize letter
-    pstoedit -f "plot:type ps" -pagesize legal > output.ps
-    pstoedit -f "plot:type fig" -pagesize a4 > output.fig
+    pstoedit -f "plot:-plotformat X" -pagesize letter
+    pstoedit -f "plot:-plotformat ps" -pagesize legal > output.ps
+    pstoedit -f "plot:-plotformat fig" -pagesize a4 > output.fig
    
    The supported page sizes are:
 
@@ -71,7 +71,7 @@
    Also in the "plot" format, you may specify any of libplot/libplotter's
    parameters on the command line.  For example,
 
-    pstoedit -f "plot:type X BITMAPSIZE 400x200 BG_COLOR yellow" -pagesize a4 
+    pstoedit -f "plot:-plotformat X BITMAPSIZE 400x200 BG_COLOR yellow" -pagesize a4 
 
    will pop up an X window of size 400x200, with a yellow background.
    BITMAPSIZE is also supported if the output type is "pnm" or "gif", and
@@ -892,15 +892,16 @@ drvplot::derivedConstructor(drvplot):constructBase
 	if (d_argc) {
 		const unsigned int remaining = DOptions_ptr->parseoptions(errf,d_argc,d_argv);
 		if (Verbose()) { errf << "remaining options " << remaining << endl; }
-		for (unsigned int i = 1; i < d_argc; i++) {
-			if (strcmp(d_argv[i], "META_PORTABLE") == 0
-						&& strcmp(d_argv[i + 1], "yes") == 0)
+		const char * * remaining_argv = DOptions_ptr->unhandledOptions;
+		for (unsigned int i = 0; (i+1) < remaining; i++) {  // -1 because we also use argv[i+1]
+			if (strcmp(remaining_argv[i], "META_PORTABLE") == 0
+						&& strcmp(remaining_argv[i + 1], "yes") == 0)
 						portable_metafile = true;
 					// set Plotter parameter
 			if (Verbose()) {
-				errf << "adding Plotter parameter " << d_argv[i] << ":" << d_argv[i + 1] << endl;
+				errf << "adding Plotter parameter " << remaining_argv[i] << ":" << remaining_argv[i + 1] << endl;
 			}
-			(void)Plotter::parampl(d_argv[i], (void*)d_argv[i + 1]);
+			(void)Plotter::parampl(remaining_argv[i], (void*)remaining_argv[i + 1]);
 			i++;
 		}
 	}
@@ -1283,7 +1284,7 @@ static DriverDescriptionT < drvplot > D_plot_meta_b("gmfb", "binary GNU metafile
 													);
 
 #ifdef HAVE_LIBPLOTTER
-static DriverDescriptionT < drvplot > D_plot("plot", "GNU libplot output types, e.g. plot:type X", "", "plot", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plot("plot", "GNU libplot output types, e.g. plot:-plotformat X", "", "plot", false,	// backend does not support subpaths
 											 true,	// backend supports curves
 											 true,	// backend supports filled elements with edges 
 											 true,	// backend supports text

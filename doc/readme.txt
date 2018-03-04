@@ -1,5 +1,5 @@
 PSTOEDIT 
-Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 pstoedit converts Postscript(TM) and PDF files to other vector graphic
 formats so that they can be edited graphically. See pstoedit.htm or
@@ -52,9 +52,6 @@ This works under *nix only.
 When building pstoedit under cygwin/Linux you may need to set LDFLAGS to /usr/local/lib in case you have some libraries (e.g. libEMF) installed there.
 
 Under some systems (e.g. cygwin) it is not possible to link static libraries (.a) into a dynamic library (.so/.dll). In this case, you need to have also a shared version of the relevant libs, e.g. of libEMF. In order to get a shared version, you normally need to set the option "--enabled-shared" during the "configure" run for the library.
-
-
-A note about libemf. Unfortunately this library seems to be no longer maintained by the original author. I have done some smaller changes - mainly compiler and OS adaptations - and put my version under http://sourceforge.net/projects/pstoedit in the download section. In the long term I will try to put the changes under libemf.sourceforge.net - but I haven't been able to contact the admin of that project so far.
 
 
 Installing pstoedit under Windows 9x/NT/2000/XP/Vista/Windows 7:
@@ -157,5 +154,4 @@ License:
 
 
 ----------------------------------------------------------------------------
- 
  

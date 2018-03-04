@@ -12,6 +12,10 @@ if HAVE_LIBMING
 LIBMING_ENTRY=libp2edrvswf.la
 endif
 
+if HAVE_LIBZIP
+LIBPPTX_ENTRY=libp2edrvpptx.la
+endif
+
 if HAVE_LIBMAGICK
 LIBMAGICK_ENTRY=libp2edrvmagick++.la
 endif
@@ -38,6 +42,7 @@ pkglib_LTLIBRARIES=libp2edrvstd.la		\
 	${LIBPLUGINS_ENTRY}			\
 	${LIBPLOTTER_ENTRY}			\
 	${LIBMING_ENTRY}			\
+	${LIBPPTX_ENTRY}			\
 	${LIBMAGICK_ENTRY}			\
 	${LIBEMF_ENTRY}
 
@@ -96,6 +101,10 @@ libp2edrvstd_la_LDFLAGS=-no-undefined -module
 libp2edrvlplot_la_SOURCES=drvlplot.cpp drvlplot.h initlibrary.cpp
 libp2edrvlplot_la_LIBADD=$(LIBPLOTTER_LDFLAGS) libpstoedit.la
 libp2edrvlplot_la_LDFLAGS=-no-undefined -module
+
+libp2edrvpptx_la_SOURCES=drvpptx.cpp drvpptx.h initlibrary.cpp
+libp2edrvpptx_la_LIBADD=$(LIBPPTX_LDFLAGS) libpstoedit.la
+libp2edrvpptx_la_LDFLAGS=-no-undefined -module
 
 libp2edrvswf_la_SOURCES=drvswf.cpp drvswf.h initlibrary.cpp
 libp2edrvswf_la_LIBADD=$(LIBMING_LDFLAGS) libpstoedit.la

@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -130,13 +130,13 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driv
 	if (driveroptions_p) {
 #if 1
 		Argv driverargs;
-		driverargs.parseFromString(driveroptions_p);
+		(void) driverargs.parseFromString(driveroptions_p);
 		d_argc = driverargs.argc;
 		d_argv = new const char *[d_argc + 2];  // 1 more for the argv[0]
 		d_argv[0] = cppstrdup(Pdriverdesc_p->symbolicname);
 		d_argc = 1;
-		for (unsigned int i = 0; i < driverargs.argc; i++) {
-			d_argv[d_argc] = cppstrdup(driverargs.argv[i]);
+		for (unsigned int a = 0; a < driverargs.argc; a++) {
+			d_argv[d_argc] = cppstrdup(driverargs.argv[a]);
 			d_argc++;
 		}
 		d_argv[d_argc] = 0;
@@ -181,7 +181,7 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driv
 		if (DOptions_ptr) {
 			//debug errf << "DOptions_ptr: " << (void*) DOptions_ptr << endl;
 			const unsigned int remaining = DOptions_ptr->parseoptions(errf,d_argc,d_argv);
-			if (remaining > 0) {
+			if ((remaining > 0) && !DOptions_ptr->expectUnhandled) {
 				errf << "the following " << remaining  << " options could not be handled by the driver: " << endl;
 				for (unsigned int i = 0; i < remaining; i++) {
 					errf << DOptions_ptr->unhandledOptions[i] << endl;
@@ -253,6 +253,8 @@ drvbase::~drvbase()
 		}
 	}
 	currentSaveLevel = 0;
+	defaultFontName = NIL;
+	last_currentPath = NIL;
 }
 
 const RSString & drvbase::getPageSize() const { return globaloptions.outputPageSize(); }
@@ -523,6 +525,7 @@ void drvbase::pushText(const size_t len, const char *const thetext, const float 
 		textInfo_.y = y;
 		textInfo_.thetext.copy(thetext, len);
 		textInfo_.glyphnames.copy(glyphnames ? glyphnames:"");
+		textInfo_.currentFontUnmappedName = textInfo_.currentFontName;
 		textInfo_.remappedfont= false;
 		const char *remappedFontName = drvbase::theFontMapper().mapFont(textInfo_.currentFontName);
 		// errf << " Mapping of " << textInfo_.currentFontName << " returned " << (remappedFontName ? remappedFontName:" ") << endl;
@@ -619,22 +622,56 @@ void drvbase::setCurrentFontAngle(float value)
 
 bool drvbase::is_a_rectangle() const
 {
-//in most cases of rectangles there are 5 Elements
-	if (numberOfElementsInPath() != 5)
-		return false;
-	if (pathElement(0).getType() == closepath || pathElement(4).getType() == closepath ) return false;
+/* Detects the following sequences
+                moveto 
+                lineto 
+                lineto 
+                lineto
+                closepath
+or
+                moveto 
+                lineto 
+                lineto 
+                lineto 
+                lineto 
+				(if last lineto goes to same coord as first moveto
+*/
+	// cout << "Testing path " << currentNr() <<endl; 
+// there have to be 5 elements
+	if (numberOfElementsInPath() != 5)       return false;
+	if (pathElement(0).getType() != moveto ) return false;
+	if (pathElement(1).getType() != lineto ) return false;
+	if (pathElement(2).getType() != lineto ) return false;
+	if (pathElement(3).getType() != lineto ) return false;
 
-//first and last points are identical
-	if (pathElement(0).getPoint(0).x_ != pathElement(4).getPoint(0).x_ ||
-		pathElement(0).getPoint(0).y_ != pathElement(4).getPoint(0).y_)
-		return false;
+	Point points[5];
+	{
+	//	cout << "before normalization " <<  "Path # " << currentNr() <<endl;
+	for (int i = 0; i< 4; i++) {
+		points[i] = pathElement(i).getPoint(0) ;
+		// cout << "p " << i << " " << points[i].x_ << " " <<  points[i].y_ << endl;
+	}
+	// cout << "####" << endl;
+	}
+	// the 5th depend on the last element
+	  
+	if (pathElement(4).getType() == lineto ) {
+			// check for first == last
+		if (pathElement(0).getPoint(0) != pathElement(4).getPoint(0)) return false;  
+	} else { 
+		if (pathElement(4).getType() != closepath ) return false; // 4th element is neither lineto nor closepath
+	}
+
+	// now we are sure we either have a closepath or a final line to the initial moveto so we can set the last point to the first one.
+	points[4] = pathElement(0).getPoint(0); // use the point of the first moveto.
 
 
+// so far all OK - now check the points.
 
 	unsigned int start_horic_test;
 	unsigned int start_vert_test;
 
-	if (pathElement(0).getPoint(0).x_ == pathElement(1).getPoint(0).x_) {
+	if (points[0].x_ == points[1].x_) {
 		start_horic_test = 0;
 		start_vert_test = 1;
 	} else {
@@ -644,15 +681,20 @@ bool drvbase::is_a_rectangle() const
 
 	{
 		for (unsigned int i = start_horic_test; i < 4; i++, i++)
-			if (pathElement(i).getPoint(0).x_ != pathElement((i + 1) % 4).getPoint(0).x_)
+			if (points[i].x_ != points[(i + 1) % 4].x_) {
+				// cout << "F1" << endl;
 				return false;
+			}
 	}
 
 	{
 		for (unsigned int i = start_vert_test; i < 4; i++, i++)
-			if (pathElement(i).getPoint(0).y_ != pathElement((i + 1) % 4).getPoint(0).y_)
+			if (points[i].y_ != points[(i + 1) % 4].y_) {
+				// cout << "F2" << endl;
 				return false;
+			}
 	}
+	// cout << "IS RECT" << endl;
 	return true;
 }
 
@@ -838,24 +880,24 @@ void drvbase::dumpRearrangedPathes()
 	const unsigned int origCount = numberOfElementsInPath();
 	unsigned int starti = 0;
 	for (unsigned int i = 0; i < numpaths; i++) {
-		unsigned int end = starti;
+		unsigned int endi = starti;
 		outputPath->subpathoffset = 0;
-		while (true)				// Find the next end index
-		{
-			end++;
-			if (end >= origCount)
+		for ( ; ; ) { // while true but without compiler warning
+			// Find the next end index
+			endi++;
+			if (endi >= origCount)
 				break;
-			else if (pathElement(end).getType() == moveto)
+			else if (pathElement(endi).getType() == moveto)
 				break;
 		}
-		if (end <= origCount) {
+		if (endi <= origCount) {
 			if (verbose)
-				errf << "dumping subpath from " << starti << " to " << end << endl;
+				errf << "dumping subpath from " << starti << " to " << endi << endl;
 			outputPath->subpathoffset = starti;
-			outputPath->numberOfElementsInPath = end - starti;
+			outputPath->numberOfElementsInPath = endi - starti;
 			show_path();		// from start to end
 		}
-		starti = end;
+		starti = endi;
 	}
 	outputPath->numberOfElementsInPath = origCount;
 	outputPath->subpathoffset = 0;

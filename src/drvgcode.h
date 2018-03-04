@@ -5,7 +5,7 @@
    drvGCODE.h : This file is part of pstoedit
    Contributed / Copyright 2008 by: Lawrence Glaister VE7IT
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz@pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz@pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

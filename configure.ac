@@ -10,10 +10,10 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.61,wglunz35_AT_pstoedit.net)
+AC_INIT(pstoedit,3.62,wglunz35_AT_pstoedit.net)
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.61)
+AM_INIT_AUTOMAKE(pstoedit,3.62)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
@@ -100,6 +100,9 @@ with_libplot=$withval, with_libplot=yes)
 AC_ARG_WITH(swf,
 [  --with-swf  enable/disable swf interface (default: enabled - use --without-swf to disable)],
 with_swf=$withval, with_swf=yes)
+AC_ARG_WITH(pptx,
+[  --with-pptx  enable/disable pptx interface (default: enabled - use --without-pptX to disable)],
+with_pptx=$withval, with_pptx=yes)
 
 
 OLD_CPPFLAGS=${CPPFLAGS}
@@ -197,6 +200,35 @@ AM_CONDITIONAL(HAVE_LIBMING, test "$HAVE_LIBMING" = yes)
 else
    AC_MSG_WARN([swf support disabled by configure argument .])
    AM_CONDITIONAL(HAVE_LIBMING, false )
+fi
+
+if test "${with_pptx}" = "yes" ; then
+dnl
+dnl Driver::libpptx
+dnl
+HAVE_LIBZIP=no
+LIBPPTX_LDFLAGS=
+LIBPPTX_CFLAGS=
+
+dnl If zip.h is found, use it.
+AC_CHECK_LIB(zip,zip_add,
+	[LIBPPTX_LDFLAGS="-lzip -lz"],,-lz)
+AC_CHECK_HEADER(zip.h,
+	[LIBPPTX_CFLAGS="-DHAVE_LIBZIP"])
+if test -n "${LIBPPTX_LDFLAGS}" && test -n "${LIBPPTX_CFLAGS}"; then
+   HAVE_LIBZIP=yes
+   AC_MSG_WARN([** libpptx driver is enabled.])
+else
+   LIBPPTX_LDFLAGS=
+   LIBPPTX_CFLAGS=
+   AC_MSG_WARN([** libpptx driver is disabled.])
+fi
+AC_SUBST(LIBPPTX_LDFLAGS)
+AC_SUBST(LIBPPTX_CFLAGS)
+AM_CONDITIONAL(HAVE_LIBZIP, test "$HAVE_LIBZIP" = yes)
+else
+   AC_MSG_WARN([pptx support disabled by configure argument .])
+   AM_CONDITIONAL(HAVE_LIBZIP, false )
 fi
 
 

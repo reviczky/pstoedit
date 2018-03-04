@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to GhostScript
 
-   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -93,7 +93,7 @@ static RSString createCmdLine(int argc, const char *const argv[])
 
 
 
-// Interface to GHostScript EXE - as an alternative to the DLL
+// Interface to GhostScript EXE - as an alternative to the DLL
 // The usage of the DLL makes problem in case of gsview, since 
 // there can only be one instance of the DLL and GhostScript active
 // in one process. So - if being called from gsview - we need to start 
@@ -133,7 +133,7 @@ static int callgsEXE(int argc, const char * const argv[])
     if (status) gsresult=0;
     else        gsresult=-1; // Failure
 
-    while (1) {
+    for ( ; ; ) { // while true but without compiler warning
         status=GetExitCodeProcess(MyProcessInformation.hProcess, &gs_status);
 		if ( !status ) {  // process-Status could not be determined
 			gsresult=-1;
@@ -155,6 +155,7 @@ static int callgsEXE(int argc, const char * const argv[])
 int callgs(int argc, const char * const argv[]) { 
 	const bool verbose = false; // debug only
 
+// #define PSTOEDITDEBUG 1
 #ifdef PSTOEDITDEBUG
 	cerr << "Commandline " << endl;
 	for (int i = 0; i < argc; i++) {
@@ -167,12 +168,21 @@ int callgs(int argc, const char * const argv[]) {
 	strcpy(dll,"gswin32.exe");  
 	*/
 
+	int result = false;
 	// check the first arg in the command line whether it contains gsdll32.dll
 	if ((strstr(argv[0],"gsdll32.dll") != NULL) || (strstr(argv[0],"gsdll64.dll") != NULL)) {
-
 #ifdef WITHDLLSUPPORT
-		int result = callgsDLL(argc, (char **) argv);
-		if (result == -1 ) /* could not even load the dll - so try the exe */
+		 result = callgsDLL(argc, (char **) argv);
+#else
+		cerr << "Sorry, but DLL support was not enabled in this version of pstoedit" << endl;
+		return 2;
+#endif
+	} else {
+		result = callgsEXE(argc,argv); // callgsDLL(argc, (char **) argv);
+	}
+
+
+		if (result == -1 ) /* could not even load the dll/exe - so try fallback exe */
 		{ 
 			const char * * newargv = new const char *[argc];
 			for (int i = 0; i< argc; i++) { newargv[i] = argv[i]; }
@@ -196,23 +206,25 @@ int callgs(int argc, const char * const argv[]) {
 #endif
 			const RSString exename( fileExists(defaultexe.value()) ? defaultexe : fallbackexe );
 			if (verbose) {
-				cerr << "loading DLL: " << argv[0] << " failed (possibly due to 32/64 bit mix - reverting to call gs as exe via: " << exename << endl;
+				cerr << "loading: " << argv[0] << " failed (possibly due to 32/64 bit mix - reverting to call gs as exe via: " << exename << endl;
 			}
 			newargv[0] = exename.value();
 			result = callgsEXE(argc,newargv);
 			delete [] newargv; /* just the array - the content is not owned */ 
 			return  result;
 		} else return result;
-#else
-		cerr << "Sorry, but DLL support was not enabled in this version of pstoedit" << endl;
-		return 2;
-#endif
+
+
+
+#if 0
 	} else {
 		if (verbose) {
 			cerr << "calling gs as exe: " << argv[0] << endl;
 		}
 		return callgsEXE(argc,argv);
 	}
+#endif
+
 }
 
 
@@ -294,7 +306,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 #endif
 	const char *gstocall;
 
-	
+	// for debugging verbose = true; 
 	if (verbose)
 			errstream << endl << "Looking up where to find the PostScript interpreter." << endl;
 

@@ -118,6 +118,7 @@ static const PaperInfo* getPaperInfo(const char * pname) {
 #endif
 		pi++;
 	}
+	cerr << "could not find paper info for page size " << pname << endl;
 	return 0;
 }
 

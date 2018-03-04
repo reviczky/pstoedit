@@ -2,7 +2,7 @@
    drvPCB1.cpp : Hans-Jürgen Jahn    (Version 1.0  10.08.02)
    this code is derived from drvSAMPL.cpp, see text below
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify

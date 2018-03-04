@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure 
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -317,7 +317,7 @@ bool f_useCoutForDiag = false; // default is cout - but some clients may redirec
 // but that would cause an incompatible interface change and is not feasible.
 
 extern "C" DLLEXPORT
-void useCoutForDiag(int flag) { f_useCoutForDiag = (bool) flag; }
+void useCoutForDiag(int flag) { f_useCoutForDiag = (bool) flag; } 
 
 
 extern "C" DLLEXPORT
@@ -354,7 +354,7 @@ extern "C" DLLEXPORT
 
 	errstream << "pstoedit: version " << version << " / DLL interface " <<
 		drvbaseVersion << " (build " << __DATE__ << " - " << buildtype << " - " << compversion << ")" 
-		" : Copyright (C) 1993 - 2006 Wolfgang Glunz\n";
+		" : Copyright (C) 1993 - 2007 Wolfgang Glunz\n";
 	// int arg = 1;
 	drvbase::SetVerbose( false );	// init
 
@@ -648,18 +648,19 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			}
 			commandline.addarg("-dNOPAUSE");
 			commandline.addarg("-dBATCH");
-			char tempbuffer[1000];
-			tempbuffer[0] = '\0';
-			strcat_s(tempbuffer, 1000, "-sDEVICE=");
-			strcat_s(tempbuffer, 1000,driveroptions);	// e.g., pdfwrite ;
-			commandline.addarg(tempbuffer);
+			RSString tempbuffer("-sDEVICE=") ; // char tempbuffer[1000];
+			// tempbuffer[0] = '\0';
+			// tempbuffer += "-sDEVICE="; // strcat_s(tempbuffer, 1000, "-sDEVICE=");
+			tempbuffer += driveroptions; // strcat_s(tempbuffer, 1000,driveroptions);	// e.g., pdfwrite ;
+			commandline.addarg(tempbuffer.value() );
 			for (unsigned int psi = 0; psi < options.psArgs().argc; psi++) {
 				commandline.addarg(options.psArgs().argv[psi]);
 			}
-			tempbuffer[0] = '\0';
-			strcat_s(tempbuffer,1000, "-sOutputFile=");
-			strcat_s(tempbuffer,1000, options.nameOfOutputFile);
-			commandline.addarg(tempbuffer);
+			tempbuffer = "-sOutputFile=";
+			tempbuffer +=  options.nameOfOutputFile; 
+			// strcat_s(tempbuffer,1000, "-sOutputFile=");
+			// strcat_s(tempbuffer,1000, options.nameOfOutputFile);
+			commandline.addarg(tempbuffer.value());
 			commandline.addarg("-c");
 			commandline.addarg("save");
 			commandline.addarg("pop");
@@ -1227,7 +1228,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				} else {
 					// outputdriver has no backend
 					// Debug or PostScript driver
-					ifstream gsoutStream(gsout.value());
+					ifstream gsoutStream(gsout.value()); 
 					if (options.verbose)
 						errstream << "now copying  '" << gsout << "' to '"
 							<< (options.nameOfOutputFile ? options.nameOfOutputFile : "standard output ") << "' ";

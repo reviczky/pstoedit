@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -347,18 +347,18 @@ void drvJAVA2::show_rectangle(const float llx, const float lly, const float urx,
 
 void drvJAVA2::show_image(const PSImage & imageinfo)
 {
-	if (outDirName == NIL || outBaseName == NIL) {
+	if (outBaseName == "") {
 		errf << "images cannot be handled via standard output. Use an output file" << endl;
 		return;
 	}
 	// write image data to separate file
-	const unsigned int sizefilename = strlen(outBaseName) + 21;
+	const unsigned int sizefilename = strlen(outBaseName.value()) + 21;
 	char *imgOutFileName = new char[sizefilename];
-	const unsigned int sizefullfilename = strlen(outDirName) + strlen(outBaseName) + 21;
+	const unsigned int sizefullfilename = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
 	char *imgOutFullFileName = new char[sizefullfilename];
 
-	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%d.img", outBaseName, numberOfImages);
-	sprintf_s(TARGETWITHLEN(imgOutFullFileName,sizefullfilename), "%s%s", outDirName, imgOutFileName);
+	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%d.img", outBaseName.value(), numberOfImages);
+	sprintf_s(TARGETWITHLEN(imgOutFullFileName,sizefullfilename), "%s%s", outDirName.value(), imgOutFileName);
 	outf << "    currentPage.add(new PSImageObject(" << imageinfo.
 		width << ", " << imageinfo.height << ", ";
 	outf << imageinfo.bits << ", " << imageinfo.ncomp << ", ";

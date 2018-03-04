@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -1507,9 +1507,7 @@ void drvDXF::show_path()
 		}
 	} else {
 		// no curveto and not forced to draw LINEs - use PolyLine/VERTEX then
-		const float lineWidth = currentLineWidth();
 		buffer << "  0\nPOLYLINE\n";
-
 		// layer
 		writeLayer(currentR(), currentG(), currentB());
 		// color
@@ -1524,7 +1522,10 @@ void drvDXF::show_path()
 			buffer << " 70\n     1\n";
 		}
 		// start and end line width
-		buffer << " 40\n" << lineWidth << "\n 41\n" << lineWidth << "\n";
+		{
+			const float lineWidth = currentLineWidth();
+			buffer << " 40\n" << lineWidth << "\n 41\n" << lineWidth << "\n";
+		}
 		for (unsigned int t = 0; t < numberOfElementsInPath(); t++) {
 			const Point & p = pathElement(t).getPoint(0);
 			drawVertex(p, true, 0);

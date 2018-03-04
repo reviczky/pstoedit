@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Fri Mar 10 23:27:41 WEST 2006
+.\" Manual page created with latex2man on Sun Sep  9 20:05:30 WEDT 2007
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "March 2006" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "September 2007" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -95,7 +95,7 @@ details.
 .PP
 .SS RELEASE LEVEL
 .PP
-This manpage documents release 3.44 of pstoedit\&.
+This manpage documents release 3.45 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -548,7 +548,7 @@ No driver specific options
 .PP
 .TP
 [\fB\-standalone\fP]
- create standalong type svg 
+ create stand\-alone type svg 
 .PP
 .TP
 [\fB\-withdtd\fP]
@@ -565,6 +565,10 @@ No driver specific options
 .TP
 [\fB\-noviewbox\fP]
  don\&'t write a view box 
+.PP
+.TP
+[\fB\-withnamespace\fP]
+ write xmlns declaration into output file 
 .PP
 .TP
 [\fB\-texmode\fP]
@@ -1015,7 +1019,7 @@ StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.
 .PP
 .TP
 [\fB\-nfw\fP]
- Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the \-pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the \-nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again \- this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
+ Newer versions of Windows (2000, XP, Vista) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the \-pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the \-nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again \- this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 .PP
 .TP
 [\fB\-winbb\fP]
@@ -1044,7 +1048,7 @@ StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.
 .PP
 .TP
 [\fB\-nfw\fP]
- Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the \-pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the \-nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again \- this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
+ Newer versions of Windows (2000, XP, Vista) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the \-pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the \-nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again \- this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 .PP
 .TP
 [\fB\-winbb\fP]
@@ -1358,7 +1362,7 @@ format and some changes to tgif to make the output format driver easier to imple
 .TP
 .B *
 Reini Urban \fBrurban_AT_sbox.tu\-graz.ac.at\fP provided input for the
-extended DXF output format driver.(\fBhttp://xarch.tu\-graz.ac.at/autocad/\fP)
+extended DXF output format driver.(\fBhttp://autocad.xarch.at/\fP)
 .PP
 .TP
 .B *

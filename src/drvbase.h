@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -330,12 +330,12 @@ protected:
 	const RSString	inFileName; // full name of input file
 	const RSString	outFileName; // full name of output file
 
-	char*         	outDirName; 	// output path with trailing slash or backslash
-	char*         	outBaseName; 	// just the basename (no path, no suffix)
+	RSString       	outDirName; 	// output path with trailing slash or backslash
+	RSString       	outBaseName; 	// just the basename (no path, no suffix)
 	unsigned int	d_argc;
 	const char **			d_argv; // array of driver argument strings
 	const class PsToEditOptions & globaloptions; 
-	float           currentDeviceHeight; // normally 792 pt; used for flipping y values.
+	float           currentDeviceHeight; // normally 792 pt (US Letter); used for flipping y values.
 	float           currentDeviceWidth;  
 	float           x_offset;
 	float           y_offset;
@@ -399,7 +399,7 @@ public:
 
 	void		setdefaultFontName(const char * n) {defaultFontName = n;}
 
-	virtual bool textIsWorthToPrint(const char *thetext) const; // in the default implementation full blank strings are ignored
+	virtual bool textIsWorthToPrint(const RSString & thetext) const; // in the default implementation full blank strings are ignored
 
 	virtual bool textCanBeMerged(const TextInfo & text1, const TextInfo & text2) const; // checked whether two pieces of text can be merged into one.
 
@@ -543,7 +543,8 @@ public:
 
 	// the push*Text methods set the textinfo_ member and then call the 
 	// showOrMergeText(textinfo_) ;
-	void    	pushText(const char *const thetext,
+	void    	pushText(const size_t len,
+				        const char *const thetext,
 					const float x, 
 					const float y,
 					const char * const glyphnames=0);

@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options 
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -132,7 +132,7 @@ public:
 	Option < RSString, RSStringValueExtractor> replacementfont;// = "Courier";
  	Option < bool, BoolTrueExtractor > nomaptoisolatin1 ;//= false;
 	Option < bool, BoolTrueExtractor > withdisplay ;//= false;
-	Option < bool, BoolTrueExtractor> noquit ;//= false;
+	Option < bool, BoolTrueExtractor > noquit ;//= false;
 	Option < bool, BoolTrueExtractor > nocurves ;//= false;		// normally curves are shown as curves if backend supports
 	Option < bool, BoolTrueExtractor > nosubpathes ;//= false;	// normally we use subpathes if the backend support them
 	Option < bool, BoolTrueExtractor > mergelines ;//= false;

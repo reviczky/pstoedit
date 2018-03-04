@@ -10,9 +10,11 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.44,wglunz34_AT_pstoedit.net)
+AC_INIT(pstoedit,3.45,wglunz34_AT_pstoedit.net)
+AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.44)
+AM_INIT_AUTOMAKE(pstoedit,3.45)
+AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
 
@@ -54,7 +56,6 @@ fi
 
 PKG_PROG_PKG_CONFIG
 
-AC_LANG(C++)
 
 AC_C_BIGENDIAN([CPPFLAGS="$CPPFLAGS -D_BIG_ENDIAN"], [CPPFLAGS="$CPPFLAGS -D_LITTLE_ENDIAN"])
 

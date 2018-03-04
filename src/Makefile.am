@@ -103,7 +103,7 @@ libpstoedit_la_SOURCES =			\
 	genericints.h 				\
 	version.h
 
-libpstoedit_la_LIBADD = ${CXX_STD_LIB} ${CXX_RUNTIME_LIB}
+libpstoedit_la_LIBADD = ${CXX_STD_LIB} ${CXX_RUNTIME_LIB} -ldl
 libpstoedit_la_LDFLAGS = -no-undefined
 
 pstoedit_SOURCES = cmdmain.cpp
@@ -121,6 +121,7 @@ pkginclude_HEADERS =				\
 	genericints.h				\
 	base64writer.h				\
 	poptions.h				\
+	papersizes.h				\
 	ordlist.h				\
 	psimage.h
 

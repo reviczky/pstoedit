@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2006  Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1999 - 2007  Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

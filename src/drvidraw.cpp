@@ -4,7 +4,7 @@
    Contributed by: Scott Pakin <pakin_AT_uiuc.edu>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1006,7 +1006,7 @@ void drvIDRAW::show_path()
 
 void drvIDRAW::show_image(const PSImage & imageinfo)
 {
-	if (outDirName == NIL || outBaseName == NIL) {
+	if (outBaseName == "") {
 		errf << "images cannot be handled via standard output. Use an output file " << endl;
 		return;
 	}

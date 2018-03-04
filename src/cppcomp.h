@@ -30,30 +30,8 @@
 # define DLLEXPORT
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-// for MS VS 8 (== cl version 14) we can use the new secure *_s string functions
-// for other systems we have to "emulate" them
-#define TARGETWITHLEN(str,len) str,len
-
-#else
-
-#define strcpy_s(de,si,so)        strcpy(de,so)
-#define strncpy_s(de,si,so,co)    strncpy(de,so,co)
-#define strcat_s(de,si,so)        strcat(de,so)
-
-// sprintf_s requires a second argument indicating the size of the target string
-// because sprintf can have any number of arguments, we cannot handle this in the 
-// same manner as the functions above. So we need to hide/unhide this second argument
-// for older compilers
-#define sprintf_s sprintf
-#define TARGETWITHLEN(str,len) str
-// sscanf_s requires a size argument for output strings, unless we use "to-string", we can use sscanf
-// but this has to be assured in each individual case !!!
-#define sscanf_s sscanf
 
 
-
-#endif
 
 #ifdef _AIX
 #define _unix
@@ -235,6 +213,68 @@ const bool true  = 1;
 #endif
 
 
+
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+// for MS VS 8 (== cl version 14) we can use the new secure *_s string functions
+// for other systems we have to "emulate" them
+#define TARGETWITHLEN(str,len) str,len
+
+#else
+
+#include I_iostream
+USESTD
+
+// approach for emulation:
+// * guarantee that the result string ends with \n (array[size-1] = 0)
+// * if the above condition cannot be achieved - exit with error message
+//
+// the implementation is far from optimal from a performance point of view - but for pstoedit this is not critical
+//
+
+static inline void strncpy_s(char * de, size_t de_size, const char *  so, size_t count)   {
+	const size_t sourcelen = strlen(so);
+	size_t tobecopied = sourcelen < count ? sourcelen : count;
+	if ( tobecopied < de_size ) {
+		while (so && *so && (tobecopied > 0) ) {
+			*de = *so; ++de; ++so; --tobecopied;
+		} // does not copy final 0
+		*de = 0;
+	} else {
+		cerr << "buffer overflow in strcpy_s. Input string: '" << so << "' count: " << count  << " sourcelen " << sourcelen << " buffersize " << de_size << endl;
+		exit(1);
+	}
+}
+static inline void strcpy_s(char * de, size_t de_size, const char * so) {
+	strncpy_s(de, de_size, so, strlen(so) );
+}
+
+static inline void strcat_s(char * de, size_t de_size, const char *  so) {
+	// copy string into de + strlen(de)
+	const size_t already_in = strlen(de);
+	strcpy_s(de + already_in, de_size - already_in, so);
+}
+
+// sprintf_s requires a second argument indicating the size of the target string
+// because sprintf can have any number of arguments, we cannot handle this in the 
+// same manner as the functions above. So we need to hide/unhide this second argument
+// for older compilers
+
+#ifdef HAVE_SNPRINTF
+#define sprintf_s snprintf
+#define TARGETWITHLEN(str,len) str,len
+#else
+#define sprintf_s sprintf
+#define TARGETWITHLEN(str,len) str
+#endif
+
+// sscanf_s requires a size argument for output strings, unless we use "to-string", we can use sscanf
+// but this has to be assured in each individual case !!!
+
+// TARGETWITHLEN is not being used in the context of sscanf
+#define sscanf_s sscanf
+
+#endif
 
 #endif
 

@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to GhostScript
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -50,21 +50,13 @@
 
 
 
-char *createCmdLine(int argc, const char *const argv[])
+static RSString createCmdLine(int argc, const char *const argv[])
 {
 	// create a single string from all args
-	unsigned int sizeneeded = 0;
-	{
-		for (unsigned int i = 0; i < (unsigned) argc; i++)
-			sizeneeded += strlen(argv[i]) + 2;
-	}
-	char *result = new char[sizeneeded + 1];
-	*result = '\0';
-	{
-		for (unsigned int i = 0; i < (unsigned) argc; i++) {
-			strcat_s(result,sizeneeded + 1, argv[i]);
-			strcat_s(result,sizeneeded + 1, " ");	//lint !e803
-		}
+	RSString result("");
+	for (unsigned int i = 0; i < (unsigned) argc; i++) {
+			result += argv[i];
+			result += " ";
 	}
 	return result;
 }
@@ -122,11 +114,11 @@ static int callgsEXE(int argc, const char * const argv[])
          // CreateProcess fills in this structure
     DWORD gs_status = 0;
 
-	char * commandline = createCmdLine(argc,argv);
+	const RSString& commandline = createCmdLine(argc,argv);
 
 	BOOL status = CreateProcess(
               NULL, // Application Name 
-              (LPSTR)commandline,
+              (LPSTR)commandline.value(),
               NULL, // Process attributes (NULL == Default)
               NULL, // Thread-Attributes (Default)
               FALSE, // InheritHandles
@@ -138,8 +130,7 @@ static int callgsEXE(int argc, const char * const argv[])
              (LPPROCESS_INFORMATION)(&MyProcessInformation)
             );
 
-    delete [] commandline;
-	if (status) gsresult=0;
+    if (status) gsresult=0;
     else        gsresult=-1; // Failure
 
     while (1) {
@@ -170,6 +161,11 @@ int callgs(int argc, const char * const argv[]) {
 	}
 #endif
 
+	/* force usage of exe - for test purposes only 
+	char * dll = strstr(argv[0],"gsdll32.dll");
+	strcpy(dll,"gswin32.exe");  
+	*/
+
 	// check the first arg in the command line whether it contains gsdll32.dll
 	if (strstr(argv[0],"gsdll32.dll") != NULL) {
 
@@ -180,6 +176,7 @@ int callgs(int argc, const char * const argv[]) {
 		return 2;
 #endif
 	} else {
+		cerr << "calling gs as exe" << endl;
 		return callgsEXE(argc,argv);
 	}
 }
@@ -189,9 +186,8 @@ int callgs(int argc, const char * const argv[]) {
 // not a windows system
 int callgs(int argc, const char *const argv[])
 {
-	char *commandline = createCmdLine(argc, argv);
-	const int result = system(commandline);
-	delete[]commandline;
+	const RSString& commandline = createCmdLine(argc, argv);
+	const int result = system(commandline.value());
 	return result;
 }
 #endif
@@ -226,15 +222,19 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 #endif
 	const char *gstocall;
 
-#if defined (_WIN32)
+	
+	if (verbose)
+			errstream << endl << "Looking up where to find the PostScript interpreter." << endl;
 
+#if defined (_WIN32)
 
 	RSString gstocallfromregistry = getRegistryValue(errstream, "common", "gstocall");
 	if (gstocallfromregistry.value() != 0) {
 		if (verbose)
 			errstream << "found value in registry" << endl;
 		static char buffer[2000];
-		strncpy_s(buffer,2000, gstocallfromregistry.value(),2000);
+		buffer[2000-1] = 0; // add EOS
+		strncpy_s(buffer,2000-1, gstocallfromregistry.value(),2000-1);
 		//  delete[]gstocallfromregistry;
 		gstocall = buffer;
 	} else {
@@ -255,7 +255,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 											   "GhostscriptDLL",
 											   "",	//default
 											   pathname,
-											   1000,
+											   sizeof(pathname),
 											   fullinifilename);
 		if (result > 0) {
 			if (verbose) {
@@ -271,10 +271,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 			}
 			gstocall = pathname;
 		} else {
-//      if (verbose) errstream<< "nothing found so far, trying getenv GS " << endl;
-//      gstocall = getenv("GS");
-//      if (gstocall == 0) {
-
+		    if (verbose) errstream<< "nothing found in gsview32.ini file - using find_gs to lookup latest version of GhostScript in registry " << endl;
 			static char buf[1000];
 			if (find_gs(buf, sizeof(buf), 550, getPstoeditsetDLLUsage() , gsregbase)) { 
 				if (verbose) {
@@ -286,8 +283,6 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 			} else {
 				if (verbose)
 					errstream << "find_gs couldn't find GS in registry" << endl;
-				if (verbose)
-					errstream << "nothing found so far, trying default " << endl;
 				if (strlen(defaultgs) > 0) {
 					gstocall = defaultgs;
 				} else {
@@ -298,7 +293,6 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 					gstocall = 0;
 				}
 			}
-//      }
 		}
 	}
 #elif defined (__OS2__)
@@ -307,7 +301,8 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 		if (verbose)
 			errstream << "found value in pstoedit.ini" << endl;
 		static char buffer[2000];
-		strncpy(buffer, gstocallfromregistry.value(),2000);
+		buffer[2000-1] = 0; // add EOS
+		strncpy(buffer, gstocallfromregistry.value(),2000-1);
 		gstocall = buffer;
 	} else {
 		if (verbose)
@@ -349,10 +344,11 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 				errstream << "found value in " << fullinifilename << endl;
 			gstocall = pathname;
 		} else {
-			if (verbose)
-				errstream << "nothing found so far, trying default " << endl;
-			if (strlen(defaultgs) > 0) {
+
+			if (strlen(defaultgs) > 0) {	
 				gstocall = defaultgs;
+				if (verbose)
+					errstream << "nothing found so far, trying default: " << defaultgs << endl;
 			} else {
 				errstream <<
 					"Fatal: don't know which interpreter to call. " <<
@@ -372,14 +368,16 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 			if (verbose)
 				errstream << "found value in registry" << endl;
 			static char buffer[2000];
-			strncpy(buffer, gstocallfromregistry.value(),2000);
+			buffer[2000-1] = 0; // add EOS
+			strncpy(buffer, gstocallfromregistry.value(),2000-1);
 			gstocall = buffer;
 		} else {
 			{
-				if (verbose)
-					errstream << "nothing found so far, trying default " << endl;
+
 				if (strlen(defaultgs) > 0) {
 					gstocall = defaultgs;
+					if (verbose)
+						errstream << "nothing found so far, trying default: " << defaultgs << endl;
 				} else {
 					errstream <<
 						"Fatal: don't know which interpreter to call. " <<
@@ -400,7 +398,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 
 
 #if defined(_WIN32)
-static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int /* buflen */ )
+static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int   buflen   )
 {
 	const char *PIOptions = 0;
 	if (verbose)
@@ -419,7 +417,7 @@ static const char *getOSspecificOptions(int verbose, ostream & errstream, char *
 										   "GhostscriptInclude",
 										   "",	//default
 										   buffer,
-										   1000,
+										   buflen,
 										   fullinifilename);
 	if (result > 0) {			//2.
 		if (verbose) {
@@ -534,32 +532,33 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 	static char buffer[2000];
 	const char *PIOptions;
 	if (verbose)
-		errstream << "first trying " << lookupplace << " for common/GS_LIB" << endl;
+		errstream << endl << "Looking up specific options for the PostScript interpreter." << endl << "First trying " << lookupplace << " for common/GS_LIB" << endl;
 
 	// try first registry/ini value, then GS_LIB and at last the default
 	RSString PIOptionsfromregistry = getRegistryValue(errstream, "common", "GS_LIB");
 	if (PIOptionsfromregistry.value() != 0) {	// 1.
 		if (verbose)
 			errstream << "found value in " << lookupplace << endl;
-		strncpy_s(buffer,2000, PIOptionsfromregistry.value(),2000);
+		strncpy_s(buffer,sizeof(buffer), PIOptionsfromregistry.value(),sizeof(buffer));
 		// delete[]PIOptionsfromregistry;
 		PIOptions = buffer;
 	} else {					//2.-4.
 
-		PIOptions = getOSspecificOptions(verbose, errstream, buffer,2000);
+		PIOptions = getOSspecificOptions(verbose, errstream, buffer,sizeof(buffer) );
 
 		if (PIOptions == NULL) {	//3.
 			if (verbose)
-				errstream << "still not found an entry - now trying GS_LIB " << endl;
+				errstream << "still not found an entry - now trying GS_LIB env var." << endl;
 			PIOptions = getenv("GS_LIB");
 			if (PIOptions == NULL) {	//4.
-				if (verbose)
-					errstream << "nothing found so far, trying default " << endl;
-				if (strlen(defaultPIOptions) > 0)
+				if (verbose) errstream << "GS_LIB not set" << endl;
+				if (strlen(defaultPIOptions) > 0) {
 					PIOptions = defaultPIOptions;
-				else
+					if (verbose) errstream << "nothing found so far, trying default: " << defaultPIOptions<< endl;
+				} else {
 					PIOptions = 0;
-			} else {
+				}
+			} else { 
 				if (verbose)
 					errstream << "GS_LIB is set to:" << PIOptions << endl;
 			}
@@ -568,12 +567,13 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 
 	if (PIOptions && (PIOptions[0] != '-') && (PIOptions[1] != 'I')) {
 		static char returnbuffer[2000];
-		strncpy_s(returnbuffer,2000, "-I",2000);
-		strcat_s(returnbuffer,2000, PIOptions);
+		returnbuffer[2000-1]=0;
+		strncpy_s(returnbuffer,sizeof(returnbuffer)-1, "-I",sizeof(returnbuffer)-1);
+		strcat_s(returnbuffer,sizeof(returnbuffer)-1, PIOptions);
 		PIOptions = returnbuffer;
 	}
-	if (verbose && PIOptions)
-		errstream << "Value returned :" << PIOptions << endl;
+	if (verbose )
+		errstream << "Value returned:" << (PIOptions ? PIOptions : "") << endl << endl;
 	return PIOptions;
 }
 

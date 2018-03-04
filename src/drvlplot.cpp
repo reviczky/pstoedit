@@ -152,6 +152,9 @@
 #include I_stdio
 #include I_stdlib
 
+// #include "papersizes.h"  // not yet done - remove of local page size related code and replace it with the one from papersizes.h
+
+
 #ifdef OLD_LIBPLOTTER
 #define NO_LIBPLOTTER_CGM_SUPPORT
 #endif

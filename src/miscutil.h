@@ -64,13 +64,7 @@ const char directoryDelimiter = '/';
 // NOTE: The following two dup functions are made inline to solve the problem
 // of allocation and deallocation in different .dlls. 
 // a strdup which uses new instead of malloc
-inline char *cppstrdup(const char * const src, unsigned int addon = 0)
-{
-	const unsigned int newlen = strlen(src) + 1 + addon;
-	char * const ret = new char[newlen];
-	strncpy_s(ret, newlen, src, newlen );
-	return ret;
-}
+
 inline char * cppstrndup(const char * const src, const unsigned int length, const unsigned int addon = 0 )
 {
 	char * const ret = new char[length + 1 + addon];
@@ -80,6 +74,10 @@ inline char * cppstrndup(const char * const src, const unsigned int length, cons
 	}
 	return ret;
 
+}
+inline char *cppstrdup(const char * const src, unsigned int addon = 0)
+{
+	return cppstrndup(src,strlen(src),addon);
 }
 
 // DLLEXPORT char * cppstrdup(const char * src, unsigned int addon = 0);
@@ -171,7 +169,13 @@ public:
 		}
 		return *this;
 	}
+	const RSString & operator = (const char * rs) {
+		copy(rs,strlen(rs));
+		return *this;
+	}
+
  	RSString& operator+= (const RSString &rs);
+	RSString& operator+= (const char * rs);
 	friend bool operator==(const RSString & ls,const RSString & rs);
 	friend bool operator!=(const RSString & ls,const RSString & rs); 
 
@@ -319,8 +323,7 @@ DLLEXPORT RSString getRegistryValue(ostream& errstream, const char * typekey, co
 DLLEXPORT unsigned long P_GetPathToMyself(const char *name, char * returnbuffer, unsigned long buflen);
 DLLEXPORT unsigned long searchinpath(const char* EnvPath,const char* name, char *returnbuffer,unsigned long buflen);
 DLLEXPORT void errorMessage(const char * text); // display an error message (cerr or msgbox)
-
-DLLEXPORT void copy_file(const istream& infile,ostream& outfile) ;
+DLLEXPORT void copy_file(istream& infile,ostream& outfile) ;
 
 
 

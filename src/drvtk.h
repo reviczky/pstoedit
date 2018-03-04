@@ -31,6 +31,7 @@
 
 #include "drvbase.h"
 
+
 class drvTK : public drvbase {
 
 public:
@@ -65,9 +66,7 @@ private:
 	TempFile		tempFile;
 	ofstream		&buffer;
 	int			objectId;
-	enum { ssize = 20 };
-	char pheight[ssize];
-	char pwidth[ssize];
+	const struct PaperInfo * paperinfo;
 
 	void			canvasCreate();
 	void			outputEscapedText(const char* string);

@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,9 +37,9 @@
 #endif
 
 static void splitFullFileName(const char *const fullName, 
-							  char *pathName, unsigned int plen,
-							  char *baseName, unsigned int blen,
-							  char *fileExt, unsigned int elen)
+							  RSString& pathName, 
+							  RSString& baseName, 
+							  RSString& fileExt)
 {
 	if (fullName == NIL)
 		return;
@@ -55,26 +55,20 @@ static void splitFullFileName(const char *const fullName,
 	if (c != NIL) {
 		baseName_T = cppstrdup(c + 1);
 		*(c + 1) = 0;
-		if (pathName != NIL)
-			strcpy_s(pathName, plen, fullName_T);
+		pathName = fullName_T;
 	} else {
 		baseName_T = cppstrdup(fullName_T);
-		if (pathName != NIL)
-			strcpy_s(pathName, plen, "");
+		pathName = "";
 	}
 
 	c = strrchr(baseName_T, '.');
 	if (c != NIL) {
-		if (fileExt != NIL)
-			strcpy_s(fileExt, elen, c + 1);
+		fileExt =  (c + 1);
 		*c = 0;
-		if (baseName != NIL)
-			strcpy_s(baseName, blen, baseName_T);
+		baseName = baseName_T;
 	} else {
-		if (fileExt != NIL)
-			strcpy_s(fileExt, elen, "");
-		if (baseName != NIL)
-			strcpy_s(baseName, blen, baseName_T);
+		fileExt = "";
+		baseName = baseName_T;
 	}
 	delete[]baseName_T;
 	delete[]fullName_T;
@@ -98,10 +92,10 @@ DOptions_ptr(Pdriverdesc_p->createDriverOptions()),
 errf(theerrStream),
 inFileName(nameOfInputFile_p),
 outFileName(nameOfOutputFile_p), 
-outDirName(0), outBaseName(0), d_argc(0), d_argv(0), globaloptions(globaloptions_p),
+outDirName(""), outBaseName(""), d_argc(0), d_argv(0), globaloptions(globaloptions_p),
 	// set some common defaults
-	currentDeviceHeight(792.0f ),
-currentDeviceWidth(640.0f ),
+currentDeviceHeight(792.0f ),  // US Letter
+currentDeviceWidth(612.0f ),   // US Letter
 x_offset(0.0f),
 y_offset(0.0f),
 currentPageNumber(0),
@@ -110,7 +104,7 @@ defaultFontName(0),
 ctorOK(true),
 saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), driveroptions(0),
 	// default for PI1 and PI2 and clippath
-	currentPath(0), outputPath(0), lastPath(0)
+	currentPath(0), last_currentPath(0), outputPath(0), lastPath(0)
 	// default for textInfo_ and lasttextInfo_
 {
 
@@ -123,14 +117,12 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 	}
 
 	if (nameOfOutputFile_p) {
-		const unsigned int stringsize = strlen(nameOfOutputFile_p) + 1;
-		outDirName = new char[stringsize];
-		outBaseName = new char[stringsize];
-		splitFullFileName(nameOfOutputFile_p, outDirName, stringsize, outBaseName,stringsize, NIL,0);
+		RSString extension; // not needed
+		splitFullFileName(nameOfOutputFile_p, outDirName, outBaseName, extension );
 		if (verbose) {
-			errf << "nameofOutputFile:'" << nameOfOutputFile_p;
-			errf << "' outDirName:" << outDirName;
-			errf << "' outBaseName:" << outBaseName;
+			errf << "nameofOutputFile: '" << nameOfOutputFile_p;
+			errf << "' outDirName: '" << outDirName;
+			errf << "' outBaseName: '" << outBaseName;
 			errf << "'" << endl;
 		}
 	}
@@ -231,10 +223,10 @@ drvbase::~drvbase()
 		driveroptions = NIL;
 	}
 //  delete[] bboxes; bboxes = NIL;
-	delete[]outDirName;
-	outDirName = NIL;
-	delete[]outBaseName;
-	outBaseName = NIL;
+//	delete[]outDirName;
+//	outDirName = NIL;
+//	delete[]outBaseName;
+//	outBaseName = NIL;
 	Pdriverdesc = NIL;
 
 	delete DOptions_ptr;
@@ -361,19 +353,15 @@ bool basedrawingelement::operator == (const basedrawingelement & bd2) const
 	return 1;
 }
 
-bool drvbase::textIsWorthToPrint(const char *thetext) const
+bool drvbase::textIsWorthToPrint(const RSString& thetext) const
 {
 	// check whether it contains just blanks. This makes
 	// problems, e.g. with the xfig backend.
-	if (strlen(thetext) > 0) {
-		const char *cp = thetext;
-		while (*cp) {
-			if (*cp != ' ')
-				return true;
-			cp++;
-		}
-	}
-	return false;
+  const char *cp = thetext.value();
+  for (size_t i = thetext.length(); i>0; i--)
+    if (*cp++ != ' ')
+      return true;
+  return false;
 }
 
 bool drvbase::textCanBeMerged(const TextInfo & text1, const TextInfo & text2) const
@@ -509,17 +497,17 @@ void drvbase::showOrMergeText()
 		}
 	} else {
 		// always just "pass through" if it is worth to be printed
-		if (textIsWorthToPrint(textInfo_.thetext.value())) {
+		if (textIsWorthToPrint(textInfo_.thetext)) {
 			flushTextBuffer(false); // false -> use textinfo_
 		}
 	}
 }
 
-void drvbase::pushText(const char *const thetext, const float x, const float y, const char * const glyphnames)
+void drvbase::pushText(const size_t len, const char *const thetext, const float x, const float y, const char * const glyphnames)
 {
 		textInfo_.x = x;
 		textInfo_.y = y;
-		textInfo_.thetext.copy(thetext);
+		textInfo_.thetext.copy(thetext, len);
 		textInfo_.glyphnames.copy(glyphnames ? glyphnames:"");
 		textInfo_.remappedfont= false;
 		const char *remappedFontName = drvbase::theFontMapper().mapFont(textInfo_.currentFontName);
@@ -564,7 +552,7 @@ void drvbase::pushHEXText(const char *const thetext, const float x, const float 
 			j++;j++;
 		}
 		decodedText[textlen/2] = '\0';
-		pushText(decodedText,x,y,glyphnames);
+		pushText(textlen/2,decodedText,x,y,glyphnames);
 		delete [] decodedText;
 	}
 }

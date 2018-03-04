@@ -2441,7 +2441,7 @@ YY_RULE_SETUP
 			float width  = pop(); 
 			if (width < 1.0 ) { width = 612 * backend->getScale() ; }
 			backend->setCurrentDeviceWidth(width);
-			if (backend->verbose) errf << "handling setPageSize " << height << " " << width << endl;
+			if (backend->verbose) errf << "handling setPageSize (w,h)(" << width  << "," << height << ")"<< endl;
 			}
 	YY_BREAK
 case 52:
@@ -2501,7 +2501,8 @@ YY_RULE_SETUP
 			const float y = pop(); /* just the last moveto (0 0 in case of makefont) */
 			const float x = pop(); /* just the last moveto (0 0 in case of makefont) */
 			/* backend->dumpText(start_of_text,x,y); */
-			backend->pushText(start_of_text,x + backend->getCurrentFontMatrix()[4],y + backend->getCurrentFontMatrix()[5]);
+			backend->pushText(strlen(start_of_text),start_of_text,x + backend->getCurrentFontMatrix()[4],y + backend->getCurrentFontMatrix()[5]);
+			/* old - zeropatch backend->pushText(start_of_text,x + backend->getCurrentFontMatrix()[4],y + backend->getCurrentFontMatrix()[5]); */
 			}
 	YY_BREAK
 case 56:

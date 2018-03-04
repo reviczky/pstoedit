@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<!-- Manual page created with latex2man on Fri Mar 10 23:27:42 WEST 2006 --
+<!-- Manual page created with latex2man on Sun Sep  9 20:05:32 WEDT 2007 --
 -- Author of latex2man: Juergen.Vollmer@informatik-vollmer.de --
 -- NOTE: This file is generated, DO NOT EDIT. -->
 <html>
@@ -9,8 +9,8 @@
 PSTOEDIT 
 </h1>
 <h4 align=center>Dr. Wolfgang Glunz </h4>
-<h4 align=center>March 2006</h4>
-<h4 align=center>Version 3.44</h4>
+<h4 align=center>September 2007</h4>
+<h4 align=center>Version 3.45</h4>
 <tt>pstoedit</tt>
 - a tool converting PostScript and PDF files into various 
 vector graphic formats 
@@ -202,7 +202,7 @@ details.
 <h4><a name="section_6">RELEASE LEVEL</a></h4>
 
 <p>
-This manpage documents release 3.44 of <tt>pstoedit</tt>.
+This manpage documents release 3.45 of <tt>pstoedit</tt>.
 <p>
 <h4><a name="section_7">USE</a></h4>
 
@@ -826,7 +826,7 @@ use local DTD
 <dt>[<b>-standalone</b>]
 </dt>
 <dd> 
-create standalong type svg 
+create stand-alone type svg 
 <p>
 </dd>
 <dt>[<b>-withdtd</b>]
@@ -851,6 +851,12 @@ do not write a group around pathes
 </dt>
 <dd> 
 don't write a view box 
+<p>
+</dd>
+<dt>[<b>-withnamespace</b>]
+</dt>
+<dd> 
+write xmlns declaration into output file 
 <p>
 </dd>
 <dt>[<b>-texmode</b>]
@@ -1562,7 +1568,7 @@ prune line ends
 <dt>[<b>-nfw</b>]
 </dt>
 <dd> 
-Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the -pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the -nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
+Newer versions of Windows (2000, XP, Vista) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the -pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the -nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 <p>
 </dd>
 <dt>[<b>-winbb</b>]
@@ -1608,7 +1614,7 @@ prune line ends
 <dt>[<b>-nfw</b>]
 </dt>
 <dd> 
-Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the -pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the -nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
+Newer versions of Windows (2000, XP, Vista) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the -pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the -nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 <p>
 </dd>
 <dt>[<b>-winbb</b>]
@@ -1921,7 +1927,7 @@ format and some changes to tgif to make the output format driver easier to imple
 <p>
 </li>
 <li>Reini Urban <a href ="mailto:rurban_AT_sbox.tu-graz.ac.at"><tt>rurban_AT_sbox.tu-graz.ac.at</tt></a> provided input for the
-extended DXF output format driver.(<a href ="http://xarch.tu-graz.ac.at/autocad/"><tt>http://xarch.tu-graz.ac.at/autocad/</tt></a>)
+extended DXF output format driver.(<a href ="http://autocad.xarch.at/"><tt>http://autocad.xarch.at/</tt></a>)
 <p>
 </li>
 <li>Glenn M. Lewis <a href ="mailto:glenn_AT_gmlewis.com"><tt>glenn_AT_gmlewis.com</tt></a> provided RenderMan (RIB),

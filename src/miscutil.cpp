@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2006  Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2007  Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -207,14 +207,10 @@ RSString full_qualified_tempnam(const char *pref)
 	if ((strchr(filename, '\\') == 0) && (strchr(filename, '/') == 0)) {	// keine Pfadangaben..
 		char cwd[400];
 		(void) getcwd(cwd, 400);
-		const unsigned int size =  strlen(filename) + strlen(cwd) + 2;
-		char *buffer = new char[size];
-		strcpy_s(buffer,size, cwd);
-		strcat_s(buffer,size, "/");
-		strcat_s(buffer,size, filename);
+		RSString result = cwd;
+		result += "/";
+		result += filename;
 		free(filename);
-		const RSString result(buffer);
-		delete [] buffer;
 		return result;
 	} else {
 		const RSString result(filename);
@@ -282,13 +278,13 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 	unused(&errstream);
 
 //  CString subkey = CString("SOFTWARE\\wglunz\\") + CString(product);
-	char subkeyn[1000];
-	subkeyn[0] = '\0';
-	strcat_s(subkeyn,1000, "SOFTWARE\\wglunz\\");
-	strcat_s(subkeyn,1000, typekey);
-	RSString result = tryregistry(HKEY_CURRENT_USER, subkeyn, key);
+	RSString subkeyn("SOFTWARE\\wglunz\\"); // char subkeyn[1000];
+	// subkeyn[0] = '\0';
+	// strcat_s(subkeyn,1000, "SOFTWARE\\wglunz\\");
+	subkeyn += typekey; // strcat_s(subkeyn,1000, typekey);
+	RSString result = tryregistry(HKEY_CURRENT_USER, subkeyn.value(), key);
 	if (!result.value() )
-		result = tryregistry(HKEY_LOCAL_MACHINE, subkeyn, key);
+		result = tryregistry(HKEY_LOCAL_MACHINE, subkeyn.value(), key);
 	return result;
 #elif defined (__OS2__)
 	//query a "real" OS/2 profile pstoedit.ini
@@ -387,15 +383,26 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 }
 //lint -restore
 
-void copy_file(const istream & infile, ostream & outfile)
+void copy_file(istream & infile, ostream & outfile)
 {
 #if 1
+	if ( infile.peek() != EOF ) {
+		// Calling the copy operator in case the input file is empty results in the error state
+		// of the target stream to be set to fail which then blocks any further IO on the output
+		// This is not want we want, hence we have to check in advance whether there is something
+		// available in the input buffer.
+		// Alternatively I tried if (infile.rdbuf())->in_avail() ) 
+		// but - in_avail seems to be compiler dependent. E.g. GNU seems to return
+		// the number of available chars even without prior peek. MSVC seems to return 0
+		// up to the first peek (or other operation).
+		// 
 #if defined(__SUNPRO_CC) && (__SUNPRO_CC < 0x500)
-	// for SUN CC 4.2 rdbuf is non const - i guess this is an error since all other compilers have it const
-	outfile << ((istream&)infile).rdbuf();
+		// for SUN CC 4.2 rdbuf is non const - i guess this is an error since all other compilers have it const
+		outfile << ((istream&)infile).rdbuf();
 #else
-	outfile << infile.rdbuf();
+		outfile << infile.rdbuf();
 #endif
+	}
 #else
 // long version. should do the same as above
 	unsigned char c;
@@ -442,8 +449,9 @@ ifstream & TempFile::asInput()
 {
 	close();
 	inFileStream.open(tempFileName);
-	if (outFileStream.fail())
+	if (outFileStream.fail()) {
 		cerr << "openening " << tempFileName << "failed " << endl;
+	}
 	return inFileStream; //lint !e1536 //exposing low access member
 }
 
@@ -608,11 +616,12 @@ RSString::~RSString()
 }
 
 
-RSString & RSString::operator += (const RSString & rs)
+RSString & RSString::operator += (const char* rs)
 {
-	assert(rs.content != 0);
+	assert(rs != 0);
 	assert(content != 0);
-	unsigned int newlen = stringlength + rs.stringlength  + 1;
+	const unsigned int rslength = strlen(rs);
+	unsigned int newlen = stringlength + rslength  + 1;
 	char *newstring = newContent(newlen);
 //cout << ":" << content << ":" << stringlength << endl;
 //cout << ":" << rs.content << ":" << rs.stringlength << endl;
@@ -621,9 +630,9 @@ RSString & RSString::operator += (const RSString & rs)
 		newstring[i] = content[i];
 	}
 //	strncpy(newstring, content, stringlength);
-	for (unsigned int j = 0 ; j < rs.stringlength ; j++)
+	for (unsigned int j = 0 ; j < rslength ; j++)
 	{
-		newstring[stringlength+j] = rs.content[j];
+		newstring[stringlength+j] = rs[j];
 	}
 //	strncat(newstring, rs.content, rs.stringlength);
 	newstring[newlen-1] = '\0';
@@ -632,6 +641,11 @@ RSString & RSString::operator += (const RSString & rs)
 	allocatedLength = newlen;
 	stringlength= newlen-1;
 	return *this;
+}
+
+RSString & RSString::operator += (const RSString & rs)
+{
+	return (*this) += rs.content;
 }
 
 

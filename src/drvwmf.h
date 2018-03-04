@@ -69,7 +69,7 @@ public:
 		drawBoundingBox(true,"-drawbb",0,0,"draw bounding box",0,false),
 		pruneLineEnds(true,"-p",0,0,"prune line ends",0,false),
 		notforWindows(true,"-nfw",0,0,"not for Windows (meaningful under *nix only)",
-		"Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. "
+		"Newer versions of Windows (2000, XP, Vista) will not accept WMF/EMF files generated when this option is set and the input contains Text. "
 		"But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using "
 		"a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice "
 		"can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing "

@@ -42,7 +42,7 @@ public:
 	}*options;
 
 #include "drvfuncs.h"
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
+	// void show_rectangle(const float llx, const float lly, const float urx, const float ury);
 	void show_text(const TextInfo & textInfo);
 
     virtual void    show_image(const PSImage & imageinfo);
@@ -53,14 +53,9 @@ public:
  private:
 	void print_coords();
     int id;
-    int getid();
+	int getid() { return id++; }
 
 };
 
-
-inline int drvSK::getid()
-{
-    return id++;
-}
 #endif
  

@@ -3,7 +3,7 @@
    HPGL / HPGL2 Device driver supporting text commands
 
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
-   Copyright (C) 2000 - 2006 Katzmann & Glunz (fill stuff)
+   Copyright (C) 2000 - 2007 Katzmann & Glunz (fill stuff)
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
     This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,14 @@
     Changed sections are delimited by:
     //  Start DA hpgl color addition
     //  End DA hpgl color addition
+
+for more info about HPGL see: 
+http://lprng.sourceforge.net/DISTRIB/RESOURCES/HPGL_short_summary.html
+http://www.multicam.com/main/mat/hpgl.htm
+ 
+http://www.piclist.com/techref/language/hpgl.htm
+http://www.piclist.com/techref/language/hpgl/commands.htm
+ 
 
 */
 

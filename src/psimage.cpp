@@ -1,7 +1,7 @@
 /*
    psimage.cpp : This file is part of pstoedit.
   
-   Copyright (C) 1997- 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1997- 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
    Support for Image::writeIdrawImage by Scott Johnston
 

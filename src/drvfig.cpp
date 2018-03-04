@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -814,14 +814,14 @@ void drvFIG::show_path()
 	case dashed:
 		linestyle = 1;
 		break;
+	case dotted:
+		linestyle = 2;
+		break;
 	case dashdot:
 		linestyle = 3;
 		break;
-	case dotted:
-		linestyle = 4;
-		break;
 	case dashdotdot:
-		linestyle = 2;
+		linestyle = 4;
 		break;
 	}
 
@@ -830,7 +830,7 @@ void drvFIG::show_path()
 	// Calculate BBox
 	bbox_path();
 
-	unsigned int curvetos = nrOfCurvetos();
+	const unsigned int curvetos = nrOfCurvetos();
 	if (curvetos == 0)			// polyline
 	{
 		buffer << "# polyline\n";
@@ -873,18 +873,18 @@ void drvFIG::show_path()
 
 void drvFIG::show_image(const PSImage & imageinfo)
 {
-	if (outDirName == NULL || outBaseName == NULL) {
+	if (outBaseName == "") {
 		errf << "images cannot be handled via standard output. Use an output file " << endl;
 		return;
 	}
 
-	const unsigned int filenamelen = strlen(outBaseName) + 21;
+	const unsigned int filenamelen = strlen(outBaseName.value()) + 21;
 	char *EPSoutFileName = new char[filenamelen];
-	const unsigned int fullfilenamelen = strlen(outDirName) + strlen(outBaseName) + 21;
+	const unsigned int fullfilenamelen = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
 	char *EPSoutFullFileName = new char[fullfilenamelen];
 
-	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName, imgcount++);
-	sprintf_s(TARGETWITHLEN(EPSoutFullFileName,fullfilenamelen), "%s%s", outDirName, EPSoutFileName);
+	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName.value(), imgcount++);
+	sprintf_s(TARGETWITHLEN(EPSoutFullFileName,fullfilenamelen), "%s%s", outDirName.value(), EPSoutFileName);
 	ofstream outi(EPSoutFullFileName);
 	if (!outi) {
 		errf << "Could not open file " << EPSoutFullFileName << " for output";

@@ -150,10 +150,10 @@ save_line(ostream & outf, float r, float g, float b, float width,
 	}
 }
 
-static void save_string(ostream & outf, const char *str)
+static void save_string(ostream & outf, size_t len, const char *str)
 {
 	outf << '"';
-	while (*str) {
+	while (len-->0) {
 		int c = *str++ & 0xFF;
 		if (c >= 0 && c <= 127 && isprint(c)) {
 			if (c == '"')
@@ -172,7 +172,7 @@ void drvSK::show_text(const TextInfo & info)
 	outf << "Fn(\"" << info.currentFontName.value() << "\")\n";
 	outf << "Fs(" << info.currentFontSize << ")\n";
 	outf << "txt(";
-	save_string(outf, info.thetext.value());
+	save_string(outf, info.thetext.length(), info.thetext.value());
 	outf << ",(";
 	if (info.currentFontAngle) {
 		double angle = info.currentFontAngle * PI / 180.0;
@@ -216,13 +216,20 @@ void drvSK::show_path()
 	print_coords();
 
 }
-
+#if 0
 void drvSK::show_rectangle(const float llx, const float lly, const float urx, const float ury)
 {
-	//cerr << "Rectangle\n";
+
+// according to Vladimir Eltsov this is incomplete:
+//
+// For a long time pstoedit is shipped with incomplete implementation of rectangles in the 
+// removes rectangle support from drvsk (so that the default path 
+// representation is used), which I have found to produce much more useful 
+// conversion.
+//
 	outf << "r(" << urx - llx << ",0,0," << ury - lly << "," << llx << "," << lly << ")\n";
 }
-
+#endif
 
 bool drvSK::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) const
 {

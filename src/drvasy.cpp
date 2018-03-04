@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_geocities.com
+  Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ drvASY::derivedConstructor(drvASY):
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2006 Wolfgang Glunz"
+       << "// pstoedit is Copyright (C) 1993 - 2007 Wolfgang Glunz"
        << " <wglunz34_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
@@ -272,9 +272,8 @@ void drvASY::close_page()
 
 void drvASY::show_image(const PSImage & imageinfo)
 {
-  if (outBaseName == NULL) {
-    errf << "images cannot be handled via standard output. Use an output file"
-	 << endl;
+  if (outBaseName == "" ) {
+    errf << "images cannot be handled via standard output. Use an output file" << endl;
     return;
   }
 

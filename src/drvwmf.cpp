@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2013 Wolfgang Glunz
+   Copyright (C) 1998 - 2014 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -108,6 +108,7 @@ const DWORD32 PLACEABLEKEY = 0x9AC6CDD7L;
 const short PLACEABLESIZE = 22;
 // see also http://premium.microsoft.com/msdn/library/techart/html/emfdcode.htm
 // regarding alignment (Wo Gl)
+// http://msdn.microsoft.com/en-us/library/windows/desktop/ms534075(v=vs.85).aspx
 #pragma pack(2)
 struct PLACEABLEHEADER {
 	DWORD32 key;
@@ -203,19 +204,60 @@ void drvWMF::initMetaDC(HDC hdc){
 }
 
 drvWMF::derivedConstructor(drvWMF):
-constructBase,
-oldColoredPen(NIL),
-oldColoredBrush(NIL),
-enhanced(false),
-outFile(0L)
+	constructBase,
+	oldColoredPen(NIL),
+	oldColoredBrush(NIL),
+	enhanced(false),
+	outFile(0L)
 {
+ 	// some basic inits / could also be done in init list
+	// put here because static analysis tools find a lot of uninitialized usage
+	// in case we do a premature return from the ctor (see below)
+	y_offset = 0;
+	x_offset = 0;
+
+	// in maxY and maxX are the highest values of the drawing
+	maxY = 0;
+	maxX = 0;
+	maxStatus = false;				// 0, until first value set in maxY and maxX
+
+	// in minX und minY are the lowest values of the drawing
+	minX = 0;
+	minY = 0;
+	minStatus = false;				// 0, until first value set in minX and minY
+
+	// setup pen for drawing functions
+	const POINT PenWidth = { 0, 0 };
+	penData.lopnStyle = PS_SOLID;	// solid pen
+	penData.lopnWidth = PenWidth;	// width of pen
+	penData.lopnColor = RGB(0, 0, 0);	// color of pen: black
+	coloredPen = 0L;
+
+	// setup brush for drawing functions
+	brushData.lbStyle = BS_SOLID;	// solid brush
+	brushData.lbColor = RGB(0, 0, 0);	// color of brush (black)
+	brushData.lbHatch = 0L;		// no pattern
+	coloredBrush = 0L;
+
+	// set default font
+	if (options->mapToArial) {
+		const char *const defaultfontname = "Arial";
+		setCurrentFontName(defaultfontname, false /* is standard font */ );
+	} else {
+		const char *const defaultfontname = "System";
+		setCurrentFontName(defaultfontname, false /* is standard font */ );
+	}
+	myFont = 0L;
+	oldFont = 0L;
+
+
 	// do some consistency checking
 	if (! ( (sizeof(PLACEABLEHEADER) == PLACEABLESIZE) || (sizeof(PLACEABLEHEADER) == (PLACEABLESIZE+2)) ) ) {
 		errf <<
 			"WARNING: structure size mismatch. Please contact author. Expecting :"
 			<< PLACEABLESIZE << " found " << sizeof(PLACEABLEHEADER) << endl;
 		errf << "sizeof(WORD)    = " << sizeof(WORD) << endl;	// MSVC:  2
-		errf << "sizeof(DWORD32)   = " << sizeof(DWORD32) << endl;	// MSVC:  4
+		errf << "sizeof(DWORD32) = " << sizeof(DWORD32) << endl;// MSVC:  4
 		errf << "sizeof(RECT)    = " << sizeof(RECT) << endl;	// MSVC: 16
 		errf << "sizeof(HANDLE)  = " << sizeof(HANDLE) << endl;	// MSVC:  4
  		ctorOK = false;
@@ -234,7 +276,7 @@ outFile(0L)
 	}
 
 	// which output format?
-	if (strcmp(Pdriverdesc->symbolicname, "emf") == 0) {
+	if (strcmp(driverdesc.symbolicname, "emf") == 0) {
 		enhanced = true;
 	}
 
@@ -261,8 +303,8 @@ outFile(0L)
 		} else {
 	// under non Windows systems we cannot use PlayEnhMetafile
 			if (Verbose()) errf << " not creating with bounding box " << endl;
-			// metaDC = CreateEnhMetaFile(desktopDC, outFileName.value(), &bbox , description);
-			metaDC = CreateEnhMetaFile(desktopDC, outFileName.value(), NIL, description);
+			// metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), &bbox , description);
+			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), NIL, description);
 		}
 
 		if (!metaDC) {
@@ -278,56 +320,21 @@ outFile(0L)
 		tempName = full_qualified_tempnam("wmftemp");
 
 		// standard metafile for Win16
-		metaDC = CreateMetaFile(tempName.value());
+                // coverity[tainted_string]
+		metaDC = CreateMetaFile(tempName.c_str());
 		if (!metaDC) {
 			errf << "ERROR: could not open temporary metafile: " << tempName << endl;
 			ctorOK = false;
 			return;
 		}
 
-		if ((outFile = fopen(outFileName.value(), "wb")) == 0L) {
+		if ((outFile = fopen(outFileName.c_str(), "wb")) == 0L) {
 			errf << "ERROR: cannot open final metafile " << outFileName << endl;
 			ctorOK = false;
 			return;
 		}
 	}
 
-	y_offset = 0;
-	x_offset = 0;
-
-	// in maxY and maxX are the highest values of the drawing
-	maxY = 0;
-	maxX = 0;
-	maxStatus = 0;				// 0, until first value set in maxY and maxX
-
-	// in minX und minY are the lowest values of the drawing
-	minX = 0;
-	minY = 0;
-	minStatus = 0;				// 0, until first value set in minX and minY
-
-	// setup pen for drawing functions
-	const POINT PenWidth = { 0, 0 };
-	penData.lopnStyle = PS_SOLID;	// solid pen
-	penData.lopnWidth = PenWidth;	// width of pen
-	penData.lopnColor = RGB(0, 0, 0);	// color of pen: black
-	coloredPen = 0L;
-
-	// setup brush for drawing functions
-	brushData.lbStyle = BS_SOLID;	// solid brush
-	brushData.lbColor = RGB(0, 0, 0);	// color of brush (black)
-	brushData.lbHatch = 0L;		// no pattern
-	coloredBrush = 0L;
-
-	// set default font
-	if (options->mapToArial) {
-		const char *const defaultfontname = "Arial";
-		setCurrentFontName(defaultfontname, false /* is standard font */ );
-	} else {
-		const char *const defaultfontname = "System";
-		setCurrentFontName(defaultfontname, false /* is standard font */ );
-	}
-	myFont = 0L;
-	oldFont = 0L;
 
 	// set reasonable text drawing mode
 	SetBkMode(metaDC, TRANSPARENT);
@@ -336,9 +343,9 @@ outFile(0L)
 	SetTextAlign(metaDC, TA_BASELINE);
 }
 
+#ifdef _WIN32
 static void writeErrorCause(const char * mess)  
 {
-#ifdef _WIN32
 	DWORD ec = GetLastError(); 
 	LPVOID lpMsgBuf; 
 	(void)FormatMessage( 
@@ -352,9 +359,21 @@ static void writeErrorCause(const char * mess)
 	);	
 	cerr << "Error Code for "  << mess << " ec: " << ec << " " << (char*) lpMsgBuf << endl; 
 	LocalFree( lpMsgBuf ); 
-#endif
 }
+#else
+static inline void writeErrorCause(const char * )  {}
+#endif
 
+const int WMF_short_max = 32767;
+const int WMF_short_min = -32768;
+
+static short int_to_WMFRange(int i) {
+	return i <  WMF_short_min
+		     ? WMF_short_min
+			 : ((i > WMF_short_max)
+			     ? WMF_short_max
+			     : (unsigned short) i);
+}
 
 drvWMF::~drvWMF()
 {
@@ -368,17 +387,23 @@ drvWMF::~drvWMF()
 	if (Verbose()) errf << "original PostScript Bounding Box   : " << psBBox.ll.x_  << " " << psBBox.ll.y_ << " " << psBBox.ur.x_ << " " << psBBox.ur.y_ << endl;
 	if (Verbose()) errf << "transformed PostScript Bounding Box: " << minX << " " << minY << " " << maxX << " " << maxY << endl;
 
-
+	
 	// is the output within signed integer boundaries?
-	if (minX < -20000 ||
-		minX > 20000 ||
-		minY < -20000 ||
-		minY > 20000 || maxX < -20000 || maxX > 20000 || maxY < -20000 || maxY > 20000) {
+	if (minX < WMF_short_min || minX > WMF_short_max ||
+		minY < WMF_short_min || minY > WMF_short_max || 
+		maxX < WMF_short_min || maxX > WMF_short_max || 
+		maxY < WMF_short_min || maxY > WMF_short_max) {
 		// issue warning, coordinate overflow possible !
 		errf << "Possible coordinate overflow, reduce scale! " << endl;
 		errf << "  Origin: " << minX << " , " << minY << endl;
 		errf << "  Size: " << maxX - minX << " , " << maxY - minY << endl;
 	}
+	// truncate to unsigned short range
+	minX=int_to_WMFRange(minX);
+	minY=int_to_WMFRange(minY);
+	maxX=int_to_WMFRange(maxX);
+	maxY=int_to_WMFRange(maxY);
+
 	// set dummy pixel, if not EMF
 //  if( !enhanced && drawBoundingBox )
 	if (options->drawBoundingBox) {
@@ -449,7 +474,7 @@ drvWMF::~drvWMF()
 			if (Verbose()) cout << "creating final metafile" << endl;
 			// cout << "creating with bounding box 2: " << minX << "," << minY<< "," << maxX<< "," << maxY << endl;
 			// don't need a BB here - Windows will calculate it by itself (that is the whole purpose of the later replay)
-			metaDC = CreateEnhMetaFile(desktopDC, outFileName.value(), NIL, description);
+			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), NIL, description);
 			initMetaDC(metaDC);
 		}
 		if (metaDC) {
@@ -487,7 +512,7 @@ drvWMF::~drvWMF()
 		WORD checksum;
 	
 
-		if ((inFile = fopen(tempName.value(), "rb")) != 0L) {
+		if ((inFile = fopen(tempName.c_str(), "rb")) != 0L) {
 			if (outFile != 0L) {
 				// setup header
 				pHd.key = LittleEndian_Dword32(PLACEABLEKEY);
@@ -530,8 +555,8 @@ drvWMF::~drvWMF()
 
 			fclose(inFile);
 		}
-		(void)remove(tempName.value());
-		// cout << "tmp name " << tempName.value() << endl;
+		(void)remove(tempName.c_str());
+		// cout << "tmp name " << tempName.c_str() << endl;
 
 	}
 
@@ -573,6 +598,7 @@ void drvWMF::setDrawAttr()
 	case solid:
 		penData.lopnStyle = PS_SOLID;
 		break;
+	default: ; // not expected
 	}
 
 	const POINT PenWidth = { (int) (currentLineWidth() + .5), 0 };	// rounded int
@@ -616,83 +642,83 @@ int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int
 
 	theFontRec.lfWeight = FW_DONTCARE;	// default: don't care
 
-	if (strstr(textinfo.currentFontWeight.value(), "Regular"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Regular"))
 		theFontRec.lfWeight = FW_NORMAL;	// other values don't work  
 
-	if (strstr(textinfo.currentFontWeight.value(), "Medium"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Medium"))
 		theFontRec.lfWeight = FW_NORMAL;	// other values don't work  
 
-	if (strstr(textinfo.currentFontWeight.value(), "Normal"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Normal"))
 		theFontRec.lfWeight = FW_NORMAL;
 
 	if (options->emulateNarrowFonts) {
-		if (strstr(textinfo.currentFontWeight.value(), "Thin") ||
-			strstr(textinfo.currentFontName.value(), "Thin") ||
-			strstr(textinfo.currentFontFullName.value(), "Thin")) {
+		if (strstr(textinfo.currentFontWeight.c_str(), "Thin") ||
+			strstr(textinfo.currentFontName.c_str(), "Thin") ||
+			strstr(textinfo.currentFontFullName.c_str(), "Thin")) {
 			theFontRec.lfWidth = textHeight / 3;	// narrow font emulation (trial and error value for Arial font)
 		}
 
-		if (strstr(textinfo.currentFontWeight.value(), "Extralight") ||
-			strstr(textinfo.currentFontName.value(), "Extralight") ||
-			strstr(textinfo.currentFontFullName.value(), "Extralight")) {
+		if (strstr(textinfo.currentFontWeight.c_str(), "Extralight") ||
+			strstr(textinfo.currentFontName.c_str(), "Extralight") ||
+			strstr(textinfo.currentFontFullName.c_str(), "Extralight")) {
 			theFontRec.lfWidth = textHeight / 4;	// narrow font emulation (trial and error value for Arial font)
 		}
 
-		if (strstr(textinfo.currentFontWeight.value(), "Ultralight") ||
-			strstr(textinfo.currentFontName.value(), "Ultralight") ||
-			strstr(textinfo.currentFontFullName.value(), "Ultralight")) {
+		if (strstr(textinfo.currentFontWeight.c_str(), "Ultralight") ||
+			strstr(textinfo.currentFontName.c_str(), "Ultralight") ||
+			strstr(textinfo.currentFontFullName.c_str(), "Ultralight")) {
 			theFontRec.lfWidth = textHeight / 4;	// narrow font emulation (trial and error value for Arial font)
 		}
 
-		if (strstr(textinfo.currentFontWeight.value(), "Light") ||
-			strstr(textinfo.currentFontName.value(), "Light") ||
-			strstr(textinfo.currentFontFullName.value(), "Light") ||
-			strstr(textinfo.currentFontWeight.value(), "Condensed") ||
-			strstr(textinfo.currentFontName.value(), "Condensed") ||
-			strstr(textinfo.currentFontFullName.value(), "Condensed")) {
+		if (strstr(textinfo.currentFontWeight.c_str(), "Light") ||
+			strstr(textinfo.currentFontName.c_str(), "Light") ||
+			strstr(textinfo.currentFontFullName.c_str(), "Light") ||
+			strstr(textinfo.currentFontWeight.c_str(), "Condensed") ||
+			strstr(textinfo.currentFontName.c_str(), "Condensed") ||
+			strstr(textinfo.currentFontFullName.c_str(), "Condensed")) {
 			theFontRec.lfWidth = textHeight / 3;	// narrow font emulation (trial and error value for Arial font)
 		}
 	}
 
-	if (strstr(textinfo.currentFontWeight.value(), "Semibold") ||
-		strstr(textinfo.currentFontName.value(), "Semibold") ||
-		strstr(textinfo.currentFontFullName.value(), "Semibold"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Semibold") ||
+		strstr(textinfo.currentFontName.c_str(), "Semibold") ||
+		strstr(textinfo.currentFontFullName.c_str(), "Semibold"))
 		theFontRec.lfWeight = FW_BOLD;	// other values don't work
 
-	if (strstr(textinfo.currentFontWeight.value(), "Demibold") ||
-		strstr(textinfo.currentFontName.value(), "Demibold") ||
-		strstr(textinfo.currentFontFullName.value(), "Demibold"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Demibold") ||
+		strstr(textinfo.currentFontName.c_str(), "Demibold") ||
+		strstr(textinfo.currentFontFullName.c_str(), "Demibold"))
 		theFontRec.lfWeight = FW_BOLD;	// other values don't work
 
-	if (strstr(textinfo.currentFontWeight.value(), "Bold") ||
-		strstr(textinfo.currentFontName.value(), "Bold") ||
-		strstr(textinfo.currentFontFullName.value(), "Bold"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Bold") ||
+		strstr(textinfo.currentFontName.c_str(), "Bold") ||
+		strstr(textinfo.currentFontFullName.c_str(), "Bold"))
 		theFontRec.lfWeight = FW_BOLD;
 
-	if (strstr(textinfo.currentFontWeight.value(), "Extrabold") ||
-		strstr(textinfo.currentFontName.value(), "Extrabold") ||
-		strstr(textinfo.currentFontFullName.value(), "Extrabold"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Extrabold") ||
+		strstr(textinfo.currentFontName.c_str(), "Extrabold") ||
+		strstr(textinfo.currentFontFullName.c_str(), "Extrabold"))
 		theFontRec.lfWeight = FW_BOLD;	// other values don't work
 
-	if (strstr(textinfo.currentFontWeight.value(), "Ultrabold") ||
-		strstr(textinfo.currentFontName.value(), "Ultrabold") ||
-		strstr(textinfo.currentFontFullName.value(), "Ultrabold"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Ultrabold") ||
+		strstr(textinfo.currentFontName.c_str(), "Ultrabold") ||
+		strstr(textinfo.currentFontFullName.c_str(), "Ultrabold"))
 		theFontRec.lfWeight = FW_BOLD;	// other values don't work
 
-	if (strstr(textinfo.currentFontWeight.value(), "Heavy") ||
-		strstr(textinfo.currentFontName.value(), "Heavy") ||
-		strstr(textinfo.currentFontFullName.value(), "Heavy"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Heavy") ||
+		strstr(textinfo.currentFontName.c_str(), "Heavy") ||
+		strstr(textinfo.currentFontFullName.c_str(), "Heavy"))
 		theFontRec.lfWeight = FW_BOLD;	// other values don't work
 
-	if (strstr(textinfo.currentFontWeight.value(), "Black") ||
-		strstr(textinfo.currentFontName.value(), "Black") ||
-		strstr(textinfo.currentFontFullName.value(), "Black"))
+	if (strstr(textinfo.currentFontWeight.c_str(), "Black") ||
+		strstr(textinfo.currentFontName.c_str(), "Black") ||
+		strstr(textinfo.currentFontFullName.c_str(), "Black"))
 		theFontRec.lfWeight = FW_BOLD;	// other values don't work
 
-	if ((strstr(textinfo.currentFontName.value(), "Italic") != NIL) ||
-		(strstr(textinfo.currentFontName.value(), "Oblique") != NIL) ||
-		(strstr(textinfo.currentFontFullName.value(), "Italic") != NIL) ||
-		(strstr(textinfo.currentFontFullName.value(), "Oblique") != NIL)) {
+	if ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL) ||
+		(strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL) ||
+		(strstr(textinfo.currentFontFullName.c_str(), "Italic") != NIL) ||
+		(strstr(textinfo.currentFontFullName.c_str(), "Oblique") != NIL)) {
 		theFontRec.lfItalic = TRUE;
 	} else {
 		theFontRec.lfItalic = 0;
@@ -705,24 +731,24 @@ int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int
 	theFontRec.lfQuality = PROOF_QUALITY;
 	theFontRec.lfPitchAndFamily = VARIABLE_PITCH | FF_DONTCARE;	// let every font be possible
 
-	if ((strstr(textinfo.currentFontFullName.value(), "Symbol") != NIL) ||
-		(strstr(textinfo.currentFontFullName.value(), "symbol") != NIL)) {
+	if ((strstr(textinfo.currentFontFullName.c_str(), "Symbol") != NIL) ||
+		(strstr(textinfo.currentFontFullName.c_str(), "symbol") != NIL)) {
 		theFontRec.lfCharSet = SYMBOL_CHARSET;
 		strcpy_s(theFontRec.lfFaceName, LF_FACESIZE, "symbol");
-	} else if ((strstr(textinfo.currentFontFamilyName.value(), "Computer Modern") != NIL) ) {
+	} else if ((strstr(textinfo.currentFontFamilyName.c_str(), "Computer Modern") != NIL) ) {
 		// special handling for TeX Fonts - fix supplied by James F. O'Brien (job at cs.berkeley.edu)
         theFontRec.lfWeight = FW_NORMAL;
   	    theFontRec.lfItalic = 0;
   	    theFontRec.lfUnderline = 0;
 	    theFontRec.lfCharSet = ANSI_CHARSET;
-  	    strcpy_s(theFontRec.lfFaceName,LF_FACESIZE,  textinfo.currentFontName.value());
+  	    strcpy_s(theFontRec.lfFaceName,LF_FACESIZE,  textinfo.currentFontName.c_str());
 	} else 	{
 		theFontRec.lfCharSet = ANSI_CHARSET;
 
 		if (options->mapToArial)
 			strcpy_s(theFontRec.lfFaceName,LF_FACESIZE, "Arial");
 		else /* formerly we used currentFontFamilyName but FontName seems to be better */
-			strcpy_s(theFontRec.lfFaceName,LF_FACESIZE, textinfo.currentFontName.value());
+			strcpy_s(theFontRec.lfFaceName,LF_FACESIZE, textinfo.currentFontName.c_str());
 	}
 
 	if (myFont) {
@@ -743,8 +769,25 @@ int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int
 
 
 // fill point array and draw
-void drvWMF::drawPoly(POINT * aptlPoints, int *aptlNumPts, polyType type)
+void drvWMF::drawPoly(polyType type)
 {
+	const unsigned int numOfElements = numberOfElementsInPath();
+	// get us twice the number of elements in path,
+	// as maybe every subpath is closed and consists of ONE point!
+	POINT *aptlPoints = new POINT[2 * numOfElements];
+	if (aptlPoints == 0) {
+		errf << "ERROR: Cannot allocate memory for point-array" << endl;
+		return;
+	}
+	// get us twice the number of elements in path,
+	// as maybe every subpath is closed and consists of ONE point!
+	int *aptlNumPts = new int[2 * numOfElements];
+	if (aptlNumPts == 0) {
+		errf << "ERROR: Cannot allocate memory for pointNum-array" << endl;
+		delete [] aptlPoints;
+		return;
+	}
+
 	POINT lastStart = { 0, 0 };
 	bool lastWasMoveTo = false;
 	bool lastWasClosePath = false;
@@ -752,7 +795,6 @@ void drvWMF::drawPoly(POINT * aptlPoints, int *aptlNumPts, polyType type)
 	unsigned int numOfPts = 0;
 	unsigned int p = 0;
 
-	const unsigned int numOfElements = numberOfElementsInPath();
 	for (unsigned int n = 0; n < numOfElements &&
 		 p < 2 * numberOfElementsInPath() && numOfPolies < 2 * numOfElements; n++) {
 		const basedrawingelement & elem = pathElement(n);
@@ -790,7 +832,7 @@ void drvWMF::drawPoly(POINT * aptlPoints, int *aptlNumPts, polyType type)
 			} else {
 				maxX = aptlPoints[p].x + lineWidth;
 				maxY = aptlPoints[p].y + lineWidth;
-				maxStatus = 1;
+				maxStatus = true;
 			}
 		}
 
@@ -959,6 +1001,8 @@ void drvWMF::drawPoly(POINT * aptlPoints, int *aptlNumPts, polyType type)
 			}
 		}
 	}
+	delete[]aptlPoints;
+	delete[]aptlNumPts;
 }
 
 
@@ -977,21 +1021,6 @@ void drvWMF::open_page()
 
 void drvWMF::show_path()
 {	
-	// get us twice the number of elements in path,
-	// as maybe every subpath is closed and consists of ONE point!
-	POINT *aptlPoints = new POINT[2 * numberOfElementsInPath()];
-	if (aptlPoints == 0) {
-		errf << "ERROR: Cannot allocate memory for point-array" << endl;
-		return;
-	}
-	// get us twice the number of elements in path,
-	// as maybe every subpath is closed and consists of ONE point!
-	int *aptlNumPts = new int[2 * numberOfElementsInPath()];
-	if (aptlNumPts == 0) {
-		errf << "ERROR: Cannot allocate memory for pointNum-array" << endl;
-		delete [] aptlPoints;
-		return;
-	}
 	// update pen/brush
 	setDrawAttr();
 
@@ -999,13 +1028,13 @@ void drvWMF::show_path()
 	switch (currentShowType()) {
 	case drvbase::stroke:
 		// draw lines
-		drawPoly(aptlPoints, aptlNumPts, TYPE_LINES);
+		drawPoly(TYPE_LINES);
 		break;
 
 	case drvbase::fill:
 	case drvbase::eofill:
 		// draw filled polygon
-		drawPoly(aptlPoints, aptlNumPts, TYPE_FILL);
+		drawPoly(TYPE_FILL);
 		break;
 
 	default:
@@ -1014,8 +1043,6 @@ void drvWMF::show_path()
 		break;
 	}
 
-	delete[]aptlPoints;
-	delete[]aptlNumPts;
 }
 
 
@@ -1076,26 +1103,26 @@ void drvWMF::show_text(const TextInfo & textinfo)
 	} else {
 		maxX = xMax;
 		maxY = yMax;
-		maxStatus = 1;
+		maxStatus = true;
 	}
 
-	size_t textLen = strlen(textinfo.thetext.value());
+	size_t textLen = strlen(textinfo.thetext.c_str());
 	if (options->pruneLineEnds) {
 		/* check for '#' at lineend */
-		if (textLen > 0 && textinfo.thetext.value()[textLen - 1] == '#') {
+		if (textLen > 0 && textinfo.thetext.c_str()[textLen - 1] == '#') {
 			/* write one character less */
 			textLen--;
 		}
 	}
 
 #if defined(_WIN32)
-	(void)TextOut(metaDC, x1, y1, textinfo.thetext.value(), textLen);
+	(void)TextOut(metaDC, x1, y1, textinfo.thetext.c_str(), (int) textLen);
 	// TextOut(metaDC, 10, 10, "hello",4);
 #else
 
 	if (options->notforWindows) {
 		// the user is aware of generating non-portable output
-		TextOut(metaDC, x1, y1, textinfo.thetext.value(), textLen);
+		TextOut(metaDC, x1, y1, textinfo.thetext.c_str(), textLen);
 	} else {
 		// we are not running Windows - so we need an emulation - see note below
 		const long textdistance = (long) pythagoras((double)(x1-x2), (double)(y1-y2));
@@ -1106,7 +1133,7 @@ void drvWMF::show_text(const TextInfo & textinfo)
 			pxDistance[letter] = letterspace;
 		}
 		const UINT fuOptions = 0;
-		ExtTextOut (metaDC, x1, y1, fuOptions, 0, textinfo.thetext.value(), textLen, pxDistance);
+		ExtTextOut (metaDC, x1, y1, fuOptions, 0, textinfo.thetext.c_str(), textLen, pxDistance);
 		delete [] pxDistance;
 
 		static bool warningwritten = false;
@@ -1198,7 +1225,7 @@ void drvWMF::show_rectangle(const float llx, const float lly, const float urx, c
 	} else {
 		maxX = xMax;
 		maxY = yMax;
-		maxStatus = 1;
+		maxStatus = true;
 	}
 
 	if (0 && currentShowType() == drvbase::stroke) {
@@ -1264,7 +1291,7 @@ void drvWMF::show_image(const PSImage & image)
 	} else {
 		maxX = xMax;
 		maxY = yMax;
-		maxStatus = 1;
+		maxStatus = true;
 	}
 
 	// calc long-padded size of scanline 
@@ -1402,7 +1429,7 @@ void drvWMF::show_image(const PSImage & image)
 // Under libemf, a createMetaFile effectively creates an enhMetaFile but that confuses almost all
 // programs which expect to read an WMF with an aldus placeable header
 // 
-static DriverDescriptionT < drvWMF > D_wmf("wmf", "Windows metafile", "","wmf", true,	// backend supports subpathes
+static DriverDescriptionT < drvWMF > D_wmf("wmf", "MS Windows Metafile", "","wmf", true,	// backend supports subpathes
 										   // if subpathes are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
@@ -1425,7 +1452,7 @@ static DriverDescriptionT < drvWMF > D_wmf("wmf", "Windows metafile", "","wmf", 
 										   );
 #endif
 
-static DriverDescriptionT < drvWMF > D_emf("emf", "Enhanced Windows metafile", "","emf", true,	// backend supports subpathes
+static DriverDescriptionT < drvWMF > D_emf("emf", "Enhanced MS Windows Metafile", "","emf", true,	// backend supports subpathes
 										   // if subpathes are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)

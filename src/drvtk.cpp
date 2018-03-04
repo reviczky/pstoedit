@@ -7,7 +7,7 @@
 
    drvsample.cpp : Backend for TK
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,8 +77,8 @@ constructBase, buffer(tempFile.asOutput()), objectId(1),paperinfo(0)
 	x_offset = 0.0;				/* set to fit to tk page      */
 	y_offset = 0.0;				/*          "                 */
 
-    const RSString pagesize = getPageSize();
-	paperinfo = getPaperInfo(pagesize.value());
+    const RSString& pagesize = getPageSize();
+	paperinfo = getPaperInfo(pagesize.c_str());
 	// cout << "Paper Info for " << pagesize << " is " << (void*) paperinfo << endl;
 	if (!paperinfo) { paperinfo = getPaperInfo("Letter"); } //default 
 
@@ -988,15 +988,16 @@ void drvTK::open_page()
 
 void drvTK::show_text(const TextInfo & textinfo)
 {
-	int condensedfont = (strstr(textinfo.currentFontName.value(), "Condensed") != NIL);
-	int narrowfont = (strstr(textinfo.currentFontName.value(), "Narrow") != NIL);
-	int boldfont = (strstr(textinfo.currentFontName.value(), "Bold") != NIL);
-	int italicfont = ((strstr(textinfo.currentFontName.value(), "Italic") != NIL)
-					  || (strstr(textinfo.currentFontName.value(), "Oblique") != NIL));
-	char*  tempfontname = cppstrdup(textinfo.currentFontName.value()) ; // char tempfontname[1024];
+	int condensedfont = (strstr(textinfo.currentFontName.c_str(), "Condensed") != NIL);
+	int narrowfont = (strstr(textinfo.currentFontName.c_str(), "Narrow") != NIL);
+	int boldfont = (strstr(textinfo.currentFontName.c_str(), "Bold") != NIL);
+	int italicfont = ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL)
+					  || (strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL));
+	char*  tempfontname = cppstrdup(textinfo.currentFontName.c_str()) ; // char tempfontname[1024];
 	char fonttype = 'r';
 	char *i;
 	int actualFontSize;
+	// coverity[uninit_use_in_call]
 	i = strchr(tempfontname, '-');
 	if (i != NIL) {
 		*i = '\0';
@@ -1012,7 +1013,7 @@ void drvTK::show_text(const TextInfo & textinfo)
 
 
 	buffer << " -text \"";
-	outputEscapedText(textinfo.thetext.value());
+	outputEscapedText(textinfo.thetext.c_str());
 	buffer << endl << "\"";
 	buffer << " -font {-*-" << tempfontname << "-";
 	if (boldfont)
@@ -1029,10 +1030,10 @@ void drvTK::show_text(const TextInfo & textinfo)
 	buffer << actualFontSize
 		<< "-72-72-*-*-*-*"
 		<< "}" << " -anchor sw" << " -fill " << colorstring(currentR(), currentG(), currentB())
-		<< " -tags \"" << options->tagNames << "\" ]" << endl;
+		<< " -tags \"" << options->tagNames.value << "\" ]" << endl;
 
-	if (strcmp(options->tagNames.value.value(), "") && !(options->noImPress)) {
-		buffer << "set Group($Global(CurrentCanvas),$i) \"" << options->tagNames << "\"" << endl;
+	if (strcmp(options->tagNames.value.c_str(), "") && !(options->noImPress)) {
+		buffer << "set Group($Global(CurrentCanvas),$i) \"" << options->tagNames.value << "\"" << endl;
 	}
 	delete [] tempfontname;
 }
@@ -1054,7 +1055,7 @@ void drvTK::show_path()
 		}
 		buffer << " -outline \"" << colorstring(currentR(), currentG(), currentB())
 			<< "\"" << " -width " << (currentLineWidth()? currentLineWidth() : 1)
-			<< "p" << " -tags \"" << options->tagNames << "\" ]" << endl;
+			<< "p" << " -tags \"" << options->tagNames.value << "\" ]" << endl;
 	} else {
 		if (fillpat == 1) {
 			buffer << "set i [$Global(CurrentCanvas) create polygon ";
@@ -1063,17 +1064,17 @@ void drvTK::show_path()
 				<< "\"";
 			buffer << " -outline \"" << colorstring(currentR(), currentG(), currentB())
 				<< "\"" << " -width " << (currentLineWidth()? currentLineWidth() : 1)
-				<< "p" << " -tags \"" << options->tagNames << "\" ]" << endl;
+				<< "p" << " -tags \"" << options->tagNames.value << "\" ]" << endl;
 		} else {
 			buffer << "set i [$Global(CurrentCanvas) create line ";
 			print_coords();
 			buffer << " -fill \"" << colorstring(currentR(), currentG(), currentB())
 				<< "\"" << " -width " << (currentLineWidth()? currentLineWidth() : 1)
-				<< "p" << " -tags \"" << options->tagNames << "\" ]" << endl;
+				<< "p" << " -tags \"" << options->tagNames.value << "\" ]" << endl;
 		}
 	}
-	if (strcmp(options->tagNames.value.value(), "") && !(options->noImPress)) {
-		buffer << "set Group($Global(CurrentCanvas),$i) \"" << options->tagNames << "\"" << endl;
+	if (strcmp(options->tagNames.value.c_str(), "") && !(options->noImPress)) {
+		buffer << "set Group($Global(CurrentCanvas),$i) \"" << options->tagNames.value << "\"" << endl;
 	}
 }
 

@@ -766,7 +766,7 @@ drvplot::derivedConstructor(drvplot):constructBase
 //	const char *type = "meta";	// default - now in options in .h file
  	bool portable_metafile = false;  // binary is not portable - ascii is
 
-	if (strcmp(Pdriverdesc->symbolicname, "gmfa") == 0) {
+	if (strcmp(driverdesc.symbolicname, "gmfa") == 0) {
 		const char t[] = "yes";
 		(void)Plotter::parampl("META_PORTABLE", (void *) t);
 		portable_metafile = true;	// won't need to reopen outf in binary mode
@@ -783,10 +783,10 @@ drvplot::derivedConstructor(drvplot):constructBase
 			unsigned int j;
 
 			for (j = 0; j < NUM_LIBPLOT_PAGE_SIZES; j++)
-				if (strcmp(pagesize.value(), known_page_sizes[j].name) == 0
+				if (strcmp(pagesize.c_str(), known_page_sizes[j].name) == 0
 					||
 					(known_page_sizes[j].alias
-					 && strcmp(pagesize.value(), known_page_sizes[j].alias) == 0)) {
+					 && strcmp(pagesize.c_str(), known_page_sizes[j].alias) == 0)) {
 					matched = true;
 					break;
 				}
@@ -861,7 +861,7 @@ drvplot::derivedConstructor(drvplot):constructBase
 	for (unsigned int i = 0; i < d_argc;) {
 		assert(d_argv && d_argv[i]);
 
-		if (strcmp(Pdriverdesc->symbolicname, "plot") == 0) {
+		if (strcmp(driverdesc.symbolicname, "plot") == 0) {
 			if ((i + 1) < d_argc) {
 				if (strcmp(d_argv[i], "type") == 0)
 					type = d_argv[i + 1];
@@ -918,14 +918,14 @@ drvplot::derivedConstructor(drvplot):constructBase
 	// instantiate the fake Plotter class instead
 
 #ifdef HAVE_LIBPLOTTER
-	if ((strcmp(Pdriverdesc->symbolicname, "plot") == 0)
+	if ((strcmp(driverdesc.symbolicname, "plot") == 0)
 #ifdef WITHSHORTCUTS
-		|| (strncmp(Pdriverdesc->symbolicname, "plot-", 5) == 0)
+		|| (strncmp(driverdesc.symbolicname, "plot-", 5) == 0)
 #endif
 		) {
 #ifdef WITHSHORTCUTS
-		if (strncmp(Pdriverdesc->symbolicname, "plot-", 5) == 0) {
-			options->type.value = Pdriverdesc->symbolicname + 5;
+		if (strncmp(driverdesc.symbolicname, "plot-", 5) == 0) {
+			options->type.value = driverdesc.symbolicname + 5;
 			// cout << "type : " << type << endl;
 		}
 #endif
@@ -1136,9 +1136,9 @@ static inline int plotcolor(const float f)
 
 void drvplot::show_text(const TextInfo & textinfo)
 {
-	if (strlen(textinfo.thetext.value()) > 0) {
+	if (strlen(textinfo.thetext.c_str()) > 0) {
 		(void)plotter->ffontsize(textinfo.currentFontSize);
-		(void)plotter->fontname(textinfo.currentFontName.value());
+		(void)plotter->fontname(textinfo.currentFontName.c_str());
 		(void)plotter->pencolor(plotcolor(textinfo.currentR),
 						  plotcolor(textinfo.currentG), plotcolor(textinfo.currentB));
 		const float *matrix = getCurrentFontMatrix();
@@ -1153,7 +1153,7 @@ void drvplot::show_text(const TextInfo & textinfo)
 						 sinv * (double) matrix[2],
 						 sinv * (double) matrix[3], textinfo.x + x_offset, textinfo.y + y_offset);
 		(void)plotter->fmove(0.0, 0.0);
-		(void)plotter->label(textinfo.thetext.value());
+		(void)plotter->label(textinfo.thetext.c_str());
 		(void)plotter->restorestate();
 	}
 }
@@ -1299,7 +1299,7 @@ static DriverDescriptionT < drvplot > D_plot("plot", "GNU libplot output types, 
 // one can say -f plot-xxx.
 
 #ifndef NO_LIBPLOTTER_PNM_SUPPORT
-static DriverDescriptionT < drvplot > D_plotpnm("plot-pnm", "pnm  via GNU libplot", "", "pnm", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotpnm("plot-pnm", "pnm via GNU libplot", "", "pnm", false,	// backend does not support subpaths
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
@@ -1314,7 +1314,7 @@ static DriverDescriptionT < drvplot > D_plotpnm("plot-pnm", "pnm  via GNU libplo
 
 //#endif
 #ifndef NO_LIBPLOTTER_CGM_SUPPORT
-static DriverDescriptionT < drvplot > D_plotcgm("plot-cgm", "cgm  via GNU libplot", "", "cgm", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotcgm("plot-cgm", "cgm via GNU libplot", "", "cgm", false,	// backend does not support subpaths
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
@@ -1325,7 +1325,7 @@ static DriverDescriptionT < drvplot > D_plotcgm("plot-cgm", "cgm  via GNU libplo
 												);
 #endif
 
-static DriverDescriptionT < drvplot > D_plotai("plot-ai", "ai   via GNU libplot","",  "ai", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotai("plot-ai", "ai via GNU libplot","",  "ai", false,	// backend does not support subpaths
 											   true,	// backend supports curves
 											   true,	// backend supports filled elements with edges 
 											   true,	// backend supports text
@@ -1336,7 +1336,7 @@ static DriverDescriptionT < drvplot > D_plotai("plot-ai", "ai   via GNU libplot"
 											   );
 
 #if defined(PL_LIBPLOT_VER) &&  (PL_LIBPLOT_VER > 400)
-static DriverDescriptionT < drvplot > D_plotsvg("plot-svg", "svg  via GNU libplot", "", "svg", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotsvg("plot-svg", "svg via GNU libplot", "", "svg", false,	// backend does not support subpaths
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
@@ -1347,7 +1347,7 @@ static DriverDescriptionT < drvplot > D_plotsvg("plot-svg", "svg  via GNU libplo
 												);
 #endif
 
-static DriverDescriptionT < drvplot > D_plotps("plot-ps", "ps   via GNU libplot", "", "ps", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotps("plot-ps", "ps via GNU libplot", "", "ps", false,	// backend does not support subpaths
 											   true,	// backend supports curves
 											   true,	// backend supports filled elements with edges 
 											   true,	// backend supports text
@@ -1357,7 +1357,7 @@ static DriverDescriptionT < drvplot > D_plotps("plot-ps", "ps   via GNU libplot"
 											   false /*clipping */ 
 											   );
 
-static DriverDescriptionT < drvplot > D_plotfig("plot-fig", "fig  via GNU libplot", "", "fig", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotfig("plot-fig", "fig via GNU libplot", "", "fig", false,	// backend does not support subpaths
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
@@ -1367,7 +1367,7 @@ static DriverDescriptionT < drvplot > D_plotfig("plot-fig", "fig  via GNU libplo
 												false  /*clipping */
 												);
 
-static DriverDescriptionT < drvplot > D_plotpcl("plot-pcl", "pcl  via GNU libplot", "", "pcl", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotpcl("plot-pcl", "pcl via GNU libplot", "", "pcl", false,	// backend does not support subpaths
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
@@ -1387,7 +1387,7 @@ static DriverDescriptionT < drvplot > D_plothpgl("plot-hpgl", "hpgl via GNU libp
 												 false  /*clipping */ 
 												 );
 
-static DriverDescriptionT < drvplot > D_plottek("plot-tek", "tek  via GNU libplot","",  "tek", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plottek("plot-tek", "tek via GNU libplot","",  "tek", false,	// backend does not support subpaths
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
@@ -1398,7 +1398,7 @@ static DriverDescriptionT < drvplot > D_plottek("plot-tek", "tek  via GNU libplo
 												);
 
 #ifndef NO_LIBPLOTTER_X_SUPPORT
-static DriverDescriptionT < drvplot > D_plotX("plot-X", "X    via GNU libplot", "", "X", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plotX("plot-X", "X via GNU libplot", "", "X", false,	// backend does not support subpaths
 											  true,	// backend supports curves
 											  true,	// backend supports filled elements with edges 
 											  true,	// backend supports text

@@ -4,7 +4,7 @@ libdir=@libdir@
 includedir=@includedir@
 
 Name: pstoedit
-Description: converts Postscript(TM) and PDF files to other vector graphic formats
+Description: converts PostScript(TM) and PDF files to other vector graphic formats
 Version: @VERSION@.0
 Requires: 
 Libs: -L@libdir@ -lpstoedit @LIBPNG_LDFLAGS@ @CXX_STD_LIB@ @CXX_RUNTIME_LIB@ @LIBLD_LDFLAGS@

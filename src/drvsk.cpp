@@ -161,6 +161,7 @@ static void save_string(ostream & outf, size_t len, const char *str)
 			outf << char (c);
 		} else {
 			outf << '\\' << oct << setw(3) << setfill('0') << c;
+			outf << dec << setfill(' '); // reset to std
 		}
 	}
 	outf << '"';
@@ -169,10 +170,10 @@ static void save_string(ostream & outf, size_t len, const char *str)
 void drvSK::show_text(const TextInfo & info)
 {
 	save_solid_fill(outf, fillR(), fillG(), fillB());
-	outf << "Fn(\"" << info.currentFontName.value() << "\")\n";
+	outf << "Fn(\"" << info.currentFontName.c_str() << "\")\n";
 	outf << "Fs(" << info.currentFontSize << ")\n";
 	outf << "txt(";
-	save_string(outf, info.thetext.length(), info.thetext.value());
+	save_string(outf, info.thetext.length(), info.thetext.c_str());
 	outf << ",(";
 	if (info.currentFontAngle) {
 		double angle = info.currentFontAngle * PI / 180.0;
@@ -351,7 +352,7 @@ void drvSK::show_image(const PSImage & imageinfo)
 
 }
 
-static DriverDescriptionT < drvSK > D_sampl("sk", "Sketch Format","", "sk", true,	// backend supports subpaths
+static DriverDescriptionT < drvSK > D_sampl("sk", "Sketch format","", "sk", true,	// backend supports subpaths
 											true,	// backend supports curves
 											true,	// backend supports elements which are filled and stroked
 											true,	// backend supports text

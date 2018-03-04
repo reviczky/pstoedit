@@ -3,7 +3,7 @@
    Backend for MetaPost files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_geocities.com
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_geocities.com
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ constructBase,
 	outf << "% Converted from PostScript(TM) to MetaPost by pstoedit\n"
 		<<
 		"% MetaPost backend contributed by Scott Pakin <scott+ps2ed_AT_pakin.org>\n"
-		<< "% pstoedit is Copyright (C) 1993 - 2013 Wolfgang Glunz" <<
+		<< "% pstoedit is Copyright (C) 1993 - 2014 Wolfgang Glunz" <<
 		" <wglunz35_AT_pstoedit.net>\n\n";
 
 	/*
@@ -258,9 +258,9 @@ void drvMPOST::show_text(const TextInfo & textinfo)
 	static bool texshortchar = false;	// 0=ASCII; 1=TeX character set
 
 	// Change fonts
-	string thisFontName(textinfo.currentFontName.value());
+	string thisFontName(textinfo.currentFontName.c_str());
 	if (thisFontName ==  emptystring ) {	// If we're this brain-damaged, we must be a TeX font
-		thisFontName = textinfo.currentFontFullName.value();
+		thisFontName = textinfo.currentFontFullName.c_str();
 		if (!texshortchar) {
 			outf << "shortchar := char(24);" << endl;	// Cedilla in TeX land
 			texshortchar = true;
@@ -305,7 +305,7 @@ void drvMPOST::show_text(const TextInfo & textinfo)
 
 	// Output the text using macros defined in the constructor
 	outf << "showtext ((" << textinfo.x << ',' << textinfo.y << "), " << prevFontAngle << ", \"";
-	for (const char *c = textinfo.thetext.value(); *c; c++)
+	for (const char *c = textinfo.thetext.c_str(); *c; c++)
 		if (*c == '"')
 			outf << "\" & char(34) & \"";
 		else
@@ -416,7 +416,7 @@ void drvMPOST::show_path()
 	print_coords();
 }
 
-static DriverDescriptionT < drvMPOST > D_mpost("mpost", "MetaPost Format", "","mp", true,	// if backend supports subpathes, else 0
+static DriverDescriptionT < drvMPOST > D_mpost("mpost", "MetaPost format", "","mp", true,	// if backend supports subpathes, else 0
 											   // if subpathes are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)

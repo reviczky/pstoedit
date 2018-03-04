@@ -6,7 +6,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -129,17 +129,17 @@ private:
                             RSString * typeface, RSString * panose,
                             bool * isBold, bool * isItalic,
                             unsigned char * pitchFamily);
-        TextInfo * eot2texinfo(string eotfilename);
+        void eot2texinfo(const string& eotfilename, TextInfo & textinfo);
 
         // Describe a theme color and modifications to it.
         class ThemeColor {
         public:
           string name;            // Color name
           unsigned int lum;       // New luminance (thousandths of a %)
-          ThemeColor(string tName="unknown", unsigned int tLum=~0U) {
-            name = tName;
-            lum = tLum;
-          }
+          ThemeColor(string tName="unknown", unsigned int tLum=~0U) :
+            name(tName),
+            lum(tLum)
+          {}
         };
 
         // Map an RGB value to a theme color.

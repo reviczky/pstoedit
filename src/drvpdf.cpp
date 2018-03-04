@@ -2,7 +2,7 @@
    drvPDF.cpp : This file is part of pstoedit
    Backend for PDF(TM) format
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -148,12 +148,7 @@ bb_llx(largeint), bb_lly(largeint), bb_urx(-largeint), bb_ury(-largeint)
 	}
 	const char *const header = "%PDF-1.1";
 	outf << header << endl;
-#ifdef HAVESTL
-	//to avoid message "3 overloads have similar conversion"
 	newlinebytes = (long) outf.tellp() - (long) strlen(header);
-#else
-	newlinebytes = (long) outf.tellp() - (long) strlen(header);
-#endif
 	if (Verbose())
 		outf << "% Driver options:" << endl;
 	for (unsigned int i = 0; i < d_argc; i++) {
@@ -424,13 +419,15 @@ drvPDF::~drvPDF()
 	outf << "<<" << endl;
 	time_t t = time(0);
 	struct tm *localt = localtime(&t);
-	outf << "/CreationDate (D:"
+	if (localt) {
+	   outf << "/CreationDate (D:"
 		<< setw(4) << localt->tm_year + 1900
 		<< setw(2) << setfill('0') << localt->tm_mon + 1
 		<< setw(2) << setfill('0') << localt->tm_mday
 		<< setw(2) << setfill('0') << localt->tm_hour
 		<< setw(2) << setfill('0') << localt->tm_min
 		<< setw(2) << setfill('0') << localt->tm_sec << ")" << endl;
+	}
 	outf << "/Producer (pstoedit by wglunz35_AT_pstoedit.net)" << endl;
 	outf << ">>" << endl;
 	endobject();
@@ -579,22 +576,22 @@ void drvPDF::show_text(const TextInfo & textinfo)
 {
 	const float toRadians = 3.14159265359f / 180.0f;
 	const float angleInRadians = textinfo.currentFontAngle * toRadians;
-	int PDFFontNum = getFontNumber(textinfo.currentFontName.value());
+	int PDFFontNum = getFontNumber(textinfo.currentFontName.c_str());
 	if (PDFFontNum == -1) {
-		PDFFontNum = getSubStringFontNumber(textinfo.currentFontName.value());
+		PDFFontNum = getSubStringFontNumber(textinfo.currentFontName.c_str());
 		if (PDFFontNum == -1) {
 			PDFFontNum = getSubStringFontNumber(defaultFontName);
 			if (PDFFontNum == -1) {
 				errf << "Warning, unsupported font " << textinfo.
-					currentFontName.value() << ", using Courier instead" << endl;
+					currentFontName.c_str() << ", using Courier instead" << endl;
 				PDFFontNum = 0;	// Courier
 			} else {
 				errf << "Warning, unsupported font " << textinfo.
-					currentFontName.value() << ", using " << defaultFontName << " instead" << endl;
+					currentFontName.c_str() << ", using " << defaultFontName << " instead" << endl;
 			}
 		} else {
 			errf << "Warning, unsupported font " << textinfo.
-				currentFontName.value() << ", using " << PDFFonts[PDFFontNum] << " instead" << endl;
+				currentFontName.c_str() << ", using " << PDFFonts[PDFFontNum] << " instead" << endl;
 		}
 	}
 	starttext();
@@ -639,7 +636,7 @@ void drvPDF::show_text(const TextInfo & textinfo)
 	buffer << RND3(textinfo.cx) << ' ' << RND3(textinfo.ax) << ' ';
 #endif
 	buffer << "(";
-	const char *start_of_text = textinfo.thetext.value();
+	const char *start_of_text = textinfo.thetext.c_str();
 	while (*start_of_text) {
 		if ((*start_of_text == '(') || (*start_of_text == ')') || (*start_of_text == '\\')) {
 			buffer << '\\';

@@ -1,8 +1,8 @@
 /*  
    callgs.cpp : This file is part of pstoedit
-   interface to GhostScript
+   interface to Ghostscript
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -64,7 +64,7 @@ static RSString createCmdLine(int argc, const char *const argv[])
 
 #if defined(_WIN32) || defined (__OS2__)
 
-// using GhostScript DLL
+// using Ghostscript DLL
 #define WITHDLLSUPPORT 1
 
 #ifdef WITHDLLSUPPORT
@@ -93,12 +93,12 @@ static RSString createCmdLine(int argc, const char *const argv[])
 
 
 
-// Interface to GhostScript EXE - as an alternative to the DLL
+// Interface to Ghostscript EXE - as an alternative to the DLL
 // The usage of the DLL makes problem in case of gsview, since 
-// there can only be one instance of the DLL and GhostScript active
+// there can only be one instance of the DLL and Ghostscript active
 // in one process. So - if being called from gsview - we need to start 
-// ghostscript via the EXE.
-// Same holds if 64 bit ghostscript should be called from 32 big pstoedit.
+// Ghostscript via the EXE.
+// Same holds if 64 bit Ghostscript should be called from 32 big pstoedit.
 #include <windows.h>
 #include I_stdio
 static int callgsEXE(int argc, const char * const argv[])
@@ -118,7 +118,7 @@ static int callgsEXE(int argc, const char * const argv[])
 
 	BOOL status = CreateProcess(
               NULL, // Application Name 
-              (LPSTR)commandline.value(),
+              (LPSTR)commandline.c_str(),
               NULL, // Process attributes (NULL == Default)
               NULL, // Thread-Attributes (Default)
               FALSE, // InheritHandles
@@ -204,11 +204,11 @@ int callgs(int argc, const char * const argv[]) {
 			const RSString defaultexe(gsdir + RSString("gswin32c.exe"));
 			const RSString fallbackexe(gsdir + RSString("gswin64c.exe"));
 #endif
-			const RSString exename( fileExists(defaultexe.value()) ? defaultexe : fallbackexe );
+			const RSString exename( fileExists(defaultexe.c_str()) ? defaultexe : fallbackexe );
 			if (verbose) {
 				cerr << "loading: " << argv[0] << " failed (possibly due to 32/64 bit mix - reverting to call gs as exe via: " << exename << endl;
 			}
-			newargv[0] = exename.value();
+			newargv[0] = exename.c_str();
 			result = callgsEXE(argc,newargv);
 			delete [] newargv; /* just the array - the content is not owned */ 
 			return  result;
@@ -234,9 +234,9 @@ int callgs(int argc, const char *const argv[])
 {
 #ifndef USE_FORK
 	RSString commandline = createCmdLine(argc, argv);
-	commandline += " 1>&2" ; // redirect all stdout of ghostscript to stderr
+	commandline += " 1>&2" ; // redirect all stdout of Ghostscript to stderr
 							 // in order not to interfere with stdout of pstoedit
-	const int result = system(commandline.value());
+	const int result = system(commandline.c_str());
 	return result;
 #else
 	//
@@ -304,13 +304,13 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 #else
 	static const char *const defaultgs = "";
 #endif
-	const char *gstocall;
+	const char *gstocall = NULL;
 
 	// for debugging verbose = true; 
 	if (verbose)
 			errstream << endl << "Looking up where to find the PostScript interpreter." << endl;
 
-	if (gsToUse != 0) {
+	if ((gsToUse != 0) && !strequal(gsToUse,"") ) {
 		if (verbose) {
 			errstream << " an explicit path was given - using : " << gsToUse << endl;
 		}
@@ -320,12 +320,12 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 #if defined (_WIN32)
 
 	RSString gstocallfromregistry = getRegistryValue(errstream, "common", "gstocall");
-	if (gstocallfromregistry.value() != 0) {
+	if (gstocallfromregistry.length()) {
 		if (verbose)
 			errstream << "found value in registry" << endl;
 		static char buffer[2000];
 		buffer[2000-1] = 0; // add EOS
-		strncpy_s(buffer,2000-1, gstocallfromregistry.value(),2000-1);
+		strncpy_s(buffer,2000-1, gstocallfromregistry.c_str(),2000-1);
 		//  delete[]gstocallfromregistry;
 		gstocall = buffer;
 	} else {
@@ -362,7 +362,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 			}
 			gstocall = pathname;
 		} else {
-		    if (verbose) errstream<< "nothing found in gsview32.ini file - using find_gs to lookup latest version of GhostScript in registry " << endl;
+		    if (verbose) errstream<< "nothing found in gsview32.ini file - using find_gs to lookup latest version of Ghostscript in registry " << endl;
 			static char buf[1000];
 			if (find_gs(buf, sizeof(buf), 550 /* min ver*/ , getPstoeditsetDLLUsage() , gsregbase)) { 
 				if (verbose) {
@@ -387,13 +387,14 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 		}
 	}
 #elif defined (__OS2__)
+	unused(&gsregbase);
 	RSString gstocallfromregistry = getRegistryValue(errstream, "common", "gstocall");
-	if (gstocallfromregistry.value() != 0) {
+	if (gstocallfromregistry.length() ) {
 		if (verbose)
 			errstream << "found value in pstoedit.ini" << endl;
 		static char buffer[2000];
 		buffer[2000-1] = 0; // add EOS
-		strncpy(buffer, gstocallfromregistry.value(),2000-1);
+		strncpy(buffer, gstocallfromregistry.c_str(),2000-1);
 		gstocall = buffer;
 	} else {
 		if (verbose)
@@ -450,17 +451,18 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 		}
 	}
 #else							//UNIX
+	unused(&gsregbase);
 	gstocall = getenv("GS");
 	if (gstocall == 0) {
 		if (verbose)
 			errstream << "GS not set, trying registry for common/gstocall" << endl;
 		RSString gstocallfromregistry = getRegistryValue(errstream, "common", "gstocall");
-		if (gstocallfromregistry.value() != 0) {
+		if (gstocallfromregistry.length()) {
 			if (verbose)
 				errstream << "found value in registry" << endl;
 			static char buffer[2000];
 			buffer[2000-1] = 0; // add EOS
-			strncpy(buffer, gstocallfromregistry.value(),2000-1);
+			strncpy(buffer, gstocallfromregistry.c_str(),2000-1);
 			gstocall = buffer;
 		} else {
 			{
@@ -482,7 +484,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 			errstream << "GS is set to:" << gstocall << endl;
 	}
 #endif
-	if (verbose && gstocall)
+	if (verbose && gstocall&& !strequal(gstocall,""))
 		errstream << "Value found is:" << gstocall << endl;
 	return gstocall;
 }
@@ -590,6 +592,7 @@ static const char * const lookupplace = "pstoedit.ini";
 #else
 static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int buflen)
 {
+	unused(&verbose); unused(&errstream); unused(buffer); unused(&buflen);
 	return 0;
 }
 static const char * const lookupplace = "registry";
@@ -602,7 +605,7 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 	// WIN32:
 	// 1. look in the registry
 	// 2. look into gsview32.ini
-	// 3. look for latest version of ghostscript in registry
+	// 3. look for latest version of Ghostscript in registry
 	// 4. look in the environment for the value of GS_LIB
 	// 5. look for the compiled-in GS_LIB
 	// OS/2:
@@ -627,10 +630,10 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 
 	// try first registry/ini value, then GS_LIB and at last the default
 	RSString PIOptionsfromregistry = getRegistryValue(errstream, "common", "GS_LIB");
-	if (PIOptionsfromregistry.value() != 0) {	// 1.
+	if (PIOptionsfromregistry.length()) {	// 1.
 		if (verbose)
 			errstream << "found value in " << lookupplace << endl;
-		strncpy_s(buffer,sizeof(buffer), PIOptionsfromregistry.value(),sizeof(buffer));
+		strncpy_s(buffer,sizeof(buffer), PIOptionsfromregistry.c_str(),sizeof(buffer));
 		// delete[]PIOptionsfromregistry;
 		PIOptions = buffer;
 	} else {					//2.-4.

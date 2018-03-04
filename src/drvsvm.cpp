@@ -533,108 +533,108 @@ void drvSVM::show_text(const TextInfo& textinfo)
 
         const char* fontName = NULL;
 
-        if (strstr(textinfo.currentFontWeight.value(), "Regular"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Regular"))
             fontWeigth = 4;	// semi light weight
 
-        if (strstr(textinfo.currentFontWeight.value(), "Normal"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Normal"))
             fontWeigth = 5;	// normal weight
 
-        if (strstr(textinfo.currentFontWeight.value(), "Medium"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Medium"))
             fontWeigth = 6;	// medium weight
 
         if (options->emulateNarrowFonts) {
-            if (strstr(textinfo.currentFontWeight.value(), "Thin") ||
-                strstr(textinfo.currentFontName.value(), "Thin") ||
-                strstr(textinfo.currentFontFullName.value(), "Thin")) {
+            if (strstr(textinfo.currentFontWeight.c_str(), "Thin") ||
+                strstr(textinfo.currentFontName.c_str(), "Thin") ||
+                strstr(textinfo.currentFontFullName.c_str(), "Thin")) {
                 fontWidth = fontHeight / 3;	// narrow font emulation (trial and error value for Arial font)
             }
 
-            if (strstr(textinfo.currentFontWeight.value(), "Extralight") ||
-                strstr(textinfo.currentFontName.value(), "Extralight") ||
-                strstr(textinfo.currentFontFullName.value(), "Extralight")) {
+            if (strstr(textinfo.currentFontWeight.c_str(), "Extralight") ||
+                strstr(textinfo.currentFontName.c_str(), "Extralight") ||
+                strstr(textinfo.currentFontFullName.c_str(), "Extralight")) {
                 fontWidth = fontHeight / 4;	// narrow font emulation (trial and error value for Arial font)
             }
 
-            if (strstr(textinfo.currentFontWeight.value(), "Ultralight") ||
-                strstr(textinfo.currentFontName.value(), "Ultralight") ||
-                strstr(textinfo.currentFontFullName.value(), "Ultralight")) {
+            if (strstr(textinfo.currentFontWeight.c_str(), "Ultralight") ||
+                strstr(textinfo.currentFontName.c_str(), "Ultralight") ||
+                strstr(textinfo.currentFontFullName.c_str(), "Ultralight")) {
                 fontWidth = fontHeight / 4;	// narrow font emulation (trial and error value for Arial font)
             }
 
-            if (strstr(textinfo.currentFontWeight.value(), "Light") ||
-                strstr(textinfo.currentFontName.value(), "Light") ||
-                strstr(textinfo.currentFontFullName.value(), "Light") ||
-                strstr(textinfo.currentFontWeight.value(), "Condensed") ||
-                strstr(textinfo.currentFontName.value(), "Condensed") ||
-                strstr(textinfo.currentFontFullName.value(), "Condensed")) {
+            if (strstr(textinfo.currentFontWeight.c_str(), "Light") ||
+                strstr(textinfo.currentFontName.c_str(), "Light") ||
+                strstr(textinfo.currentFontFullName.c_str(), "Light") ||
+                strstr(textinfo.currentFontWeight.c_str(), "Condensed") ||
+                strstr(textinfo.currentFontName.c_str(), "Condensed") ||
+                strstr(textinfo.currentFontFullName.c_str(), "Condensed")) {
                 fontWidth = fontHeight / 3;	// narrow font emulation (trial and error value for Arial font)
             }
         }
         else {
-            if (strstr(textinfo.currentFontWeight.value(), "Thin"))
+            if (strstr(textinfo.currentFontWeight.c_str(), "Thin"))
                 fontWeigth = 1;	// thin
 
-            if (strstr(textinfo.currentFontWeight.value(), "Extralight"))
+            if (strstr(textinfo.currentFontWeight.c_str(), "Extralight"))
                 fontWeigth = 1;	// thin
 
-            if (strstr(textinfo.currentFontWeight.value(), "Ultralight"))
+            if (strstr(textinfo.currentFontWeight.c_str(), "Ultralight"))
                 fontWeigth = 2;	// ultra light
 
-            if (strstr(textinfo.currentFontWeight.value(), "Light") ||
-                strstr(textinfo.currentFontWeight.value(), "Condensed"))
+            if (strstr(textinfo.currentFontWeight.c_str(), "Light") ||
+                strstr(textinfo.currentFontWeight.c_str(), "Condensed"))
                 fontWeigth = 3;	// light
         }
 
-        if (strstr(textinfo.currentFontWeight.value(), "Semibold") ||
-            strstr(textinfo.currentFontName.value(), "Semibold") ||
-            strstr(textinfo.currentFontFullName.value(), "Semibold"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Semibold") ||
+            strstr(textinfo.currentFontName.c_str(), "Semibold") ||
+            strstr(textinfo.currentFontFullName.c_str(), "Semibold"))
             fontWeigth = 7;	// semibold
 
-        if (strstr(textinfo.currentFontWeight.value(), "Demibold") ||
-            strstr(textinfo.currentFontName.value(), "Demibold") ||
-            strstr(textinfo.currentFontFullName.value(), "Demibold"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Demibold") ||
+            strstr(textinfo.currentFontName.c_str(), "Demibold") ||
+            strstr(textinfo.currentFontFullName.c_str(), "Demibold"))
             fontWeigth = 7;	// semibold
 
-        if (strstr(textinfo.currentFontWeight.value(), "Bold") ||
-            strstr(textinfo.currentFontName.value(), "Bold") ||
-            strstr(textinfo.currentFontFullName.value(), "Bold"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Bold") ||
+            strstr(textinfo.currentFontName.c_str(), "Bold") ||
+            strstr(textinfo.currentFontFullName.c_str(), "Bold"))
             fontWeigth = 8;	// bold
 
-        if (strstr(textinfo.currentFontWeight.value(), "Extrabold") ||
-            strstr(textinfo.currentFontName.value(), "Extrabold") ||
-            strstr(textinfo.currentFontFullName.value(), "Extrabold"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Extrabold") ||
+            strstr(textinfo.currentFontName.c_str(), "Extrabold") ||
+            strstr(textinfo.currentFontFullName.c_str(), "Extrabold"))
             fontWeigth = 8;	// bold
 
-        if (strstr(textinfo.currentFontWeight.value(), "Ultrabold") ||
-            strstr(textinfo.currentFontName.value(), "Ultrabold") ||
-            strstr(textinfo.currentFontFullName.value(), "Ultrabold"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Ultrabold") ||
+            strstr(textinfo.currentFontName.c_str(), "Ultrabold") ||
+            strstr(textinfo.currentFontFullName.c_str(), "Ultrabold"))
             fontWeigth = 9;	// ultrabold
 
-        if (strstr(textinfo.currentFontWeight.value(), "Heavy") ||
-            strstr(textinfo.currentFontName.value(), "Heavy") ||
-            strstr(textinfo.currentFontFullName.value(), "Heavy"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Heavy") ||
+            strstr(textinfo.currentFontName.c_str(), "Heavy") ||
+            strstr(textinfo.currentFontFullName.c_str(), "Heavy"))
             fontWeigth = 9;	// ultrabold
 
-        if (strstr(textinfo.currentFontWeight.value(), "Black") ||
-            strstr(textinfo.currentFontName.value(), "Black") ||
-            strstr(textinfo.currentFontFullName.value(), "Black"))
+        if (strstr(textinfo.currentFontWeight.c_str(), "Black") ||
+            strstr(textinfo.currentFontName.c_str(), "Black") ||
+            strstr(textinfo.currentFontFullName.c_str(), "Black"))
             fontWeigth = 10;	// black
 
-        if ((strstr(textinfo.currentFontName.value(), "Italic") != NIL) ||
-            (strstr(textinfo.currentFontFullName.value(), "Italic") != NIL))
+        if ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL) ||
+            (strstr(textinfo.currentFontFullName.c_str(), "Italic") != NIL))
             fontItalic = 2; // normal italics
 
-        if ((strstr(textinfo.currentFontName.value(), "Oblique") != NIL) ||
-            (strstr(textinfo.currentFontFullName.value(), "Oblique") != NIL))
+        if ((strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL) ||
+            (strstr(textinfo.currentFontFullName.c_str(), "Oblique") != NIL))
             fontItalic = 1; // oblique italics
 
-        if ((strstr(textinfo.currentFontFullName.value(), "Symbol") != NIL) ||
-            (strstr(textinfo.currentFontFullName.value(), "symbol") != NIL)) {
+        if ((strstr(textinfo.currentFontFullName.c_str(), "Symbol") != NIL) ||
+            (strstr(textinfo.currentFontFullName.c_str(), "symbol") != NIL)) {
             charSet = 10; // symbol charset
             fontName = symbolName;
         } else {
             charSet = 11; // ASCII-US charset
-            fontName = textinfo.currentFontName.value();
+            fontName = textinfo.currentFontName.c_str();
         }
 
         // write MetaFontAction
@@ -646,7 +646,7 @@ void drvSVM::show_text(const TextInfo& textinfo)
         fakeVersionCompat(outf, 2, 0);
 
         // font name
-        const size_t stringLen = fontName != NULL ? strlen(fontName) : 0;
+        const size_t stringLen = strlen(fontName);
         writePod(outf,
                  (uInt16)stringLen);
         outf.write(fontName,stringLen);
@@ -751,7 +751,7 @@ void drvSVM::show_text(const TextInfo& textinfo)
     ++actionCount;
 
     // write text
-    if( textinfo.thetext.value() )
+    if( textinfo.thetext.c_str() )
     {
         writePod(outf, 
                  (uInt16)META_TEXT_ACTION);
@@ -761,10 +761,10 @@ void drvSVM::show_text(const TextInfo& textinfo)
         writePod(outf, 
                  (uInt32)l_transY(textinfo.y));
 
-        const size_t textLen = strlen(textinfo.thetext.value());
+        const size_t textLen = strlen(textinfo.thetext.c_str());
         writePod(outf,
                  (uInt16)textLen);
-        outf.write(textinfo.thetext.value(),
+        outf.write(textinfo.thetext.c_str(),
                    textLen);
         writePod(outf,
                  (uInt16)0);
@@ -796,7 +796,9 @@ void drvSVM::show_image(const PSImage& image)
 
 	// now lets get some mem
 	unsigned char* const output = new unsigned char[scanlineLen * height];
+	output[0] = 0; // init for coverity
 	unsigned char* const outputMask = new unsigned char[maskScanlineLen * height];
+	outputMask[0] = 0; // init for coverity
 
 	// setup inverse transformation matrix
 	const float matrixScale(image.normalizedImageCurrentMatrix[0] *
@@ -852,7 +854,7 @@ void drvSVM::show_image(const PSImage& image)
 				// okay, fetch source pixel value into 
 				// RGB triplet
 
-				unsigned char r(255), g(255), b(255), c, m, y, k;
+				unsigned char r(255), g(255), b(255);
 
 				// how many components?
 				switch (image.ncomp) {
@@ -866,21 +868,22 @@ void drvSVM::show_image(const PSImage& image)
 					b = image.getComponent(sourceX, sourceY, 2);
 					break;
 
-				case 4:
-					c = image.getComponent(sourceX, sourceY, 0);
-					m = image.getComponent(sourceX, sourceY, 1);
-					y = image.getComponent(sourceX, sourceY, 2);
-					k = image.getComponent(sourceX, sourceY, 3);
+				case 4: {
+					unsigned char C = image.getComponent(sourceX, sourceY, 0);
+					unsigned char M = image.getComponent(sourceX, sourceY, 1);
+					unsigned char Y = image.getComponent(sourceX, sourceY, 2);
+					unsigned char K = image.getComponent(sourceX, sourceY, 3);
 
 					// account for key
-					c += k;
-					m += k;
-					y += k;
+					C += K;
+					M += K;
+					Y += K;
 
 					// convert color
-					r = 255 - c;
-					g = 255 - m;
-					b = 255 - y;
+					r = 255 - C;
+					g = 255 - M;
+					b = 255 - Y;
+					}
 					break;
 
                     default: 

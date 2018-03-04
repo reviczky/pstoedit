@@ -6,7 +6,7 @@
    Class declaration for a VTK output driver with no additional attributes
    and methods (minimal interface)
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,7 @@ public:
 private:
 	void print_coords();
 	int add_point(const Point & p);
-	int add_line(int s, int e, float r, float g, float b);
+	// int add_line(int s, int e, float r, float g, float b);
 	int pointsCount;
 	int lineCount;
 	int linepoints; 

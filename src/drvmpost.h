@@ -6,7 +6,7 @@
    Backend for MetaPost files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,12 +29,8 @@
 #include "drvbase.h"
 
 
-#ifdef HAVESTL
+#ifdef HAVE_STL
 #include <string>        // C++ string class
-// STL no longer needed, use FontMapper from miscutil.h
-//#include <set>           // C++ STL set class
-//#include <memory>        // Needed for allocator class
-//#include <functional>
 #else
 typedef RSString string;
 #endif

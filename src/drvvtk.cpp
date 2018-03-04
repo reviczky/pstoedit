@@ -2,7 +2,7 @@
    drvVTK.cpp : This file is part of pstoedit
    Backend for VTK files, e.g. for ParaView - http://www.paraview.org/
 
-   Copyright (C) 2008 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 2008 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -70,6 +70,8 @@ int drvVTK::add_point(const Point & p)
 	pointsCount++;
 	return pointsCount;
 }
+#if 0 
+// not used so far
 int drvVTK::add_line(int s, int e, float r, float g, float b)
 {
 	polyStream << "2 " << s-1 << " " << e-1 << endl;
@@ -77,6 +79,7 @@ int drvVTK::add_line(int s, int e, float r, float g, float b)
 	lineCount++;
 	return lineCount;
 }
+#endif
 
 // Version with multi-segment lines
 void drvVTK::print_coords()
@@ -140,17 +143,17 @@ void drvVTK::show_path()
 	print_coords();
 }
 
-void drvVTK::show_rectangle(const float llx, const float lly, const float urx, const float ury)
+void drvVTK::show_rectangle(const float , const float , const float , const float )
 {
 // just do show_path for a first guess
 	show_path();
 }
-void drvVTK::show_image(const PSImage & imageinfo)
+void drvVTK::show_image(const PSImage & )
 {
 	errf << "\t\tFatal: unexpected case in drvVTK - show_image " << endl;
 }
 
-static DriverDescriptionT < drvVTK > D_VTK("vtk", "VTK driver: if you don't want to see this, uncomment the corresponding line in makefile and make again", "this is a long description for the VTKe driver","vtk", false,	// backend supports subpathes
+static DriverDescriptionT < drvVTK > D_VTK("vtk", "VTK driver: if you do not want to see this, uncomment the corresponding line in makefile and make again", "this is a long description for the VTKe driver","vtk", false,	// backend supports subpathes
 											   // if subpathes are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)

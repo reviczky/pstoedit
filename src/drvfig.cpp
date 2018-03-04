@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -654,7 +654,7 @@ LaTeX::special::Fontname
 
 FontName
 PostScript::special::Fontname
-::special::Fontname (same as Postscript::special::Fontname)
+::special::Fontname (same as PostScript::special::Fontname)
 
 
 */
@@ -663,26 +663,26 @@ PostScript::special::Fontname
 	// 4 is 0100 - PostScript
 
 	int FigFontNum = 0;
-	const char * const specialindex = strstr(textinfo.currentFontName.value(),"::special::");
+	const char * const specialindex = strstr(textinfo.currentFontName.c_str(),"::special::");
 	const bool special = (specialindex != 0);
-	if (!strncmp(textinfo.currentFontName.value(),"LaTeX::",7) ) {
+	if (!strncmp(textinfo.currentFontName.c_str(),"LaTeX::",7) ) {
 		// it is a LaTeX Font
 		fontflags = special ? 2 : 0 ; // 0010 or 0000  - LaTeX
-		const char* fontname = special ? (specialindex + 11) : ( textinfo.currentFontName.value() + 7);
+		const char* fontname = special ? (specialindex + 11) : ( textinfo.currentFontName.c_str() + 7);
 		FigFontNum = getfigFontnumber(fontname,FigLaTeXFonts,MaxLaTeXFntnum);
-		// debug cout << "LaTeX::" << (const char *) (special ? "special" : "normal") << "::"<< fontname << " " <<textinfo.currentFontName.value() << endl;
+		// debug cout << "LaTeX::" << (const char *) (special ? "special" : "normal") << "::"<< fontname << " " <<textinfo.currentFontName.c_str() << endl;
 		if (FigFontNum == -1) {
 			errf << "Warning, unsupported font " << fontname << ", using LaTeX default instead.";
 			FigFontNum = 0;
 		}
 	} else {
-		const char * fontname = textinfo.currentFontName.value();
-		if (!strncmp(textinfo.currentFontName.value(),"PostScript::",12) ) {
+		const char * fontname = textinfo.currentFontName.c_str();
+		if (!strncmp(textinfo.currentFontName.c_str(),"PostScript::",12) ) {
 			fontname+=12; // just skip "PostScript::"
 		}
 		if (special) { fontname+=11 ; } // just skip "::special::"
 		fontflags = special ? 6 : 4; // 0110 or 0100 - PostScript
-		// debug cout << "PostScript::" << (const char *) (special ? "special" : "normal") << "::" << fontname<< " " <<textinfo.currentFontName.value() << endl;
+		// debug cout << "PostScript::" << (const char *) (special ? "special" : "normal") << "::" << fontname<< " " <<textinfo.currentFontName.c_str() << endl;
 		FigFontNum = getfigFontnumber(fontname,FigPSFonts,MaxPSFntnum);
 		if (FigFontNum == -1) {
 			errf << "Warning, unsupported font " << fontname << ", using ";
@@ -724,9 +724,9 @@ PostScript::special::Fontname
 	}
 
 	const float FigHeight = PntFig * localFontSize;
-	const float FigLength = FigHeight * strlen(textinfo.thetext.value());
+	const float FigLength = FigHeight * strlen(textinfo.thetext.c_str());
 	const float PSHeight = localFontSize;
-	const float PSLength = PSHeight * strlen(textinfo.thetext.value());
+	const float PSLength = PSHeight * strlen(textinfo.thetext.c_str());
 // Calculate BBox
 	if (textinfo.currentFontAngle == 0) {
 		addtobbox(Point(textinfo.x, textinfo.y));
@@ -764,7 +764,7 @@ PostScript::special::Fontname
 		<< FigHeight << " "
 		<< FigLength << " "
 		<< (int) (PntFig * textinfo.x + 0.5f) << " "
-		<< (int) (y_offset - (PntFig * textinfo.y) + 0.5f) << " " << textinfo.thetext.value() << "\\001\n";
+		<< (int) (y_offset - (PntFig * textinfo.y) + 0.5f) << " " << textinfo.thetext.c_str() << "\\001\n";
 }
 
 void drvFIG::bbox_path()
@@ -855,6 +855,7 @@ f = (l /15) + 1
 	case dashdotdot:
 		linestyle = 4;
 		break;
+	default: ; // not expected
 	}
 
 	const unsigned int linecap = currentLineCap();
@@ -954,13 +955,13 @@ void drvFIG::show_image(const PSImage & imageinfo)
 
 
 	} else {
-	const size_t filenamelen = strlen(outBaseName.value()) + 21;
+	const size_t filenamelen = strlen(outBaseName.c_str()) + 21;
 	char *EPSoutFileName = new char[filenamelen];
-	const size_t fullfilenamelen = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
+	const size_t fullfilenamelen = strlen(outDirName.c_str()) + strlen(outBaseName.c_str()) + 21;
 	char *EPSoutFullFileName = new char[fullfilenamelen];
 
-	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName.value(), imgcount++);
-	sprintf_s(TARGETWITHLEN(EPSoutFullFileName,fullfilenamelen), "%s%s", outDirName.value(), EPSoutFileName);
+	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName.c_str(), imgcount++);
+	sprintf_s(TARGETWITHLEN(EPSoutFullFileName,fullfilenamelen), "%s%s", outDirName.c_str(), EPSoutFileName);
 	ofstream outi(EPSoutFullFileName);
 	if (!outi) {
 		errf << "Could not open file " << EPSoutFullFileName << " for output";
@@ -1004,21 +1005,21 @@ void drvFIG::show_image(const PSImage & imageinfo)
 
 static const char * const additionalDoku = 
 "The xfig format driver supports special fontnames, which may be produced by using a fontmap file. "
-"The following types of names are supported : BREAK  "
+"The following types of names are supported :BREAK"
 "\n\\begin{verbatim}\n"
-"General notation: \n"
-"\"Postscript Font Name\" ((LaTeX|PostScript|empty)(::special)::)XFigFontName\n"
-" \n"
+"General notation:\n"
+"\"PostScript Font Name\" ((LaTeX|PostScript|empty)(::special)::)XFigFontName\n"
+"\n"
 "Examples:\n"
 "\n"
 "Helvetica LaTeX::SansSerif\n"
 "Courier LaTeX::special::Typewriter\n"
 "GillSans \"AvantGarde Demi\"\n"
-"Albertus PostScript::special::\"New Century Schoolbook Italic\" \n"
-"Symbol ::special::Symbol (same as Postscript::special::Symbol)\n"
+"Albertus PostScript::special::\"New Century Schoolbook Italic\"\n"
+"Symbol ::special::Symbol (same as PostScript::special::Symbol)\n"
 "\\end{verbatim}\n"
 "See also the file examplefigmap.fmp in the misc directory of the pstoedit source distribution for an example font map file for xfig. "
-"Please note that the Fontname has to be among those supported by xfig. "
+"Please note that the fontname has to be among those supported by xfig. "
 "See - \\URL{http://www.xfig.org/userman/fig-format.html} for a list of legal font names";
 
 static DriverDescriptionT < drvFIG > D_fig( "fig", ".fig format for xfig",  additionalDoku,"fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images

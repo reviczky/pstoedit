@@ -21,22 +21,35 @@
 # demonstrates the use of the cairo driver for pstoedit.
 
 
-CFLAGS=	-Wall  `pkg-config --cflags cairo cairo-pdf cairo-xlib pangocairo`
-LDFLAGS=`pkg-config --libs cairo cairo-pdf cairo-xlib pangocairo`
+CFLAGS=	-Wall -H `pkg-config --cflags cairo cairo-pdf cairo-xlib pangocairo`
+LDFLAGS=`pkg-config --libs cairo cairo-pdf cairo-xlib pangocairo` -Wl,-t
 
-default: cairo-example
+default: cairo-example cairo-example-pango
 
 cairo-example : sample.o cairo-example.o
 	$(CC) -o $@  $(CFLAGS) $(CPPFLAGS) cairo-example.o sample.o $(LDFLAGS)
+
+cairo-example-pango : sample-pango.o cairo-example-pango.o
+	$(CC) -o $@  $(CFLAGS) $(CPPFLAGS) cairo-example-pango.o sample-pango.o $(LDFLAGS)
 
 
 cairo-example.o : cairo-example.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) cairo-example.c
 
+cairo-example-pango.o : cairo-example.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) cairo-example.c -o $@
+
+
 sample.o: sample.c
 	$(CC) -c $(CFLAGS) $(CPPFLAGS) sample.c
 
+sample-pango.o: sample-pango.c
+	$(CC) -c $(CFLAGS) $(CPPFLAGS) sample-pango.c
 
-sample.c : sample.eps pstoedit libp2edrvstd.la
-	./pstoedit  -f "cairo: -header sample.h" sample.eps sample.c
+
+sample.c : sample.eps ../../src/pstoedit ../../src/libp2edrvstd.la
+	../../src/pstoedit  -f "cairo: -header sample.h" sample.eps sample.c
+
+sample-pango.c : sample.eps ../../src/pstoedit ../../src/libp2edrvstd.la
+	../../src/pstoedit  -f "cairo: -pango -header sample.h" sample.eps sample-pango.c
 

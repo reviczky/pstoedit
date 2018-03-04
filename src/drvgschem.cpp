@@ -3,7 +3,7 @@
    simple backend for Gschem format.
    Contributed / Copyright 2004 by: Mark Rages 
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -73,7 +73,7 @@ void drvGSCHEM::show_path()
 
 
 static DriverDescriptionT < drvGSCHEM > D_gschem("gschem", "gschem format", 
-												 "See also:  \\URL{http://www.geda.seul.org/tools/gschem/} ","gschem", false,	// if backend supports subpathes
+												 "See also:  \\URL{http://www.geda.seul.org/tools/gschem/}","gschem", false,	// if backend supports subpathes
 												   // if subpathes are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)

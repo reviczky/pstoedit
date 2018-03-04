@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_geocities.com
+  Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ drvASY::derivedConstructor(drvASY):
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2013 Wolfgang Glunz"
+       << "// pstoedit is Copyright (C) 1993 - 2014 Wolfgang Glunz"
        << " <wglunz35_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
@@ -93,8 +93,9 @@ void drvASY::restore() {
   while(gsavestack.size() && !gsavestack.front()) {
     gsavestack.pop_front();
     while(clipstack.size() > 0) {
-      if(clipstack.back())
-	outf << "endclip();" << endl;
+      if(clipstack.back()) {
+	    outf << "endclip();" << endl;
+	  }
       clipstack.pop_back();
     }
     outf << "grestore();" << endl;
@@ -107,12 +108,12 @@ void drvASY::print_coords()
 {
   bool withinpath = false;	// true=already started plotting points
   unsigned int pointsOnLine = 0;// Number of points on the current output line
-  bool havecycle=false;
-  bool firstpoint=false;
-
+  
   save();
   
   if (fillmode || clipmode) {
+    bool havecycle=false;
+    bool firstpoint=false;
     for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
       const basedrawingelement & elem = pathElement(n);
       switch (elem.getType()) {
@@ -130,7 +131,7 @@ void drvASY::print_coords()
 	  firstpoint=true;
 	  if(clipmode) {
 	    outf << "beginclip(";
-	    bool pop=clipstack.size() > 0;
+	    const bool pop=clipstack.size() > 0;
 	    if(pop) {
 	      clipstack.pop_back();
 	      clipstack.push_back(true);
@@ -208,6 +209,7 @@ void drvASY::print_coords()
       switch (elem.getType()) {
       case moveto:
 	if(!withinpath) outf << "draw(";
+        // coverity[fallthrough]
       case lineto:
 	{
 	  const Point & p = elem.getPoint(0);
@@ -315,7 +317,7 @@ void drvASY::show_image(const PSImage & imageinfo)
   }
   
   imageinfo.writeEPSImage(outi);
-  (void)remove(imageinfo.FileName.value());
+  (void)remove(imageinfo.FileName.c_str());
 
   outi.close();
 }
@@ -326,8 +328,8 @@ void drvASY::show_text(const TextInfo & textinfo)
   restore();
   
   // Change fonts
-  string thisFontName(textinfo.currentFontName.value());
-  string thisFontWeight(textinfo.currentFontWeight.value());
+  string thisFontName(textinfo.currentFontName.c_str());
+  string thisFontWeight(textinfo.currentFontWeight.c_str());
 
   const double ps2tex=72.27/72.0;
     
@@ -382,7 +384,7 @@ void drvASY::show_text(const TextInfo & textinfo)
   if(prevFontAngle != 0.0) outf << "rotate(" << prevFontAngle << ")*(";
   bool texify=false;
   bool quote=false;
-  const char *c=textinfo.thetext.value();
+  const char *c=textinfo.thetext.c_str();
   if(*c) for (; *c; c++) {
     if (*c >= ' ' && *c != '\\' && *c <= '~') {
       if(!texify) {

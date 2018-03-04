@@ -1,7 +1,7 @@
 /*
    psimage.cpp : This file is part of pstoedit.
   
-   Copyright (C) 1997- 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1997- 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
    Support for Image::writeIdrawImage by Scott Johnston
 
@@ -35,7 +35,7 @@
 #include I_iomanip
 
 #if 0
-// should be obsolete - since now PNG images are written directly by ghostscript
+//{ should be obsolete - since now PNG images are written directly by Ghostscript
 
 
 //#define HAVE_LIBPNG
@@ -223,7 +223,7 @@ void PSImage::writePNGImage(const char *FileName, const char *source,
 
 #endif
 
-// end obsolete
+// end obsolete }
 #endif
 
 unsigned char PSImage::getComponent(unsigned int x, unsigned int y, char numComponent) const
@@ -238,7 +238,7 @@ unsigned char PSImage::getComponent(unsigned int x, unsigned int y, char numComp
 	// see PS manual §4.10.2
 
 	// which position?
-	const long tmp = bits * ncomp * width;
+	const long tmp = (long) bits * ncomp * width;
 	const long paddedBytesPerRow = (tmp + 7) / 8;
 	const long pos = paddedBytesPerRow * 8 * y + bits * (ncomp * x + numComponent);
 
@@ -263,6 +263,7 @@ unsigned char PSImage::getComponent(unsigned int x, unsigned int y, char numComp
 		}
 	}
 
+	assert(numBits>0);
 	// scale result into full range [0-255]
 	return (unsigned char) ((long) result * 255L / ((1L << numBits) - 1L));	//lint !e795 //  Conceivable division by 0
 }
@@ -296,8 +297,12 @@ void PSImage::writeEPSImage(ostream & outi) const
 {
 	if (isFileImage) {
 #ifdef HAVE_LIBGD
-		FILE* in = fopen(FileName.value(),"rb");
-//		cerr << "Reading: "<<FileName.value() << endl;
+		FILE* in = fopen(FileName.c_str(),"rb");
+		if (!in) { 
+			cerr << "Error opening file " <<FileName.c_str() << endl;
+			return; 
+		}
+//		cerr << "Reading: "<<FileName.c_str() << endl;
 		gdImagePtr im=gdImageCreateFromPng(in);
 		assert(im);
 		fclose(in);
@@ -353,6 +358,7 @@ void PSImage::writeEPSImage(ostream & outi) const
 				outi << setw(2) << setfill('0') << hex << (int)gdImageBlue(im,c);
 				i++;
 			}
+		outi << setfill(' ') << dec; // reset
 		outi << endl << endl;
 		outi << "% restore previous state" << endl;
 		outi << "end " << endl;
@@ -410,6 +416,7 @@ void PSImage::writeEPSImage(ostream & outi) const
 					outi << endl;	// debug " " << dec << i << endl;
 				outi << setw(2) << setfill('0') << hex << (int) data[i];
 			}
+			outi << setfill(' ') << dec; // reset
 		}
 		break;
 	case imagemask:
@@ -429,6 +436,7 @@ void PSImage::writeEPSImage(ostream & outi) const
 				outi << setw(2) << setfill('0') << hex << (unsigned int)
 					data[i];
 			}
+			outi << setfill(' ') << dec; // reset
 		}
 		break;
 	default:
@@ -603,6 +611,7 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 					outi << setw(2) << setfill('0') << hex << (unsigned int) dataptr[cur++] << dec;
 				}
 			}
+			outi << setfill(' ') << dec; // reset
 		}
 	}
 

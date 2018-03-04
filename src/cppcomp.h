@@ -1,10 +1,11 @@
 #ifndef cppcomp_h
 #define cppcomp_h
+//{
 /*
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -22,79 +23,67 @@
 
 */
 #ifdef HAVE_CONFIG_H
-#include "pstoedit_config.h"
+	#include "pstoedit_config.h"
 #endif
 
 #ifdef _MSC_VER
-# ifndef DLLEXPORT
-# define DLLEXPORT __declspec( dllexport )
-# endif
+	#ifndef DLLEXPORT
+	#define DLLEXPORT __declspec( dllexport )
+	#endif
 #else
-# define DLLEXPORT
+	#define DLLEXPORT
 #endif
 
 
 
 
 #ifdef _AIX
-#define _unix
+	#define _unix
 #endif
 
 #if defined (_MSC_VER) && (_MSC_VER >= 1100) 
-// MSVC 5 and 6 have ANSI C++ header files, but the compilation
-// is much slower and object files get bigger. 
-// add other compiler that support STL and the ANSI C++ standard here
-// 1100 means : compiler v 11 which is MSVC 5
-// 1200 - VS 6
-// 1300 - VS 7 (2002)
-// 1400 - VS 8 (2005)
+	// MSVC 5 and 6 have ANSI C++ header files, but the compilation
+	// is much slower and object files get bigger. 
+	// add other compiler that support STL and the ANSI C++ standard here
+	// 1100 means : compiler v 11 which is MSVC 5
+	// 1200 - VS 6
+	// 1300 - VS 7 (2002)
+	// 1400 - VS 8 (2005)
 
-// NOTE: If your compiler or installation does not come with
-// an installation of the STL, just umcomment the next line
+	// NOTE: If your compiler or installation does not come with
+	// an installation of the STL, just comment out the next line
 
-#define HAVESTL
-#define HAVETYPENAME
-// now this is again commented out by default, since now all
-// drivers can be compiled without the STL
-#define USE_NEWSTRSTREAM
+	#define HAVE_STL
+	// old - now using STL dynamic vectors #define USE_FIXED_ARRAY 1
+	#define HAVE_TYPENAME
 
-#define HAVEAUTOPTR
+	#define USE_NEWSTRSTREAM
+
+	#define HAVE_AUTOPTR
 
 #endif
 
 #if defined (FORCESTLUSAGE)
 // 
-#define HAVESTL
-//wogl test #define HAVETYPENAME
+	#define HAVE_STL
 #endif
 
 #if defined (__GNUG__)  && (__GNUC__>=3)
-// GNU 3.0 compiles in HAVESTL mode.
-// but is sooooooooooo slow
-// further, I had some crashes in this mode which don't occur in the traditional mode
-// so I finally commented this out again and made the code compile also in traditional mode
-#define HAVESTL
-#define HAVETYPENAME
-#define HAVEAUTOPTR
 
-//#if (__GNUC__>=3)
-#define  USE_NEWSTRSTREAM
-//#endif
-
-//#include <stdint.h>
-// really should have autoconf figure this out
-//#include <inttypes.h>
-//#include <sys/int_types.h>
+	#define HAVE_STL
+	#define HAVE_TYPENAME
+	#define HAVE_AUTOPTR
+	#define USE_NEWSTRSTREAM
 
 #endif
 
 #ifdef __SUNPRO_CC
 	#if __SUNPRO_CC >= 0x500
-		#define HAVETYPENAME
+		#define HAVE_TYPENAME
 		#if __SUNPRO_CC_COMPAT >= 5
 // SUN's new compiler seems to work with STL (only)
-			#define HAVESTL
-			#define HAVEAUTOPTR
+			#define HAVE_STL
+			#define HAVE_AUTOPTR
 			#ifndef INTERNALBOOL
 				#define INTERNALBOOL
 			#endif
@@ -109,7 +98,7 @@
 	#endif
 #endif     
 
-#ifndef HAVETYPENAME
+#ifndef HAVE_TYPENAME
 	#define typename 
 #endif
 
@@ -119,7 +108,8 @@
 // it works, but not a second one) (at least with MSVC 5)
 //
 
-#ifdef HAVESTL
+//{
+#ifdef HAVE_STL
 
 #define I_fstream		<fstream>
 #define I_iomanip		<iomanip>
@@ -155,6 +145,7 @@
 #define USESTD using namespace std;
 
 #else
+//} {
 
 // section for non ANSI C++ compilers
 #define I_fstream		<fstream.h>
@@ -168,26 +159,26 @@
 
 
 #if (defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) ) && !defined(DJGPP)
-#define I_strstream		<strstream.h>
-// next macro is to avoid usage of the above lengthy || list and because in .fl file __unix__ cannot be used sometimes because m4 
-// expands this sometimes to ""
-#define PSTOEDIT_UNIXLIKE
+	#define I_strstream		<strstream.h>
+	// next macro is to avoid usage of the above lengthy || list and because in .fl file __unix__ cannot be used sometimes because m4 
+	// expands this sometimes to ""
+	#define PSTOEDIT_UNIXLIKE
 #else
-#define I_strstream		<strstrea.h>
+	#define I_strstream		<strstrea.h>
 #endif
 
 #define C_istrstream istrstream
 #define C_ostrstream ostrstream
 
 #if defined (__GNUG__) || defined (BOOLDEFINED) || ( defined (_MSC_VER) && _MSC_VER >= 1100) || defined (__BCPLUSPLUS__) && __BCPLUSPLUS__ >= 0x0400 || defined (INTERNALBOOL) || defined (_BOOL_EXISTS)
-// no need to define bool
-// 1100 is version 5.0
-// is for Digital Unix 
+	// no need to define bool
+	// 1100 is version 5.0
+	// is for Digital Unix 
 #else
-typedef int bool;
-const bool false = 0;
-const bool true  = 1;
-#define BOOLDEFINED 1
+	typedef int bool;
+	const bool false = 0;
+	const bool true  = 1;
+	#define BOOLDEFINED 1
 #endif
 
 #define I_stdio		<stdio.h>
@@ -195,17 +186,19 @@ const bool true  = 1;
 #define USESTD
 
 #endif
+//}
 
-#if (defined (_MSC_VER) && _MSC_VER >= 1100) || defined (LINT)
+// if (defined (_MSC_VER) && _MSC_VER >= 1100) || defined (LINT) || defined (__COVERITY__)
+#if 1
 #define NOCOPYANDASSIGN(classname) \
 	private: \
 		classname(const classname&); \
 		const classname & operator=(const classname&);
 #else
-/* nothing - GNU has problems with this anyway. But, it doesn't harm. 
+/* nothing - GNU has problems with this anyway. But, it does not harm. 
    During compilation with VC++ potential misusages of the 
    forbidden methods will be detected */
-#define NOCOPYANDASSIGN(classname) 
+	#define NOCOPYANDASSIGN(classname) 
 #endif
 
 
@@ -218,20 +211,20 @@ const bool true  = 1;
 
 // some code seems to rely on _WIN32 instead of WIN32
 #if defined (WIN32)
-#ifndef _WIN32 
-#define _WIN32 WIN32
+	#ifndef _WIN32 
+		#define _WIN32 WIN32
+	#endif
 #endif
-#endif
-
 
 #ifndef NIL 
 // 0 pointers
-#define NIL 0
+	#define NIL 0
 #endif
 
 
 
 
+//{
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 // for MS VS 8 (== cl version 14) we can use the new secure *_s string functions
 // for other systems we have to "emulate" them
@@ -247,7 +240,9 @@ const bool true  = 1;
 #define SETMODE _setmode
 #define TEMPNAM _tempnam
 #define GETCWD _getcwd
+
 #else
+//} {
 
 #include I_iostream
 #include I_string_h	// for strlen
@@ -256,7 +251,8 @@ const bool true  = 1;
 #define OPEN open
 #define CLOSE close
 #define READ read
-#define STRICMP stricmp
+#define STRICMP strcasecmp
+//#define STRICMP stricmp
 #define FILENO fileno
 #define SETMODE setmode
 #define TEMPNAM tempnam
@@ -272,7 +268,7 @@ USESTD
 //
 
 static inline void strncpy_s(char * de, size_t de_size, const char *  so, size_t count)   {
-	const size_t sourcelen = strlen(so);
+	const size_t sourcelen = so ? strlen(so) : 0;
 	size_t tobecopied = sourcelen < count ? sourcelen : count;
 	if ( tobecopied < de_size ) {
 		while (so && *so && (tobecopied > 0) ) {
@@ -280,7 +276,7 @@ static inline void strncpy_s(char * de, size_t de_size, const char *  so, size_t
 		} // does not copy final 0
 		*de = 0;
 	} else {
-		cerr << "buffer overflow in strcpy_s. Input string: '" << so << "' count: " << count  << " sourcelen " << sourcelen << " buffersize " << de_size << endl;
+		cerr << "buffer overflow in strcpy_s. Input string: '" << (so ? so : "NULL") << "' count: " << count  << " sourcelen " << sourcelen << " buffersize " << de_size << endl;
 		exit(1);
 	}
 }
@@ -300,11 +296,11 @@ static inline void strcat_s(char * de, size_t de_size, const char *  so) {
 // for older compilers
 
 #ifdef HAVE_SNPRINTF
-#define sprintf_s snprintf
-#define TARGETWITHLEN(str,len) str,len
+	#define sprintf_s snprintf
+	#define TARGETWITHLEN(str,len) str,len
 #else
-#define sprintf_s sprintf
-#define TARGETWITHLEN(str,len) str
+	#define sprintf_s sprintf
+	#define TARGETWITHLEN(str,len) str
 #endif
 
 // sscanf_s requires a size argument for output strings, unless we use "to-string", we can use sscanf
@@ -314,10 +310,7 @@ static inline void strcat_s(char * de, size_t de_size, const char *  so) {
 #define sscanf_s sscanf
 
 #endif
+//}
 
 #endif
-
- 
- 
- 
- 
+//}

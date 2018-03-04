@@ -1,7 +1,7 @@
 PSTOEDIT 
 Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
-pstoedit converts Postscript(TM) and PDF files to other vector graphic
+pstoedit converts PostScript(TM) and PDF files to other vector graphic
 formats so that they can be edited graphically. See pstoedit.htm or
 index.htm for more details on which formats are supported by pstoedit.
 
@@ -69,14 +69,14 @@ for OS/2.
 
 pstoedit and the -dSAFER option of Ghostscript:
 -----------------------------------------------
-GhostScript provides an option -dSAFER that disables all file access
+Ghostscript provides an option -dSAFER that disables all file access
 functions of PostScript. Some administrators even install a wrapper
-like to following instead of ghostscript directly
+like to following instead of gs directly
 #!/bin/sh
 gs.real -dSAFER $*
 
 So when a user uses gs he/she actually runs this script. However,
-pstoedit needs to have access to files for it's operation. So
+pstoedit needs to have access to files for its operation. So
 it is not possible to use this wrapper for gs in combination with pstoedit.
 You would get an error message like "Error: /invalidfileaccess in (w)".
 
@@ -89,8 +89,8 @@ export GS
 pstoedit.real -include /??????/local/safer.ps $*
 
 A template for safer.ps can be found in the misc subdirectory.
-This way pstoedit can open all the file it needs (the input file and an
-output file). After that then -- via the included file -- all files
+This way pstoedit can open all the files it needs (the input file and an
+output file). After that then -- via the included file -- all file
 operations are disabled and the input file is processed. Any file operation
 that is executed be the user's PostScript file is disabled this way.
 
@@ -98,15 +98,15 @@ that is executed be the user's PostScript file is disabled this way.
 Using pstoedit:
 ---------------
 Before you can use pstoedit you must have a working installation
-of GhostScript (either GNU or Aladdin).
+of Ghostscript (either GNU or Aladdin).
 
-The rest is descibed in the manual page in /pstoedit.htm.
+The rest is described in the manual page in /pstoedit.htm.
 
 pstoedit works reasonable with PostScript files containing
 	* line drawings
 	* text with standard fonts 
 
-Try to run it on golfer.ps or tiger.ps that comes with ghostscript, e.g., 
+Try to run it on golfer.ps or tiger.ps that comes with Ghostscript, e.g., 
 pstoedit -f <your format> <local path where GhostScript is installed>/examples/tiger.ps tiger.<suffix>
 
 Some features that are no supported by every backend of pstoedit:
@@ -117,7 +117,7 @@ Some features that are no supported by every backend of pstoedit:
 
 Special note about the Java backend:
 ------------------------------------
-The java backends generate a java source file that needs other files
+The Java backends generate a Java source file that needs other files
 in order to be compiled and usable. See the files contrib/java/java1/readme_java.txt 
 and contrib/java/java2/readme_java2.htm for more details.
 

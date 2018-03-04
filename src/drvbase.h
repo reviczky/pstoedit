@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,6 +54,9 @@ USESTD
 #include "miscutil.h"
 #endif
 
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+#include <vector>
+#endif
 
 // for compatibility checking
 static const unsigned int drvbaseVersion = 108;
@@ -66,12 +69,14 @@ static const unsigned int drvbaseVersion = 108;
 // 107 new driver descriptions -- added info about clipping
 // 108 new driver descriptions -- added info about driver options
 
-const unsigned int	maxFontNamesLength = 1000;
-const unsigned int	maxPoints    = 80000;	// twice the maximal number of points in a path
 const unsigned int  maxPages     = 10000;   // maximum number of pages - needed for the array of bounding boxes
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+ // we can use std::vector
+#else
+const unsigned int	maxPoints    = 80000;	// twice the maximal number of points in a path
 const unsigned int	maxElements  = maxPoints/2;
 const unsigned int	maxSegments  = maxPoints/2;// at least half of maxpoints (if we only have segments with one point)
-
+#endif
 
 class DLLEXPORT Point
 {
@@ -125,8 +130,8 @@ public:
 
 static const char emptyDashPattern[] =  "[ ] 0.0";
 
-class basedrawingelement ; // forward
-class DriverDescription ;  // forward
+class basedrawingelement; // forward
+class DriverDescription ; // forward
 
 class       DLLEXPORT    drvbase 
     // = TITLE
@@ -236,7 +241,11 @@ protected:
 		unsigned int    currentLineJoin;
 		float			currentMiterLimit;
 		unsigned int    nr;
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+		std::vector<basedrawingelement *> path;
+#else
 		basedrawingelement * * path; // a path is an array of pointers to basedrawingelements
+#endif
 		bool	 	isPolygon; // whether current path was closed via closepath or not
 		unsigned int	numberOfElementsInPath;
 		unsigned int	subpathoffset; // normally 0, but if subpathes are simulated
@@ -274,19 +283,28 @@ protected:
 			pathWasMerged(false),
 			dashPattern(emptyDashPattern)
 			{
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+#else
 			    path = new basedrawingelement *[maxElements];
+#endif
 			}
 
 		virtual ~PathInfo() { // added virtual because of windows memory handling
 			// the path content is deleted by clear
 			clear();
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+			// use std dtor
+#else
 			delete [] path;
+#endif
 		}
+		void addtopath(basedrawingelement * newelement,
+			           ostream & errf);
 		void clear();
 		void copyInfo(const PathInfo & p);
 			// copies the whole path state except the path array
 		void rearrange();
-            // rearrange subpaths for backends which don't support them 
+            // rearrange subpaths for backends which do not support them 
 	private:
 		// Inhibitors (declared, but not defined)
 		const PathInfo& operator=(const PathInfo&);
@@ -314,7 +332,7 @@ protected:
 public:
 	// = PUBLIC DATA
 
-	const DriverDescription * Pdriverdesc; // pointer to the derived class' driverdescription
+	const DriverDescription& driverdesc; // reference to the derived class' driverdescription
 
 	ProgramOptions* DOptions_ptr;
 
@@ -386,12 +404,12 @@ public:
 		const char* nameOfInputFile_p,
 		const char* nameOfOutputFile_p,
 		PsToEditOptions & globaloptions_p,
-		const DriverDescription * Pdriverdesc_p
+		const class DriverDescription & driverdesc_p
 	); // constructor
 	virtual ~drvbase();  		// destructor
 
 	// = BACKEND GENERIC FUNCTIONS 
-        // These functions are not backend specific and shouldn't have to be
+        // These functions are not backend specific and should not have to be
         // changed for new backends
 
 	void		startup(bool merge);
@@ -494,7 +512,7 @@ public:
 			{ currentPath->currentLineWidth = linewidth; }
 			
 	void 		setDash(const char * const dash)
-			{ currentPath->dashPattern.copy(dash); }
+			{ currentPath->dashPattern.assign(dash); }
 
 	void	 	setIsPolygon(bool what) { currentPath->isPolygon=what; } // whether current path was closed via closepath or not
 
@@ -588,7 +606,7 @@ public:
 	// or it can just set the ctorOK to false.
 	virtual bool driverOK() const { return ctorOK; } // some  
 
-	// needed to check for pseude drivers which don't have a real backend
+	// needed to check for pseude drivers which do not have a real backend
 	// but instead just do the job in the gs frontend.
 	virtual bool withbackend() const { return true; }
 
@@ -612,9 +630,9 @@ protected:
 	float           fillG() const { return outputPath->fillG; }
 	float           fillB() const { return outputPath->fillB; }
 	const RSString & currentColorName() const { return outputPath->colorName; }
-	const char *    dashPattern() const { return outputPath->dashPattern.value(); }
-	float           currentR() const { return outputPath->fillR; } // backends that don't support merging 
-	float           currentG() const { return outputPath->fillG; } // don't need to differentiate and
+	const char *    dashPattern() const { return outputPath->dashPattern.c_str(); }
+	float           currentR() const { return outputPath->fillR; } // backends that do not support merging 
+	float           currentG() const { return outputPath->fillG; } // do not need to differentiate and
 	float           currentB() const { return outputPath->fillB; } // can use these functions.
 	void			add_to_page();
 
@@ -637,6 +655,10 @@ private:
 	// writes a page header whenever a new page is needed
 
 	virtual void    show_path() = 0;
+
+	void show_or_convert_path();
+
+	void simulate_fill();
 
 	// the next functions are virtual with default implementations
 
@@ -667,7 +689,9 @@ public:
 	float * numbers;
 	float offset;
 
+private:
 	NOCOPYANDASSIGN(DashPattern)
+	DashPattern();
 };
 
 typedef const char * (*makeColorNameType)(float r, float g, float b);
@@ -720,8 +744,8 @@ public:
 //	basedrawingelement(unsigned int size_p) /*: size(size_p) */ {}
 	virtual const Point &getPoint(unsigned int i) const = 0;
 	virtual Dtype getType() const = 0;
-	friend ostream & operator<<(ostream & out,const basedrawingelement &elem);
-	bool operator==( const basedrawingelement & bd2) const;
+	friend ostream & operator<<(ostream & out, const basedrawingelement &elem);
+	bool operator==(const basedrawingelement& bd2) const;
 	virtual unsigned int getNrOfPoints() const = 0;
 	virtual basedrawingelement* clone() const = 0; // make a copy
 	// deleteyourself is needed because under Windows, the deletion
@@ -748,7 +772,7 @@ public:
 // "drvbase.h", line 455: sorry, not implemented: cannot expand inline function  drawingelement 
 //   <1 , 0 >::drawingelement__pt__19_XCUiL11XC5DtypeL10(Point*) with  for statement in inline
 
-	drawingelement(float x_1 = 0.0 ,float y_1 = 0.0 , float x_2 = 0.0, float y_2 = 0.0, float x_3 = 0.0, float y_3 = 0.0)
+	drawingelement(float x_1, float y_1, float x_2 = 0.0, float y_2 = 0.0, float x_3 = 0.0, float y_3 = 0.0)
 	: basedrawingelement()
 	{
 #if defined (__GNUG__) || defined (_MSC_VER) && _MSC_VER >= 1100
@@ -756,7 +780,7 @@ public:
 	copyPoints(nr,p,points);
 #else
 	// Turbo C++ hangs if the other solution is used.
-	// and the HP CC compiler doesn't like it either
+	// and the HP CC compiler does not like it either
 	// so use this for all compilers besides GNU and MS VC++
 	// This, however, is somewhat slower than the solution above
 	Point  * p = new Point[3];
@@ -804,6 +828,7 @@ public:
 	virtual unsigned int getNrOfPoints() const { return nr; }
 private:
 	Point points[(nr > 0) ? nr : (unsigned int)1]; //lint !e62 //Incompatible types (basic) for operator ':'
+	const drawingelement<nr,curtype> &  operator=( const drawingelement<nr,curtype> & rhs ); // not implemented
 };
 
 
@@ -822,20 +847,22 @@ inline drawingelement<nr,curtype>::drawingelement(Point p[])
 
 typedef drawingelement<(unsigned int) 1,moveto>  	Moveto;
 typedef drawingelement<(unsigned int) 1,lineto> 	Lineto;
-typedef drawingelement<(unsigned int) 0,closepath>  	Closepath;
+typedef drawingelement<(unsigned int) 1,closepath> 	Closepath;
 typedef drawingelement<(unsigned int) 3,curveto> 	Curveto;
 
 
 #define derivedConstructor(Class)			\
 	Class(const char * driveroptions_p, 	\
-	       ostream & theoutStream, 			\
-	       ostream & theerrStream, 			\
-		   const char* nameOfInputFile_p,	\
-	       const char* nameOfOutputFile_p,	\
-		   PsToEditOptions & globaloptions_p, /* non const because driver can also add options */ 		\
-		   const DriverDescription * descptr)	
+              ostream & theoutStream, 			\
+              ostream & theerrStream, 			\
+              const char* nameOfInputFile_p,	\
+              const char* nameOfOutputFile_p,	\
+              PsToEditOptions & globaloptions_p, /* non const because driver can also add options */ 		\
+              const class DriverDescription & descref)	
 
-#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descptr), options((DriverOptions*)DOptions_ptr)
+// use of static_cast instead of dynamic_cast, because some tools complain about problems then since
+// in theory dynamic_cast could return 0
+#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), options(static_cast<DriverOptions*>(DOptions_ptr))
 
 
 class DLLEXPORT DescriptionRegister
@@ -859,6 +886,7 @@ public:
 	void registerDriver(DriverDescription* xp);
 	void mergeRegister(ostream & out,const DescriptionRegister & src,const char * filename);
 	void explainformats(ostream & out,bool withdetails=false) const;
+	void listdrivers(ostream &out) const;
 	const DriverDescription * getDriverDescForName(const char * drivername) const;
 	const DriverDescription * getDriverDescForSuffix(const char * suffix) const;
 
@@ -969,7 +997,7 @@ public:
 	const bool	backendSupportsMultiplePages;
 	const bool	backendSupportsClipping;
 	const bool	nativedriver;
-	RSString filename; 
+	RSString 	filename; 
 	// where this driver is loaded from
 	// Note: formerly this was a RSString - but that caused problems under X64 / Windows
 	// it seems as constructing and deleting heap during start-up phase when not all DLLs are fully initialized
@@ -1029,7 +1057,7 @@ public:
 			PsToEditOptions & globaloptions_p /* non const because driver can also add arguments */
 			 ) const
 	{ 
-		drvbase * backend = new T(driveroptions_P, theoutStream, theerrStream,nameOfInputFile,nameOfOutputFile, globaloptions_p,this); 
+		drvbase * backend = new T(driveroptions_P, theoutStream, theerrStream, nameOfInputFile, nameOfOutputFile, globaloptions_p, *this); 
 		return backend;
 	} 
 
@@ -1049,7 +1077,7 @@ private:
 	NOCOPYANDASSIGN(DriverDescriptionT<T>)
 };
 
-#if !( (defined (__GNUG__)  && (__GNUC__>=3) && defined (HAVESTL)) || defined (_MSC_VER) && (_MSC_VER >= 1300) )
+#if !( (defined (__GNUG__)  && (__GNUC__>=3) && defined (HAVE_STL)) || defined (_MSC_VER) && (_MSC_VER >= 1300) )
 // 1300 is MSVC.net (7.0)
 // 1200 is MSVC 6.0
 //G++3.0 comes with a STL lib that includes a definition of min and max

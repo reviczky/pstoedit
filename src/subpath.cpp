@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2013  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1999 - 2014  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -383,7 +383,7 @@ void sub_path_list::read(const drvbase::PathInfo & path_info)
 
 	// Count the number of movetos
 
-	for (i = 0; i < path_info.numberOfElementsInPath - 1; i++) {
+	for (i = 0; i < path_info.numberOfElementsInPath - 1; i++) { // ??? why -1 ???
 		if (path_info.path[i]->getType() == moveto)
 			num_paths++;
 	}
@@ -452,6 +452,7 @@ insert_subpath( basedrawingelement **  parent_path,
 
 void drvbase::PathInfo::rearrange()
 {
+//	cerr << " numberOfElementsInPath on input " << numberOfElementsInPath << endl;
 	//  write(*this);
 	sub_path_list list;
 	sub_path *child  = (sub_path *) 0;
@@ -462,6 +463,19 @@ void drvbase::PathInfo::rearrange()
 	list.find_parents();		// Find the parents of all children
 	list.new_points();			// Make the new point arrays
 	list.clean_children();
+	
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+	// temp hack to insert some additional space into the STL vector
+	// which might be needed by the code below - since it doesn't check 
+	// the index anymore.
+	// TBD - fix this.
+	const int additional_space = 4;
+	for (int s = 0; s < additional_space; s++) {
+		addtopath(new Lineto(0.0f,0.0f),cerr);
+		addtopath(new Lineto(0.0f,0.0f),cerr);
+	}
+#endif
+
 	clear();					// Clear the path
 	//  cerr << "Rearranging path" << endl;
 	// Write the elements back
@@ -488,7 +502,7 @@ void drvbase::PathInfo::rearrange()
 					continue;
 				const float test_distance =
 					get_min_distance(&path
-									 [numberOfElementsInPath],
+									 [numberOfElementsInPath], 
 									 parent->children[k]->path,
 									 tmp_num -
 									 numberOfElementsInPath,
@@ -503,17 +517,22 @@ void drvbase::PathInfo::rearrange()
 			}
 //			assert(child != 0 && "fatal error in pstoedit::subpath.cpp::drvbase::PathInfo::rearrange");
 			if (child) {
-				insert_subpath(path, child->path, tmp_num,
+				insert_subpath(&path[0], child->path, tmp_num,
 						   child->num_elements, parent_index + numberOfElementsInPath, child_index);
 				child->flags |= PS_PATH_IS_CONNECTED;
 				tmp_num += child->num_elements + 2;
 			}
 		}}
+#if 0
+		if (tmp_num > numberOfElementsInPath) {
+			cerr << "increasing numberOfElementsInPath from " << numberOfElementsInPath << " to " << tmp_num<< endl;
+		}
+#endif
 		numberOfElementsInPath = tmp_num;
 	} }
 
 	// Remove duplicate linetos
-
+#if 1
 	{for (unsigned int i = 0; i + 1 < numberOfElementsInPath; i++) {
 		if ((path[i]->getType() == lineto)
 			&& (path[i + 1]->getType() == lineto)) {
@@ -521,11 +540,13 @@ void drvbase::PathInfo::rearrange()
 			const Point & pp2 = path[i + 1]->getPoint(0);
 			if ((pp1.x_ == pp2.x_) && (pp1.y_ == pp2.y_)) {
 				delete path[i];
-				for (unsigned int j = i; j + 1 < numberOfElementsInPath; j++)
+				for (unsigned int j = i; j + 1 < numberOfElementsInPath; j++) {
 					path[j] = path[j + 1];
+				}
 				numberOfElementsInPath--;
 			}
 		}
 	}}
+#endif
 	//  write(*this);
 }

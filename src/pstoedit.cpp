@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure 
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,6 +33,13 @@
 
 #include "pstoeditoptions.h"
 
+PsToEditOptions& PsToEditOptions::theOptions() // singleton
+{
+	static PsToEditOptions theInstance;
+	return theInstance;
+}
+
+
 #include "pstoedit.h"
 
 // for the DLL export data types (the description struct)
@@ -46,15 +53,13 @@
 #include "dynload.h"
 #endif
 
-inline bool strequal(const char * const s1, const char * const s2) { return (strcmp(s1,s2) == 0);}
-
 #ifndef USEPROLOGFROMFILE
 #include "pstoedit.ph"
 #endif
 
 #include "psfront.h"
 
-#ifdef HAVEDIALOG
+#ifdef HAVE_DIALOG
 #include "pstoeditdialog.h"
 
 // typedef void (pstoeditDialog_func) (void  *); /* in reality the params is is PsToEditOptions * */
@@ -95,8 +100,8 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 #if ( defined (__GNUG__) || defined(__mips) )
 	inFile.open(filename);		// for some reasons adding flags does not work correctly with  g++
 #else
-	#ifdef HAVESTL
-	// at least MSVC doesn't know nocreate when using STL
+	#ifdef HAVE_STL
+	// at least MSVC does not know nocreate when using STL
 		inFile.open(filename, ios::binary );
 	#else
 		inFile.open(filename, ios::binary | ios::nocreate);
@@ -121,7 +126,7 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 			// make a temp variable to avoid a compiler warning on MSVC
 			// (signed/unsigned comparison)
 			const std::streamsize inFile_gcountresult = inFile.gcount();
-#ifdef HAVESTL
+#ifdef HAVE_STL
 			// Notes regarding ANSI C++ version (from KB)
 			// istream::get( char* pch, int nCount, char delim ) is different in three ways: 
 			// When nothing is read, failbit is set.
@@ -140,7 +145,7 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 			} else
 #endif
 
-			if ((inFile_gcountresult == matchlen) && strequal(buffer, matchstring) ) {
+			if ((inFile_gcountresult>0) && ((size_t)inFile_gcountresult == matchlen) && strequal(buffer, matchstring) ) {
 				delete[]buffer;
 				return 0;
 			}
@@ -202,7 +207,7 @@ static DriverDescriptionT < drvNOBACKEND > D_dump("dump", "for test purposes (sa
 												  "","dbg", true, true, true, true, DriverDescription::memoryeps,
 												  DriverDescription::normalopen, true, true,false);
 static DriverDescriptionT < drvNOBACKEND > D_gs("gs",
-												"any device that GhostScript provides - use gs:format, e.g. gs:pdfwrite",
+												"any device that Ghostscript provides - use gs:format, e.g. gs:pdfwrite",
 												"","gs", true, true, true, true, DriverDescription::noimage,
 												DriverDescription::normalopen, true, true,false);
 #if 0
@@ -212,7 +217,7 @@ static const OptionDescription driveroptionsAI[] = {
 	endofoptions};
 #endif
 static DriverDescriptionT < drvNOBACKEND > D_ps2ai("ps2ai",
-												   "Adobe Illustrator via ps2ai.ps of GhostScript",
+												   "Adobe Illustrator via ps2ai.ps of Ghostscript",
 												   "","ai", true, true, true, true, DriverDescription::noimage,
 												   DriverDescription::normalopen, false, true,
 												   false);
@@ -252,8 +257,8 @@ static void loadpstoeditplugins(const char *progname, ostream & errstream, bool 
 	if (pluginsloaded)
 		return;
 	RSString plugindir = getRegistryValue(errstream, "common", "plugindir");
-	if (plugindir.value() && strlen(plugindir.value() )) {
-		loadPlugInDrivers(plugindir.value(), errstream, verbose);	// load the driver plugins
+	if (plugindir.length()) {
+		loadPlugInDrivers(plugindir.c_str(), errstream, verbose);	// load the driver plugins
 		pluginsloaded = true;
 	}
 	// also look in the directory where the pstoedit .exe/dll was found
@@ -264,15 +269,24 @@ static void loadpstoeditplugins(const char *progname, ostream & errstream, bool 
 	char *p = 0;
 	if (r && (p = strrchr(szExePath, directoryDelimiter)) != 0) {
 		*p = '\0';
-		if (!strequal(szExePath, plugindir.value() ? plugindir.value() : "")) {
+		if (!strequal(szExePath, plugindir.c_str())) {
 			loadPlugInDrivers(szExePath, errstream,verbose);
 			pluginsloaded = true;
 		}
 	}
+	// now try also $exepath/../lib/pstoedit
+	strcat_s(szExePath,1000,"/../lib/pstoedit");
+	if (!strequal(szExePath, plugindir.c_str())) {
+    	loadPlugInDrivers(szExePath, errstream,verbose);
+		pluginsloaded = true;
+	}
+
 #ifdef PSTOEDITLIBDIR
-	// also try to load drivers from the PSTOEDITLIBDIR
-	loadPlugInDrivers(PSTOEDITLIBDIR, errstream,verbose);
-	pluginsloaded = true;
+	if (!pluginsloaded) {
+  	  // also try to load drivers from the PSTOEDITLIBDIR
+	  loadPlugInDrivers(PSTOEDITLIBDIR, errstream,verbose);
+	  pluginsloaded = true;
+	}
 #endif
 
 	// delete[]plugindir;
@@ -286,7 +300,6 @@ extern FILE *yyin;				// used by lexer
 
 static void usage(ostream & outstream, bool forTeX, bool withdetails, bool withcategories = false)
 {
-	PsToEditOptions dummy;
 	if (withcategories) {
 		const char * const propSheetNames[] = {
 		"General options",
@@ -300,13 +313,13 @@ static void usage(ostream & outstream, bool forTeX, bool withdetails, bool withc
 		for (unsigned int sheet = PsToEditOptions::g_t ; sheet <= PsToEditOptions::d_t ; sheet++ ) {
 			if (sheet == PsToEditOptions::a_t) continue; // skip "about"
 			outstream << "\\subsection{"  << propSheetNames[sheet] << "}" << endl;
-			dummy.showhelp(outstream,forTeX,withdetails,sheet);
+			PsToEditOptions::theOptions().showhelp(outstream,forTeX,withdetails,sheet);
 		} 
 		outstream << "\\subsection{Input and outfile file arguments}" << endl;
-		outstream << "[ inputfile [outputfile] ] " << endl;
+		outstream << "[ inputfile [outputfile] ]" << endl;
 	} else {
-		dummy.showhelp(outstream,forTeX,withdetails);
-		outstream << "[ inputfile [outputfile] ] " << endl;
+		PsToEditOptions::theOptions().showhelp(outstream,forTeX,withdetails);
+		outstream << "[ inputfile [outputfile] ]" << endl;
 	}
 }
 static void shortusage(ostream & outstream)
@@ -331,14 +344,13 @@ extern "C" DLLEXPORT
 
 	Closer closerObject;
 
-	PsToEditOptions options;
+	PsToEditOptions& options = PsToEditOptions::theOptions(); // just short hand notation 
 	ostream& diag = f_useCoutForDiag ? cout : errstream;
 
-#ifdef _DEBUG
-	const char buildtype [] = "debug build";
-#else
-	const char buildtype [] = "release build";
-#endif
+	drvbase::SetVerbose( false );	// init
+	const unsigned int remaining = options.parseoptions(errstream,argc,argv);
+
+
 #ifdef __VERSION__
 	#if defined(_LP64) && (_LP64)
 		#define COMPILEDFORWHICHARCH "64-bit"
@@ -370,15 +382,16 @@ extern "C" DLLEXPORT
 	#endif
 #endif
 
-
-	// int arg = 1;
-	drvbase::SetVerbose( false );	// init
-	const unsigned int remaining = options.parseoptions(errstream,argc,argv);
-
 	if (!options.quiet) {
+
+#ifdef _DEBUG
+	const char buildtype [] = "debug build";
+#else
+	const char buildtype [] = "release build";
+#endif
 		errstream << "pstoedit: version " << version << " / DLL interface " <<
 		drvbaseVersion << " (built: " << __DATE__ << " - " << buildtype << " - " << compversion << ")" 
-		" : Copyright (C) 1993 - 2013 Wolfgang Glunz\n";
+		" : Copyright (C) 1993 - 2014 Wolfgang Glunz\n";
 	}
 
 	//  handling of derived parameters
@@ -407,7 +420,7 @@ extern "C" DLLEXPORT
 			}
 	}
 
-#ifdef HAVEDIALOG
+#ifdef HAVE_DIALOG
 	// setPstoeditDialogFunction(rundialog);
 	
 	if (options.showdialog) {
@@ -478,9 +491,14 @@ extern "C" DLLEXPORT
 		getglobalRp()->explainformats(diag,true);
 		return 1;
 	}
+	if (options.listdrivers) {
+		// show driver specific options
+		getglobalRp()->listdrivers(diag);
+		return 1;
+	}
 	if (options.showdrvhelp) {
 		usage(diag,false,false);
-		const char *gstocall = whichPI(diag, options.verbose, options.gsregbase.value.value(),options.GSToUse.value.value());
+		const char *gstocall = whichPI(diag, options.verbose, options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
 		if (gstocall != 0) {
 			diag << "Default interpreter is " << gstocall << endl;
 		}
@@ -489,7 +507,7 @@ extern "C" DLLEXPORT
 	}
 
 	if (options.justgstest) {
-		const char *gstocall = whichPI(errstream, options.verbose, options.gsregbase.value.value(),options.GSToUse.value.value());
+		const char *gstocall = whichPI(errstream, options.verbose, options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
 		if (gstocall == 0) {
 			return 3;
 		}
@@ -556,7 +574,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		}
 		return gsresult;
 	}
-	if (options.drivername.value.value() == 0) {
+	if (options.drivername.value.length() == 0) {
 		// try to find driver according to suffix of input file
 		if (!options.nameOfOutputFile) {
 			diag << "No output format specified (-f option) and format could not be deduced from suffix of output file since no output file name was given" << endl;
@@ -584,16 +602,16 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 	}
 	// from here on options.drivername is != 0
 	{
-		auto_ptr<char> driveroptionscopy (cppstrdup(options.drivername.value.value()) );
+		auto_ptr<char> driveroptionscopy (cppstrdup(options.drivername.value.c_str()) );
 		char *driveroptions = strchr(driveroptionscopy.operator->(), ':');
 		if (driveroptions) {
 			*driveroptions = '\0';	// replace : with 0 to separate drivername
 			options.drivername = driveroptionscopy.operator->();
 			driveroptions++;
 		}
-		const DriverDescription *currentDriverDesc = getglobalRp()->getDriverDescForName(options.drivername.value.value());
+		const DriverDescription *currentDriverDesc = getglobalRp()->getDriverDescForName(options.drivername.value.c_str());
 		if (currentDriverDesc == 0) {
-			diag << "Unsupported output format " << options.drivername.value.value() << endl;
+			diag << "Unsupported output format " << options.drivername.value.c_str() << endl;
 			getglobalRp()->explainformats(diag);
 			return 1;
 		}
@@ -613,7 +631,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			delete dummy;
 			return 1;
 		}
-		if (strequal(options.drivername.value.value(), "gs")) {
+		if (strequal(options.drivername.value.c_str(), "gs")) {
 // TODO:
 			// Check for input file (exists, or stdin) stdout handling
 			if (!options.nameOfInputFile) {
@@ -648,12 +666,12 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					"The gs output driver needs a gs-device as argument, e.g. gs:pdfwrite" << endl;
 				return 1;
 			}
-			// special handling of direct ghostscript drivers
+			// special handling of direct Ghostscript drivers
 			Argv commandline;
 //          char commandline[1000];
 			// TODO check for overflow
 //          commandline[0]= '\0';
-			const char *gstocall = whichPI(errstream, options.verbose, options.gsregbase.value.value(),options.GSToUse.value.value());
+			const char *gstocall = whichPI(errstream, options.verbose, options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
 			if (gstocall == 0) {
 				return 3;
 			}
@@ -675,7 +693,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			// tempbuffer[0] = '\0';
 			// tempbuffer += "-sDEVICE="; // strcat_s(tempbuffer, 1000, "-sDEVICE=");
 			tempbuffer += driveroptions; // strcat_s(tempbuffer, 1000,driveroptions);	// e.g., pdfwrite ;
-			commandline.addarg(tempbuffer.value() );
+			commandline.addarg(tempbuffer.c_str() );
 			for (unsigned int psi = 0; psi < options.psArgs().argc; psi++) {
 				commandline.addarg(options.psArgs().argv[psi]);
 			}
@@ -683,7 +701,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			tempbuffer +=  options.nameOfOutputFile; 
 			// strcat_s(tempbuffer,1000, "-sOutputFile=");
 			// strcat_s(tempbuffer,1000, options.nameOfOutputFile);
-			commandline.addarg(tempbuffer.value());
+			commandline.addarg(tempbuffer.c_str());
 			commandline.addarg("-c");
 			commandline.addarg("save");
 			commandline.addarg("pop");
@@ -737,7 +755,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				} else {
 					drvbase::pstoeditHomeDir() = "";
 				}
-				if (options.verbose)  errstream << "pstoedit home directory : " << drvbase::pstoeditHomeDir().value() << endl;
+				if (options.verbose)  errstream << "pstoedit home directory : " << drvbase::pstoeditHomeDir().c_str() << endl;
 
 				drvbase::pstoeditDataDir() = drvbase::pstoeditHomeDir();
 
@@ -750,7 +768,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 #endif
 #endif
 
-				if (options.verbose)  errstream << "pstoedit data directory : " << drvbase::pstoeditDataDir().value() << endl;
+				if (options.verbose)  errstream << "pstoedit data directory : " << drvbase::pstoeditDataDir().c_str() << endl;
 			}
 
 
@@ -765,7 +783,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				sprintf_s(TARGETWITHLEN(nameOfOutputFilewithoutpercentD, strlen(options.nameOfOutputFile)+ 20) , options.nameOfOutputFile, 1);	//first page is page 1
 #endif
 				RSString newFileName = getOutputFileNameFromPageNumber(options.nameOfOutputFile, options.pagenumberformat, 1);
-				nameOfOutputFilewithoutpercentD = cppstrdup(newFileName.value());
+				nameOfOutputFilewithoutpercentD = cppstrdup(newFileName.c_str());
 				
 				if (currentDriverDesc->backendFileOpenType != DriverDescription::noopen) {
 					if (currentDriverDesc->backendFileOpenType == DriverDescription::binaryopen) {
@@ -816,20 +834,20 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			}
 
 
-			if (options.explicitFontMapFile.value.value()) {
-				if (fileExists(options.explicitFontMapFile.value.value())) {
+			if (options.explicitFontMapFile.value.length()) {
+				if (fileExists(options.explicitFontMapFile.value.c_str())) {
 					if (options.verbose) {
 						errstream << "Loading fontmap from " << options.explicitFontMapFile.value << endl;
 					}
-					drvbase::theFontMapper().readMappingTable(errstream, options.explicitFontMapFile.value.value());
+					drvbase::theFontMapper().readMappingTable(errstream, options.explicitFontMapFile.value.c_str());
 				} else {
 					RSString extendedFontMapFile = options.explicitFontMapFile.value;
 					extendedFontMapFile += ".fmp";
-					if (fileExists(extendedFontMapFile.value())) {
+					if (fileExists(extendedFontMapFile.c_str())) {
 						if (options.verbose) {
 							errstream << "Loading fontmap from " << extendedFontMapFile << endl;
 						}
-						drvbase::theFontMapper().readMappingTable(errstream, options.explicitFontMapFile.value.value());
+						drvbase::theFontMapper().readMappingTable(errstream, options.explicitFontMapFile.value.c_str());
 					} else {
 						errstream << "Warning: Couldn't open fontmap file. Neither " <<
 						options.explicitFontMapFile.value << " nor " << extendedFontMapFile << ". Option ignored." << endl;
@@ -844,12 +862,12 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					test += directoryDelimiter;
 					test += options.drivername.value;
 					test += ".fmp";
-					if (fileExists(test.value())) {
+					if (fileExists(test.c_str())) {
 						if (options.verbose) {
 							errstream <<
-								"loading driver specific fontmap from " << test.value() << endl;
+								"loading driver specific fontmap from " << test.c_str() << endl;
 						}
-						drvbase::theFontMapper().readMappingTable(errstream, test.value());
+						drvbase::theFontMapper().readMappingTable(errstream, test.c_str());
 					}
 				}
 			}
@@ -868,16 +886,16 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					test += "windows";
 #endif
 					test += ".fmp";
-					if (fileExists(test.value())) {
+					if (fileExists(test.c_str())) {
 						if (options.verbose) {
 							errstream <<
-								"loading system specific fontmap from " << test.value() << endl;
+								"loading system specific fontmap from " << test.c_str() << endl;
 						}
-						drvbase::theFontMapper().readMappingTable(errstream, test.value());
+						drvbase::theFontMapper().readMappingTable(errstream, test.c_str());
 					} else  {
 						if (options.verbose) {
 							errstream <<
-								"Warning: System specific fontmap not loaded - " << test.value() << " not found in pstoedit data directory." << endl;
+								"Warning: System specific fontmap not loaded - " << test.c_str() << " not found in pstoedit data directory." << endl;
 						}
 					}
 				} else {
@@ -888,7 +906,6 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				}
 			}
 
-			RSString gsoutName;
 			RSString gsout;
 			int gsresult = 0;
 			if (options.backendonly) {
@@ -901,7 +918,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			} else {
 				RSString gsin = full_qualified_tempnam("psin");
 				const char *successstring;	// string that indicated success of .pro
-				ofstream inFileStream(gsin.value());
+				ofstream inFileStream(gsin.c_str());
 				inFileStream << "/pstoedit.pagetoextract " << options.pagetoextract << " def" << endl;
 				inFileStream << "/pstoedit.versioninfo (" << version << " " << compversion << ") def" << endl;
 				if (options.nomaptoisolatin1) {
@@ -968,9 +985,9 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				if (options.correctdefinefont) {
 					inFileStream << "/pstoedit.correctdefinefont true def" << endl;
 				}
-				if (options.unmappablecharstring.value.value() && strlen(options.unmappablecharstring.value.value())) {
+				if (options.unmappablecharstring.value.length()) {
 					inFileStream << "/pstoedit.globalunmappablecharacter (" <<
-						options.unmappablecharstring.value.value()[0] << ") def" << endl;
+						options.unmappablecharstring.value.c_str()[0] << ") def" << endl;
 				}
 				inFileStream << "/pstoedit.precisiontext " << options.precisiontext << " def" << endl;
 
@@ -988,18 +1005,17 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				inFileStream << "/pstoedit.yshift " << options.yshift << " def" << endl;
 				if (options.centered) { inFileStream << "/pstoedit.centered " << "true" << " def" << endl; }
 	
-				if (strequal(options.drivername.value.value(), "ps")
-					|| strequal(options.drivername.value.value(), "psf")) {
+				if (strequal(options.drivername.value.c_str(), "ps")
+					|| strequal(options.drivername.value.c_str(), "psf")) {
 					inFileStream << "/pstoedit.escapetext true def" << endl;
 				}
-				if ((strequal(options.drivername.value.value(), "debug")) || (strequal(options.drivername.value.value(), "pdf"))) {
+				if ((strequal(options.drivername.value.c_str(), "debug")) || (strequal(options.drivername.value.c_str(), "pdf"))) {
 					inFileStream << "/pstoedit.usepdfmark true def" << endl;
 				}
  
-				inFileStream << "/pstoedit.replacementfont (" << options.replacementfont << ") def" << endl;
-				gsout = gsoutName = full_qualified_tempnam("psout");
-				assert((gsin != gsout)
-					   && ("You seem to have a buggy version of tempnam" != 0));
+				inFileStream << "/pstoedit.replacementfont (" << options.replacementfont.value << ") def" << endl;
+				gsout = full_qualified_tempnam("psout");
+				// assert((gsin != gsout) && ("You seem to have a buggy version of tempnam" != 0));
 				// tempnam under older version of DJGPP are buggy
 				// see search for BUGGYTEMPNAME in this file !! 
 				if (options.nameOfOutputFile) {
@@ -1016,23 +1032,23 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					inFileStream << ") def" << endl;
 				}
 				inFileStream << "/pstoedit.outputfilename (";
-				writeFileName(inFileStream, gsout.value());
+				writeFileName(inFileStream, gsout.c_str());
 				inFileStream << ") def" << endl;
 
 				inFileStream << "/pstoedit.inputfilename  (";
 				writeFileName(inFileStream, options.nameOfInputFile);
 				inFileStream << ") def" << endl;
 
-				if (options.nameOfIncludeFile.value.value()) {
-					ifstream filetest(options.nameOfIncludeFile.value.value());
+				if (options.nameOfIncludeFile.value.length()) {
+					ifstream filetest(options.nameOfIncludeFile.value.c_str());
 					if (!filetest) {
 						errstream << "Could not open file " <<
-							options.nameOfIncludeFile << " for inclusion" << endl;
+							options.nameOfIncludeFile.value << " for inclusion" << endl;
 						return 1;
 					}
 					filetest.close();
 					inFileStream << "/pstoedit.nameOfIncludeFile  (";
-					writeFileName(inFileStream, options.nameOfIncludeFile.value.value());
+					writeFileName(inFileStream, options.nameOfIncludeFile.value.c_str());
 					inFileStream << ") def" << endl;
 				}
 
@@ -1104,7 +1120,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					}
 					inFileStream << "end" << endl;
 				}
-				if (strequal(options.drivername.value.value(), "ps2ai")) {
+				if (strequal(options.drivername.value.c_str(), "ps2ai")) {
 					successstring = "%EOF";	// This is written by the ps2ai.ps 
 					// showpage in ps2ai does quit !!!
 					// ps2ai needs special headers
@@ -1136,11 +1152,11 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 #endif
 				}
 				inFileStream.close();
-				// now call ghostscript
+				// now call Ghostscript
 
 				Argv commandline;
 				const char *gstocall = whichPI(errstream, options.verbose, 
-				  options.gsregbase.value.value(),options.GSToUse.value.value());
+				  options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
 				if (gstocall == 0) {
 					return 3;
 				}
@@ -1167,7 +1183,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				}
 				if (!options.verbose)
 					commandline.addarg("-q");
-				if (!strequal(options.drivername.value.value(), "ps2ai") ) {	// not for ps2ai
+				if (!strequal(options.drivername.value.c_str(), "ps2ai") ) {	// not for ps2ai
 					if (options.nobindversion) {
 						// NOBIND disables bind in, e.g, gs_init.ps
 						// these files are loaded before pstoedit.pro
@@ -1188,18 +1204,22 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				if (options.withdisplay) {
 					commandline.addarg("-dNOPAUSE");
 				} else {
-					if (options.pngimage.value.value()) {
+					if (options.pngimage.value.length()) {
 						commandline.addarg("-dNOPAUSE");
 						commandline.addarg("-dBATCH");
 						commandline.addarg("-sDEVICE=png16m");
 						RSString tempbuffer = "-sOutputFile=";
 						tempbuffer +=  options.pngimage.value;
-						commandline.addarg(tempbuffer.value());
+						commandline.addarg(tempbuffer.c_str());
 					} else {
 						commandline.addarg("-dNODISPLAY");
 					}
 				}
 				commandline.addarg("-dNOEPS"); // otherwise EPSF files create implicit showpages and a save/restore pair which disturbs the setPageSize handling
+
+				//layer commandline.addarg("-dDEBUG");
+				//layer commandline.addarg("pdf_cslayer.ps");
+
 
 				for (unsigned int psi = 0; psi < options.psArgs().argc; psi++) {
 					commandline.addarg(options.psArgs().argv[psi]);
@@ -1211,13 +1231,13 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 #else
 				RSString gsinfilename = gsin;
 #endif
-				if (strequal(options.drivername.value.value(), "ps2ai")) {
+				if (strequal(options.drivername.value.c_str(), "ps2ai")) {
 					// ps2ai needs special headers
-					commandline.addarg(gsinfilename.value());	// the first time to set the paramters for ps2ai.ps
+					commandline.addarg(gsinfilename.c_str());	// the first time to set the paramters for ps2ai.ps
 					commandline.addarg("ps2ai.ps");
-					commandline.addarg(gsinfilename.value());	// again, but this time it'll run the conversion
+					commandline.addarg(gsinfilename.c_str());	// again, but this time it'll run the conversion
 				} else {
-					commandline.addarg(gsinfilename.value());
+					commandline.addarg(gsinfilename.c_str());
 				}
 				if (options.verbose)
 					errstream << "now calling the interpreter via: " << commandline << endl;
@@ -1227,23 +1247,23 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					errstream << "PostScript/PDF Interpreter finished. Return status " << gsresult 
 					<< " executed command : " << commandline << endl;
 				}
-				// ghostscript seems to return always 0, so
+				// Ghostscript seems to return always 0, so
 				// check whether the normal end was reached by pstoedit.pro
-				if (!options.keepinternalfiles)
-					(void) remove(gsin.value());
-				//wogl free(gsin);
+				if (!options.keepinternalfiles) {
+                                        // coverity[tainted_string]
+					(void) remove(gsin.c_str());
+                                }
 				// if really returned !0 don't grep
 				if (!gsresult) {
 					if (options.verbose)
 						errstream << "Now checking the temporary output" << endl;
-					gsresult = grep(successstring, gsout.value(), errstream);
+					gsresult = grep(successstring, gsout.c_str(), errstream);
 				}
 			}
 			if (gsresult != 0) {
 				errstream << "The interpreter seems to have failed, cannot proceed !" << endl;
 				if (!options.keepinternalfiles)
-					(void) remove(gsout.value());
-				//wogl free(gsoutName);
+					(void) remove(gsout.c_str());
 				return 1;
 			} else {
 				if (outputdriver->withbackend()) {
@@ -1256,14 +1276,14 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 						if (options.verbose) {
 							errstream << "copying stdin to " << gsout << endl;
 						}
-						ofstream copyofstdin(gsout.value());
+						ofstream copyofstdin(gsout.c_str());
 						copy_file(cin, copyofstdin);
 					}
 
 					{
 						// local scope to force delete before delete of driver
-						outputdriver->setdefaultFontName(options.replacementfont.value.value());
-						//      if (nosubpathes) ((DriverDescription*) outputdriver->Pdriverdesc)->backendSupportsSubPathes=false;
+						outputdriver->setdefaultFontName(options.replacementfont.value.c_str());
+						//      if (nosubpaths) ((DriverDescription*) outputdriver->Pdriverdesc)->backendSupportsSubPathes=false;
 //						outputdriver->simulateSubPaths = (bool) options.simulateSubPaths;
 
 						const char * bbfilename = 0;
@@ -1271,7 +1291,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 							// read BB from original input file
 							bbfilename = options.nameOfInputFile;
 						} else {
-							bbfilename = gsout.value();
+							bbfilename = gsout.c_str();
 						}
                             
 						yyin = fopen(bbfilename, "rb");	// ios::binary | ios::nocreate
@@ -1301,7 +1321,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 						if (options.verbose)
 							errstream << "now postprocessing the interpreter output" << endl;
 						
-						yyin = fopen(gsout.value(), "rb");
+						yyin = fopen(gsout.c_str(), "rb");
 						fe.run(options.mergelines);
 						// now we can close it in any case - since we took a copy
 						fclose(yyin);
@@ -1312,12 +1332,12 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 
 
 					if (options.backendonly && (strequal(options.nameOfInputFile, stdinFileName))) {
-						(void) remove(gsout.value());
+						(void) remove(gsout.c_str());
 					}
 				} else {
 					// outputdriver has no backend
 					// Debug or PostScript driver
-					ifstream gsoutStream(gsout.value()); 
+					ifstream gsoutStream(gsout.c_str()); 
 					if (options.verbose)
 						errstream << "now copying  '" << gsout << "' to '"
 							<< (options.nameOfOutputFile ? options.nameOfOutputFile : "standard output ") << "' ";
@@ -1328,10 +1348,9 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				}
 				if (!options.backendonly) {
 					if (!options.keepinternalfiles)
-						(void) remove(gsout.value());
+						(void) remove(gsout.c_str());
 				}
 			}
-			//wogl free(gsoutName); 
 		}
 	}							// no backend specified
 //  delete [] drivername;
@@ -1413,7 +1432,7 @@ static DriverDescription_S * getPstoeditDriverInfo_internal(bool withgsdrivers)
 	const int dCount = getglobalRp()->nrOfDescriptions();
 	/* use malloc to be compatible with C */
 	DriverDescription_S *result =
-		(DriverDescription_S *) malloc((dCount + 1) * sizeof(DriverDescription_S));
+		static_cast<DriverDescription_S *>( malloc((dCount + 1) * sizeof(DriverDescription_S)));
 	DriverDescription_S *curR = result;
 	assert(curR);
 	const DriverDescription *const *dd = getglobalRp()->rp;
@@ -1445,7 +1464,7 @@ extern "C" DLLEXPORT DriverDescription_S * getPstoeditDriverInfo_plainC(void)
 }
 
 extern "C" DLLEXPORT DriverDescription_S* getPstoeditNativeDriverInfo_plainC(void)
- /* for the pstoedit native drivers - not the ones that are provided as short cuts to ghostscript */
+ /* for the pstoedit native drivers - not the ones that are provided as short cuts to Ghostscript */
 {
 	return getPstoeditDriverInfo_internal(false);
 }
@@ -1466,7 +1485,7 @@ extern "C" DLLEXPORT void clearPstoeditDriverInfo_plainC(DriverDescription_S * p
 // under Windows we need to be able to switch between two modes of calling GS - 1 via DLL and 2 with EXE
 // the EXE is needed when being called from gsview - whereas in all other cases the DLL is the better way
 // So the useDLL is set to false - and the pstoedit stand-alone program sets it to true
-// gsview uses the default which is false - hence the ghostscript is called via its exe
+// gsview uses the default which is false - hence the Ghostscript is called via its exe
 //
 
 static int useDLL = false;
@@ -1489,7 +1508,7 @@ extern "C" DLLEXPORT void setPstoeditOutputFunction(void *cbData, write_callback
 
 	set_gs_write_callback(cbFunction);	// for the gswin.DLL
 	(void) cbBuffer.set_callback(cbData, cbFunction);
-#if defined(HAVESTL) || defined(__OS2__)
+#if defined(HAVE_STL) || defined(__OS2__)
 	(void)cerr.rdbuf(&cbBuffer);
 #else
 	cerr = &cbBuffer;

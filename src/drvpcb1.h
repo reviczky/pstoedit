@@ -4,7 +4,7 @@
 /* 
    drvPCB1.cpp : Hans-Jürgen Jahn    (Version 1.0  10.08.02)
    implements output device for the conversion of a PCB layout
-   in Postscript to engraving data.
+   in PostScript to engraving data.
    this code is derived from drvSAMPL.cpp, see text below
 
    drvsampl.h : This file is part of pstoedit

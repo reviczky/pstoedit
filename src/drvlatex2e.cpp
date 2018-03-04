@@ -3,7 +3,7 @@
    Backend for Latex2E files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2013	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
+   Copyright (C) 1993 - 2014	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
 							Scott Pakin, <scott+ps2ed_AT_pakin.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -24,13 +24,6 @@
 
 
 #include "drvlatex2e.h"
-
-//#ifdef HAVESTL
-//#include I_fstream
-//#include I_stdio
-//#include I_stdlib
-
-
 
 
 // Constructor
@@ -237,7 +230,7 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 	buffer.setf(ios::fixed, ios::floatfield);	// TeX can't deal with scientific notation.
 
 	// Set the font and font size if (and only if) it's changed.
-	string fontname(textinfo.currentFontName.value());
+	string fontname(textinfo.currentFontName.c_str());
 	if (fontname[0] != '{' && fontname != prevfontname) {
 		errf << "Font \"" << fontname
 			<<
@@ -283,8 +276,8 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 			buffer << "\\turnbox{" << textinfo.currentFontAngle << "}{";
 		}
 	}
-	const char * cp = textinfo.thetext.value();
-	//buffer << textinfo.thetext.value() 
+	const char * cp = textinfo.thetext.c_str();
+	//buffer << textinfo.thetext.c_str() 
 
 // characters to be handled specially	
 //
@@ -401,7 +394,7 @@ void drvLATEX2E::show_image(const Image &  )
 #endif
 
 // Describe the LaTeX2e backend's capabilities.
-static DriverDescriptionT < drvLATEX2E > D_latex2e("latex2e", "LaTeX2e picture format", "","tex", true,	// backend supports subpathes
+static DriverDescriptionT < drvLATEX2E > D_latex2e("latex2e", "\\LaTeX2e picture format", "","tex", true,	// backend supports subpathes
 												   // if subpathes are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)
@@ -423,4 +416,3 @@ static DriverDescriptionT < drvLATEX2E > D_latex2e("latex2e", "LaTeX2e picture f
 												   
 	);
 
-//#endif // HAVESTL 

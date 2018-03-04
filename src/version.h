@@ -1,6 +1,6 @@
 #define P2E_MAJORVERSION 3
-#define P2E_MINORVERSION 62
-#define P2E_VERSIONSUFFIX 
+#define P2E_MINORVERSION 70
+#define P2E_VERSIONSUFFIX  
 
 #define P2E_xstr(s) P2E_str(s)
 #define P2E_str(s) #s

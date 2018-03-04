@@ -1,4 +1,4 @@
-THis directory contains an example EPS file along with a sample C program and makefile.
+This directory contains an example EPS file along with a sample C program and makefile.
 These are related to the cairo backend of pstoedit. 
 After building pstoedit, you can do
 

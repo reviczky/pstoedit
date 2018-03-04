@@ -1,6 +1,6 @@
 /*
   drvcairo.cpp : This file is part of pstoedit
-  Copyright (C) 2009 - 2013 Dan McMahill dan_AT_mcmahill_DOT_net
+  Copyright (C) 2009 - 2014 Dan McMahill dan_AT_mcmahill_DOT_net
 
   This driver used drvSAMPL.cpp as a reference.
   
@@ -84,7 +84,7 @@ drvCAIRO::derivedConstructor(drvCAIRO):
 
   
   // Generate the header file
-  outh.open(options->header.value.value(), ios::out);
+  outh.open(options->header.value.c_str(), ios::out);
 
   outh << "/* " << options->header.value << " */" << endl;
   outh << "/* ***** Generated from pstoedit ***** */" << endl;
@@ -268,11 +268,11 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
   outf << "  /*" << endl;
   outf << "   * " << "X " << textinfo.x << " Y " << textinfo.y << endl;
   outf << "   * " << "X_END " << textinfo.x_end << " Y_END " << textinfo.y_end << endl;
-  outf << "   * " << "currentFontName: " << textinfo.currentFontName.value() << endl;
+  outf << "   * " << "currentFontName: " << textinfo.currentFontName.c_str() << endl;
   outf << "   * " << "is_non_standard_font: " << textinfo.is_non_standard_font << endl;
-  outf << "   * " << "currentFontFamilyName: " << textinfo.currentFontFamilyName.value() << endl;
-  outf << "   * " << "currentFontFullName: " << textinfo.currentFontFullName.value() << endl;
-  outf << "   * " << "currentFontWeight: " << textinfo.currentFontWeight.value() << endl;
+  outf << "   * " << "currentFontFamilyName: " << textinfo.currentFontFamilyName.c_str() << endl;
+  outf << "   * " << "currentFontFullName: " << textinfo.currentFontFullName.c_str() << endl;
+  outf << "   * " << "currentFontWeight: " << textinfo.currentFontWeight.c_str() << endl;
   outf << "   * " << "currentFontAngle: " << textinfo.currentFontAngle << endl;
 
   const float *CTM = getCurrentFontMatrix();
@@ -291,7 +291,7 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
     outf << "    PangoFontDescription *desc;" << endl;
     outf << "    PangoLayout *layout;" << endl;
   }
-  outf << "    const char *text = \"" << textinfo.thetext.value() << "\";" << endl;
+  outf << "    const char *text = \"" << textinfo.thetext.c_str() << "\";" << endl;
   outf << endl;
 
   outf << "    cairo_set_source_rgb (cr, " << textinfo.currentR << "," << 
@@ -316,21 +316,21 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
   outf << endl;
 
   family = "monospace";
-  if (strstr(textinfo.currentFontName.value(), "Times") ||
-      strstr(textinfo.currentFontName.value(), "Roman")) {
+  if (strstr(textinfo.currentFontName.c_str(), "Times") ||
+      strstr(textinfo.currentFontName.c_str(), "Roman")) {
     family = "serif";
-  } else if (strstr(textinfo.currentFontName.value(), "Helvetica") ||
-	     strstr(textinfo.currentFontName.value(), "Sans")) {
+  } else if (strstr(textinfo.currentFontName.c_str(), "Helvetica") ||
+	     strstr(textinfo.currentFontName.c_str(), "Sans")) {
     family = "sans-serif";
-  } else if (strstr(textinfo.currentFontName.value(), "Courier") ||
-	     strstr(textinfo.currentFontName.value(), "Mono")) {
+  } else if (strstr(textinfo.currentFontName.c_str(), "Courier") ||
+	     strstr(textinfo.currentFontName.c_str(), "Mono")) {
     family = "monospace";
-  } else if (strstr(textinfo.currentFontName.value(), "Symbol") ) {
+  } else if (strstr(textinfo.currentFontName.c_str(), "Symbol") ) {
     // In this case, what unfortunately needs to happen is I need to convert the
     // ASCII string to UTF-8 encoded string but with mapping from the 
     family = "symbol";
   } else {
-    errf << "currentFontName: " << textinfo.currentFontName.value() << " is not known." << endl;
+    errf << "currentFontName: " << textinfo.currentFontName.c_str() << " is not known." << endl;
     errf << "                 Defaulting to " << family << endl;
   }
   
@@ -373,9 +373,9 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
 
     // FIXME -- set the slant more robustly
     slant = "CAIRO_FONT_SLANT_NORMAL";
-    if (strstr(textinfo.currentFontFullName.value(), "Italic")) {
+    if (strstr(textinfo.currentFontFullName.c_str(), "Italic")) {
       slant = "CAIRO_FONT_SLANT_ITALIC";
-    } else  if (strstr(textinfo.currentFontFullName.value(), "Oblique")) {
+    } else  if (strstr(textinfo.currentFontFullName.c_str(), "Oblique")) {
       slant = "CAIRO_FONT_SLANT_OBLIQUE";
     }
 
@@ -386,8 +386,8 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
 
     // FIXME -- set the weight more robustly
     weight = "CAIRO_FONT_WEIGHT_NORMAL";
-    if (strstr(textinfo.currentFontWeight.value(), "bold") ||
-	strstr(textinfo.currentFontWeight.value(), "Bold") ) {
+    if (strstr(textinfo.currentFontWeight.c_str(), "bold") ||
+	strstr(textinfo.currentFontWeight.c_str(), "Bold") ) {
       weight = "CAIRO_FONT_WEIGHT_BOLD";
     }
     

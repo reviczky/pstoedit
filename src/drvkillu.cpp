@@ -2,7 +2,7 @@
    drvkillu.cpp : This file is part of pstoedit
    Implementation of Kontour output driver.
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 1998,1999 Kai-Uwe Sattler, kus_AT_iti.cs.uni-magdeburg.de
 
    This program is free software; you can redistribute it and/or modify
@@ -116,20 +116,20 @@ void drvKontour::show_text(const TextInfo & textinfo)
 		<< cvtColor(textinfo.currentB) << "\""
 		<< " strokestyle=\"1\"" << " linewidth=\"0\"" << " fillstyle=\"0\"" << " align=\"0\" >\n";
 	outf << "<font face=\"";
-	if (::strcmp(textinfo.currentFontName.value(), "Times-Roman") == 0)
+	if (::strcmp(textinfo.currentFontName.c_str(), "Times-Roman") == 0)
 		outf << "times";
 	else
-		outf << textinfo.currentFontName.value();
+		outf << textinfo.currentFontName.c_str();
 	outf << "\" point-size=\"" << textinfo.currentFontSize << "\"" << " weight=\"";
-	if (strcmp(textinfo.currentFontWeight.value(), "Regular") == 0)
+	if (strcmp(textinfo.currentFontWeight.c_str(), "Regular") == 0)
 		outf << 50;
-	else if (strcmp(textinfo.currentFontWeight.value(), "Bold") == 0)
+	else if (strcmp(textinfo.currentFontWeight.c_str(), "Bold") == 0)
 		outf << 87;
 	else
 		outf << 50;
 	outf << "\">\n";
 
-	const char *c = textinfo.thetext.value();
+	const char *c = textinfo.thetext.c_str();
 	while (*c != '\0') {
 		if (*c == '<')
 			outf << "&lt;";

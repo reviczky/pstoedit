@@ -4,7 +4,7 @@
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -680,19 +680,18 @@ void drvIDRAW::print_header(const char *objtype)
 	int dashpieces = sscanf_s(dashPattern(), "[ %lf %lf %lf %lf",
 							&dash[0], &dash[1], &dash[2], &dash[3]);
 	if (dashpieces) {
-		int i;
-		unsigned short dashbits = 0;
-		for (i = 0; i < 4; i++) {
-			unsigned int numbits = iscale((float)dash[i % dashpieces]);
-			unsigned int j;
-			for (j = 0; j < numbits; j++)
+		unsigned int dashbits = 0;  // was unsigned short initially
+		for (int i = 0; i < 4; i++) {
+			unsigned int numbits = min((unsigned int)sizeof(dashbits)*8,iscale((float)dash[i % dashpieces]));
+			for (unsigned int j = 0; j < numbits; j++) {
 				dashbits = dashbits << 1 | (~i & 1);
+			}
 		}
 		outf << dashbits << endl;
 		outf << iscale(currentLineWidth()) << " 0 0 [";
-		for (i = 0; i < dashpieces - 1; i++)
+		for (int i = 0; i < dashpieces - 1; i++)
 			outf << iscale((float)dash[i]) << ' ';
-		outf << iscale((float)dash[i]) << "] ";
+		outf << iscale((float)dash[dashpieces - 1]) << "] ";
 	} else {
 		outf << 65535 << endl;
 		outf << iscale(currentLineWidth()) << " 0 0 [] ";
@@ -766,7 +765,7 @@ void drvIDRAW::print_coords()
 		if (curved) {
 			const unsigned int pt_per_cp = 5;	// PostScript points per control point
 			const unsigned int min_innerpoints = 2;	// Minimum # of points to add
-			unsigned int innerpoints;	// Number of points to add
+			
 			unsigned int newtotalpoints = 0;	// Number of points in curve
 
 			// ASSUMPTION: Curve is moveto+curveto+curveto+curveto+...
@@ -791,7 +790,8 @@ void drvIDRAW::print_coords()
 				
 
 				// Longer lines get more control points
-				innerpoints =(unsigned int) (
+				// Number of points to add
+				unsigned int innerpoints =(unsigned int) (
 							pythagoras((y1 - y0),(x1 - x0) ) + 
 							pythagoras((y2 - y1),(x2 - x1) ) + 
 							pythagoras((y3 - y2),(x3 - x2) ) ) / pt_per_cp;
@@ -953,12 +953,12 @@ void drvIDRAW::show_text(const TextInfo & textinfo)
 	print_header("Text");
 
 	// Output the name of the font to use on screen
-	outf << "%I f " << psfont2xlfd(textinfo.currentFontName.value());
+	outf << "%I f " << psfont2xlfd(textinfo.currentFontName.c_str());
 	outf << iscale(textinfo.currentFontSize);
 	outf << "-*-*-*-*-*-*-*" << endl;
 
 	// Output the name of the font to print
-	outf << textinfo.currentFontName.value() << ' ';
+	outf << textinfo.currentFontName.c_str() << ' ';
 	outf << iscale(textinfo.currentFontSize);
 	outf << " SetF" << endl;
 
@@ -978,7 +978,7 @@ void drvIDRAW::show_text(const TextInfo & textinfo)
 
 	// Output the string, escaping parentheses with backslashes
 	outf << '(';
-	for (const char *c = textinfo.thetext.value(); *c; c++)
+	for (const char *c = textinfo.thetext.c_str(); *c; c++)
 		switch (*c) {
 		case '(':
 			outf << "\\(";

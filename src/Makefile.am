@@ -31,6 +31,7 @@ AM_CPPFLAGS=					\
 	${LIBMAGICK_CFLAGS}			\
 	${LIBEMF_CFLAGS}			\
 	${LIBPNG_CFLAGS}			\
+	${LIBZIP_CFLAGS}			\
         -DDEFAULTGS=$(GS)			\
 	-DPSTOEDITDATADIR="\"$(pkgdatadir)\""	\
 	-DPSTOEDITLIBDIR="\"$(pkglibdir)\""	\
@@ -103,7 +104,7 @@ libp2edrvlplot_la_LIBADD=$(LIBPLOTTER_LDFLAGS) libpstoedit.la
 libp2edrvlplot_la_LDFLAGS=-no-undefined -module
 
 libp2edrvpptx_la_SOURCES=drvpptx.cpp drvpptx.h initlibrary.cpp
-libp2edrvpptx_la_LIBADD=$(LIBPPTX_LDFLAGS) libpstoedit.la
+libp2edrvpptx_la_LIBADD=$(LIBZIP_LDFLAGS) libpstoedit.la
 libp2edrvpptx_la_LDFLAGS=-no-undefined -module
 
 libp2edrvswf_la_SOURCES=drvswf.cpp drvswf.h initlibrary.cpp
@@ -129,6 +130,7 @@ endif
 libpstoedit_la_SOURCES =			\
 	dynload.cpp dynload.h			\
 	callgs.cpp				\
+	fillpoly.cpp				\
 	lexyy.cpp				\
 	miscutil.cpp 				\
 	cbstream.cpp cbstream.h			\
@@ -165,3 +167,12 @@ pkginclude_HEADERS =				\
 	ordlist.h				\
 	psimage.h
 
+
+cppcheck:
+	cppcheck --inconclusive --enable=all `sh ./get_D_and_I_options.sh ${AM_CPPFLAGS}` ${SOURCES}
+
+clanganalyze:
+	for f in `ls ${SOURCES} | grep -v \.h | sort -u` ; do \
+	  echo "checking $$f"; \
+          clang++ --analyze -Weverything -pedantic `sh ./get_D_and_I_options.sh ${AM_CPPFLAGS}` $$f ; \
+        done

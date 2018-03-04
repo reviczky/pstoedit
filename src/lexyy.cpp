@@ -1,5 +1,5 @@
 
-#line 3 "F:\\pstoedit\\devbase\\src\\lexyy.cpp"
+#line 3 "F:/pstoedit/devbase/src/lexyy.cpp"
 
 #define  YY_INT_ALIGNED short int
 
@@ -8,7 +8,7 @@
 #define FLEX_SCANNER
 #define YY_FLEX_MAJOR_VERSION 2
 #define YY_FLEX_MINOR_VERSION 5
-#define YY_FLEX_SUBMINOR_VERSION 35
+#define YY_FLEX_SUBMINOR_VERSION 39
 #if YY_FLEX_SUBMINOR_VERSION > 0
 #define FLEX_BETA
 #endif
@@ -53,7 +53,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -83,6 +82,8 @@ typedef unsigned int flex_uint32_t;
 #ifndef UINT32_MAX
 #define UINT32_MAX             (4294967295U)
 #endif
+
+#endif /* ! C99 */
 
 #endif /* ! FLEXINT_H */
 
@@ -152,7 +153,12 @@ typedef unsigned int flex_uint32_t;
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #endif
 
-extern int yyleng;
+#ifndef YY_TYPEDEF_YY_SIZE_T
+#define YY_TYPEDEF_YY_SIZE_T
+typedef size_t yy_size_t;
+#endif
+
+extern yy_size_t yyleng;
 
 extern FILE *yyin, *yyout;
 
@@ -161,6 +167,7 @@ extern FILE *yyin, *yyout;
 #define EOB_ACT_LAST_MATCH 2
 
     #define YY_LESS_LINENO(n)
+    #define YY_LINENO_REWIND_TO(ptr)
     
 /* Return all but the first "n" matched characters back to the input stream. */
 #define yyless(n) \
@@ -177,11 +184,6 @@ extern FILE *yyin, *yyout;
 	while ( 0 )
 
 #define unput(c) yyunput( c, (yytext_ptr)  )
-
-#ifndef YY_TYPEDEF_YY_SIZE_T
-#define YY_TYPEDEF_YY_SIZE_T
-typedef size_t yy_size_t;
-#endif
 
 #ifndef YY_STRUCT_YY_BUFFER_STATE
 #define YY_STRUCT_YY_BUFFER_STATE
@@ -200,7 +202,7 @@ struct yy_buffer_state
 	/* Number of characters read into yy_ch_buf, not including EOB
 	 * characters.
 	 */
-	int yy_n_chars;
+	yy_size_t yy_n_chars;
 
 	/* Whether we "own" the buffer - i.e., we know we created it,
 	 * and can realloc() it to grow it, and should free() it to
@@ -270,8 +272,8 @@ static YY_BUFFER_STATE * yy_buffer_stack = 0; /**< Stack as an array. */
 
 /* yy_hold_char holds the character lost when yytext is formed. */
 static char yy_hold_char;
-static int yy_n_chars;		/* number of characters read into yy_ch_buf */
-int yyleng;
+static yy_size_t yy_n_chars;		/* number of characters read into yy_ch_buf */
+yy_size_t yyleng;
 
 /* Points to current character in buffer. */
 static char *yy_c_buf_p = (char *) 0;
@@ -299,7 +301,7 @@ static void yy_init_buffer (YY_BUFFER_STATE b,FILE *file  );
 
 YY_BUFFER_STATE yy_scan_buffer (char *base,yy_size_t size  );
 YY_BUFFER_STATE yy_scan_string (yyconst char *yy_str  );
-YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,int len  );
+YY_BUFFER_STATE yy_scan_bytes (yyconst char *bytes,yy_size_t len  );
 
 void *yyalloc (yy_size_t  );
 void *yyrealloc (void *,yy_size_t  );
@@ -1504,13 +1506,13 @@ int yy_flex_debug = 0;
 #define YY_RESTORE_YY_MORE_OFFSET
 char *yytext;
 #define YY_NO_UNISTD_H 1
-//debug static int DC = 0; 
+//debug static int DC = 0;  
 /*
    makeedit.l : This file is part of pstoedit
    Simple parser to parse the intermediate flat PostScript and call the backend
    output routines.
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1637,7 +1639,7 @@ FILE *yyget_out (void );
 
 void yyset_out  (FILE * out_str  );
 
-int yyget_leng (void );
+yy_size_t yyget_leng (void );
 
 char *yyget_text (void );
 
@@ -1685,7 +1687,7 @@ static int input (void );
 /* This used to be an fputs(), but since the string might contain NUL's,
  * we now use fwrite().
  */
-#define ECHO fwrite( yytext, yyleng, 1, yyout )
+#define ECHO do { if (fwrite( yytext, yyleng, 1, yyout )) {} } while (0)
 #endif
 
 /* Gets input and stuffs it into "buf".  number of characters read, or YY_NULL,
@@ -1696,7 +1698,7 @@ static int input (void );
 	if ( YY_CURRENT_BUFFER_LVALUE->yy_is_interactive ) \
 		{ \
 		int c = '*'; \
-		int n; \
+		size_t n; \
 		for ( n = 0; n < max_size && \
 			     (c = getc( yyin )) != EOF && c != '\n'; ++n ) \
 			buf[n] = (char) c; \
@@ -1804,6 +1806,8 @@ YY_DECL
 		yy_load_buffer_state( );
 		}
 
+	{
+
 	while ( 1 )		/* loops until end-of-file is reached */
 		{
 		yy_cp = (yy_c_buf_p);
@@ -1820,7 +1824,7 @@ YY_DECL
 yy_match:
 		do
 			{
-			register YY_CHAR yy_c = yy_ec[YY_SC_TO_UI(*yy_cp)];
+			register YY_CHAR yy_c = (YY_CHAR) yy_ec[YY_SC_TO_UI(*yy_cp)] ;
 			if ( yy_accept[yy_current_state] )
 				{
 				(yy_last_accepting_state) = yy_current_state;
@@ -1830,7 +1834,7 @@ yy_match:
 				{
 				yy_current_state = (int) yy_def[yy_current_state];
 				if ( yy_current_state >= 979 )
-					yy_c = yy_meta[(unsigned int) yy_c];
+					yy_c = (YY_CHAR) yy_meta[(unsigned int) yy_c];
 				}
 			yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 			++yy_cp;
@@ -1953,22 +1957,22 @@ YY_RULE_SETUP
 // old if (defined(unix) || defined() || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) ) && !defined(DJGPP)
 #if defined(PSTOEDIT_UNIXLIKE)
 // binary is not available on UNIX, only on PC
-								outputFilePtr->open(newFileName.value(),ios::out);
+								outputFilePtr->open(newFileName.c_str(),ios::out);
 #else
 								// use redundant ios::out because of bug in djgpp
-								outputFilePtr->open(newFileName.value(),ios::out | ios::binary);
+								outputFilePtr->open(newFileName.c_str(),ios::out | ios::binary);
 #endif
-								// errf << "opened " << newFileName.value() << " for binary output" << endl;
+								// errf << "opened " << newFileName.c_str() << " for binary output" << endl;
 							} else {
-								outputFilePtr->open(newFileName.value());
-								// errf << "opened " << newFileName.value() << " for output" << endl;
+								outputFilePtr->open(newFileName.c_str());
+								// errf << "opened " << newFileName.c_str() << " for output" << endl;
 							}
 							if (outFile.fail() ) {
-								errf << "Could not open file " << newFileName.value() << " for output" << endl;
+								errf << "Could not open file " << newFileName.c_str() << " for output" << endl;
 								return 1;
 							} // fail
 						} // backend opens file by itself
-						backend =  driverDesc->CreateBackend(driveroptions,*outputFilePtr,errf,infilename,newFileName.value(),globaloptions);
+						backend =  driverDesc->CreateBackend(driveroptions,*outputFilePtr,errf,infilename,newFileName.c_str(),globaloptions);
 						if (!backend->driverOK()) {
 							errf << "Creation of driver for new page failed " << endl;
 							return (1);
@@ -2433,7 +2437,7 @@ YY_RULE_SETUP
 				cleanyytext();
 				const char * cp = yytext;
 				// search for ' '
-				while (cp && (*cp != ' ')) cp++; 
+				while (*cp != ' ') cp++; 
 				// now cp points to blank
 				cp++;
 //cerr << "effective length " << strlen(cp) << endl;
@@ -2799,7 +2803,7 @@ YY_RULE_SETUP
 				// this is an intermediate moveto
 				// if backend supports subpaths add it
 				// else dump last path and start a new one
-				if (backend->globaloptions.simulateSubPaths || backend->Pdriverdesc->backendSupportsSubPathes) {
+				if (backend->globaloptions.simulateSubPaths || backend->driverdesc.backendSupportsSubPathes) {
 //					Point p(origx,origy);
 					backend->addtopath(new Moveto(origx,origy));  
 				} else {
@@ -2848,7 +2852,7 @@ YY_RULE_SETUP
 				p[i-1] = Point(x,y);
 			}
 
-			if (backend->Pdriverdesc->backendSupportsCurveto) {
+			if (backend->driverdesc.backendSupportsCurveto) {
 				backend->addtopath(new Curveto(p)); // pass p as array
 			} else {
 
@@ -2888,8 +2892,8 @@ YY_RULE_SETUP
 				backend->removeFromElementFromPath();
 				// no need to close the path, it's already closed
 			 } /* else */ {
-				if (backend->globaloptions.simulateSubPaths || backend->Pdriverdesc->backendSupportsSubPathes) {
-			 		backend->addtopath(new Closepath()); 
+				if (backend->globaloptions.simulateSubPaths || backend->driverdesc.backendSupportsSubPathes) {
+			 		backend->addtopath(new Closepath(origx,origy)); 
 				} else {
 			 		backend->addtopath(new Lineto(origx,origy)); // pass p as array
 				}
@@ -3118,6 +3122,7 @@ case YY_STATE_EOF(READBBOX):
 				yy_cp = (yy_c_buf_p);
 				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
 				goto yy_find_action;
+                        default:;
 			}
 		break;
 		}
@@ -3127,6 +3132,7 @@ case YY_STATE_EOF(READBBOX):
 			"fatal flex scanner internal error--no action found" );
 	} /* end of action switch */
 		} /* end of scanning one token */
+	} /* end of user's declarations */
 } /* end of yylex */
 
 /* yy_get_next_buffer - try to read in a new buffer
@@ -3182,21 +3188,21 @@ static int yy_get_next_buffer (void)
 
 	else
 		{
-			int num_to_read =
+			yy_size_t num_to_read =
 			YY_CURRENT_BUFFER_LVALUE->yy_buf_size - number_to_move - 1;
 
 		while ( num_to_read <= 0 )
 			{ /* Not enough room in the buffer - grow it. */
 
 			/* just a shorter name for the current buffer */
-			YY_BUFFER_STATE b = YY_CURRENT_BUFFER;
+			YY_BUFFER_STATE b = YY_CURRENT_BUFFER_LVALUE;
 
 			int yy_c_buf_p_offset =
 				(int) ((yy_c_buf_p) - b->yy_ch_buf);
 
 			if ( b->yy_is_our_buffer )
 				{
-				int new_size = b->yy_buf_size * 2;
+				yy_size_t new_size = b->yy_buf_size * 2;
 
 				if ( new_size <= 0 )
 					b->yy_buf_size += b->yy_buf_size / 8;
@@ -3227,7 +3233,7 @@ static int yy_get_next_buffer (void)
 
 		/* Read in more data. */
 		YY_INPUT( (&YY_CURRENT_BUFFER_LVALUE->yy_ch_buf[number_to_move]),
-			(yy_n_chars), (size_t) num_to_read );
+			(yy_n_chars), num_to_read );
 
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
 		}
@@ -3279,7 +3285,7 @@ static int yy_get_next_buffer (void)
 
 	for ( yy_cp = (yytext_ptr) + YY_MORE_ADJ; yy_cp < (yy_c_buf_p); ++yy_cp )
 		{
-		register YY_CHAR yy_c = (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : 1);
+		register YY_CHAR yy_c = (YY_CHAR) (*yy_cp ? yy_ec[YY_SC_TO_UI(*yy_cp)] : (YY_CHAR) 1);
 		if ( yy_accept[yy_current_state] )
 			{
 			(yy_last_accepting_state) = yy_current_state;
@@ -3289,7 +3295,7 @@ static int yy_get_next_buffer (void)
 			{
 			yy_current_state = (int) yy_def[yy_current_state];
 			if ( yy_current_state >= 979 )
-				yy_c = yy_meta[(unsigned int) yy_c];
+				yy_c = (YY_CHAR) yy_meta[(unsigned int) yy_c];
 			}
 		yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 		}
@@ -3307,7 +3313,7 @@ static int yy_get_next_buffer (void)
 	register int yy_is_jam;
     	register char *yy_cp = (yy_c_buf_p);
 
-	register YY_CHAR yy_c = 1;
+	register YY_CHAR yy_c = (YY_CHAR) 1;
 	if ( yy_accept[yy_current_state] )
 		{
 		(yy_last_accepting_state) = yy_current_state;
@@ -3317,12 +3323,12 @@ static int yy_get_next_buffer (void)
 		{
 		yy_current_state = (int) yy_def[yy_current_state];
 		if ( yy_current_state >= 979 )
-			yy_c = yy_meta[(unsigned int) yy_c];
+			yy_c = (YY_CHAR) yy_meta[(unsigned int) yy_c];
 		}
 	yy_current_state = yy_nxt[yy_base[yy_current_state] + (unsigned int) yy_c];
 	yy_is_jam = (yy_current_state == 978);
 
-	return yy_is_jam ? 0 : yy_current_state;
+		return yy_is_jam ? 0 : yy_current_state;
 }
 
 #ifndef YY_NO_INPUT
@@ -3349,7 +3355,7 @@ static int yy_get_next_buffer (void)
 
 		else
 			{ /* need more input */
-			int offset = (yy_c_buf_p) - (yytext_ptr);
+			yy_size_t offset = (yy_c_buf_p) - (yytext_ptr);
 			++(yy_c_buf_p);
 
 			switch ( yy_get_next_buffer(  ) )
@@ -3387,6 +3393,7 @@ static int yy_get_next_buffer (void)
 				case EOB_ACT_CONTINUE_SCAN:
 					(yy_c_buf_p) = (yytext_ptr) + offset;
 					break;
+                                default:;
 				}
 			}
 		}
@@ -3439,9 +3446,9 @@ static int yy_get_next_buffer (void)
 		*(yy_c_buf_p) = (yy_hold_char);
 		YY_CURRENT_BUFFER_LVALUE->yy_buf_pos = (yy_c_buf_p);
 		YY_CURRENT_BUFFER_LVALUE->yy_n_chars = (yy_n_chars);
+	        YY_CURRENT_BUFFER_LVALUE = new_buffer;
 		}
 
-	YY_CURRENT_BUFFER_LVALUE = new_buffer;
 	yy_load_buffer_state( );
 
 	/* We don't actually know whether we did this switch during
@@ -3587,9 +3594,10 @@ void yypush_buffer_state (YY_BUFFER_STATE new_buffer )
 		}
 
 	/* Only push if top exists. Otherwise, replace top. */
-	if (YY_CURRENT_BUFFER)
+	if (YY_CURRENT_BUFFER) {
 		(yy_buffer_stack_top)++;
-	YY_CURRENT_BUFFER_LVALUE = new_buffer;
+	        YY_CURRENT_BUFFER_LVALUE = new_buffer;
+        }
 
 	/* copied from yy_switch_to_buffer. */
 	yy_load_buffer_state( );
@@ -3621,7 +3629,7 @@ void yypop_buffer_state (void)
  */
 static void yyensure_buffer_stack (void)
 {
-	int num_to_alloc;
+	yy_size_t num_to_alloc;
     
 	if (!(yy_buffer_stack)) {
 
@@ -3713,17 +3721,17 @@ YY_BUFFER_STATE yy_scan_string (yyconst char * yystr )
 
 /** Setup the input buffer state to scan the given bytes. The next call to yylex() will
  * scan from a @e copy of @a bytes.
- * @param bytes the byte buffer to scan
- * @param len the number of bytes in the buffer pointed to by @a bytes.
+ * @param yybytes the byte buffer to scan
+ * @param _yybytes_len the number of bytes in the buffer pointed to by @a bytes.
  * 
  * @return the newly allocated buffer state object.
  */
-YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, int  _yybytes_len )
+YY_BUFFER_STATE yy_scan_bytes  (yyconst char * yybytes, yy_size_t  _yybytes_len )
 {
 	YY_BUFFER_STATE b;
 	char *buf;
 	yy_size_t n;
-	int i;
+	yy_size_t i;
     
 	/* Get memory for full buffer, including space for trailing EOB's. */
 	n = _yybytes_len + 2;
@@ -3805,7 +3813,7 @@ FILE *yyget_out  (void)
 /** Get the length of the current token.
  * 
  */
-int yyget_leng  (void)
+yy_size_t yyget_leng  (void)
 {
         return yyleng;
 }
@@ -4015,6 +4023,14 @@ void PSFrontEnd::run(bool mergelines)
 void PSFrontEnd::addNumber(float a_number)
 {
   // printf("Adding %f\n",number);
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+ if (nextFreeNumber >= numbers.size()) {
+   numbers.push_back(a_number);
+ } else { 
+   numbers[nextFreeNumber] = a_number;
+ }
+ nextFreeNumber++;
+#else
  if (nextFreeNumber < maxPoints) { 
 	// cout << "adding number : " << a_number << endl;
      	numbers[nextFreeNumber++] = a_number; 
@@ -4023,6 +4039,7 @@ void PSFrontEnd::addNumber(float a_number)
    	errf << "Too many numbers on stack. Please increase maxPoints in drvbase.h \n"; 
    	exit(1); 
  }
+ #endif
 }
 
 PSFrontEnd::PSFrontEnd(ostream& outfile_p, 
@@ -4045,7 +4062,10 @@ PSFrontEnd::PSFrontEnd(ostream& outfile_p,
 	  backend(backend_p),
 	  currentPageNumber(1),
 	  lineNumber(1),
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+#else
 	  numbers((float*) 0),
+#endif
       nextFreeNumber(0),
       pathnumber(0),
 	  non_standard_font(false),
@@ -4053,19 +4073,27 @@ PSFrontEnd::PSFrontEnd(ostream& outfile_p,
 	  bblexmode(false),
 	  bboxes_ptr(0)
 {
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+    // can use default ctor for vector
+#else
     numbers = new float[maxPoints]; // The number stack
     if ((numbers == 0)){
 		errf << "new failed in PSFrontEnd::PSFrontEnd " << endl;
 		exit(1);
     }
+#endif
 }
 
 PSFrontEnd::~PSFrontEnd() {
 #ifdef __INSURE__
 	errf << "Deleting PSFrontEnd object and thus the numbers as well" << endl;
 #endif
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+// use default dtor
+#else
 	delete [] numbers;
 	numbers = 0;
+#endif
 	
 	yylexcleanup();
 
@@ -4080,15 +4108,7 @@ PSFrontEnd::~PSFrontEnd() {
 
 float PSFrontEnd::pop() 
 { 
-  if (nextFreeNumber > 0) {
-  	nextFreeNumber--;
-  	return numbers[nextFreeNumber] * backend->getScale(); // the value we just pushed
-  } else {
-	errf << "Fatal error in PSFrontEnd::pop : nextFreeNumber would get < 0" << endl;
-	assert(false);
-	//exit(1);
-  }
-  return 0.0f; // never reached, just to make compiler quiet
+  return popUnScaled()  * backend->getScale();
 }
 
 float PSFrontEnd::popUnScaled() 
@@ -4104,8 +4124,8 @@ float PSFrontEnd::popUnScaled()
 }
 
 void PSFrontEnd::pstack()  const {
-	for (unsigned int i = 0 ; i < nextFreeNumber ; i++ ) {
-		cerr << "[" << i << "] " << numbers[i] << " " << numbers[i]* backend->getScale() << endl;
-	}
+  for (unsigned int i = 0 ; i < nextFreeNumber ; i++ ) {
+	cerr << "[" << i << "] " << numbers[i] << " " << numbers[i]* backend->getScale() << endl;
+  }
 }
 

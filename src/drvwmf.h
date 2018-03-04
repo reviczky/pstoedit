@@ -68,19 +68,19 @@ public:
 		emulateNarrowFonts(true,"-nf",0,0,"emulate narrow fonts",0,false),
 		drawBoundingBox(true,"-drawbb",0,0,"draw bounding box",0,false),
 		pruneLineEnds(true,"-p",0,0,"prune line ends",0,false),
-		notforWindows(true,"-nfw",0,0,"not for Windows (meaningful under *nix only)",
-		"Newer versions of Windows (2000, XP, Vista) will not accept WMF/EMF files generated when this option is set and the input contains Text. "
+		notforWindows(true,"-nfw",0,0,"not for MS Windows (meaningful under *nix only)",
+		"Newer versions of MS Windows (2000, XP, Vista, 7, ...) will not accept WMF/EMF files generated when this option is set and the input contains text. "
 		"But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using "
 		"a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice "
 		"can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing "
 		"to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed "
-		"under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix "
+		"under MS Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix "
 		"the only option is to use the -pta option of pstoedit. However that causes every text to be split into single characters "
-		"which makes the text hard to edit afterwards. Hence the -nfw options provides a sort of compromise between "
+		"which makes the text hard to edit afterwards. Hence the -nfw option provides a sort of compromise between "
 		"portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit "
-		"is executed under Windows anyway. In that case the output is portable "
+		"is executed under MS Windows anyway. In that case the output is portable "
 		"but nevertheless not split and still looks fine.", false),
-		winbb(true,"-winbb",0,0,"let the Windows API calculate the Bounding Box (Windows only)",0,false),
+		winbb(true,"-winbb",0,0,"let the MS Windows API calculate the Bounding Box (MS Windows only)",0,false),
 		OpenOfficeMode(true,"-OO", 0, 0, "generate OpenOffice compatible EMF file",0,false)
 
 		{
@@ -105,7 +105,7 @@ private:
 
 	enum polyType {TYPE_FILL,TYPE_LINES};
 
-	void	drawPoly			(POINT*, int*, polyType type);
+	void	drawPoly			(polyType type);
 
 	void	setDrawAttr			();
 
@@ -133,9 +133,9 @@ private:
 	HFONT			myFont;
 	HFONT			oldFont;
 
-	long			maxX, maxY;
-	long			minX, minY;
-	long			maxStatus, minStatus;
+	int 			maxX, maxY;
+	int 			minX, minY;
+	bool			maxStatus, minStatus;
 
 	bool			enhanced;	
 

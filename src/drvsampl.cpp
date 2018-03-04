@@ -2,7 +2,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -102,14 +102,14 @@ void drvSAMPL::close_page()
 
 void drvSAMPL::show_text(const TextInfo & textinfo)
 {
-	outf << "Text String : " << textinfo.thetext.value() << endl;
+	outf << "Text String : " << textinfo.thetext.c_str() << endl;
 	outf << '\t' << "X " << textinfo.x << " Y " << textinfo.y << endl;
 	outf << '\t' << "X_END " << textinfo.x_end << " Y_END " << textinfo.y_end << endl;
-	outf << '\t' << "currentFontName: " << textinfo.currentFontName.value() << endl;
+	outf << '\t' << "currentFontName: " << textinfo.currentFontName.c_str() << endl;
 	outf << '\t' << "is_non_standard_font: " << textinfo.is_non_standard_font << endl;
-	outf << '\t' << "currentFontFamilyName: " << textinfo.currentFontFamilyName.value() << endl;
-	outf << '\t' << "currentFontFullName: " << textinfo.currentFontFullName.value() << endl;
-	outf << '\t' << "currentFontWeight: " << textinfo.currentFontWeight.value() << endl;
+	outf << '\t' << "currentFontFamilyName: " << textinfo.currentFontFamilyName.c_str() << endl;
+	outf << '\t' << "currentFontFullName: " << textinfo.currentFontFullName.c_str() << endl;
+	outf << '\t' << "currentFontWeight: " << textinfo.currentFontWeight.c_str() << endl;
 	outf << '\t' << "currentFontSize: " << textinfo.currentFontSize << endl;
 	outf << '\t' << "currentFontAngle: " << textinfo.currentFontAngle << endl;
 	outf << '\t' << "glyphnames: " << textinfo.glyphnames << endl;
@@ -201,11 +201,11 @@ void drvSAMPL::show_image(const PSImage & imageinfo)
 	outf << PNGoutFullFileName << endl;
 //  cout << outBaseName << endl;
 //  cout << outDirName << endl;
-	char *title = new char[strlen(inFileName.value()) + 100];
-	sprintf(title, "raster image number %d from input file %s", imgcount, inFileName.value());
+	char *title = new char[strlen(inFileName.c_str()) + 100];
+	sprintf(title, "raster image number %d from input file %s", imgcount, inFileName.c_str());
 	char generator[100];
 	sprintf(generator, "pstoedit version: %s", version);
-	imageinfo.writePNGImage(PNGoutFullFileName, inFileName.value(), title, generator);
+	imageinfo.writePNGImage(PNGoutFullFileName, inFileName.c_str(), title, generator);
 
 	delete[]title;
 	delete[]PNGoutFullFileName;
@@ -258,7 +258,7 @@ void drvSAMPL::show_image(const PSImage & imageinfo)
 	}
 }
 
-static DriverDescriptionT < drvSAMPL > D_sampl("sample", "sample driver: if you don't want to see this, uncomment the corresponding line in makefile and make again", "this is a long description for the sample driver","sam", true,	// backend supports subpathes
+static DriverDescriptionT < drvSAMPL > D_sampl("sample", "sample driver: if you do not want to see this, uncomment the corresponding line in makefile and make again", "this is a long description for the sample driver","sam", true,	// backend supports subpathes
 											   // if subpathes are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)

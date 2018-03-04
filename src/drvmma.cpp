@@ -5,7 +5,7 @@
    $Id: drvmma.cpp,v 1.5 2003/03/15 16:25:46 manfred Exp $
    Based on drvSAMPL.cpp
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net,
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net,
                              Manfred Thole, manfred_AT_thole.org
 
     This program is free software; you can redistribute it and/or modify
@@ -209,7 +209,7 @@ void drvMMA::show_text(const TextInfo & textinfo)
 	RGBColor(textinfo.currentR, textinfo.currentG, textinfo.currentB);
 	outf << "Text[\"";
 	// Escape special characters
-	for (const char *c = textinfo.thetext.value(); *c; c++) {
+	for (const char *c = textinfo.thetext.c_str(); *c; c++) {
 		switch (*c) {
 		case '"':
 		case '\\':
@@ -227,19 +227,19 @@ void drvMMA::show_text(const TextInfo & textinfo)
 	outf << "TextStyle -> {";
 	// FontFamily->"Times", FontSlant->"Italic", FontWeight->"Bold",
 	// FontSize->12
-	if (!strncmp(textinfo.currentFontName.value(), "Times", 5)) {
+	if (!strncmp(textinfo.currentFontName.c_str(), "Times", 5)) {
 		outf << "FontFamily -> \"Times\", ";
-	} else if (!strncmp(textinfo.currentFontName.value(), "Helvetica", 9)) {
+	} else if (!strncmp(textinfo.currentFontName.c_str(), "Helvetica", 9)) {
 		outf << "FontFamily -> \"Helvetica\", ";
-	} else if (!strncmp(textinfo.currentFontName.value(), "Courier", 7)) {
+	} else if (!strncmp(textinfo.currentFontName.c_str(), "Courier", 7)) {
 		outf << "FontFamily -> \"Courier\", ";
 	}
-	if (strstr(textinfo.currentFontName.value(), "Italic")) {
+	if (strstr(textinfo.currentFontName.c_str(), "Italic")) {
 		outf << "FontSlant -> \"Italic\", ";
-	} else if (strstr(textinfo.currentFontName.value(), "Oblique")) {
+	} else if (strstr(textinfo.currentFontName.c_str(), "Oblique")) {
 		outf << "FontSlant -> \"Oblique\", ";
 	}
-	if (!strcmp(textinfo.currentFontWeight.value(), "Bold")) {
+	if (!strcmp(textinfo.currentFontWeight.c_str(), "Bold")) {
 		outf << "FontWeight -> \"Bold\", ";
 	}
 	outf << "FontSize -> " << textinfo.currentFontSize;
@@ -266,6 +266,7 @@ void drvMMA::show_path()
 		case dashdotdot:
 			outf << "AbsoluteDashing[{10, 5, 1, 5, 1, 5}],\n";
 			break;
+		default: ;// nothing to do
 		}
 	}
 	if (mmaThickness != currentLineWidth()) {
@@ -285,7 +286,7 @@ void drvMMA::RGBColor(float R, float G, float B)
 	}
 }
 
-static DriverDescriptionT < drvMMA > D_mma("mma", "Mathematica Graphics", "","m", true,	// backend supports subpathes
+static DriverDescriptionT < drvMMA > D_mma("mma", "Mathematica graphics", "","m", true,	// backend supports subpathes
 										   // if subpathes are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)

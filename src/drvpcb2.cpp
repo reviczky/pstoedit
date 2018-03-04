@@ -4,7 +4,7 @@
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -257,6 +257,7 @@ void drvPCB2::show_path()
 			layer_nogrid = &layer_boundaries_nogrid;
 			goto polyline;
 			break;
+		default:; // no expected
 		}
 	} else {
 		/* Put lines that are not associated with polygon into component layer. They are probably PCB traces. */
@@ -286,7 +287,7 @@ void drvPCB2::show_path()
 
 
 static DriverDescriptionT < drvPCB2 > D_pcb("pcb", "pcb format", 
-											"See also: \\URL{http://pcb.sourceforge.net} and \\URL{http://www.penguin.cz/\\Tilde utx/pstoedit-pcb/} ","pcb", false,	// if backend supports subpathes
+											"See also: \\URL{http://pcb.sourceforge.net} and \\URL{http://www.penguin.cz/\\Tilde utx/pstoedit-pcb/}","pcb", false,	// if backend supports subpathes
 												   // if subpathes are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)

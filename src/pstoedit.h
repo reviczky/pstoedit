@@ -4,7 +4,7 @@
    pstoedit.h : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,12 +31,12 @@
 #endif
 
 /* #include <iostream.h>   */
-#ifdef HAVESTL
+#ifdef HAVE_STL
 #include <iosfwd>
 USESTD
 #else
 #if defined (__GNUG__)  && (__GNUC__>=3) 
-/* if we dont define HAVESTL for g++ > 3.0, then we can use the simple forwards */
+/* if we dont define HAVE_STL for g++ > 3.0, then we can use the simple forwards */
 	#include <iostream.h>
 #else
 	class istream;
@@ -89,9 +89,9 @@ int pstoeditwithghostscript(int argc,
 extern "C" DLLEXPORT 
 #endif
 int pstoedit_plainC(int argc,
-					const char * const argv[],
-					const char * const psinterpreter  /* if 0, then pstoedit will look for one using whichpi() */
-					);
+                    const char * const argv[],
+                    const char * const psinterpreter  /* if 0, then pstoedit will look for one using whichpi() */
+                   );
 
 /* extern "C" DLLEXPORT const class DriverDescription* const * getPstoeditDriverInfo(ostream& errstream); */
 #ifdef __cplusplus
@@ -111,7 +111,7 @@ void clearPstoeditDriverInfo_plainC(struct DriverDescription_S * ptr);
 #ifdef __cplusplus
 extern "C" DLLEXPORT 
 #endif
-struct DriverDescription_S* getPstoeditNativeDriverInfo_plainC(void); /* for the pstoedit native drivers - not the ones that are provided as short cuts to ghostscript */
+struct DriverDescription_S* getPstoeditNativeDriverInfo_plainC(void); /* for the pstoedit native drivers - not the ones that are provided as short cuts to Ghostscript */
 
 
 #ifdef __cplusplus

@@ -5,7 +5,7 @@
    drvcairo.h : This file is part of pstoedit
    Class declaration for the cairo driver.
    
-   Copyright (C) 2009 - 2013 Dan McMahill dan_AT_mcmahill_DOT_net
+   Copyright (C) 2009 - 2014 Dan McMahill dan_AT_mcmahill_DOT_net
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ class drvCAIRO : public drvbase {
 #include "drvfuncs.h"
   void show_rectangle(const float llx, const float lly, const float urx, const float ury);
   void show_text(const TextInfo & textInfo);
-  void ClipPath(cliptype);
+  virtual void ClipPath(cliptype);
   
  public:
   

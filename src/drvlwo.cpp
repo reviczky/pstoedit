@@ -7,7 +7,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -181,7 +181,7 @@ void drvLWO::show_path()
 }
 
 
-static DriverDescriptionT < drvLWO > D_lwo("lwo", "LightWave 3D Object Format", "","lwo", false,	// if backend supports subpathes, else 0
+static DriverDescriptionT < drvLWO > D_lwo("lwo", "LightWave 3D object format", "","lwo", false,	// if backend supports subpathes, else 0
 										   // if subpathes are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)

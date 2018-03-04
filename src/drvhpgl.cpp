@@ -5,7 +5,7 @@
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
-   Copyright (C) 2000 - 2013 Glunz (fill support,  improved color handling)
+   Copyright (C) 2000 - 2014 Glunz (fill support,  improved color handling)
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -85,7 +85,7 @@ constructBase,
 	// driver specific initializations
 	// and writing of header to output file
 
-	if (strcmp(Pdriverdesc->symbolicname, "pcl") == 0) {
+	if (strcmp(driverdesc.symbolicname, "pcl") == 0) {
 		options->hpgl2 = true;
 	}
 	if (options->rot90) rotation = 90; else 
@@ -110,24 +110,24 @@ constructBase,
 			test += directoryDelimiter;
 			test += "drvhpgl"; // options.drivername.value;
 			test += ".pencolors";
-			//	errf << "testing for :" << test.value() << endl;
-			if (fileExists(test.value())) {
+			//	errf << "testing for :" << test.c_str() << endl;
+			if (fileExists(test.c_str())) {
 				if (Verbose()) {
 					errf <<
-						"loading pen colors from " << test.value() << endl;
+						"loading pen colors from " << test.c_str() << endl;
 				}
-				const unsigned int numberofpens = readPenColors(errf, test.value(),true);
+				const unsigned int numberofpens = readPenColors(errf, test.c_str(),true);
 				penColors = new HPGLColor[numberofpens];
 				const HPGLColor initvalue = {0.0f,0.0f,0.0f,0};
 				for (unsigned int p = 0; p < numberofpens; p++) {
 					penColors[p] = initvalue;
 				}
 				maxPen = numberofpens;
-				(void) readPenColors(errf, test.value(),false);
-				if (Verbose() ){ errf << "read " << numberofpens << " colors from file " << test.value() << endl; }
+				(void) readPenColors(errf, test.c_str(),false);
+				if (Verbose() ){ errf << "read " << numberofpens << " colors from file " << test.c_str() << endl; }
 			}
 			else {
-				errf << "could not read pen colors from file - " << test.value() << " does not exist" << endl; 
+				errf << "could not read pen colors from file - " << test.c_str() << " does not exist" << endl; 
 			}
 		} else {
 			errf << "could not read pen colors from file - pstoedit Data Directory is unknown" << endl; 
@@ -444,7 +444,7 @@ drvhpgl.cpp:318: warning: ISO C++ does not support the `%lg' printf format
 	outf << "SI" << textinfo.currentFontSize / 1000 * HPGLScale << "," << textinfo.currentFontSize / 1000  * HPGLScale << ";";
 	outf << "PU" << (int) x << "," << (int) y << ";";
 #endif
-	outf << "LB" << textinfo.thetext.value() << "\003;" << endl;
+	outf << "LB" << textinfo.thetext.c_str() << "\003;" << endl;
 }
 
 
@@ -482,7 +482,8 @@ void drvHPGL::show_path()
 		if (!options->penplotter) {
 #if USESPRINTF
 			char str[256];
-			sprintf_s(TARGETWITHLEN(str,256), "PW%lg;", currentLineWidth());
+//%lg is not standard - but might be needed // sprintf_s(TARGETWITHLEN(str,256), "PW%lg;", currentLineWidth());
+			sprintf_s(TARGETWITHLEN(str,256), "PW%g;", currentLineWidth());
 			outf << str;
 #else
 			outf << "PW" << currentLineWidth() << ";";

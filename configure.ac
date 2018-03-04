@@ -10,10 +10,10 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.62,wglunz35_AT_pstoedit.net)
+AC_INIT(pstoedit,3.70,wglunz35_AT_pstoedit.net)
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.62)
+AM_INIT_AUTOMAKE(pstoedit,3.70)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
@@ -67,6 +67,11 @@ AC_C_BIGENDIAN([CPPFLAGS="$CPPFLAGS -D_BIG_ENDIAN"], [CPPFLAGS="$CPPFLAGS -D_LIT
 
 dnl check for directory handling
 AC_HEADER_DIRENT
+
+dnl check for the more secure versions of some functions
+AC_CHECK_FUNC([snprintf], [AC_DEFINE([HAVE_SNPRINTF], [1],
+			[Define if snprintf exists.])])
+
 
 dnl 
 dnl Look for various optional libraries.
@@ -188,7 +193,8 @@ AC_CHECK_HEADER(mingpp.h,
 	[LIBMING_CFLAGS="-DHAVE_LIBMING"])
 if test -n "${LIBMING_LDFLAGS}" && test -n "${LIBMING_CFLAGS}"; then
    HAVE_LIBMING=yes
-   AC_CHECK_HEADER(util/png2dbl.c,[LIBMING_CFLAGS="$LIBMING_CFLAGS -DHAVE_LIBMINGUTIL"])
+   dnl legacy for old versions of ming. AC_CHECK_HEADER(util/png2dbl.c,[LIBMING_CFLAGS="$LIBMING_CFLAGS -DHAVE_LIBMINGUTIL"])
+   AC_MSG_RESULT([** libming driver is enabled.])
 else
    LIBMING_LDFLAGS=
    LIBMING_CFLAGS=
@@ -207,24 +213,50 @@ dnl
 dnl Driver::libpptx
 dnl
 HAVE_LIBZIP=no
-LIBPPTX_LDFLAGS=
-LIBPPTX_CFLAGS=
+LIBZIP_LDFLAGS=
+LIBZIP_CFLAGS=
 
 dnl If zip.h is found, use it.
+AC_ARG_WITH(libzip-lib,
+[  --with-libzip-lib=DIR           look for libzip library in dir (e.g. /usr/local/lib)],
+libzip_lib_dir=$withval, libzip_lib_dir=)
+
+AC_ARG_WITH(libzip-include,
+[  --with-libzip-include=DIR       look for libzip header in dir (e.g. /usr/local/include/libzip)],
+libzip_include_dir=$withval, libzip_include_dir=)
+
+OLD_LIBS=${LIBS}
+if test -n "${libzip_lib_dir}"; then
+   LIBS="-L${libzip_lib_dir} ${LIBS}"
+fi
 AC_CHECK_LIB(zip,zip_add,
-	[LIBPPTX_LDFLAGS="-lzip -lz"],,-lz)
+	[LIBZIP_LDFLAGS="-lzip -lz"],,-lz)
+LIBS=${OLD_LIBS}
+
+OLD_CPPFLAGS=${CPPFLAGS}
+if test -n "${libzip_include_dir}"; then
+   CPPFLAGS="-I${libzip_include_dir} ${CPPFLAGS}"
+fi
 AC_CHECK_HEADER(zip.h,
-	[LIBPPTX_CFLAGS="-DHAVE_LIBZIP"])
-if test -n "${LIBPPTX_LDFLAGS}" && test -n "${LIBPPTX_CFLAGS}"; then
+	[LIBZIP_CFLAGS="-DHAVE_LIBZIP"])
+CPPFLAGS=${OLD_CPPFLAGS}
+
+if test -n "${LIBZIP_LDFLAGS}" && test -n "${LIBZIP_CFLAGS}"; then
    HAVE_LIBZIP=yes
-   AC_MSG_WARN([** libpptx driver is enabled.])
+   if test -n "${libzip_include_dir}"; then
+     LIBZIP_CFLAGS="-I${libzip_include_dir} ${LIBZIP_CFLAGS}"
+   fi
+   if test -n "${libzip_lib_dir}"; then
+     LIBZIP_LDFLAGS="-L${libzip_lib_dir} ${LIBZIP_LDFLAGS}"
+   fi   
+   AC_MSG_RESULT([** libpptx driver is enabled.])
 else
-   LIBPPTX_LDFLAGS=
-   LIBPPTX_CFLAGS=
+   LIBZIP_LDFLAGS=
+   LIBZIP_CFLAGS=
    AC_MSG_WARN([** libpptx driver is disabled.])
 fi
-AC_SUBST(LIBPPTX_LDFLAGS)
-AC_SUBST(LIBPPTX_CFLAGS)
+AC_SUBST(LIBZIP_LDFLAGS)
+AC_SUBST(LIBZIP_CFLAGS)
 AM_CONDITIONAL(HAVE_LIBZIP, test "$HAVE_LIBZIP" = yes)
 else
    AC_MSG_WARN([pptx support disabled by configure argument .])
@@ -403,20 +435,20 @@ fi
 dnl
 dnl PNG and Zlib
 dnl
-HAVE_LIBPNG=no
-LIBPNG_CFLAGS=
-LIBPNG_LDFLAGS=
-AC_MSG_CHECKING(See if we have libpng and zlib)
-AC_TRY_COMPILE( [#include <png.h>
-	 	 int i = PNG_TRANSFORM_IDENTITY; ],[ ],
-               [HAVE_LIBPNG=yes;
-                LIBPNG_CFLAGS="-DHAVE_LIBPNG"; 
-                LIBPNG_LDFLAGS="-lpng -lz ";
-                AC_MSG_RESULT(you seem to have compatible version of libpng)], 
-               [AC_MSG_RESULT(you either have no libpng or an old version - 1.0.8 should be ok.)])
-AC_SUBST(LIBPNG_LDFLAGS)
-AC_SUBST(LIBPNG_CFLAGS)
-AM_CONDITIONAL(HAVE_LIBPNG, test "$HAVE_LIBPNG" = yes)
+dnl OBS: HAVE_LIBPNG=no
+dnl OBS: LIBPNG_CFLAGS=
+dnl OBS: LIBPNG_LDFLAGS=
+dnl OBS: AC_MSG_CHECKING(See if we have libpng and zlib)
+dnl OBS: AC_TRY_COMPILE( [#include <png.h>
+dnl OBS: 	 	 int i = PNG_TRANSFORM_IDENTITY; ],[ ],
+dnl OBS:                [HAVE_LIBPNG=yes;
+dnl OBS:                 LIBPNG_CFLAGS="-DHAVE_LIBPNG"; 
+dnl OBS:                 LIBPNG_LDFLAGS="-lpng -lz ";
+dnl OBS:                 AC_MSG_RESULT(you seem to have compatible version of libpng)], 
+dnl OBS:                [AC_MSG_RESULT(you either have no libpng or an old version - 1.0.8 should be ok.)])
+dnl OBS: AC_SUBST(LIBPNG_LDFLAGS)
+dnl OBS: AC_SUBST(LIBPNG_CFLAGS)
+dnl OBS: AM_CONDITIONAL(HAVE_LIBPNG, test "$HAVE_LIBPNG" = yes)
 
 dnl
 dnl C++ compiler related checking
@@ -441,7 +473,7 @@ if test "$GXX" = yes; then
   else
     AC_MSG_RESULT([GNU])
 #   need to disable long long warning here because of ImageMagick using it
-    SPECIAL_CXXFLAGS="-DBUGGYGPP -pedantic -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long "
+    SPECIAL_CXXFLAGS="-DBUGGYGPP_NOLONGERNEEDE -pedantic -Wall -Wextra -Wuninitialized -Wswitch-default -Wunused -Wshadow -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long"
   fi
 elif test `echo "$CXX" | egrep -c 'xlC$'` -eq 1; then
   AC_MSG_RESULT([AIX xlC])

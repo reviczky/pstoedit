@@ -2,7 +2,7 @@
    drvTGIF.cpp : This file is part of pstoedit
    Backend for TGIF
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -151,7 +151,7 @@ void drvTGIF::show_text(const TextInfo & textinfo)
 		const int fillpat = noFill;
 		buffer << "," << fillpat << "," << 1	// currentLineWidth() 
 			<< "," << Fill << "," << objectId++ << ",0,0,0,0,0,'1',[\n" << "attr(\"href=\", \"";
-		const char *cp = textinfo.thetext.value();
+		const char *cp = textinfo.thetext.c_str();
 		while (*cp) {
 			if ((*cp == '"') || (*cp == '\\')) {
 				buffer << '\\';
@@ -171,10 +171,10 @@ void drvTGIF::show_text(const TextInfo & textinfo)
 #else
 	buffer << "," << currentDeviceHeight* tgifscale - textinfo.y*tgifscale + y_offset - textinfo.currentFontSize*tgifscale;
 #endif
-	buffer << ",'" << textinfo.currentFontName.value() << "'";
-	const bool boldfont = (strstr(textinfo.currentFontName.value(), "Bold") != NIL);
-	const bool italicfont = ((strstr(textinfo.currentFontName.value(), "Italic") != NIL)
-							 || (strstr(textinfo.currentFontName.value(), "Oblique") != NIL));
+	buffer << ",'" << textinfo.currentFontName.c_str() << "'";
+	const bool boldfont = (strstr(textinfo.currentFontName.c_str(), "Bold") != NIL);
+	const bool italicfont = ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL)
+							 || (strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL));
 	int fonttype = 0;
 	if (boldfont) {
 		if (italicfont)
@@ -231,7 +231,7 @@ void drvTGIF::show_text(const TextInfo & textinfo)
 //  const float Sx = textinfo.currentFontSize;
 //  const float Sy = textinfo.currentFontSize;
 #endif
-//  const int len = strlen(textinfo.thetext.value());
+//  const int len = strlen(textinfo.thetext.c_str());
 // if we use the tx of CTM  buffer << '\t'<< 0.0 ;
 // if we use the ty of CTM  buffer << "," << 0.0 ;
 		buffer << '\t' << textinfo.x*tgifscale + x_offset;
@@ -296,7 +296,7 @@ void drvTGIF::show_text(const TextInfo & textinfo)
 		buffer << "],[" << endl;
 	}
 	buffer << "\t\"";
-	const char *cp = textinfo.thetext.value();
+	const char *cp = textinfo.thetext.c_str();
 	while (*cp) {
 		if ((*cp == '"') || (*cp == '\\')) {
 			buffer << '\\';

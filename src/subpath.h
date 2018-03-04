@@ -1,7 +1,7 @@
 /*
    subpath.h: This file is part of pstoedit
          Reaggangement of paths for backends which
-         don't support subpaths
+         do not support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum@ipf.uni-stuttgart.de
 

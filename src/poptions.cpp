@@ -2,7 +2,7 @@
    poptions.cpp : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -134,6 +134,8 @@ bool BoolTrueExtractor::getvalue(const char *UNUSEDARG(optname), const char *UNU
 }
 
 
+#if 0 
+// debug
 void ProgramOptions::showvalues(ostream & outstr, bool withdescription) const
 {
 	for (unsigned int i = 0; i < optcount; i++) {
@@ -160,6 +162,7 @@ void OptionBase::toString(RSString & result) const
 	tempstream.rdbuf()->freeze(0);
 #endif
 }
+#endif
 
 unsigned int ProgramOptions::parseoptions(ostream & outstr, unsigned int argc,
 										  const char *const *argv)
@@ -219,7 +222,7 @@ void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescriptio
 	if (optcount && forTeX && withdescription) {
 		outstr << "\\begin{description}" << endl;
 	}
-	const char *const terminator = withdescription ? "] " : " ";
+	const char *const terminator = withdescription ? "]" : "";
 	for (unsigned int i = 0; i < optcount; i++) {
 		if (forTeX) {
 			if ((!hideFromDoku(*(alloptions[i])) && (sheet == -1))

@@ -257,8 +257,8 @@ void drvPIC::close_page()
 
 void drvPIC::show_text(const TextInfo & textinfo)
 {
-	const char *fontname = textinfo.currentFontName.value();
-	const char *fontweight = textinfo.currentFontWeight.value();
+	const char *fontname = textinfo.currentFontName.c_str();
+	const char *fontweight = textinfo.currentFontWeight.c_str();
 	int pointsize = (textinfo.currentFontSize < 2.0) ? 0 : (int) (textinfo.currentFontSize + 1.8);
 	// BUG: point size is strange...
 	const char *tfont = 0;
@@ -267,7 +267,7 @@ void drvPIC::show_text(const TextInfo & textinfo)
 	const float y = y_coord(textinfo.x, textinfo.y);
 
 	// const unsigned int fontstringlen=80;
-	RSString selected_font;	// Could / should these be class members (wogl? ? ?) // Further, this is used before set !!
+	static RSString selected_font;	// Could / should these be class members (wogl? ? ?) 
 	static bool font_selected = false;
 
 	static int is_text = 0;		// ...
@@ -325,14 +325,14 @@ void drvPIC::show_text(const TextInfo & textinfo)
 			selected_size = pointsize;
 		}
 
-		for (const char *p = textinfo.thetext.value(); *p; ++p) {
+		for (const char *p = textinfo.thetext.c_str(); *p; ++p) {
 			switch (*p) {
 			case '\\':
 				outf << "\\\\";
 				break;
 			case '`':
 			case '.':
-				if (p == textinfo.thetext.value()) {
+				if (p == textinfo.thetext.c_str()) {
 					outf << "\\&";
 				}
 				/* drop through */
@@ -348,12 +348,12 @@ void drvPIC::show_text(const TextInfo & textinfo)
 
 		if (options->debug) {
 			outf << endl;
-			outf << ".\\\" currentFontName: " << textinfo.currentFontName.value() << endl;
+			outf << ".\\\" currentFontName: " << textinfo.currentFontName.c_str() << endl;
 			outf << ".\\\" currentFontFamilyName: " << textinfo.
-				currentFontFamilyName.value() << endl;
-			outf << ".\\\" currentFontFullName: " << textinfo.currentFontFullName.value() << endl;
+				currentFontFamilyName.c_str() << endl;
+			outf << ".\\\" currentFontFullName: " << textinfo.currentFontFullName.c_str() << endl;
 			outf << ".\\\" currentFontSize: " << textinfo.currentFontSize << endl;
-			outf << ".\\\" currentFontWeight: " << textinfo.currentFontWeight.value() << endl;
+			outf << ".\\\" currentFontWeight: " << textinfo.currentFontWeight.c_str() << endl;
 			outf << ".\\\" currentFontAngle: " << textinfo.currentFontAngle << endl;
 			outf << ".\\\" currentRGB: " << textinfo.
 				currentR << "," << textinfo.currentG << "," << textinfo.currentB << endl;
@@ -370,7 +370,7 @@ void drvPIC::show_text(const TextInfo & textinfo)
 			outf << tfont;
 
 		// string itself
-		for (const char *p = textinfo.thetext.value(); *p; ++p) {
+		for (const char *p = textinfo.thetext.c_str(); *p; ++p) {
 			switch (*p) {
 			case '"':
 				outf << "\\\"";

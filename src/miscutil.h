@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,7 +93,7 @@ private:
 	NOCOPYANDASSIGN(TempFile)
 };
 
-#ifdef HAVEAUTOPTR 
+#ifdef HAVE_AUTOPTR 
 #include <memory>
 #else
 template <class T> 
@@ -119,6 +119,23 @@ private:
 
 #endif
 
+#if defined (_MSC_VER) 
+#pragma warning(disable: 4275)
+#pragma warning(disable: 4251)
+// non dll-interface class 'Mapper<class KeyValuePair<class RSString,class RSString> >' used as base for dll-interface class 'FontMapper'
+// miscutil.h(259) : see declaration of 'FontMapper'
+// Same applies to string
+#endif
+
+//#ifdef NOTYETFULLYBASEDONSTL
+#ifdef HAVE_STL
+#include <string>
+typedef std::string RSString;
+inline bool string_contains(const RSString & s, const RSString & substr) { return s.find(substr) !=RSString::npos; }
+
+#define DONOTIMPLEMENTRSSTRING
+
+#else
 // a very very simple resizing string
 // since STL is not yet available on all systems / compilers
 class DLLEXPORT RSString  {
@@ -129,19 +146,21 @@ public:
 	RSString(const char * arg , const size_t len);
 	RSString(const RSString & s);
 	virtual ~RSString();
-	const char * value() const { return content; }
+	const char *c_str() const { return content; }
+	char * value_to_change() { return content; }
 	size_t length() const { return stringlength; }
-	void copy(const char *src,const size_t len) ;
-	void copy(const char *src);
+	void assign(const char *src,const size_t len) ;
+	void assign(const char *src);
 	bool contains(const RSString & s) const;
+	// coverity[assign_returning_const]
 	const RSString & operator = (const RSString & rs) {
 		if (&rs != this) {
-			copy(rs.value(),rs.length());
+			assign(rs.c_str(),rs.length());
 		}
 		return *this;
 	}
 	const RSString & operator = (const char * rs) {
-		copy(rs,strlen(rs));
+		assign(rs,strlen(rs));
 		return *this;
 	}
 
@@ -179,15 +198,18 @@ private:
 };
 
 
-inline RSString  operator+ (const RSString & ls,const RSString &rs) 
+inline RSString  operator+ (const RSString & ls, const RSString &rs) 
 	{ RSString result(ls); result += rs; return result; }
 
-inline bool operator==(const RSString & ls,const RSString & rs) 
+inline bool operator==(const RSString & ls, const RSString & rs) 
 	{ 	return ( (rs.stringlength == ls.stringlength ) && (strncmp(ls.content,rs.content,ls.stringlength) == 0) );	}
-inline bool operator!=(const RSString & ls,const RSString & rs)  
+inline bool operator!=(const RSString & ls, const RSString & rs)  
 	{ 	return !(ls==rs); }
+inline bool string_contains(const RSString & s, const RSString & substr) { return s.contains(substr);}
+#endif
 
 
+inline bool strequal(const char * const s1, const char * const s2) { return (strcmp(s1,s2) == 0);}
 
 class Argv {
 	enum { maxargs=1000 };
@@ -207,22 +229,22 @@ public:
 		assert(argc<maxargs); //lint !e1776
 		if (argc < maxargs) {
 #ifdef USE_RSSTRING
-		argv[argc] = RSString(arg);
+		   argv[argc] = RSString(arg);
 #else
-		argv[argc] = cppstrdup(arg); 
+		   argv[argc] = cppstrdup(arg); 
 #endif
-		argc++; 
+		   argc++; 
 		}
 	}
 	void addarg(const RSString & arg) { 
 		assert(argc<maxargs); //lint !e1776
 		if (argc < maxargs) {
 #ifdef USE_RSSTRING
-		argv[argc] = arg;
+		   argv[argc] = arg;
 #else
-		argv[argc] = cppstrdup(arg.value()); 
+		   argv[argc] = cppstrdup(arg.c_str()); 
 #endif
-		argc++; 
+		   argc++; 
 		}
 	}
 
@@ -247,7 +269,6 @@ DLLEXPORT ostream & operator <<(ostream & out, const Argv & a);
 DLLEXPORT bool fileExists (const char * filename);
 DLLEXPORT RSString full_qualified_tempnam(const char * pref);
 DLLEXPORT void convertBackSlashes(char* string);
-//#define BUGGYGPP
 
 
 #ifndef BUGGYGPP
@@ -276,9 +297,9 @@ public:
 		firstEntry = new T(key,value,firstEntry);
 	}
 #ifndef BUGGYGPP
-	const  typename T::V_Type* getValue(const  typename T::K_Type & key) {
+	const  typename T::V_Type* getValue(const  typename T::K_Type & key) const {
 #else /* BUGGYGPP */
-	const  V_Type* getValue(const  K_Type & key) {
+	const  V_Type* getValue(const  K_Type & key) const {
 #endif /* BUGGYGPP */
 		T * curEntry = firstEntry;
 		while (curEntry != 0) {
@@ -331,11 +352,7 @@ private:
 
 typedef KeyValuePair<RSString,RSString> FontMapping ;
 
-#if defined (_MSC_VER) 
-#pragma warning(disable: 4275)
-// non dll-interface class 'Mapper<class KeyValuePair<class RSString,class RSString> >' used as base for dll-interface class 'FontMapper'
-// miscutil.h(259) : see declaration of 'FontMapper'
-#endif
+
 
 //lint -esym(1790,Mapper*)
 #ifndef BUGGYGPP
@@ -346,7 +363,7 @@ class DLLEXPORT FontMapper: public Mapper<FontMapping,RSString,RSString>
 {
 public:
   void readMappingTable(ostream & errstream,const char * filename);
-  const char * mapFont(const RSString & fontname);
+  const char * mapFont(const RSString & fontname) const;
 };
 #if defined (_MSC_VER) 
 #pragma warning(default: 4275)

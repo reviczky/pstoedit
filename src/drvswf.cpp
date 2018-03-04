@@ -2,7 +2,7 @@
    drvSWF.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,9 @@
 
 */
 
-#ifdef HAVE_LIBMING 
+// libming/swf (not this driver) is not very clean from memory management point of view 
+// so exclude this driver from Coverity analysis
+#if defined(HAVE_LIBMING) && !defined(__COVERITY__)
 #include "drvswf.h"
 #include I_fstream
 #include I_stdio
@@ -48,7 +50,7 @@ extern "C" {
 #endif
 
 // USE_PNG is defined in ming/config.h
-#if defined (HAVE_LIBMINGUTIL) && !( defined(USE_PNG) && USE_PNG )
+#if defined(HAVE_LIBMINGUTIL) && !( defined(USE_PNG) && USE_PNG )
 
 // only use this if libming doesn't support png2dbl itself (available from version 0.3 on)
 
@@ -114,11 +116,11 @@ constructBase, imgcount(0), swfscale(1.0f)
 
 drvSWF::~drvSWF()
 {
-	const int length = movie->save(outFileName.value());
+	const int length = movie->save(outFileName.c_str());
 	delete movie;
 	if (options->trace)
 		printf("}\n");
-	printf("// %i bytes written to %s\n", length, outFileName.value());
+	printf("// %i bytes written to %s\n", length, outFileName.c_str());
 }
 
 // *INDENT-OFF*
@@ -495,21 +497,21 @@ void drvSWF::show_text(const TextInfo & textinfo)
 	}
 
 	RSString fontfilename = fonthome;
-	fontfilename += textinfo.currentFontName.value();
+	fontfilename += textinfo.currentFontName.c_str();
 	fontfilename += ".fdb";
 
-	const char *const fontname = textinfo.currentFontName.value();
-	if (fileExists(fontfilename.value())) {
+	const char *const fontname = textinfo.currentFontName.c_str();
+	if (fileExists(fontfilename.c_str())) {
 		if (Verbose()) {
-			errf << "loading font from from " << fontfilename.value() << endl;
+			errf << "loading font from from " << fontfilename.c_str() << endl;
 		}
 	} else {
 		RSString defaultfontname = fonthome;
 		defaultfontname += "default.fdb";
-		if (fileExists(defaultfontname.value())) {
+		if (fileExists(defaultfontname.c_str())) {
 			if (Verbose())
 				errf << "no fdb file found for font " << fontname << ". Using " <<
-					defaultfontname.value() << " instead" << endl;
+					defaultfontname.c_str() << " instead" << endl;
 			fontfilename = defaultfontname;
 		} else {
 			errf << "no fdb file found for font " << fontname <<
@@ -520,10 +522,10 @@ void drvSWF::show_text(const TextInfo & textinfo)
 
 	// if the fontnames ends with .fdb, then the file is read, otherwise browser fonts are used.
 
-	//as long as SWF is not const correct SWFFont *f = new SWFFont(fontfilename.value());
-	SWFFont *f = new SWFFont(const_cast<char *>(fontfilename.value()));
+	//as long as SWF is not const correct SWFFont *f = new SWFFont(fontfilename.c_str());
+	SWFFont *f = new SWFFont(const_cast<char *>(fontfilename.c_str()));
 	if ((f == NULL) || (f->font == NULL)) {
-		errf << "Loading font " << fontfilename.value() << " failed !" << endl;
+		errf << "Loading font " << fontfilename.c_str() << " failed !" << endl;
 		return;
 	}
 
@@ -537,7 +539,7 @@ void drvSWF::show_text(const TextInfo & textinfo)
 	t->setColor((unsigned char) (255.0 * textinfo.currentR),
 				(unsigned char) (255.0 * textinfo.currentG),
 				(unsigned char) (255.0 * textinfo.currentB), 0xff);
-	t->addString(textinfo.thetext.value(), NULL);
+	t->addString(textinfo.thetext.c_str(), NULL);
 	// t->setSpacing( 0.5);
 
 /*
@@ -617,20 +619,20 @@ void drvSWF::show_image(const PSImage & imageinfo)
 
 #endif
 
-#if (defined(USE_PNG) && USE_PNG)
+#if ( defined(USE_PNG) && USE_PNG )
 		// from 0.3 on ming may support png directly
-		SWFBitmap *bm = new SWFBitmap(imageinfo.FileName.value());
+		SWFBitmap *bm = new SWFBitmap(imageinfo.FileName.c_str());
 #else
-		unsigned int len = strlen(imageinfo.FileName.value());
-		char *outfile = cppstrdup(imageinfo.FileName.value());
+		unsigned int len = strlen(imageinfo.FileName.c_str());
+		char *outfile = cppstrdup(imageinfo.FileName.c_str());
 		outfile[len - 3] = 'd';
 		outfile[len - 2] = 'b';
 		outfile[len - 1] = 'l';
-		png2dbl(imageinfo.FileName.value(), outfile);
+		png2dbl(imageinfo.FileName.c_str(), outfile);
 		SWFBitmap *bm = new SWFBitmap(outfile);
 		delete [] outfile;
 #endif
-		(void) remove(imageinfo.FileName.value());
+		(void) remove(imageinfo.FileName.c_str());
 
 		SWFShape *s = new SWFShape;
 		SWFFill *swffill = s->addBitmapFill(bm, SWFFILL_TILED_BITMAP);
@@ -711,7 +713,7 @@ static DriverDescriptionT < drvSWF > D_SWF("swf",	//
 										   withcurves,	// backend supports curves
 										   true,	// backend supports elements which are filled and have edges
 										   true,	// backend supports text
-#if defined(HAVE_LIBMINGUTIL) || (defined(USE_PNG) && USE_PNG )
+#if defined(HAVE_LIBMINGUTIL) || ( defined(USE_PNG) && USE_PNG )
 										   DriverDescription::png,	// backend supports Images
 #else
    										   DriverDescription::noimage,	// no support for Images

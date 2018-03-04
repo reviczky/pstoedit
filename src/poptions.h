@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,6 +29,8 @@
 #include I_iostream
 #include I_ostream
 #include I_istream
+
+#include "miscutil.h"
 
 USESTD
 
@@ -93,7 +95,9 @@ public:
 	};
 	virtual ~OptionBase() { membername = 0; }
 	virtual ostream & writevalue(ostream & out) const = 0;
-	void toString(class RSString &) const;  
+#if 0
+	void toString(RSString &) const;  
+#endif
 	virtual bool copyvalue(const char *optname, const char *valuestring, unsigned int &currentarg) = 0;
 	virtual bool copyvalue_simple(const char *valuestring) = 0;
 //	virtual bool copyvalue_simple(bool boolvalue) = 0; 
@@ -121,11 +125,12 @@ template <class ValueType, class ExtractorType >
 class OptionT : public OptionBase {
 public:
 	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue)	:
-		OptionBase(optional_p,flag_p, argname_p, propsheet_p, description_p,TeXhelp_p),
+		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p),
 		value(initialvalue) {
 	};
 	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p )	:
-		OptionBase(optional_p,flag_p, argname_p, propsheet_p, description_p, TeXhelp_p) 
+		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p),
+        value() // use default init for value
 	{
 			//lint -esym(1401,*::value) // not initialized - we use the default ctor here
 	};
@@ -166,7 +171,7 @@ public:
 		/* return */ value = arg; 
 		//lint -esym(1539,OptionBase::propsheet)  // not assigned in op=
 		//lint -esym(1539,OptionBase::membername) // not assigned in op=
-	} //  cannot return a reference, because char*::operator= doesn't
+	} //  cannot return a reference, because char*::operator= does not
 	//lint -restore
 	bool operator !=(const ValueType & arg) const { return value != arg; }
 	bool operator ==(const ValueType & arg) const { return value == arg; }
@@ -198,7 +203,9 @@ public:
 	// unsigned int sheet: -1 indicates "all"
 	void showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet = -1) const ;
 	void dumpunhandled(ostream & outstr) const ;	
+#if 0
 	void showvalues(ostream & outstr, bool withdescription = true) const ;
+#endif
 	const OptionBase * const * getOptionConstIterator() const { return &alloptions[0]; }
 	OptionBase * const * getOptionIterator() const { return &alloptions[0]; }
 	unsigned int numberOfOptions() const { return optcount; }

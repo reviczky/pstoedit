@@ -117,9 +117,9 @@ libp2edrvwmf_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 @HAVE_LIBEMF_TRUE@am_libp2edrvwmf_la_rpath = -rpath $(pkglibdir)
 libpstoedit_la_DEPENDENCIES = $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-am_libpstoedit_la_OBJECTS = dynload.lo callgs.lo lexyy.lo miscutil.lo \
-	cbstream.lo psimage.lo drvbase.lo base64writer.lo poptions.lo \
-	subpath.lo pstoedit.lo
+am_libpstoedit_la_OBJECTS = dynload.lo callgs.lo fillpoly.lo lexyy.lo \
+	miscutil.lo cbstream.lo psimage.lo drvbase.lo base64writer.lo \
+	poptions.lo subpath.lo pstoedit.lo
 libpstoedit_la_OBJECTS = $(am_libpstoedit_la_OBJECTS)
 libpstoedit_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
@@ -217,12 +217,10 @@ LIBMING_LDFLAGS = @LIBMING_LDFLAGS@
 LIBOBJS = @LIBOBJS@
 LIBPLOTTER_CFLAGS = @LIBPLOTTER_CFLAGS@
 LIBPLOTTER_LDFLAGS = @LIBPLOTTER_LDFLAGS@
-LIBPNG_CFLAGS = @LIBPNG_CFLAGS@
-LIBPNG_LDFLAGS = @LIBPNG_LDFLAGS@
-LIBPPTX_CFLAGS = @LIBPPTX_CFLAGS@
-LIBPPTX_LDFLAGS = @LIBPPTX_LDFLAGS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
+LIBZIP_CFLAGS = @LIBZIP_CFLAGS@
+LIBZIP_LDFLAGS = @LIBZIP_LDFLAGS@
 LINK = @LINK@
 LIPO = @LIPO@
 LN_S = @LN_S@
@@ -328,6 +326,7 @@ AM_CPPFLAGS = \
 	${LIBMAGICK_CFLAGS}			\
 	${LIBEMF_CFLAGS}			\
 	${LIBPNG_CFLAGS}			\
+	${LIBZIP_CFLAGS}			\
         -DDEFAULTGS=$(GS)			\
 	-DPSTOEDITDATADIR="\"$(pkgdatadir)\""	\
 	-DPSTOEDITLIBDIR="\"$(pkglibdir)\""	\
@@ -394,7 +393,7 @@ libp2edrvlplot_la_SOURCES = drvlplot.cpp drvlplot.h initlibrary.cpp
 libp2edrvlplot_la_LIBADD = $(LIBPLOTTER_LDFLAGS) libpstoedit.la
 libp2edrvlplot_la_LDFLAGS = -no-undefined -module
 libp2edrvpptx_la_SOURCES = drvpptx.cpp drvpptx.h initlibrary.cpp
-libp2edrvpptx_la_LIBADD = $(LIBPPTX_LDFLAGS) libpstoedit.la
+libp2edrvpptx_la_LIBADD = $(LIBZIP_LDFLAGS) libpstoedit.la
 libp2edrvpptx_la_LDFLAGS = -no-undefined -module
 libp2edrvswf_la_SOURCES = drvswf.cpp drvswf.h initlibrary.cpp
 libp2edrvswf_la_LIBADD = $(LIBMING_LDFLAGS) libpstoedit.la
@@ -414,6 +413,7 @@ libp2edrvmagick___la_LDFLAGS = -no-undefined -module
 libpstoedit_la_SOURCES = \
 	dynload.cpp dynload.h			\
 	callgs.cpp				\
+	fillpoly.cpp				\
 	lexyy.cpp				\
 	miscutil.cpp 				\
 	cbstream.cpp cbstream.h			\
@@ -649,6 +649,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvwmf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynload.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emflib.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fillpoly.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/initlibrary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lexyy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/miscutil.Plo@am__quote@
@@ -901,6 +902,15 @@ uninstall-am: uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
 	uninstall-binPROGRAMS uninstall-libLTLIBRARIES \
 	uninstall-pkgincludeHEADERS uninstall-pkglibLTLIBRARIES
 
+
+cppcheck:
+	cppcheck --inconclusive --enable=all `sh ./get_D_and_I_options.sh ${AM_CPPFLAGS}` ${SOURCES}
+
+clanganalyze:
+	for f in `ls ${SOURCES} | grep -v \.h | sort -u` ; do \
+	  echo "checking $$f"; \
+          clang++ --analyze -Weverything -pedantic `sh ./get_D_and_I_options.sh ${AM_CPPFLAGS}` $$f ; \
+        done
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
 .NOEXPORT:

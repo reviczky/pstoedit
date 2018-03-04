@@ -4,7 +4,7 @@
    psfront.h : This file is part of pstoedit
    contains the class responsible for reading the dumped PostScript format
   
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -80,7 +80,11 @@ private:
 	drvbase *	backend;
 	unsigned int    currentPageNumber;
 	unsigned int    lineNumber;
+#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
+	std::vector<float> numbers;
+#else
 	float *         numbers; // The number stack [maxpoints]
+#endif
 	unsigned int	nextFreeNumber;
 	unsigned int	pathnumber; // number of path (for debugging)
 	bool 		non_standard_font;

@@ -2,7 +2,7 @@
    drvMAGICK.cpp : This file is part of pstoedit
    driver for Magick++ API.
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 // needs for linking : CORE_RL_Magick++_.lib CORE_RL_magick_.lib 
 
-#if defined(HAVESTL) && defined(HAVE_MAGIC)
+#if defined(HAVE_STL) && defined(HAVE_MAGIC)
 // Magick++ can only be compiled with STL
 
 #include "drvmagick++.h"
@@ -104,8 +104,8 @@ drvMAGICK::~drvMAGICK()
 		cout << "writing result.jpg" << endl;
 		imageptr->write("result.jpg");
 #endif
-		if (Verbose()) cout << "writing " << outFileName.value() << endl;
-		imageptr->write(outFileName.value());
+		if (Verbose()) cout << "writing " << outFileName.c_str() << endl;
+		imageptr->write(outFileName.c_str());
 	}
 	catch (const Exception & error_) {
 		cout << "Caught exception: " << error_.what() << endl;
@@ -172,7 +172,7 @@ void drvMAGICK::show_text(const TextInfo & textinfo)
 	try {
 		DrawableList drawList;
 		drawList.push_back(DrawablePushGraphicContext());
-		drawList.push_back(DrawableFont(textinfo.currentFontName.value(), AnyStyle, 400, AnyStretch));
+		drawList.push_back(DrawableFont(textinfo.currentFontName.c_str(), AnyStyle, 400, AnyStretch));
 //      drawList.push_back( DrawableText(100,100,"test") );
 		drawList.push_back(DrawablePointSize(textinfo.currentFontSize));
 		drawList.push_back(DrawableFillColor
@@ -208,7 +208,7 @@ are translation.
 					  (textinfo.x + x_offset, currentDeviceHeight - textinfo.y + y_offset));
 		drawList.push_back(DrawableRotation(360.0 - textinfo.currentFontAngle));
 #endif
-		drawList.push_back(DrawableText(0, 0, textinfo.thetext.value()));
+		drawList.push_back(DrawableText(0, 0, textinfo.thetext.c_str()));
 		drawList.push_back(DrawablePopGraphicContext());
 		imageptr->draw(drawList);
 	}
@@ -343,7 +343,7 @@ void drvMAGICK::show_image(const PSImage & imageinfo)
 			cout << " sx " << sx << " sy " << sy << " rx " << rx << " ry " << ry << " tx " << tx <<
 				" ty " << ty << " w " << width << " h " << height << endl;
 
-			const string filename = imageinfo.FileName.value();
+			const string filename = imageinfo.FileName.c_str();
 
 			cout << "drawing subimage from " << filename << endl;
 
@@ -371,10 +371,11 @@ void drvMAGICK::show_image(const PSImage & imageinfo)
 	}
 }
 
-static DriverDescriptionT < drvMAGICK > D_magick("magick", "MAGICK driver", 
+static DriverDescriptionT < drvMAGICK > D_magick("magick", "MAGICK driver compatible with version " MagickLibVersionText " of " MagickPackageName ".", 
 												 "This driver uses the C++ API of ImageMagick or GraphicsMagick to finally produce different output "
-												 "formats. The output format is determined automatically by Image/GraphicsMagick based on the suffix "
-												 "of the output filename. So an output file test.png will force the creation of an image in PNG format.",
+												 "formats. The output format is determined automatically by Image-/GraphicsMagick based on the suffix "
+												 "of the output filename. So an output file test.png will force the creation of an image in PNG format."
+												 " This binary of pstoedit was compiled against version " MagickLibVersionText " of " MagickPackageName ".",
 												 "...", true,	// backend supports subpathes
 												 // if subpathes are supported, the backend must deal with
 												 // sequences of the following form

@@ -2,10 +2,10 @@
 #define __ordlist_h
 /*
    ordlist.h : This file is part of pstoedit 
-   simple template for a sorted list. I didn't want to use STL
+   simple template for a sorted list. I did not want to use STL
    because not all compilers support it yet. 
   
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ public:
 		lastaccessindexptr((new size_t)) {}
 		// initialize the Refs with objects on the heap, because we need
 		// to modify these from within const functions
-		// (these act as a sort of cache, but they don't influence constness)
+		// (these act as a sort of cache, but they do not influence constness)
 	~ordlist() {
 		clear();
 		delete (lastaccessptr); lastaccessptr=0;
@@ -119,8 +119,9 @@ public:
 		} else {
 			cerr << "illegal index " << i << " max : " << size() << endl;
 			assert(i < size());
+                        static T nullElement;
+                        return nullElement; // should not be reached anyway
 		}
-		return start->elem; // never reached, just to keep compiler quiet 
 	}
 	size_t size() const { return l_size;}
 
@@ -206,7 +207,7 @@ int main()
 	}
 
 #if 0 
-// shouldn't compile due to inhibitors
+// should not compile due to inhibitors
 	{
 		ordlist<float,float,LessThan<int> > ol1;
 		ordlist<float,float,LessThan<int> > ol2;

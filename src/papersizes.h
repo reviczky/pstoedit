@@ -111,11 +111,7 @@ const PaperInfo paperformats[] = {
 static const PaperInfo* getPaperInfo(const char * pname) {
 	const PaperInfo * pi = &paperformats[0];
 	while (pi && pi->name) {
-#ifdef _MSC_VER
-		if (_stricmp(pi->name,pname) == 0) return pi;
-#else
-		if (strcasecmp(pi->name,pname) == 0) return pi;
-#endif
+		if (STRICMP(pi->name,pname) == 0) return pi;
 		pi++;
 	}
 	cerr << "could not find paper info for page size " << pname << endl;

@@ -3,7 +3,7 @@
    Backend for Context Free Design Grammar files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ drvCFDG::derivedConstructor(drvCFDG): constructBase
         // Output copyright information
         outf << "// Converted from PostScript(TM) to CFDG by pstoedit\n"
              << "// CFDG backend contributed by Scott Pakin <scott+ps2ed_AT_pakin.org>\n"
-             << "// pstoedit is Copyright (C) 1993 - 2013 Wolfgang Glunz"
+             << "// pstoedit is Copyright (C) 1993 - 2014 Wolfgang Glunz"
              << " <wglunz35_AT_pstoedit.net>\n\n";
 
         // Output the CFDG startshape

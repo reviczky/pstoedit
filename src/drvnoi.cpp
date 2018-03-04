@@ -76,11 +76,12 @@ static LPFN_BOOL_VOID		NoiEndPolyline;
 static LPFN_BOOL_FLT_UNS_PSTR NoiSetLineParams;
 
 // This array stores pointers to functions from dynamically loaded proxy dll
-static void **DllFunc[] = {(void**)&NoiWriteXML, (void**)&NoiSetCurrentColor, 
-  (void**)&NoiSetFillColor, (void**)&NoiDrawLine, (void**)&NoiDrawCurve, 
-  (void**)&NoiDrawFill, (void**)&NoiDrawText, (void**)&NoiSetFont, 
-  (void**)&NoiDrawImage, (void**)&NoiEndPolyline, (void**)&NoiSetLineParams,
-  (void**)&NoiSetOptions, (void**)&NoiDrawPolyline};
+typedef DynLoader::fptr noifptr;
+static noifptr*DllFunc[] = {(noifptr*)&NoiWriteXML, (noifptr*)&NoiSetCurrentColor, 
+  (noifptr*)&NoiSetFillColor, (noifptr*)&NoiDrawLine, (noifptr*)&NoiDrawCurve, 
+  (noifptr*)&NoiDrawFill, (noifptr*)&NoiDrawText, (noifptr*)&NoiSetFont, 
+  (noifptr*)&NoiDrawImage, (noifptr*)&NoiEndPolyline, (noifptr*)&NoiSetLineParams,
+  (noifptr*)&NoiSetOptions, (noifptr*)&NoiDrawPolyline};
   
 // Function names
 static const char *DllFuncName[] = {"NoiWriteXML", "NoiSetCurrentColor", 
@@ -89,13 +90,13 @@ static const char *DllFuncName[] = {"NoiWriteXML", "NoiSetCurrentColor",
   "NoiDrawImage", "NoiEndPolyline", "NoiSetLineParams",
   "NoiSetOptions", "NoiDrawPolyline"};
   
-static unsigned short DLLFUNCNUM = (sizeof(DllFunc)/sizeof(void*));
+static unsigned short DLLFUNCNUM = (sizeof(DllFunc)/sizeof(noifptr));
 
 // driver constructor
 // looks for resource file and bezier split level parameters
 drvNOI::derivedConstructor(drvNOI): constructBase, imgcount(0)
   {  
-  if (!outFileName.value())
+  if (!outFileName.length())
 	{
     errf << endl << "Please provide output file name" << endl << endl;
     exit(0);
@@ -123,14 +124,14 @@ drvNOI::derivedConstructor(drvNOI): constructBase, imgcount(0)
 	}	  
 #endif
 
-  (void)NoiSetOptions(options->ResourceFile.value.value(), options->BezierSplitLevel);
+  (void)NoiSetOptions(options->ResourceFile.value.c_str(), options->BezierSplitLevel);
   }
 
 // destructor - write the xml file and unload the dll
 drvNOI::~drvNOI()
   {
-  if (hProxyDLL.valid() && outFileName.value())
-	(void)NoiWriteXML(outFileName.value());
+  if (hProxyDLL.valid() && outFileName.length())
+	(void)NoiWriteXML(outFileName.c_str());
 
   hProxyDLL.close();
   options=0;
@@ -145,7 +146,7 @@ void drvNOI::LoadNOIProxy()
 	{  
 	for (unsigned int i = 0; i < DLLFUNCNUM; i++)
 	  {
-	  *DllFunc[i] = (void *) hProxyDLL.getSymbol( DllFuncName[i]);	
+	  *DllFunc[i] = hProxyDLL.getSymbol(DllFuncName[i]);	
 	  if (!*DllFunc[i])
 		{
         errf << endl << DllFuncName[i] << " function not found in " << 
@@ -222,6 +223,7 @@ void drvNOI::draw_polyline()
 		AddPoint(points, pc, npoints);
 		}
 		break;
+	  default:; // no expected
 	  }
 	}
 	
@@ -291,6 +293,7 @@ void drvNOI::draw_polygon()
 		AddPoint(points, pc, npoints);
 		break;
 		}
+	  default:; // not expected
 	  }
 	}
 
@@ -351,10 +354,10 @@ void drvNOI::show_text(const TextInfo &textinfo)
   (void)NoiSetCurrentColor((BYTE)(255 * textinfo.currentR), (BYTE)(255 * textinfo.currentG), 
     (BYTE)(255 * textinfo.currentB));
 
-  (void)NoiSetFont(textinfo.currentFontName.value(), textinfo.currentFontFullName.value(), 
-    atof(textinfo.currentFontWeight.value()), textinfo.currentFontSize);
+  (void)NoiSetFont(textinfo.currentFontName.c_str(), textinfo.currentFontFullName.c_str(), 
+    atof(textinfo.currentFontWeight.c_str()), textinfo.currentFontSize);
   
-  (void)NoiDrawText(textinfo.thetext.value(), textinfo.x + pf.x_, textinfo.y + pf.y_, 
+  (void)NoiDrawText(textinfo.thetext.c_str(), textinfo.x + pf.x_, textinfo.y + pf.y_, 
 	textinfo.x_end - textinfo.x + pf.x_, textinfo.y_end - textinfo.y + pf.y_, 
 	textinfo.currentFontAngle);
   }
@@ -368,7 +371,7 @@ void drvNOI::show_image(const PSImage &imageinfo)
   Point pf(x_offset, y_offset);
   p1 += pf;
   p2 += pf;
-  (void)NoiDrawImage(p1.x_, p1.y_, p2.x_, p2.y_, imageinfo.FileName.value());
+  (void)NoiDrawImage(p1.x_, p1.y_, p2.x_, p2.y_, imageinfo.FileName.c_str());
   }
 
 // paging support - each new page is placed on the right

@@ -3,7 +3,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,7 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#if 1
 
 #ifdef _MSC_VER
 // avoid this warning
@@ -451,7 +452,6 @@ const char * const drvPPTX::xml_theme1_xml =
 
 
 drvPPTX::derivedConstructor(drvPPTX):
-//(const char * driveroptions_p,ostream & theoutStream,ostream & theerrStream): // Constructor
 constructBase,
 outzip(NIL)
 {
@@ -478,13 +478,15 @@ outzip(NIL)
   }
   if (options->embeddedfonts != "") {
     // Loop over each EOT filename.
-    stringstream embed_stream(RSString(options->embeddedfonts).value());
+    stringstream embed_stream(RSString(options->embeddedfonts).c_str());
     string efile;
     while (getline(embed_stream, efile, ',')) {
       // Ensure the file exists, then add it to the list.
       const char * const efile_cstr = efile.c_str();
       if (!fileExists(efile_cstr)) {
-        errorMessage((RSString("ERROR: Cannot open file ") + efile_cstr).value());
+		RSString errmess("ERROR: Cannot open file ");
+		errmess += efile_cstr;
+        errorMessage(errmess.c_str());
         abort();
       }
       eotlist.insert(efile);
@@ -538,16 +540,27 @@ drvPPTX::~drvPPTX()
       const char * const eotFileName = iter->c_str();
       struct zip_source *font_file = zip_source_file(outzip, eotFileName, 0, -1);
       if (font_file == NULL) {
-        errorMessage((RSString("ERROR: Failed to embed font file ") +
-                      eotFileName + " (" + zip_strerror(outzip) + ")").value());
+	    RSString errmessage("ERROR: Failed to embed font file ");
+	    errmessage += eotFileName ;
+	    errmessage += " (" ;
+	    errmessage += zip_strerror(outzip) ;
+	    errmessage += ")" ;
+
+        errorMessage(errmessage.c_str());
         abort();
       }
       ostringstream full_eot_filename;
       full_eot_filename << "ppt/fonts/font" << fontNum << ".fntdata";
       if (zip_add(outzip, full_eot_filename.str().c_str(), font_file) == -1) {
-        errorMessage((RSString("ERROR: Failed to embed font file ") +
-                      eotFileName + " as " + full_eot_filename.str().c_str() +
-                      " (" + zip_strerror(outzip) + ")").value());
+		RSString errmessage("ERROR: Failed to embed font file ");
+		errmessage += eotFileName ;
+		errmessage += " as " ;
+		errmessage += full_eot_filename.str().c_str() ;
+		errmessage += " (" ;
+		errmessage += zip_strerror(outzip) ;
+		errmessage += ")" ;
+
+        errorMessage(errmessage.c_str());
         abort();
       }
       fontNum++;
@@ -578,13 +591,15 @@ drvPPTX::~drvPPTX()
          iter != eotlist.end();
          ++iter) {
       // Get information about the font.
-      TextInfo * textinfo = eot2texinfo(*iter);
+    
+      TextInfo textinfo;
+      eot2texinfo(*iter,textinfo);
       RSString typeface;
       RSString panose;
       bool isBold;
       bool isItalic;
       unsigned char pitchFamily;
-      get_font_props(*textinfo, &typeface, &panose, &isBold, &isItalic, &pitchFamily);
+      get_font_props(textinfo, &typeface, &panose, &isBold, &isItalic, &pitchFamily);
 
       // Describe the font to be embedded.
       xml_presentation_xml << "    <p:embeddedFont>\n"
@@ -675,9 +690,14 @@ drvPPTX::~drvPPTX()
 
   // Write the PPTX file to disk.
   if (zip_close(outzip) == -1) {
-      errorMessage((RSString("ERROR: Failed to generate ") + outFileName +
-                    " (" + zip_strerror(outzip) + ")").value());
-      abort();
+    RSString errmessage("ERROR: Failed to generate ");
+    errmessage += outFileName ;
+    errmessage += " (" ;
+    errmessage += zip_strerror(outzip) ;
+    errmessage += ")" ;
+
+    errorMessage(errmessage.c_str());
+    abort();
   }
 }
 
@@ -687,16 +707,25 @@ void drvPPTX::create_pptx_file(const char * relname, const char * contents)
   // Convert the file contents into a data source.
   struct zip_source * file_source = zip_source_buffer(outzip, strdup(contents), strlen(contents), 1);
   if (file_source == NULL) {
-    errorMessage((RSString("ERROR: Failed to create data for ") + relname +
-                  " (" + zip_strerror(outzip) + ")").value());
+    RSString errmessage("ERROR: Failed to create data for ");
+    errmessage += relname ;
+    errmessage += " (" ;
+    errmessage += zip_strerror(outzip) ;
+    errmessage += ")" ;
+    errorMessage(errmessage.c_str());
     abort();
   }
 
   // Add the data source to the PPTX file.
   if (zip_add(outzip, relname, file_source) == -1) {
-    errorMessage((RSString("ERROR: Failed to insert ") + relname +
-                  " into " + outFileName + " (" +
-                  zip_strerror(outzip) + ")").value());
+    RSString errmessage("ERROR: Failed to insert ");
+    errmessage += relname ;
+    errmessage += " into " ;
+    errmessage += outFileName ;
+    errmessage += " (" ;
+    errmessage += zip_strerror(outzip) ;
+    errmessage += ")" ;
+    errorMessage( errmessage.c_str());
     abort();
   }
 }
@@ -705,17 +734,24 @@ void drvPPTX::create_pptx_file(const char * relname, const char * contents)
 void drvPPTX::create_pptx()
 {
   // Create a PPTX file for writing.
-  unlink(outFileName.value());
+  unlink(outFileName.c_str());
   int ziperr;
-  outzip = zip_open(outFileName.value(), ZIP_CREATE, &ziperr);
+  outzip = zip_open(outFileName.c_str(), ZIP_CREATE, &ziperr);
   if (outzip == NULL) {
     char reason[101];
     zip_error_to_str(reason, 100, ziperr, errno);
-    errorMessage((RSString("ERROR: Failed to create ") + outFileName + " (" + reason + ")").value());
+	RSString errmessage("ERROR: Failed to create ");
+	errmessage += outFileName ;
+	errmessage += " (" ;
+	errmessage += reason ;
+	errmessage += ")" ;
+
+    errorMessage(errmessage.c_str());
     abort();
   }
-  RSString comment = RSString("Created by pstoedit's pptx driver from PostScript input ") + inFileName;
-  zip_set_archive_comment(outzip, comment.value(), (zip_uint16_t)comment.length());
+  RSString comment("Created by pstoedit's pptx driver from PostScript input ");
+  comment += inFileName;
+  zip_set_archive_comment(outzip, comment.c_str(), (zip_uint16_t)comment.length());
 
   // Insert boilerplate files into the PPTX archive.
   create_pptx_file("_rels/.rels", xml_rels);
@@ -821,7 +857,14 @@ void drvPPTX::close_page()
   slideFileName << "ppt/slides/slide" << currentPageNumber << ".xml";
   const char * const slideFileName_c = strdup(slideFileName.str().c_str());  // libzip seems to store a pointer to this.
   if (zip_add(outzip, slideFileName_c, slideContents) == -1) {
-    errorMessage((RSString("ERROR: Failed to store ") + slideFileName_c + " in " + outFileName + " (" + zip_strerror(outzip) + ")").value());
+    RSString errmessage("ERROR: Failed to store ");
+    errmessage += slideFileName_c ;
+    errmessage += " in " ;
+    errmessage += outFileName ;
+    errmessage += " (" ;
+    errmessage += zip_strerror(outzip) ;
+    errmessage += ")" ;
+    errorMessage( errmessage.c_str());
     abort();
   }
 
@@ -882,9 +925,9 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
 
   // Determine properties of the given font.
   unsigned int panose_vals[10];
-  if (currentFontName.contains(',')) {
+  if (string_contains(currentFontName,",")) {
     // Split the font name at commas into <full name>,<family name>,<panose>.
-    stringstream fontname_stream(currentFontName.value());
+    stringstream fontname_stream(currentFontName.c_str());
     string fullname;
     string familyname;
     string panose_str;
@@ -898,8 +941,8 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
                &panose_vals[6], &panose_vals[7], &panose_vals[8],
                &panose_vals[9]) == 10) {
       // Compute everything from the given PANOSE categorization.
-      typeface->copy(familyname.c_str());
-      panose->copy(panose_str.c_str());
+      typeface->assign(familyname.c_str());
+      panose->assign(panose_str.c_str());
       *isBold = panose_vals[2] >= 7;      // "Demi" and up
       *isItalic = panose_vals[7] >= 9;    // "Oblique" letterform
       *pitchFamily = panose2pitch(panose_vals);
@@ -916,20 +959,24 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
     *typeface = currentFontName;
   for (int i = 0; i < 10; i++)
     panose_vals[i] = 0;
-  if (currentFontName.contains("Sans") || textinfo.currentFontFullName.contains("Sans")) {
+  static const RSString Sans("Sans");
+  if (string_contains(currentFontName,Sans) || string_contains(textinfo.currentFontFullName,Sans)) {
     panose_vals[0] = 2;   // "Latin text"
     panose_vals[1] = 11;  // "Normal sans"
   }
   else {
-    if (currentFontName.contains("Script") || textinfo.currentFontFullName.contains("Script")
-        || currentFontName.contains("Hand") || textinfo.currentFontFullName.contains("Hand"))
+	static const RSString Script("Script");
+	static const RSString Hand("Hand");
+    if (string_contains(currentFontName,Script) || string_contains(textinfo.currentFontFullName,Script)
+        || string_contains(currentFontName,Hand) || string_contains(textinfo.currentFontFullName,Hand))
       panose_vals[0] = 3;   // "Latin script"
     else {
       panose_vals[0] = 2;   // "Latin text"
       panose_vals[1] = 2;   // "Cove"
     }
   }
-  if (currentFontName.contains("Bold") || textinfo.currentFontFullName.contains("Bold")) {
+  static const RSString Bold("Bold");
+  if (string_contains(currentFontName,Bold) || string_contains(textinfo.currentFontFullName,Bold)) {
     *isBold = true;
     panose_vals[2] = 8;   // "Bold"
   }
@@ -937,8 +984,10 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
     *isBold = false;
     panose_vals[2] = 5;   // "Book"
   }
-  if (currentFontName.contains("Italic") || textinfo.currentFontFullName.contains("Italic")
-      || currentFontName.contains("Oblique") || textinfo.currentFontFullName.contains("Oblique")) {
+  static const RSString Italic("Italic");
+  static const RSString Oblique("Oblique");
+  if (string_contains(currentFontName,Italic) || string_contains(textinfo.currentFontFullName,Italic)
+      || string_contains(currentFontName,Oblique) || string_contains(textinfo.currentFontFullName,Oblique)) {
     *isItalic = true;
     panose_vals[9] = 9;   // "Contact/oblique"
   }
@@ -946,7 +995,8 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
     *isItalic = false;
     panose_vals[9] = 2;   // "Contact/normal"
   }
-  if (currentFontName.contains("Mono") || textinfo.currentFontFullName.contains("Mono"))
+  static const RSString Mono("Mono");
+  if (string_contains(currentFontName,Mono) || string_contains(textinfo.currentFontFullName,Mono))
     panose_vals[4] = 9;   // "Monospaced"
   else
     panose_vals[4] = 3;   // "Modern"
@@ -955,14 +1005,13 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
           panose_vals[0], panose_vals[1], panose_vals[2], panose_vals[3],
           panose_vals[4], panose_vals[5], panose_vals[6], panose_vals[7],
           panose_vals[8], panose_vals[9]);
-  panose->copy(panose_str);
+  panose->assign(panose_str);
   *pitchFamily = panose2pitch(panose_vals);
 }
 
 // Fabricate a TextInfo structure from an EOT file header.
-drvbase::TextInfo * drvPPTX::eot2texinfo(string eotfilename)
+void drvPPTX::eot2texinfo(const string& eotfilename, TextInfo & textinfo)
 {
-  TextInfo * textinfo = new TextInfo();
   unsigned char panose_vals[10];
   unsigned char charvals[4];
 
@@ -976,7 +1025,10 @@ drvbase::TextInfo * drvPPTX::eot2texinfo(string eotfilename)
   eotfile.read((char *)charvals, 2);        // Magic number
   unsigned short magicnum = charvals[1]<<8 | charvals[0];
   if (magicnum != 0x504c) {
-    errorMessage((RSString("ERROR: ") + eotfilename.c_str() + " is not a valid Embedded OpenType (EOT) font file").value());
+    RSString errmessage("ERROR: ");
+    errmessage += eotfilename.c_str() ;
+    errmessage += " is not a valid Embedded OpenType (EOT) font file" ;
+    errorMessage(errmessage.c_str());
     abort();
   }
   eotfile.ignore(4+4+4+4+4+4);              // Unicode ranges 1-4 and code page ranges 1-2
@@ -988,7 +1040,7 @@ drvbase::TextInfo * drvPPTX::eot2texinfo(string eotfilename)
   for (unsigned short i = 0; i < namesize/2; i++)
     // Cheesy conversion from Unicode to ASCII
     familyname[i] = familyname[i*2];
-  textinfo->currentFontFamilyName = RSString(familyname, namesize/2);
+  textinfo.currentFontFamilyName = RSString(familyname, namesize/2);
   delete[] familyname;
   eotfile.ignore(2);                        // Padding
   eotfile.read((char *)charvals, 2);        // Style-name length
@@ -1006,13 +1058,13 @@ drvbase::TextInfo * drvPPTX::eot2texinfo(string eotfilename)
   for (unsigned short i = 0; i < namesize/2; i++)
     // Cheesy conversion from Unicode to ASCII
     fullname[i] = fullname[i*2];
-  textinfo->currentFontFullName = RSString(fullname, namesize/2);
+  textinfo.currentFontFullName = RSString(fullname, namesize/2);
   delete[] fullname;
   eotfile.close();
 
   // Warn the user if the font has embedding restrictions.
   if (fstype == 0x0002)
-    errf << "WARNING: Font " << textinfo->currentFontFullName << " ("
+    errf << "WARNING: Font " << textinfo.currentFontFullName << " ("
          << eotfilename << ") indicates that it must not be modified,"
          << " embedded, or exchanged in any manner without first obtaining"
          << " permission from the legal owner.  Do not embed this font"
@@ -1026,8 +1078,10 @@ drvbase::TextInfo * drvPPTX::eot2texinfo(string eotfilename)
           panose_vals[3], panose_vals[4], panose_vals[5],
           panose_vals[6], panose_vals[7], panose_vals[8],
           panose_vals[9]);
-  textinfo->currentFontName = textinfo->currentFontFullName + ',' + textinfo->currentFontFamilyName + panose_str;
-  return textinfo;
+  textinfo.currentFontName = textinfo.currentFontFullName;
+  textinfo.currentFontName += ',';
+  textinfo.currentFontName += textinfo.currentFontFamilyName;
+  textinfo.currentFontName += panose_str;
 }
 
 // Given two 2-D vectors (represented as Points), return the angle
@@ -1060,14 +1114,14 @@ void drvPPTX::parse_xform_matrix(const float * origMatrix,
                                  bool * mirrored,
                                  float * xscale, float * yscale,
                                  float * rotation,
-                                 float * xtrans, float * ytrans)
+                                 float * x_trans, float * y_trans)
 {
   // Return the translation then remove it from the matrix.
   float matrix[6];
   for (int i = 0; i < 6; i++)
     matrix[i] = origMatrix[i];
-  *xtrans = matrix[4];
-  *ytrans = matrix[5];
+  *x_trans = matrix[4];
+  *y_trans = matrix[5];
   matrix[4] = 0.0f;
   matrix[5] = 0.0f;
 
@@ -1109,9 +1163,9 @@ void drvPPTX::show_text(const TextInfo & textinfo)
   // vertical flipping because this is isomorphic to a horizontal flip
   // plus a rotation.
   bool flipH;
-  float xscale, yscale, angle, xtrans, ytrans;
+  float xscale, yscale, angle, x_trans, y_trans;
   parse_xform_matrix(textinfo.FontMatrix, &flipH, &xscale, &yscale,
-                     &angle, &xtrans, &ytrans);
+                     &angle, &x_trans, &y_trans);
   if (flipH)
     angle = -angle;
 
@@ -1191,9 +1245,10 @@ void drvPPTX::show_text(const TextInfo & textinfo)
   for (size_t c = 0; c < textinfo.thetext.length(); c++) {
     unsigned char onechar = textinfo.thetext[c];
     if (onechar < 32 || (onechar >= 128 && onechar < 192)) {
-      if (!warned_invalid_char)
+      if (!warned_invalid_char) {
         errf << "Warning: Character " << (unsigned int)onechar << " is not allowed in OOXML text; ignoring\n";
         warned_invalid_char = true;
+      }
     }
     else
       switch (onechar) {
@@ -1246,12 +1301,12 @@ const char * drvPPTX::pt2emu(float x_bp, float y_bp,
 
   if (scaleOnly)
     sprintf(emuString, "%s=\"%ld\" %s=\"%ld\"",
-            x_name.value(), bp2emu(x_bp),
-            y_name.value(), bp2emu(y_bp));
+            x_name.c_str(), bp2emu(x_bp),
+            y_name.c_str(), bp2emu(y_bp));
   else
     sprintf(emuString, "%s=\"%ld\" %s=\"%ld\"",
-            x_name.value(), xtrans(x_bp) + xshift_emu,
-            y_name.value(), ytrans(y_bp) + yshift_emu);
+            x_name.c_str(), xtrans(x_bp) + xshift_emu,
+            y_name.c_str(), ytrans(y_bp) + yshift_emu);
   return emuString;
 }
 
@@ -1285,29 +1340,31 @@ Point drvPPTX::pathCentroid()
     area += allKnots[n].x_*allKnots[n+1].y_ - allKnots[n+1].x_*allKnots[n].y_;
   area /= 2.0f;
 
+  Point result;
   // If we were given a disjoint path or the area is zero, simply
   // average all of the knot coordinates and return that.
-  if (movetos > 1 || area == 0.0f) {
+  if ((numKnots > 0) && (movetos > 1 || area == 0.0f)) {
     Point centroid;
     for (unsigned int n = 0; n < numKnots; n++)
       centroid += allKnots[n];
     centroid.x_ /= numKnots;
     centroid.y_ /= numKnots;
-    delete[] allKnots;
-    return centroid;
-  }
+    result = centroid;
+  } else if (area > 0.0f) {
 
-  // Finally, we compute the centroid of the polygon.
-  Point p;
-  for (unsigned int n = 0; n < numKnots; n++) {
-    float partial = allKnots[n].x_*allKnots[n+1].y_ - allKnots[n+1].x_*allKnots[n].y_;
-    p.x_ += (allKnots[n].x_ + allKnots[n+1].x_)*partial;
-    p.y_ += (allKnots[n].y_ + allKnots[n+1].y_)*partial;
-  }
-  p.x_ /= area*6.0f;
-  p.y_ /= area*6.0f;
+    // Finally, we compute the centroid of the polygon.
+    Point p;
+    for (unsigned int n = 0; n < numKnots; n++) {
+      float partial = allKnots[n].x_*allKnots[n+1].y_ - allKnots[n+1].x_*allKnots[n].y_;
+      p.x_ += (allKnots[n].x_ + allKnots[n+1].x_)*partial;
+      p.y_ += (allKnots[n].y_ + allKnots[n+1].y_)*partial;
+    }
+    p.x_ /= area*6.0f;
+    p.y_ /= area*6.0f;
+    result = p;
+  } 
   delete[] allKnots;
-  return p;
+  return result;
 }
 
 // Rotate point PT by ANGLE degrees around point PIVOT.
@@ -1375,26 +1432,26 @@ void drvPPTX::print_color(int baseIndent, float redF, float greenF, float blueF)
     else {
       // Randomly select a theme color, but remember it for next time.
       const ThemeColor * colorInfo = rgb2theme.getValue(rgb);
+      ThemeColor newColorInfo; 
       if (colorInfo == NULL) {
         // This is the first time we've seen this RGB color.
         static const char *colorList[] = {
           "dk2", "lt2", "accent1", "accent2", "accent3",
           "accent4", "accent5", "accent6"
         };
-        ThemeColor * newColorInfo = new ThemeColor;
-        newColorInfo->name = colorList[random() % (sizeof(colorList)/sizeof(colorList[0]))];
+        newColorInfo.name = colorList[random() % (sizeof(colorList)/sizeof(colorList[0]))];
         if (color_type == C_THEME) {
           // Randomly alter the luminosity with the constraint that
           // light colors map to light colors and dark colors map to
           // dark colors.
           float origLum = sqrtf(0.241f*redF*redF + 0.691f*greenF*greenF + 0.068f*blueF*blueF);
           if (origLum >= 0.5)
-            newColorInfo->lum = 50000 + random()%40000;  // Map to [50%, 90%].
+            newColorInfo.lum = 50000 + random()%40000;  // Map to [50%, 90%].
           else
-            newColorInfo->lum = 30000 + random()%20000;  // Map to [30%, 50%].
+            newColorInfo.lum = 30000 + random()%20000;  // Map to [30%, 50%].
         }
-        rgb2theme.insert(rgb, *newColorInfo);
-        colorInfo = newColorInfo;
+        rgb2theme.insert(rgb, newColorInfo);
+        colorInfo = &newColorInfo;
       }
 
       // Output the, possibly altered, theme color.
@@ -1680,19 +1737,28 @@ void drvPPTX::show_image(const PSImage & imageinfo)
          << "      </p:pic>\n";
 
   // Embed the image in the PPTX file.
-  struct zip_source *img_file = zip_source_file(outzip, imageinfo.FileName.value(), 0, -1);
+  struct zip_source *img_file = zip_source_file(outzip, imageinfo.FileName.c_str(), 0, -1);
   if (img_file == NULL) {
-    errorMessage((RSString("ERROR: Failed to embed image file ") +
-                  imageinfo.FileName + " (" + zip_strerror(outzip) + ")").value());
-      abort();
+    RSString errmessage("ERROR: Failed to embed image file ");
+    errmessage += imageinfo.FileName;
+    errmessage += " (";
+    errmessage += zip_strerror(outzip);
+    errmessage += ")";
+    errorMessage(errmessage.c_str());
+    abort();
   }
   ostringstream img_filename;
   img_filename << "ppt/media/image" << total_images << ".png";
   if (zip_add(outzip, img_filename.str().c_str(), img_file) == -1) {
-    errorMessage((RSString("ERROR: Failed to embed image file ") +
-                  imageinfo.FileName + " as " + img_filename.str().c_str() +
-                  " (" + zip_strerror(outzip) + ")").value());
-      abort();
+	RSString errmessage("ERROR: Failed to embed image file ");
+	errmessage += imageinfo.FileName;
+	errmessage +=" as ";
+	errmessage +=img_filename.str().c_str();
+	errmessage += " (";
+	errmessage +=zip_strerror(outzip);
+	errmessage +=")";
+    errorMessage(errmessage.c_str());
+    abort();
   }
 }
 
@@ -1722,3 +1788,5 @@ D_pptx("pptx",
        true,   // if format supports multiple pages in one file
        false  // clipping
        );
+
+#endif

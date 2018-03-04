@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,11 +24,11 @@
 
 // we need __linux__ instead of just linux since the latter is not defined when -ansi is used.
 
-#if defined(__sparc) || defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(_WIN32) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
-#define HAVESHAREDLIBS
+#if defined(__sparc) || defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(_WIN32) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
+#define HAVE_SHAREDLIBS
 #endif
 
-#ifdef HAVESHAREDLIBS
+#ifdef HAVE_SHAREDLIBS
 
 #ifndef LEANDYNLOAD
 #include "drvbase.h"
@@ -46,7 +46,7 @@
 typedef void (*initfunctype) ();
 #endif
 
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__hpux) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 #include <dlfcn.h>
 #elif defined(__sparc)
 #if defined(__SVR4)
@@ -120,7 +120,7 @@ void DynLoader::open(const char *libname_P)
 	strcpy_s(fulllibname, size, libname_P);
 	// not needed strcat(fulllibname_P,libsuffix);
 
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 	int loadmode = RTLD_LAZY;	// RTLD_NOW
 	handle = dlopen(fulllibname, loadmode);
 #elif defined(_WIN32)
@@ -133,7 +133,9 @@ void DynLoader::open(const char *libname_P)
 #error "system unsupported so far"
 #endif
 	if (handle == 0) {
-		errstream << "Problem during opening " << fulllibname << ":" << dlerror()
+		const char * const dlerrormessage = dlerror();
+		const char * const dle = dlerrormessage ? dlerrormessage : "NULL";
+		errstream << "Problem during opening " << fulllibname << ":" << dle 
 			<< endl;
 		delete[]fulllibname;
 		return;
@@ -160,10 +162,10 @@ void DynLoader::close()
 	if (handle) {
 		if (libname && verbose)
 				errstream << "closing dynamic library " << libname << endl;
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 
 
-#if defined(__linux) || defined(__linux__) || defined(__GNU__)
+#if (defined(__linux) || defined(__linux__) || defined(__GNU__)) && !(defined(__COVERITY__) || defined(LINT))
 		// normally we should call dlclose here. But there is a very strange problem in Linux
 		// whenever a plugin.so indirectly loads libpthread (e.g. libdrvmagick++ does it because libMagick++ does it
 		// the call to dlclose crashes with a seg fault 
@@ -203,21 +205,38 @@ int DynLoader::knownSymbol(const char *name) const
 	return (getSymbol(name, 0) != 0);
 }
 
+// a bit of hack since C++ does not support the case of "normal" ptrs to function ptrs.
+typedef void (*funcptr)();
+union ptrunion {
+	void *			u_ptr;
+	DynLoader::fptr u_fptr;
+};
+
+
+DynLoader::fptr DynLoader::ptr_to_fptr(void * p) {
+	ptrunion u;
+	assert( sizeof(u.u_ptr) == sizeof(u.u_fptr) );
+	u.u_ptr = p;
+	return u.u_fptr;
+}
+
 DynLoader::fptr DynLoader::getSymbol(const char *name, int check) const
 {
 	//
 	// see http://www.trilithium.com/johan/2004/12/problem-with-dlsym/ for a nice discussion
 	// about the cast problem
 	//
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
-	DynLoader::fptr rfptr = (DynLoader::fptr) dlsym(handle, name);	//lint !e611 //: Suspicious cast
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
+	DynLoader::fptr rfptr = ptr_to_fptr(dlsym(handle, name));	//lint !e611 //: Suspicious cast
 #elif defined(_WIN32)
-	DynLoader::fptr rfptr = (DynLoader::fptr) GetProcAddress((HINSTANCE) handle, name);	//lint !e611 //: Suspicious cast
+	DynLoader::fptr rfptr = ptr_to_fptr(GetProcAddress((HINSTANCE) handle, name));	//lint !e611 //: Suspicious cast
 #else
 #error "system unsupported so far"
 #endif
 	if ((rfptr == 0) && check) {
-		errstream << "error during getSymbol for " << name << ":" << dlerror()
+		const char * const dlerrormessage = dlerror();
+		const char * const dle = dlerrormessage ? dlerrormessage : "NULL";
+		errstream << "error during getSymbol for " << name << ":" << dle 
 			<< endl;
 	}
 	return rfptr;
@@ -258,7 +277,8 @@ static PluginVector LoadedPlugins;
 
 static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 {
-	if (verbose && filename)
+ 	if (!filename) return;
+	if ( verbose )
 		errstream << "loading plugin: " << filename << endl;
 
 	DriverDescription::currentfilename = filename;
@@ -272,7 +292,7 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 	} else {
 #if defined (__APPLE__)
 // on MacOS it seems necessary to at least do a dlsym to an existing symbol 
-// to get the global ctors beeing called
+// to get the global ctors being called
 		void (*fp) () = ((void (*)()) dynloader->getSymbol("initlibrary"));
 		if (fp) {
 			if (verbose) {
@@ -326,7 +346,7 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 #else
 //
 // last chance
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX)
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX)
 #include <direct.h>
 #define DIR_VERSION 5
 #else
@@ -342,7 +362,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 	if (pluginDir) {
 		DIR *dirp;
 		struct dirent *direntp;
-#if defined(__OS2__) || defined(__CYGWIN32__)
+#if defined(__OS2__) || defined(__CYGWIN__)
 		const char *const suffix = ".dll";
 #elif defined (__APPLE__)
 		const char *const suffix = ".so";	// ".dylib";
@@ -372,7 +392,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 			unsigned int flen = strlen(direntp->d_name);
 			char *expectedpositionofsuffix = direntp->d_name + flen - strlen(suffix);
 //              if ( local filename starts with drv or plugins and ends with .so)
-#if defined (__CYGWIN32__)
+#if defined (__CYGWIN__)
 			const char *const libprefix = "cygp2edrv";
 #else
 			const char *const libprefix = "libp2edrv";
@@ -380,10 +400,11 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 			if (((strstr(direntp->d_name, libprefix) == direntp->d_name) ||
 				 (strstr(direntp->d_name, "plugin") == direntp->d_name)
 				) && (strstr(expectedpositionofsuffix, suffix) == expectedpositionofsuffix)) {
-				char *fullname = new char[strlen(pluginDir) + flen + 2];
-				strcpy(fullname, pluginDir);
-				strcat(fullname, "/");
-				strcat(fullname, direntp->d_name);
+				const size_t newlen = strlen(pluginDir) + flen + 2;
+				char *fullname = new char[newlen];
+				strcpy_s(fullname, newlen, pluginDir);
+				strcat_s(fullname, newlen, "/");
+				strcat_s(fullname, newlen, direntp->d_name);
 //          cout <<  direntp->d_name  << " " << fullname << endl;
 				loadaPlugin(fullname, errstream, verbose);
 				delete[]fullname;
@@ -421,7 +442,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 		} else {
 			BOOL more = true;
 			while (more) {
-				// check for suffix beeing really .dll because FindFirstFile also matches
+				// check for suffix being really .dll because FindFirstFile also matches
 				// files such as e.g. .dllx
 				const size_t len = strlen(finddata.cFileName);
 				// -4 means go back the length of ".dll"
@@ -464,7 +485,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 
 #else
 // no shared libs
-#ifdef HAVESTL
+#ifdef HAVE_STL
 #include <iosfwd>
 using namespace std;
 #else

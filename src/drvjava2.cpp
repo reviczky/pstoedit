@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -197,11 +197,11 @@ void drvJAVA2::show_text(const TextInfo & textinfo)
 {
 	if (numberOfElements > limitNumberOfElements)
 		continue_page();
-	unsigned int javaFontNumber = getFontNumber(textinfo.currentFontName.value());
+	unsigned int javaFontNumber = getFontNumber(textinfo.currentFontName.c_str());
 	outf << "    currentPage.add(new PSTextObject(new Color(";
 	outf << currentR() << "f, " << currentG() << "f, " << currentB() << "f)," << endl;
 	outf << "      \"";
-	for (const char *p = textinfo.thetext.value(); (*p) != 0; p++) {
+	for (const char *p = textinfo.thetext.c_str(); (*p) != 0; p++) {
 		if ((*p) == '"') {
 			outf << '\\' << *p;
 		} else if ((*p) == '\\') {
@@ -352,13 +352,13 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 		return;
 	}
 	// write image data to separate file
-	const size_t sizefilename = strlen(outBaseName.value()) + 21;
+	const size_t sizefilename = strlen(outBaseName.c_str()) + 21;
 	char *imgOutFileName = new char[sizefilename];
-	const size_t sizefullfilename = strlen(outDirName.value()) + strlen(outBaseName.value()) + 21;
+	const size_t sizefullfilename = strlen(outDirName.c_str()) + strlen(outBaseName.c_str()) + 21;
 	char *imgOutFullFileName = new char[sizefullfilename];
 
-	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%d.img", outBaseName.value(), numberOfImages);
-	sprintf_s(TARGETWITHLEN(imgOutFullFileName,sizefullfilename), "%s%s", outDirName.value(), imgOutFileName);
+	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%u.img", outBaseName.c_str(), numberOfImages);
+	sprintf_s(TARGETWITHLEN(imgOutFullFileName,sizefullfilename), "%s%s", outDirName.c_str(), imgOutFileName);
 	outf << "    currentPage.add(new PSImageObject(" << imageinfo.
 		width << ", " << imageinfo.height << ", ";
 	outf << imageinfo.bits << ", " << imageinfo.ncomp << ", ";

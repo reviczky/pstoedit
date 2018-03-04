@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2013  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2014  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,6 +28,11 @@
 
 #if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) || defined(__APPLE__) || defined(_AIX)
 #include <unistd.h>
+
+// for umask
+#include <sys/types.h>
+#include <sys/stat.h>
+
 
 #ifdef __hpux
 // HP-UX does not define getcwd in unistd.h
@@ -153,6 +158,18 @@ char *tempnam(const char *, const char *pfx)
 #endif
 
 // endif for not having mkstemp
+#else
+ // we have MKSTEMP so we need this function later
+ static bool dirAccessible (const char * const dirname) {
+	struct stat s;
+	const int sret = stat(dirname, &s);
+	return ((sret != -1) && (S_ISDIR(s.st_mode)));
+ }
+ static const char * testvar(const char * var) {
+	const char * res = getenv(var);
+	if (res && dirAccessible(res)) return res;
+	else return 0;
+ }
 
 #endif
 
@@ -162,22 +179,24 @@ RSString full_qualified_tempnam(const char *pref)
 	const char *path = 0;
 	char * filename = 0;
 	const char XXXXXX[] = "XXXXXX" ; // needed for mkstemp template
-	(void) ((path = getenv("TEMP"))   == 0L && 
-		(path = getenv("TMP"))    == 0L &&
-		(path = getenv("TMPDIR")) == 0L
+	(void) ((path = testvar("TEMP"))   == 0L && 
+		(path = testvar("TMP"))    == 0L &&
+		(path = testvar("TMPDIR")) == 0L &&
+		(path = dirAccessible("/tmp" )  ? "/tmp" : "." )  // last resort current dir
 		);
-	const unsigned int needed = strlen(path ? path:"" ) + 1 + strlen(pref) + 1 + strlen(XXXXXX) + 2;
+	const unsigned int needed = strlen(path) + 1 + strlen(pref) + 1 + strlen(XXXXXX) + 2;
 	filename = (char*) malloc(needed); // new char [ needed ];
+	assert(filename);
 	filename[0] = '\0';
-// all getenvs returned 0
-	if (path) {
-		strncpy(filename, path, needed);
-		strcat(filename, "/");
-	}
-	strcat(filename, pref);
-	strcat(filename, XXXXXX);
+// one getenvs returned something
+	strncpy(filename, path, needed);
+	strcat_s(filename, needed, "/");
+	strcat_s(filename, needed, pref);
+	strcat_s(filename, needed, XXXXXX);
 	// cout << "using " << filename << " as template for mkstemp" << endl;
+	const mode_t current_umask = umask(S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH); // recommended sec practice
 	const int fd = mkstemp(filename);
+	umask(current_umask); // set back to original state
 	// cout << "returned " << filename << " and " << fd << endl;
 	if (fd == -1) {
 		cerr << "error in mkstemp for " << filename << " " << errno << endl;
@@ -225,12 +244,13 @@ unsigned short hextoint(const char hexchar)
 	unsigned short r = ( h <= '9' ) ? (h - '0') : (h + 10 - 'A' ) ; //lint !e732
 	return r;
 }
-const bool regdebug = false;
 #if defined(_WIN32)
+const bool regdebug = false;
 
 RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 {
 	HKEY subkey;
+	static RSString emptyString("");
 	const long ret = RegOpenKeyEx(hKey,	// HKEY_LOCAL_MACHINE, //HKEY hKey,
 								  subkeyn,	// LPCSTR lpSubKey,
 								  0L,	// DWORD ulOptions,
@@ -238,9 +258,10 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 								  &subkey	//PHKEY phkResult
 		);
 	if (ret != ERROR_SUCCESS) {
-		if (regdebug) cerr << "RegOpenKeyEx failed with error code " << ret << endl;
-		return RSString( (char*) 0);
+		if (regdebug) cerr << "RegOpenKeyEx :" <<subkeyn << ":" << key << ": failed with error code " << ret << endl;
+		return emptyString;
 	} else {
+		if (regdebug) cerr << "RegOpenKeyEx :" <<subkeyn << ":" << key << ": succeeded with return code " << ret << endl;
 		const int maxvaluelength = 1000;
 		BYTE value[maxvaluelength];
 		DWORD bufsize = maxvaluelength;
@@ -254,11 +275,11 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 			);
 		(void) RegCloseKey(subkey);
 		if (retv != ERROR_SUCCESS) {
-			if (regdebug)  cerr << "RegQueryValueEx failed with error code " << retv << endl;
-			return RSString( (char*) 0);
+			if (regdebug)  cerr << "RegQueryValueEx :" <<subkeyn << ":" << key << ": failed with error code " << retv << endl;
+			return emptyString;
 		} else {
-			if (regdebug) cerr << "result is " << (char*) value << endl;
-			return RSString( (char*) value);
+			if (regdebug) cerr << "result :" << subkeyn << ":" << key << ": is " << (char*) value << endl;
+			return RSString((char*)value);
 		}
 	}
 }
@@ -282,9 +303,11 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 	// subkeyn[0] = '\0';
 	// strcat_s(subkeyn,1000, "SOFTWARE\\wglunz\\");
 	subkeyn += typekey; // strcat_s(subkeyn,1000, typekey);
-	RSString result = tryregistry(HKEY_CURRENT_USER, subkeyn.value(), key);
-	if (!result.value() )
-		result = tryregistry(HKEY_LOCAL_MACHINE, subkeyn.value(), key);
+	RSString result(tryregistry(HKEY_CURRENT_USER, subkeyn.c_str(), key));
+	if (!result.length()) {
+		if (regdebug) errstream << "searching in HKEY_CURRENT_USER failed - trying HKEY_LOCAL_MACHINE " << endl;
+		result = tryregistry(HKEY_LOCAL_MACHINE, subkeyn.c_str(), key);
+	}
 	return result;
 #elif defined (__OS2__)
 	//query a "real" OS/2 profile pstoedit.ini
@@ -307,12 +330,13 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 		// char *r = cppstrdup(buffer);
 		return buffer;
 	} else
-		return RSString( (char*) 0);
+		return RSString();
 #else
 //
 // UNIX version
 // Just ask the environment
 //
+	unused(&errstream);
 #if 0
 //getenv version
 	char envname[1000];
@@ -337,7 +361,7 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 	if (!searchresult)
 		searchresult = searchinpath(getenv("PATH"), ".pstoedit.reg", pathbuffer, sizeof(pathbuffer));
 	if (!searchresult)
-		return RSString((char*) 0);
+		return RSString();
 
 #if 0
 	const char *homedir = getenv("HOME");
@@ -354,13 +378,14 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 
 	ifstream regfile(pathbuffer);
 	if (!regfile)
-		return RSString((char*)0);
+		return RSString();
 
-	char envname[1000];
+	const size_t len = 1000;
+	char envname[len];
 	envname[0] = '\0';
-	strcat(envname, typekey);
-	strcat(envname, "/");
-	strcat(envname, key);
+	strcat_s(envname, len, typekey);
+	strcat_s(envname, len, "/");
+	strcat_s(envname, len, key);
 //  cout << "checking " << envname << endl;
 	char line[1000];
 	while (!regfile.eof()) {
@@ -368,6 +393,7 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 //      cout << line << endl;
 		if (strstr(line, envname)) {
 			char *r = cppstrdup(line + strlen(envname) + 1);
+			// coverity[uninit_use_in_call]
 			char *cr = strrchr(r, '\r');
 			if (cr)
 				*cr = 0;
@@ -377,7 +403,7 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 			return result;
 		}
 	}
-	return RSString((char*) 0);
+	return RSString();
 #endif
 #endif
 }
@@ -424,7 +450,8 @@ ostream & operator << (ostream & out, const Argv & a)
 
 TempFile::TempFile()
 {
-	tempFileName = TEMPNAM(0, "pstmp");
+	tempFileName = cppstrdup(full_qualified_tempnam("pstmp").c_str());
+//	tempFileName = TEMPNAM(0, "pstmp");
 	// cout << "constructed " << tempFileName << endl; 
 }
 
@@ -441,7 +468,7 @@ ofstream & TempFile::asOutput()
 	close();
 	outFileStream.open(tempFileName);
 	if (outFileStream.fail())
-		cerr << "openening " << tempFileName << "failed " << endl;
+		cerr << "opening " << tempFileName << " failed " << endl;
 	return outFileStream; //lint !e1536 //exposing low access member
 }
 
@@ -450,7 +477,7 @@ ifstream & TempFile::asInput()
 	close();
 	inFileStream.open(tempFileName);
 	if (outFileStream.fail()) {
-		cerr << "openening " << tempFileName << "failed " << endl;
+		cerr << "opening " << tempFileName << " failed " << endl;
 	}
 	return inFileStream; //lint !e1536 //exposing low access member
 }
@@ -514,9 +541,9 @@ size_t searchinpath(const char *EnvPath, const char *name,
 			RSString test(lastbegin);
 			test += "/";
 			test += name;
-			//cout << "checking " << test.value() << endl;
-			if (fileExists(test.value())) {
-				strcpy_s(returnbuffer,buflen, test.value());
+			//cout << "checking " << test.c_str() << endl;
+			if (fileExists(test.c_str())) {
+				strcpy_s(returnbuffer,buflen, test.c_str());
 				delete[]path;
 				//cout << " FOUND !! " << endl;
 				return strlen(returnbuffer);
@@ -547,7 +574,7 @@ unsigned long P_GetPathToMyself(const char *name, char *returnbuffer, unsigned l
 		return 0;
 #else
 	if ( (*name == '/')  || (*name == '.') ) {			// starts with / or .
-		strcpy(returnbuffer, name);
+		strcpy_s(returnbuffer, buflen, name);
 		return strlen(returnbuffer);
 	} else {
 		return searchinpath(getenv("PATH"), name, returnbuffer, buflen);
@@ -586,7 +613,8 @@ DLLEXPORT RSString getOutputFileNameFromPageNumber(const char * const outputFile
 
 		char pagenumberstring[30] ;
 
-		sprintf_s(TARGETWITHLEN(pagenumberstring,sizeof(pagenumberstring)),formatting.value(),pagenumber);
+		// coverity[tainted_string_warning]
+		sprintf_s(TARGETWITHLEN(pagenumberstring,sizeof(pagenumberstring)),formatting.c_str(),pagenumber);
 
 		// cout << "pagenumberstring : " << pagenumberstring << endl;
 
@@ -612,11 +640,12 @@ DLLEXPORT RSString getOutputFileNameFromPageNumber(const char * const outputFile
 	}
 }
 
+#ifndef DONOTIMPLEMENTRSSTRING
 // a very very simple resizing string
 RSString::RSString(const char *arg) : content(0), allocatedLength(0), stringlength(0)
 {
 	if (arg) {
-		this->copy(arg,strlen(arg));
+		this->assign(arg,strlen(arg));
 	}
 	// cerr << "{ constructed" << (void*) this << endl;
 }
@@ -625,13 +654,13 @@ RSString::RSString(const char arg) : content(0), allocatedLength(0), stringlengt
 {
 	char tmp[2];
 	tmp[0] = arg; tmp[1] = '\0';
-	this->copy(tmp,1);
+	this->assign(tmp,1);
 }
 
 RSString::RSString(const char * arg  , const size_t len) :content(0), allocatedLength(0), stringlength(len)
 {
 	if (arg) {
-		this->copy(arg,stringlength);
+		this->assign(arg,stringlength);
 	}
 }
 
@@ -639,7 +668,7 @@ RSString::RSString(const char * arg  , const size_t len) :content(0), allocatedL
 RSString::RSString(const RSString & s):content(0), allocatedLength(0), stringlength(0)
 {
 	assert(this != &s);
-	this->copy(s.value(),s.stringlength);
+	this->assign(s.c_str(),s.stringlength);
 }
 
 char *RSString::newContent(size_t size)
@@ -663,7 +692,7 @@ RSString::~RSString()
 
 bool RSString::contains(const RSString & s) const
 {
-	return strstr(value(),s.value()) != 0;
+	return strstr(c_str(),s.c_str()) != 0;
 }
 
 RSString & RSString::operator += (const char* rs)
@@ -699,13 +728,13 @@ RSString & RSString::operator += (const RSString & rs)
 }
 
 
-void RSString::copy(const char *src)
+void RSString::assign(const char *src)
 {
-	copy(src,strlen(src));
+	assign(src,strlen(src));
 
 }
-//      const char * value() const { return content; }
-void RSString::copy(const char *src, const size_t len )
+//      const char *c_str() const { return content; }
+void RSString::assign(const char *src, const size_t len )
 {
 //          cerr << "copy " << src << " to " << (void *) this << endl;
 	if (src == 0) {
@@ -734,10 +763,11 @@ void RSString::copy(const char *src, const size_t len )
 	}
 	stringlength = len;
 }
+#endif
 
 bool fileExists(const char *filename)
 {
-#ifdef HAVESTL
+#ifdef HAVE_STL
 	std::ifstream test(filename);
 	return test.is_open();
 #else
@@ -793,7 +823,7 @@ void FontMapper::readMappingTable(ostream & errstream, const char *filename)
 	while (!inFile.getline(line, linesize).eof()) {
 		linenr++;
 		strcpy_s(save,linesize, line);
-#ifdef HAVESTL
+#ifdef HAVE_STL
 		// Notes regarding ANSI C++ version (from KB)
 		// istream::get( char* pch, int nCount, char delim ) is different in three ways: 
 		// When nothing is read, failbit is set.
@@ -843,7 +873,7 @@ void FontMapper::readMappingTable(ostream & errstream, const char *filename)
 	}
 }
 
-const char *FontMapper::mapFont(const RSString & fontname)
+const char *FontMapper::mapFont(const RSString & fontname) const
 {
 #if 0
 	FontMapping *curEntry = firstEntry;
@@ -851,8 +881,8 @@ const char *FontMapper::mapFont(const RSString & fontname)
 	while (curEntry != 0) {
 		// cerr << "comparing with" << curEntry->original << endl;
 		if (curEntry->original == RSString(fontname)) {
-			// cerr << "mapped to " << curEntry->replacement.value() << endl;
-			return curEntry->replacement.value();
+			// cerr << "mapped to " << curEntry->replacement.c_str() << endl;
+			return curEntry->replacement.c_str();
 		}
 		curEntry = curEntry->nextEntry;
 	}
@@ -860,7 +890,7 @@ const char *FontMapper::mapFont(const RSString & fontname)
 #endif
 	const RSString *r = getValue(fontname);
 	if (r) {
-		return r->value();
+		return r->c_str();
 	} else {
 		for (unsigned int i=0; i<fontname.length(); i++) {
 			// patch from Scott Pakin
@@ -876,10 +906,10 @@ const char *FontMapper::mapFont(const RSString & fontname)
 			// If the specified font can't be mapped and it contains a "+" character, 
 			// the method tries a second time starting from after the "+".
 	        if (fontname[i] == '+') {
-		        const RSString altfontname(fontname.value() + i + 1);
+		        const RSString altfontname(fontname.c_str() + i + 1);
 				r = getValue(altfontname);
 				if (r)
-			        return r->value();
+			        return r->c_str();
 				else 
 					return 0;
 			}
@@ -892,17 +922,17 @@ unsigned int Argv::parseFromString(const char * const argstring) {
 	unsigned int nrOfNewArgs = 0;
 	const char * cp = argstring;
 	while (cp && *cp) { // for all args
-		while (cp && *cp && (*cp == ' ')) cp++; // skip leading space
+		while (*cp == ' ') cp++; // skip leading space
 		RSString result("");
 		if (*cp == '"')	{ // handle string arg - read everything until closing "
 				cp++; // skip leading "
-				while (cp && *cp && (*cp != '"')) {
+				while (*cp && (*cp != '"')) {
 					result += *cp; 
 					cp++;
 				}
 				if (*cp) cp++; // skip trailing "
 		} else {
-				while (cp && *cp && (*cp != ' ')) {
+				while (*cp && (*cp != ' ')) {
 					result += *cp; 
 					cp++;
 				}

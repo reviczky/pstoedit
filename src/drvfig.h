@@ -5,7 +5,7 @@
    drvFIG.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,10 +43,10 @@ public:
 
 		DriverOptions():
 
-			startdepth(true,"-startdepth","number",0,"Set the initial depth (default 999)",0,999),
-			metric(true,"-metric","",0,"Switch to centimeter display (default inches)",0,false),
-			use_correct_font_size(true,"-usecorrectfontsize",0,0,"don't scale fonts for xfig. Use this if you also use this option with xfig",0,false),
-			depth_in_inches(true,"-depth","number",0,"Set the page depth in inches (default 11)",0,11)
+			startdepth(true,"-startdepth","number",0,"set the initial depth (default 999)",0,999),
+			metric(true,"-metric","",0,"switch to centimeter display (default inches)",0,false),
+			use_correct_font_size(true,"-usecorrectfontsize",0,0,"do not scale fonts for xfig. Use this if you also use this option with xfig",0,false),
+			depth_in_inches(true,"-depth","number",0,"set the page depth in inches (default 11)",0,11)
 		{
 			ADD(startdepth);
 			ADD(metric);

@@ -7,7 +7,7 @@
    and methods (minimal interface)
 
    Copyright (C) 1993,1994,1995,1996,1997,1998 Peter Katzmann p.katzmann@thiesen.com 
-   Copyright (C) 2000 - 2013 Glunz (fill support,  improved color handling)
+   Copyright (C) 2000 - 2014 Glunz (fill support,  improved color handling)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,8 +52,8 @@ protected:
 			// penColors(0), maxPenColors(0)
 		DriverOptions():
 			penplotter(true,"-penplotter",0, 0, "plotter is pen plotter (i.e. no support for specific line widths)", 0,false),
-			pencolorsfromfile(true,"-pencolorsfromfile",0, 0, "read pen colors from file drvhpgl.pencolors in pstoedit data directory", 0,false),
-			maxPenColors(true,"-pencolors", "number", 0, "maximum number of pen colors to be used by pstoedit (default 0) - " ,0,0),
+			pencolorsfromfile(true,"-pencolorsfromfile",0, 0, "read pen colors from file drvhpgl.pencolors in pstoedit's data directory", 0,false),
+			maxPenColors(true,"-pencolors", "number", 0, "maximum number of pen colors to be used by pstoedit (default 0) -" ,0,0),
 			fillinstruction(true,"-filltype", "string", 0, "select fill type e.g. FT 1" ,0,(const char*)"FT1"),
 			/*
 			   Fill Type (FT) Command 

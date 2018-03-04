@@ -1,1 +1,1 @@
-EXTRA_DIST=msdev.tar
+##EXTRA_DIST=msdev.tar

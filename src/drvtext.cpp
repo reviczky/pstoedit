@@ -3,7 +3,7 @@
    Skeleton for the implementation of text based backends
    for example this could be extended towards an HTML backend.
 
-   Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -110,16 +110,16 @@ void drvTEXT::close_page()
 			outf << "***********************************************" << endl;
 			for (unsigned int j = 0; j < nrofpieces; j++) {
 				const TextInfo & textinfo = lineptr->textpieces[j];
-				outf << "Text String : " << textinfo.thetext.value() << endl;
+				outf << "Text String : " << textinfo.thetext.c_str() << endl;
 				outf << '\t' << "X " << textinfo.x << " Y " << textinfo.y << endl;
 				outf << '\t' << "X_END " << textinfo.x_end << " Y_END " << textinfo.y_end << endl;
-				outf << '\t' << "currentFontName: " << textinfo.currentFontName.value() << endl;
+				outf << '\t' << "currentFontName: " << textinfo.currentFontName.c_str() << endl;
 				outf << '\t' << "is_non_standard_font: " << textinfo.is_non_standard_font << endl;
 				outf << '\t' << "currentFontFamilyName: " << textinfo.
-					currentFontFamilyName.value() << endl;
+					currentFontFamilyName.c_str() << endl;
 				outf << '\t' << "currentFontFullName: " << textinfo.currentFontFullName.
-					value() << endl;
-				outf << '\t' << "currentFontWeight: " << textinfo.currentFontWeight.value() << endl;
+					c_str() << endl;
+				outf << '\t' << "currentFontWeight: " << textinfo.currentFontWeight.c_str() << endl;
 				outf << '\t' << "currentFontSize: " << textinfo.currentFontSize << endl;
 				outf << '\t' << "currentFontAngle: " << textinfo.currentFontAngle << endl;
 				outf << '\t' << "currentR: " << textinfo.currentR << endl;
@@ -177,12 +177,12 @@ void drvTEXT::show_text(const TextInfo & textinfo)
 			if (((charpage[y])[x] != ' ')) {
 				cerr << "character " << (charpage[y])[x] << " overwritten with " << textinfo.
 					thetext.
-					value()[0] << " at " << x << " " << y <<
+					c_str()[0] << " at " << x << " " << y <<
 					" - Hint increase -width and/or -height" << endl;
 			}
-			(charpage[y])[x] = textinfo.thetext.value()[0];
+			(charpage[y])[x] = textinfo.thetext.c_str()[0];
 		} else {
-			cerr << "seems to be off-page: " << textinfo.thetext.value()[0] << endl;
+			cerr << "seems to be off-page: " << textinfo.thetext.c_str()[0] << endl;
 			cerr << x << " " << y << " " << textinfo.x << " " << textinfo.y << endl;
 		}
 	}

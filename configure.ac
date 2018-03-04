@@ -10,9 +10,9 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.42,wglunz34_AT_pstoedit.net)
+AC_INIT(pstoedit,3.43,wglunz34_AT_pstoedit.net)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.42)
+AM_INIT_AUTOMAKE(pstoedit,3.43)
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
 
@@ -52,6 +52,8 @@ dnl Strip off // to / that causes troubles.
    GS=`echo $GS | sed -e 's/\/\//\//g'`	
 fi
 
+PKG_PROG_PKG_CONFIG
+
 AC_LANG(C++)
 
 dnl check for directory handling
@@ -68,6 +70,8 @@ if test -n "${LIBLD_LDFLAGS}"; then
    HAVE_LD=yes
 fi
 AC_SUBST(LIBLD_LDFLAGS)
+
+AC_CHECK_LIB([gd],[gdImageCreateFromPng])
 
 dnl some optional packages - default is to check automatically
 dnl but the check can be disabled using --without-PACKAGE
@@ -90,6 +94,7 @@ with_swf=$withval, with_swf=yes)
 
 
 
+CPPFLAGS="$CPPFLAGS -DX_DISPLAY_MISSING"
 
 if test "${with_libplot}" = "yes" ; then
 dnl
@@ -109,8 +114,10 @@ if test -n "${LIBPLOTTER_LDFLAGS}" && test -n "${LIBPLOTTER_CFLAGS}"; then
    HAVE_LIBPLOTTER=yes
    AC_MSG_CHECKING(for version of "lib plot" )   
    dnl See if we have a 2.3 or newer lib Plot version
-   AC_TRY_COMPILE( [#include <plotter.h>
-		   typedef int Point; ],[ ],
+   AC_TRY_COMPILE( [
+		#include <plotter.h>
+	     	typedef int Point; 
+		],[ ],
 		    AC_MSG_RESULT(you seem to have a compatible version ),
 		    [LIBPLOTTER_CFLAGS="$LIBPLOTTER_CFLAGS -DOLD_LIBPLOTTER";   
 		    AC_MSG_RESULT(you seem to have an older version - need at least version 2.3)])
@@ -127,10 +134,22 @@ else
    AM_CONDITIONAL(HAVE_LIBPLOTTER, false )
 fi
 
+CPPFLAGS=${OLD_CPPFLAGS}
 
 
 
 
+
+AC_MSG_CHECKING(for mkstemp)
+AC_TRY_COMPILE( [#include <stdlib.h>
+		 char buffer[] = "aaaXXXXXX";
+	 	 int i = mkstemp(buffer); ],[ ],
+               [HAVE_MKSTEMP=yes;
+                MKSTEMP_CFLAGS="-DHAVE_MKSTEMP"; 
+                AC_MSG_RESULT(you seem to have mkstemp )], 
+               [AC_MSG_RESULT(you do not have mkstemp - so will try using tempnam instead)])
+
+AC_SUBST(MKSTEMP_CFLAGS)
 
 
 
@@ -197,30 +216,39 @@ if test "x${PSTOEDIT_GCC_OK}" = xno ; then
       AC_MSG_WARN([** gcc version >= 3 is required.]) 
       AC_MSG_WARN([** libMagick++ driver is disabled.])
 else
-	AC_PATH_PROG(MAGICK_CONFIG, GraphicsMagick++-config)
+      if test -n "$PKG_CONFIG"; then
+        AC_MSG_CHECKING(ImageMagick flags through pkg-config)
+	PKG_CHECK_MODULES(LIBMAGICK, ImageMagick++, 
+		HAVE_LIBMAGICK=yes 
+		LIBMAGICK_CFLAGS="-DHAVE_MAGIC $LIBMAGICK_CFLAGS" 
+		LIBMAGICK_LDFLAGS="$LIBMAGICK_LIBS" , 
+		echo "trying other methods for finding ImageMagick")
+      else
+	AC_PATH_PROG(MAGICK_CONFIG, Magick++-config)
 	if test -n "${MAGICK_CONFIG}"; then
 	   AC_MSG_CHECKING(for version of "GraphicsMagick++" )   
 	   dnl See if we have a 1.0.6 or newer version
-	   CPPFLAGS="$CPPFLAGS `GraphicsMagick++-config --cppflags`"
+	   CPPFLAGS="$CPPFLAGS `Magick++-config --cppflags`"
 	   AC_TRY_COMPILE( [#include <Magick++.h>
 	            #if MagickLibVersion >= 0x000008
-		    int correct;
-		    #else
-		    old version of GraphicsMagick;
-		    #endif ],[ ],
-		    MAGICKCORRECTVERSION="YES";AC_MSG_RESULT(you seem to have a compatible version ),
-		    [AC_MSG_RESULT(you seem to have an older version - need at least version 1.0.6)])
-	   CPPFLAGS=$OLDCPPFLAGS
+	 	    int correct;
+	  	    #else
+	  	    old version of GraphicsMagick;
+	  	    #endif ],[ ],
+	  	    MAGICKCORRECTVERSION="YES";AC_MSG_RESULT(you seem to have a compatible version ),
+	  	    [AC_MSG_RESULT(you seem to have an older version - need at least version 1.0.6)])
+	   CPPFLAGS=$OLD_CPPFLAGS
 	   if test -n "${MAGICKCORRECTVERSION}"; then
 	      HAVE_LIBMAGICK=yes
-	      LIBMAGICK_CFLAGS="-DHAVE_MAGIC `GraphicsMagick++-config --cppflags`"
-	      LIBMAGICK_LDFLAGS="`GraphicsMagick++-config --libs` `GraphicsMagick++-config --ldflags`"
+	      LIBMAGICK_CFLAGS="-DHAVE_MAGIC `Magick++-config --cppflags`"
+	      LIBMAGICK_LDFLAGS="`Magick++-config --libs` `Magick++-config --ldflags`"
 	   else
 	      AC_MSG_WARN([** libMagick++ driver is disabled because of too old version of GraphicsMagick (need at least 1.0.6).])
 	   fi
 	else
-		AC_MSG_WARN([** libMagick++ driver is disabled.])
+	      AC_MSG_WARN([** libMagick++ driver is disabled.])
 	fi
+      fi
 fi
 AC_SUBST(LIBMAGICK_CFLAGS)
 AC_SUBST(LIBMAGICK_LDFLAGS)

@@ -4,7 +4,7 @@
    Contributed by: Scott Pakin <pakin_AT_uiuc.edu>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -638,6 +638,7 @@ drvIDRAW::~drvIDRAW()
 	outf << "showpage\n\n";
 	outf << "%%Trailer\n\n";
 	outf << "end\n";
+	options=0;
 }
 
 // Return the name of closest matching color
@@ -678,7 +679,7 @@ void drvIDRAW::print_header(const char *objtype)
 	// Dash pattern
 	outf << "%I b ";
 	double dash[4];
-	int dashpieces = sscanf(dashPattern(), "[ %lf %lf %lf %lf",
+	int dashpieces = sscanf_s(dashPattern(), "[ %lf %lf %lf %lf",
 							&dash[0], &dash[1], &dash[2], &dash[3]);
 	if (dashpieces) {
 		unsigned short dashbits = 0;

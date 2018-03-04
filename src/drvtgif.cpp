@@ -2,7 +2,7 @@
    drvTGIF.cpp : This file is part of pstoedit
    Backend for TGIF
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 static const char *colorstring(float r, float g, float b)
 {
 	static char buffer[10];
-	sprintf(buffer, "%s%.2x%.2x%.2x", "#", (unsigned int) (r * 255),
+	sprintf_s(TARGETWITHLEN(buffer,10), "%s%.2x%.2x%.2x", "#", (unsigned int) (r * 255),
 			(unsigned int) (g * 255), (unsigned int) (b * 255));
 	return buffer;
 }
@@ -81,6 +81,7 @@ drvTGIF::~drvTGIF()
 	// now we can copy the buffer the output
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
+	options=0;
 }
 
 void drvTGIF::print_coords()

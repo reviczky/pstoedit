@@ -57,7 +57,7 @@ public:
   
   // Check if the path is inside of another path
 
-  bool is_inside_of(const sub_path & other);
+  bool is_inside_of(const sub_path & other) const ;
   
   // Check if a point is inside of *this
 
@@ -70,6 +70,7 @@ public:
     delete [] path; path = 0;
     delete [] points; points = 0;
     delete [] parents; parents = 0;
+	parent = 0;
   };
 
   sub_path();

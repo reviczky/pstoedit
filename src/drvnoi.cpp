@@ -49,7 +49,10 @@ typedef bool (* LPFN_BOOL_PSTR_INT)(const char *, int);
 typedef bool (* LPFN_BOOL_4DBL)(double, double, double, double);
 typedef bool (* LPFN_BOOL_8DBL)(double, double, double, double, double, double, 
   double, double);
-typedef unsigned char BYTE;
+#ifndef _WINDEF_
+// this already defined in windef.h under Windows
+	typedef unsigned char BYTE;
+#endif
 typedef bool (* LPFN_VOID_3BYTE)(BYTE, BYTE, BYTE);
 typedef bool (* LPFN_BOOL_DBL_UNS)(double [][2], unsigned);
 typedef bool (* LPFN_BOOL_PSTR_5DBL)(const char *, double, double, double, double, 
@@ -86,7 +89,7 @@ static const char *DllFuncName[] = {"NoiWriteXML", "NoiSetCurrentColor",
   "NoiDrawImage", "NoiEndPolyline", "NoiSetLineParams",
   "NoiSetOptions", "NoiDrawPolyline"};
   
-#define DLLFUNCNUM (sizeof(DllFunc)/sizeof(void*))
+static unsigned short DLLFUNCNUM = (sizeof(DllFunc)/sizeof(void*));
 
 // driver constructor
 // looks for resource file and bezier split level parameters
@@ -130,6 +133,7 @@ drvNOI::~drvNOI()
 	NoiWriteXML(outFileName.value());
 
   hProxyDLL.close();
+  options=0;
   }
 
 // load the proxy dll and get all the function pointers

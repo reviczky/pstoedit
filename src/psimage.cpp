@@ -1,7 +1,7 @@
 /*
    psimage.cpp : This file is part of pstoedit.
   
-   Copyright (C) 1997- 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1997- 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
    Support for Image::writeIdrawImage by Scott Johnston
 
@@ -20,6 +20,12 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#ifdef HAVE_LIBGD
+#include <gd.h>
+#endif
+
+#include <cmath>
+
 #include "drvbase.h"
  
 #include "version.h"
@@ -287,10 +293,9 @@ void PSImage::calculateBoundingBox()
 void PSImage::writeEPSImage(ostream & outi) const
 {
 	if (isFileImage) {
-#ifdef HAVELIBGD
-
+#ifdef HAVE_LIBGD
 		FILE* in = fopen(FileName.value(),"rb");
-		cerr<<"Reading: "<<FileName.value()<<endl;
+//		cerr << "Reading: "<<FileName.value() << endl;
 		gdImagePtr im=gdImageCreateFromPng(in);
 		assert(im);
 		fclose(in);
@@ -298,33 +303,44 @@ void PSImage::writeEPSImage(ostream & outi) const
 		const int w=gdImageSX(im);
 		const int h=gdImageSY(im);
 		
-		outi<<"%!PS-Adobe-2.0 EPSF-2.0\n";
-		outi<<"%%Title: image created by pstoedit\n";
-		outi<<"%%Creator: pstoedit version "<<version<<endl;
-		outi<<"%%BoundingBox: 0 0 "<<w<<" "<<h<<"\n";
-		outi<<"%%Pages: 1\n";
-		outi<<"%%EndComments\n";
+		outi << "%!PS-Adobe-2.0 EPSF-2.0\n";
+		outi << "%%Title: image created by pstoedit\n";
+		outi << "%%Creator: pstoedit version "<< version << endl;
+		outi << "%%BoundingBox: " 
+		     << floor(ll.x_) << " " << floor(ll.y_) << " "
+		     << ceil(ur.x_) << " " << ceil(ur.y_) << endl;
 
-		outi<<"%%Page: 1 1\n";
+		outi << "%%Pages: 1\n";
+		outi << "%%EndComments\n";
+
+		outi << "%%Page: 1 1\n";
 		
-		outi<<"gsave\n";
+		outi << "gsave\n";
 
-		outi<<"1 dict begin % temp dict for storing str1\n";
-		outi<<"/str1 1 string def\n";
+		outi << "1 dict begin % temp dict for storing str1\n";
+		outi << "% transformation matrix" << endl;
+		outi << "[ ";
+		{
+			for (unsigned int i = 0; i < 6; i++)
+				outi << normalizedImageCurrentMatrix[i] << " ";
+		}
+		outi << "] concat" << endl;
+		outi << "[ 1 0 0 -1 0 " << h << " ] concat" << endl;
+		outi << "/str1 1 string def\n";
 			
-		outi<<"0 "<<h<<" translate\n";
-		outi<<w<<" "<<-h<<" scale\n";
-		outi<<w<<" "<<h<<" 8"<<endl;
-		outi<<"[ "<<w<<" 0 0 "<<h<<" 0 0 ]\n";
+		outi << "0 " << h << " translate\n";
+		outi<< w << " " << -h << " scale\n";
+		outi<< w << " "<< h << " 8" << endl;
+		outi<< "[ " << w << " 0 0 " << h << " 0 0 ]\n";
 		
 		outi << "{currentfile str1 readhexstring pop} % decoding procedure" << endl;
 		outi << "false 3 % has many sources, number of color components" << endl;
-		outi << "% number of data " << w*h*3 << endl;
+		outi << "% number of hex bytes " << w*h*3 << endl;
 		outi << "colorimage" << endl;
 		
 		int x,y,c,i=0;
-		for(y=0; y<h; y++)
-			for(x=0; x<w; x++)
+		for(y=0; y < h; y++)
+			for(x=0; x < w; x++)
 			{
 				if (i % (12 * ncomp) == 0) outi << endl;
 				c=gdImageGetPixel(im,x,y);
@@ -346,7 +362,11 @@ void PSImage::writeEPSImage(ostream & outi) const
 		gdImageDestroy(im);
 		return;
 #else
-		cerr << "Image::writeEPSImage not yet supported for PNG File Image objects" << endl;
+		static bool first=true;
+		if(first) {
+			cerr << "Reconfigure with libgd installed to support PNG to EPS image file conversion" << endl;
+			first=false;
+		}
 		return;
 #endif
 	}
@@ -356,8 +376,8 @@ void PSImage::writeEPSImage(ostream & outi) const
 	outi << "%!PS-Adobe-2.0 EPSF-2.0" << endl;
 	outi << "%%Title: image created by pstoedit" << endl;
 	outi << "%%Creator: pstoedit version " << version << endl;
-	outi << "%%BoundingBox: " << (int) ll.x_ << " " << (int) ll.y_ << " "
-		<< (int) ur.x_ << " " << (int) ur.y_ << endl;
+	outi << "%%BoundingBox: " << floor(ll.x_) << " " << floor(ll.y_) << " "
+	     << ceil(ur.x_) << " " << ceil(ur.y_) << endl;
 	outi << "%%Pages: 1" << endl;
 	outi << "%%EndComments" << endl << endl;
 	outi << "%%Page: 1 1" << endl << endl;
@@ -550,12 +570,13 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 			outi << endl << "%I ";
 			for (unsigned int col = 0; col < width; col++) {
 				unsigned int grayval;
-				if (type == colorimage)
+				if (type == colorimage) {
 					grayval = (unsigned int)
-						(.299 * dataptr[cur++]
-						 + .587 * dataptr[cur++]
-						 + .114 * dataptr[cur++]);
-				else
+						(.299 * dataptr[cur]
+						 + .587 * dataptr[cur+1]
+						 + .114 * dataptr[cur+2]);
+						 cur+=3;
+				} else
 					grayval = dataptr[cur++];
 				outi << setw(2) << setfill('0') << hex << grayval << dec;
 			}

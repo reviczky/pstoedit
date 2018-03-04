@@ -3,6 +3,7 @@ AMVERSION=1.xxx
 AMVERSION=1.7
 AMVERSION=local
 AMVERSION=1.9
+AMVERSION=any
 
 BINDIR=/usr/local/bin
 BINDIR=/usr/bin

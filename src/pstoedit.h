@@ -4,7 +4,7 @@
    pstoedit.h : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,6 +69,13 @@ int pstoedit(	int argc,
 				const DescriptionRegister* const pushinsPtr =0
 			);
 
+/*
+	sets either cout (true) or errstream is used
+*/
+extern "C" DLLEXPORT
+void useCoutForDiag(int flag); 
+
+
 extern "C" DLLEXPORT 
 int pstoeditwithghostscript(int argc,
 							const char * const argv[],
@@ -120,6 +127,18 @@ void ignoreVersionCheck(void); /* not exported to the DLL interface, just used i
 #if defined(_WIN32) || defined(__OS2__)
 #include "cbstream.h"
 extern "C" DLLEXPORT void setPstoeditOutputFunction(void * cbData,write_callback_type* cbFunction);
+
+//
+// under Windows we need to be able to switch between two modes of calling GS - 1 via DLL and 2 with EXE
+// the EXE is needed when being called from gsview - whereas in all other cases the DLL is the better way
+// So the useDLL is set to false - and the pstoedit stand-alone program sets it to true
+// gsview uses the default which is false - hence the ghostscript is called via its exe
+// 
+// need to use int instead of bool because of C mode
+extern "C" DLLEXPORT void setPstoeditsetDLLUsage( int useDLL_p);
+extern "C" DLLEXPORT int getPstoeditsetDLLUsage();
+
+
 #endif
 
 #endif

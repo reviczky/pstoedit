@@ -3,7 +3,7 @@
    HPGL / HPGL2 Device driver supporting text commands
 
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
-   Copyright (C) 2000  Katzmann & Glunz (fill stuff)
+   Copyright (C) 2000 - 2006 Katzmann & Glunz (fill stuff)
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
     This program is free software; you can redistribute it and/or modify
@@ -67,8 +67,9 @@ void drvHPGL::rot(double &x, double &y, int angle)
 drvHPGL::derivedConstructor(drvHPGL):
 constructBase, 
 	//  Start DA hpgl color addition
-	prevColor(5555)
-	//, maxPen(0),
+	prevColor(5555),
+	maxPen(0),
+	penColors(0)
 
 	
 	//  End DA hpgl color addition
@@ -168,8 +169,9 @@ drvHPGL::~drvHPGL()
 	// and writing of trailer to output file
 	outf << "PU;PA0,0;SP;EC;PG1;EC1;OE\n";
 	// fillinstruction = NIL;
-	delete[]penColors;
+	delete [] penColors;
 	penColors = NIL;
+	options= NIL;
 }
 
 void drvHPGL::print_coords()
@@ -187,7 +189,7 @@ void drvHPGL::print_coords()
 					rot(x, y, rotation);
 #if USESPRINTF
 					char str[256];
-					sprintf(str, "PU%i,%i;", (int) x, (int) y);
+					sprintf_s(TARGETWITHLEN(str,256), "PU%i,%i;", (int) x, (int) y);
 					outf << str;
 #else
 					outf << "PU" << (int) x << "," << (int) y << ";";
@@ -203,7 +205,7 @@ void drvHPGL::print_coords()
 						rot(x, y, rotation);
 #if USESPRINTF
 						char str[256];
-						sprintf(str, "PD%i,%i;", (int) x, (int) y);
+						sprintf_s(TARGETWITHLEN(str,256), "PD%i,%i;", (int) x, (int) y);
 						outf << str;
 #else
 						outf << "PD" << (int) x << "," << (int) y << ";";
@@ -217,7 +219,7 @@ void drvHPGL::print_coords()
 						rot(x, y, rotation);
 #if USESPRINTF
 						char str[256];
-						sprintf(str, "PD%i,%i;", (int) x, (int) y);
+						sprintf_s(TARGETWITHLEN(str,256), "PD%i,%i;", (int) x, (int) y);
 						outf << str;
 #else
 						outf << "PD" << (int) x << "," << (int) y << ";";
@@ -233,7 +235,7 @@ void drvHPGL::print_coords()
 					rot(x, y, rotation);
 #if USESPRINTF
 					char str[256];
-					sprintf(str, "PD%i,%i;", (int) x, (int) y);
+					sprintf_s(TARGETWITHLEN(str,256), "PD%i,%i;", (int) x, (int) y);
 					outf << str;
 #else
 					outf << "PD" << (int) x << "," << (int) y << ";";
@@ -319,11 +321,11 @@ drvhpgl.cpp:318: warning: ISO C++ does not support the `%lg' printf format
 
 #if USESPRINTF
 	char str[256];
-	sprintf(str, "DI%g,%g;", dix, diy);
+	sprintf_s(TARGETWITHLEN(str,256), "DI%g,%g;", dix, diy);
 	outf << str;
-	sprintf(str, "SI%g,%g;", textinfo.currentFontSize / 1000 * HPGLScale, textinfo.currentFontSize / 1000 * HPGLScale);
+	sprintf_s(TARGETWITHLEN(str,256), "SI%g,%g;", textinfo.currentFontSize / 1000 * HPGLScale, textinfo.currentFontSize / 1000 * HPGLScale);
 	outf << str;
-	sprintf(str, "PU%i,%i;", (int) x, (int) y);
+	sprintf_s(TARGETWITHLEN(str,256), "PU%i,%i;", (int) x, (int) y);
 	outf << str;
 #else
 	outf << "DI" << dix << "," << diy << ";";
@@ -393,7 +395,7 @@ void drvHPGL::show_path()
 				rot(x, y, rotation);
 #if USESPRINTF
 				char str[256];
-				sprintf(str, "PU%i,%i;", (int) x, (int) y);
+				sprintf_s(TARGETWITHLEN(str,256), "PU%i,%i;", (int) x, (int) y);
 				outf << str;
 #else
 				outf << "PU" << (int) x << "," << (int) y << ";";
@@ -408,7 +410,7 @@ void drvHPGL::show_path()
 		if (!options->penplotter) {
 #if USESPRINTF
 			char str[256];
-			sprintf(str, "PW%lg;", currentLineWidth());
+			sprintf_s(TARGETWITHLEN(str,256), "PW%lg;", currentLineWidth());
 			outf << str;
 #else
 			outf << "PW" << currentLineWidth() << ";";

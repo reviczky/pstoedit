@@ -5,7 +5,7 @@
    simple template for a sorted list. I didn't want to use STL
    because not all compilers support it yet. 
   
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -48,23 +48,23 @@ public:
 	ordlist(): 
 		first(0),
 		l_size(0),
-		lastaccess(*(new ordlistElement *)),
-		lastaccessindex(*(new unsigned int)) {}
+		lastaccessptr((new ordlistElement *)),
+		lastaccessindexptr((new unsigned int)) {}
 		// initialize the Refs with objects on the heap, because we need
 		// to modify these from within const functions
 		// (these act as a sort of cache, but they don't influence constness)
 	~ordlist() {
 		clear();
-		delete (&lastaccess);
-		delete (&lastaccessindex);
+		delete (lastaccessptr); lastaccessptr=0;
+		delete (lastaccessindexptr);lastaccessindexptr=0;
 	}
 	void clear() {
 		ordlistElement * cur = first;
 		while(cur != 0) {  ordlistElement * next = cur-> next; delete cur; cur = next; }
 		l_size = 0;
 		first = 0;
-		lastaccess = 0;
-		lastaccessindex = 0;
+		(*lastaccessptr) = 0;
+		(*lastaccessindexptr) = 0;
 	}
 	void insert(const T& elem) {
 		if (first == 0) {
@@ -88,30 +88,30 @@ public:
 			}
 		}
 		l_size++;
-		lastaccess = first;
-		lastaccessindex = 0;
+		*lastaccessptr = first;
+		*lastaccessindexptr = 0;
 	}
 	const T &operator[](size_t i) const {
 		ordlistElement * start = 0;
 		unsigned int ind = 0;
 		if (i < size() ) {
-			if (i == lastaccessindex ) { 
+			if (i == (*lastaccessindexptr) ) { 
 //				cerr << "returning from last " << endl;
-				return lastaccess->elem;
-			} else if (i < lastaccessindex ) { 
+				return (*lastaccessptr)->elem;
+			} else if (i < (*lastaccessindexptr) ) { 
 //				cerr << "returning via search from start " << endl;
 				start = first;
 				ind = 0;
 
 			} else {
 //				cerr << "returning via forward search" << endl;
-				start = lastaccess;
-				ind = lastaccessindex;
+				start = (*lastaccessptr);
+				ind = (*lastaccessindexptr);
 			}
 			while(ind  < i) { start = start->next; ind++;}
 			// we need to cast away const for caching
-			lastaccess = start;
-			lastaccessindex = i;
+			(*lastaccessptr) = start;
+			(*lastaccessindexptr) = i;
 //			((ordlist<T,Telem,COMPARATOR> *)this)->lastaccess = start;
 //			((ordlist<T,Telem,COMPARATOR> *)this)->lastaccessindex = i;
 			return start->elem;
@@ -137,8 +137,8 @@ private:
 
 	// helpers for faster sequential access via operator[]
 	// these remember the position of the last access
-	ordlistElement * & lastaccess;
-	unsigned int & lastaccessindex ;
+	ordlistElement **lastaccessptr;
+	unsigned int * lastaccessindexptr ;
 
 	// inhibitors: (may not be called)
 	ordlist(const ordlist<T,Telem,COMPARATOR> &);

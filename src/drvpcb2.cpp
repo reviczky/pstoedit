@@ -3,7 +3,7 @@
    simple backend for Pcb format.
    Contributed / Copyright 2004 by: Mark Rages 
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -43,6 +43,7 @@ constructBase
 drvPCB2::~drvPCB2()
 {
   outf << ")\n";
+  options=0;
 }
 
 

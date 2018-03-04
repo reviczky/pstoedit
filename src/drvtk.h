@@ -11,7 +11,7 @@
    drvsample.h
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,8 +65,9 @@ private:
 	TempFile		tempFile;
 	ofstream		&buffer;
 	int			objectId;
-	char pheight[20];
-	char pwidth[20];
+	enum { ssize = 20 };
+	char pheight[ssize];
+	char pwidth[ssize];
 
 	void			canvasCreate();
 	void			outputEscapedText(const char* string);

@@ -6,7 +6,7 @@
    Backend for Asymptote files
    Contributed by: John Bowman
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -79,8 +79,6 @@ private:
   bool firstpage;
   
   int imgcount;
-  string tmpdir;
-  char* outname;
   
   std::list<bool> clipstack;
   std::list<bool> gsavestack;

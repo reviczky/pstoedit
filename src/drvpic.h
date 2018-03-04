@@ -64,8 +64,8 @@ public:
 
 private:
 	void print_coords();
-	float x_coord(float x, float y);
-	float y_coord(float x, float y);
+	float x_coord(float x, float y) const ;
+	float y_coord(float x, float y) const ;
 	void ps_begin();
 	void ps_end();
 

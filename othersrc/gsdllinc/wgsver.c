@@ -63,9 +63,9 @@ static int get_gs_versions_product(int *pver, int offset,
     int n = 0;
 
 	if (strlen(gsregbase))
-	  sprintf(key, "Software\\%s\\%s", gsregbase, gs_productfamily);
+	  sprintf_s(TARGETWITHLEN(key,256) , "Software\\%s\\%s", gsregbase, gs_productfamily);
 	else
-	  sprintf(key, "Software\\%s", gs_productfamily);
+	  sprintf_s(TARGETWITHLEN(key,256) ,"Software\\%s", gs_productfamily);
 
     hkeyroot = HKEY_LOCAL_MACHINE;
     if (RegOpenKeyExA(hkeyroot, key, 0, KEY_READ, &hkey) == ERROR_SUCCESS) {
@@ -198,13 +198,13 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
     }
 
 
-    sprintf(dotversion, "%d.%02d", 
+    sprintf_s(TARGETWITHLEN(dotversion,16), "%d.%02d", 
 	    (int)(gs_revision / 100), (int)(gs_revision % 100));
 	
 	if (strlen(gsregbase))
-	  sprintf(key, "Software\\%s\\%s\\%s", gsregbase, gs_productfamily, dotversion);
+	  sprintf_s(TARGETWITHLEN(key,256), "Software\\%s\\%s\\%s", gsregbase, gs_productfamily, dotversion);
 	else
-	  sprintf(key, "Software\\%s\\%s", gs_productfamily, dotversion);
+	  sprintf_s(TARGETWITHLEN(key,256), "Software\\%s\\%s", gs_productfamily, dotversion);
 
     length = len;
     code = gp_getenv_registry(HKEY_CURRENT_USER, key, name, ptr, &length);
@@ -277,20 +277,19 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL, const char *gsregbase)
 	return FALSE;
 
     if (bDLL) {
-	strncpy(gspath, buf, len-1);
-	return TRUE;
-    }
-
-    p = strrchr(buf, '\\');
-    if (p) {
-	p++;
-	*p = 0;
-	strncpy(p, "gswin32c.exe", sizeof(buf)-1-strlen(buf));
-	strncpy(gspath, buf, len-1);
-	return TRUE;
-    }
-
-    return FALSE;
+		strncpy_s(gspath, len, buf, len-1);
+		return TRUE;
+	} else {
+		p = strrchr(buf, '\\');
+		if (p) {
+			p++;
+			*p = 0;
+			strncpy_s(p,sizeof(buf)-1-strlen(buf), "gswin32c.exe", sizeof(buf)-1-strlen(buf));
+			strncpy_s(gspath,len, buf, len-1);
+			return TRUE;
+		}
+		return FALSE;
+	}
 }
 
 

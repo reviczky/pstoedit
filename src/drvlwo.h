@@ -11,7 +11,7 @@
    Class declaration for a sample output driver with no additional attributes
    and methods (minimal interface)
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ private:
   unsigned long total_polys;
   struct LWO_POLY *polys;
 
-  void out_ulong(ostream &outs, unsigned long val)
+  static void out_ulong(ostream &outs, unsigned long val)
   {
     outs.put((char)((val>>24L)&0x00FFL));
     outs.put((char)((val>>16L)&0x00FFL));
@@ -60,13 +60,13 @@ private:
     outs.put((char)((val     )&0x00FFL));
   }
 
-  void out_ushort(ostream &outs, unsigned long val)
+  static void out_ushort(ostream &outs, unsigned long val)
   {
     outs.put((char)((val>> 8L)&0x00FFL));
     outs.put((char)((val     )&0x00FFL));
   }
 
-  void out_float(ostream &outs, float val)
+  static void out_float(ostream &outs, float val)
   {
     union {
       float f;

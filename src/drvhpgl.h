@@ -82,6 +82,8 @@ protected:
 
    public:
        static void rot(double & x, double & y, int rotation);
+
+	   NOCOPYANDASSIGN(drvHPGL)
    };
 
 #endif 

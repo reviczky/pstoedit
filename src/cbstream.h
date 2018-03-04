@@ -5,7 +5,7 @@
    callbackBuffer : This file is part of pstoedit
    streambuf that writes the data to a user defineable call back function
 
-   Copyright (C) 1998 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,15 +45,20 @@ USESTD
 // but this is also already defined in old GNU compilers
 typedef int streamsize; // oder long ?? MSVC likes int
 #endif
-
-typedef int (write_callback_type) (void * cb_data, const char* text, unsigned long length);
-
+#if defined(_WIN32) || defined(__OS2__)
+typedef int (__stdcall write_callback_type) (void * cb_data, const char* text, int length);
+// length is int and not unsigned long because of gs-api
+#else
+typedef int ( write_callback_type) (void * cb_data, const char* text, int length);
+#endif
 //lint !e1712 // no default ctor
 class callbackBuffer : public streambuf {
 public:
 	callbackBuffer(void * cb_data_p, write_callback_type* wcb) : 
 		cb_data(cb_data_p), write_callback(wcb) {}
 	write_callback_type * set_callback(void * cb_data_p,write_callback_type* new_cb);
+	int write_to_callback(const char* text, int length);
+
 protected:
     int sync();
     int overflow(int ch);
@@ -64,7 +69,7 @@ protected:
     streamsize xsputn(const char* text, streamsize n);
 
 private:
-	int write_to_callback(const char* text, unsigned long length);
+	
 	void * cb_data;
 	write_callback_type * write_callback;
 	callbackBuffer(const callbackBuffer &); // not defined

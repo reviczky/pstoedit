@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,7 +62,7 @@ static const float PntFig = 1200.0f / 72.0f;
 static const char *colorstring(float r, float g, float b)
 {
 	static char buffer[15];
-	sprintf(buffer, "%s%.2x%.2x%.2x", "#", (unsigned int) (r * 255),
+	sprintf_s(TARGETWITHLEN(buffer,15), "%s%.2x%.2x%.2x", "#", (unsigned int) (r * 255),
 			(unsigned int) (g * 255), (unsigned int) (b * 255));
 
 	return buffer;
@@ -217,6 +217,7 @@ drvFIG::~drvFIG()
 	// now we can copy the buffer the output
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
+	options=0;
 }
 
 
@@ -877,11 +878,13 @@ void drvFIG::show_image(const PSImage & imageinfo)
 		return;
 	}
 
-	char *EPSoutFileName = new char[strlen(outBaseName) + 21];
-	char *EPSoutFullFileName = new char[strlen(outDirName) + strlen(outBaseName) + 21];
+	const unsigned int filenamelen = strlen(outBaseName) + 21;
+	char *EPSoutFileName = new char[filenamelen];
+	const unsigned int fullfilenamelen = strlen(outDirName) + strlen(outBaseName) + 21;
+	char *EPSoutFullFileName = new char[fullfilenamelen];
 
-	sprintf(EPSoutFileName, "%s%02d.eps", outBaseName, imgcount++);
-	sprintf(EPSoutFullFileName, "%s%s", outDirName, EPSoutFileName);
+	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName, imgcount++);
+	sprintf_s(TARGETWITHLEN(EPSoutFullFileName,fullfilenamelen), "%s%s", outDirName, EPSoutFileName);
 	ofstream outi(EPSoutFullFileName);
 	if (!outi) {
 		errf << "Could not open file " << EPSoutFullFileName << " for output";
@@ -923,7 +926,7 @@ void drvFIG::show_image(const PSImage & imageinfo)
 
 
 static const char * const additionalDoku = 
-"The xfig backend supports special fontnames, which may be produced by using a fontmap file. "
+"The xfig format driver supports special fontnames, which may be produced by using a fontmap file. "
 "The following types of names are supported : BREAK  "
 "\n\\begin{verbatim}\n"
 "General notation: \n"

@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options 
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,7 +27,7 @@
 #include "miscutil.h"
 #include "poptions.h"
 
-enum advancedTypeIDs { start=char_ty, rsstring_ty, charstring_ty, constcharstring_ty, argv_ty };
+enum advancedTypeIDs { start_ty=char_ty, rsstring_ty, charstring_ty, constcharstring_ty, argv_ty };
 
 class DLLEXPORT RSStringValueExtractor {
 public:
@@ -117,7 +117,7 @@ static const char * const UseDefaultDoku = 0;
 
 class  PsToEditOptions : public ProgramOptions {
 public:
-	enum PropSheetEnum {g_t=0, t_t, a_t, b_t, d_t, h_t=9999 };
+	enum PropSheetEnum {g_t=0, t_t, a_t, b_t, d_t, h_t };
 	// g - general
 	// t - text
 	// a - unused
@@ -149,6 +149,10 @@ public:
 
 	Option < double, DoubleValueExtractor > xscale;
 	Option < double, DoubleValueExtractor > yscale;
+	Option < double, DoubleValueExtractor > xshift;
+	Option < double, DoubleValueExtractor > yshift;
+	Option < bool, BoolTrueExtractor > centered ;
+
 
 	Option < bool, BoolTrueExtractor > splitpages ;//= false;
 	Option < bool, BoolTrueExtractor > verbose ;//= false;
@@ -168,6 +172,7 @@ public:
 	Option < bool, BoolTrueExtractor > justgstest ;//= false;
 	Option < bool, BoolTrueExtractor > pscover ;//= false;
 	Option < bool, BoolTrueExtractor > nofontreplacement ;//= false;
+	Option < bool, BoolTrueExtractor > passglyphnames; 
 	Option < int, IntValueExtractor > rotation ;//= 0;
 	Option < RSString, RSStringValueExtractor> explicitFontMapFile ;//= 0;
 	Option < RSString, RSStringValueExtractor > outputPageSize;//("");
@@ -191,48 +196,6 @@ public:
 	Option < RSString, RSStringValueExtractor > gsregbase;
 	
 	PsToEditOptions() :
-
-
-#if 0 
-
-\item[\Opt{-dt}] 
-\item[\Opt{-adt}] 
-\item[\Opt{-ndt}] 
-\item[\Opt{-t2fontsast1}] 
-\item[\Opt{-ndt}] 
-\item[\Opt{-pti or -pta}]
-\item[\Opt{-nfr}] 
-\item[\Opt{-dis}] 
-\item[\OptArg{-psarg}{~string}] 
-\end{description} 
-\begin{description}
-\item[\Opt{-merge}] 
-\item[\OptArg{-page}{~page number}]
-\item[\OptArg{-rotate}{~angle (0-360)}]
-\item[\Opt{-rgb}] 
-\item[\Opt{-split}] 
-\item[\OptArg{-uchar}{~character}] 
-\item[\Opt{-usebbfrominput}] 
-\item[\OptArg{-df}{~fontname}]
-\item[\OptArg{-include}{~}] 
-\item[\OptArg{-fontmap}{~}] 
-\item[\OptArg{-f}{~format}] 
-\item[\OptArg{-scale}{~factor}] scale by the specified factor. (Currently used with
-\Opt{-f tgif} backend only.) 
-\item[\Opt{-ssp}] 
-\item[\Opt{-sclip}] 
-\item[\OptArg{-pagesize}{string}] 
-\item[\Opt{-bo}] 
-\item[\OptArg{-flat}{~number}] 
-\item[\Opt{-nb}] 
-\item[\Opt{-nc}] 
-\item[\Opt{-nq}]  
-\item[\Opt{-v}] 
-\item[\Opt{-nomaptoisolatin1}] 
-\item[\Arg{input-file}] input file.  If a "-" is given, standard input is used.
-\item[\Arg{output-file}] output file. If no output file or "-" is given as argument,
-    \Prog{pstoedit} writes the result to standard output. 
-#endif
 
 	nameOfInputFile  (0),
 	nameOfOutputFile (0),	// can contain %d for page splitting
@@ -267,30 +230,30 @@ public:
 		"useful to avoid this. If you do, you will have to type quit at the "
 		"\\verb+GS>+ prompt to exit from Ghostscript.   ",
 		false),
-	nocurves			(true, "-nc",noArgument,d_t,"normally curves are shown as curves if backend supports. This options forces curves to be always converted to line segments.", 
+	nocurves			(true, "-nc",noArgument,d_t,"normally curves are shown as curves if the output format does support it. This options forces curves to be always converted to line segments.", 
 		"no curves.  \n"
 		"Normally pstoedit tries to keep curves from the input and transfers them to "
-		"the output if the output format supports curves. If the backend does not "
+		"the output if the output format supports curves. If the output format does not "
 		"support curves, then pstoedit replaces curves by a series of lines (see "
 		"also \\Opt{-flat} option). However, in some cases the user might wish to "
-		"have this behavior also for backends that originally support curves. This "
+		"have this behavior also for output formats that originally support curves. This "
 		"can be forced via the \\Opt{-nc} option. ",
 		false),		// 
-	nosubpathes			(true, "-nsp",noArgument,d_t,"normally subpathes are used if the backend support them. This option turns off subpathes." ,
+	nosubpathes			(true, "-nsp",noArgument,d_t,"normally subpathes are used if the output format support them. This option turns off subpathes." ,
 		UseDefaultDoku,
 		false),	// 
-	mergelines			(true, "-mergelines",noArgument,d_t,"merge adjacent pathes if one is a stroke and the other is a fill. This depends on the capabilities of the selected backend" ,
+	mergelines			(true, "-mergelines",noArgument,d_t,"merge adjacent pathes if one is a stroke and the other is a fill. This depends on the capabilities of the selected output format" ,
 		"Some output formats permit the representation of filled "
 		"polygons with edges that are in a different color than the fill color. "
 		"Since PostScript does not support this by the standard drawing primitives directly, drawing programs typically "
 		"generate two objects (the outline and the filled polygon) into the "
 		"PostScript output. \\Prog{pstoedit} is able to recombine these, if they "
 		"follow each other directly and you specify \\Opt{-mergelines}. "
-		"However, this merging is not supported by all backends due to restrictions in the target format.",
+		"However, this merging is not supported by all output formats due to restrictions in the target format.",
 		false),
 	convertFilledRectToStroke(true,"-filledrecttostroke",noArgument,d_t,"convert filled rectangles to a stroke",
 		"Rectangles filled with a solid color can be converted to a stroked line with a width that corresponds to "
-		"the width of the rectangle. This is of primary interest for backends which do not "
+		"the width of the rectangle. This is of primary interest for output formats which do not "
 		"support filled polygons at all. But it is restricted to rectangles only, i.e. it is not "
 		"supported for general polygons",false),
 	mergetext			(true, "-mergetext",noArgument,d_t,"merge adjacent text pieces" ,
@@ -305,7 +268,7 @@ public:
 		false),
 	drawtext			(true, "-dt",noArgument,t_t,"draw text, i.e. convert text to polygons" , 
 		"Draw text - Text is drawn as polygons. This might produce a large output file. This option is automatically "
-		"switched on if the selected backend does not support text, e.g. "
+		"switched on if the selected output format does not support text, e.g. "
 		"\\Cmd{gnuplot}{1}.", 
 		false),
 	autodrawtext		(true, "-adt",noArgument,t_t,"automatic draw text. This draws text only for text that uses fonts with non standard encodings" , 
@@ -329,7 +292,7 @@ public:
 	ptioption			(true, "-pti",noArgument,t_t,"precision text - individual. Places text character by character - but only if non standard chararater widths are used",
 		"Precision text - "
      		"Normally a text string is drawn as it occurs in the input file. However, in some situations, this might "
-		"produce wrongly positioned characters. This is due to limitiations in most backends of "
+		"produce wrongly positioned characters. This is due to limitiations in most output formats of "
 		"pstoedit. They cannot represent text with arbitray inter-letter spacing which is easily "
 		"possible in PDF and PostScript. "
 		"With \\Opt{-pta}, each character of a text string is placed "
@@ -349,10 +312,21 @@ public:
 		UseDefaultDoku,
 		1.0),
 
+	xshift				(true, "-xshift","number",g_t,"shift image in x-direction" ,
+		UseDefaultDoku,
+		0.0f),
+	yshift				(true, "-yshift","number",g_t,"shift image in y-direction" , 
+		UseDefaultDoku,
+		0.0f),
+
+	centered		(true,"-centered","number",g_t,"center image before scaling or shifting",
+		UseDefaultDoku,
+		false),
+
 	splitpages			(true, "-split",noArgument,g_t,"split multipage documents into single pages" ,
 		"Create a new file for each page of the input. For this the "
 		"output filename must contain a \\%d which is replaced with the current page "
-		"number. This option is automatically switched on for backends that don't "
+		"number. This option is automatically switched on for output formats that don't "
 		"support multiple pages within one file, e.g. fig or gnuplot. ",
 		false),
 	verbose				(true, "-v",noArgument,b_t,"turns on verbose mode", 
@@ -364,9 +338,9 @@ public:
 		false),
 	simulateSubPaths	(true, "-ssp",noArgument,d_t,"simulate subpaths" , 
 		"simulate sub paths. \n"
-		"Several backend don't support PostScript pathes containing sub pathes, i.e. "
+		"Several output formats don't support PostScript pathes containing sub pathes, i.e. "
 		"pathes with intermediate movetos. In the normal case, each subpath is "
-		"treated as an independent path for such backends. This can lead to bad "
+		"treated as an independent path for such output formats. This can lead to bad "
 		"looking results. The most common case where this happens is if you use the "
 		"\\Opt{-dt} option and show some text with letters like e, o, or b, i.e. "
 		"letter that have a \"hole\". When the \\Opt{-ssp} option is set, pstoedit "
@@ -397,8 +371,8 @@ public:
 	pagetoextract		(true, "-page","page number",g_t,"extract a specific page: 0 means all pages" , 
 		"Select a single page from a multi page PostScript or PDF file. ",
 		0),		// 0 stands for all pages
-	flatness			(true, "-flat","flatness factor",d_t,"the precision use for approximating curves by lines if needed" ,
-		"If the backend does not support curves in the way "
+	flatness			(true, "-flat","flatness factor",d_t,"the precision used for approximating curves by lines if needed" ,
+		"If the output format does not support curves in the way "
 		"PostScript does or if the \\Opt{-nc} option is specified, all curves are "
 		"approximated by lines. Using the \\Opt{-flat} option one can control this "
 		"approximation. This parameter is directly converted to a PostScript "
@@ -407,9 +381,9 @@ public:
 		1.0),		// used for setflat
 	simulateClipping	(true, "-sclip",noArgument,d_t,"simulate clipping - probably you need to set this if you use -dt" , 
 		"simulate clipping.  \n"
-		"Most backends of pstoedit don't have native support for clipping. For that "
+		"Most output formats of pstoedit don't have native support for clipping. For that "
 		"\\Prog{pstoedit} offers an option to perform the clipping of the graphics "
-		"directly without passing the clippath to the backends. However, this "
+		"directly without passing the clippath to the output driver. However, this "
 		"results in curves being replaced by a lot of line segments and thus larger "
 		"output files. So use this option only if your output looks different from "
 		"the input due to clipping. In addition, this \"simulated clipping\" is not "
@@ -423,7 +397,7 @@ public:
 	useRGBcolors		(true, "-rgb",noArgument,g_t,"use RGB colors instead of CMYK" , 
 		"Since version 3.30 pstoedit uses the CMYK colors internally. The -rgb option turns on the old behavior to use RGB values.",
 		false),
-	noclip				(true, "-noclip",noArgument,g_t,"don't use clipping (relevant only if backend supports clipping at all)" , 
+	noclip				(true, "-noclip",noArgument,g_t,"don't use clipping (relevant only if output format supports clipping at all)" , 
 		UseDefaultDoku,
 		false),
 	t2fontsast1			(true, "-t2fontsast1",noArgument,t_t,"handle T2 fonts (often come as embedded fonts in PDF files) same as T1" , 
@@ -444,8 +418,12 @@ public:
 		UseDefaultDoku,
 		false),
 	nofontreplacement	(true, "-nfr",noArgument,t_t,"don't replace non standard encoded fonts with a replacement font" , 
-		"In normal mode pstoedit replaces bitmap fonts with a font as defined by the \\Opt{-df} option. This is done, because most backends can't handle such fonts. This behavior can be "
+		"In normal mode pstoedit replaces bitmap fonts with a font as defined by the \\Opt{-df} option. This is done, because most output formats can't handle such fonts. This behavior can be "
 		"switched off using the \\Opt{-nfr} option but then it strongly depends on the application reading the the generated file whether the file is usable and correctly interpreted or not. Any problems are then out of control of pstoedit.",
+		false),
+	passglyphnames		(true, "-glyphs",noArgument,t_t,"pass glyph names to output format driver" , 
+		"pass glyph names to the output format driver. So far no output format driver really uses the glyph names, so this does not have any effect at the moment. "
+		"It is a preparation for future work.",
 		false),
 	rotation			(true, "-rotate","angle (0-360)",g_t,"rotate the image",
 		"Rotage image by angle.",
@@ -481,17 +459,17 @@ public:
 		"map file with mappings from over 5000 PostScript font names to their \\TeX "
 		"equivalents. This is useful because MetaPost is frequently used with "
 		"\\TeX/\\LaTeX\\ and those programs don't use standard font names. This file and "
-		"the MetaPost backend are provided by Scott Pakin "
+		"the MetaPost output format driver are provided by Scott Pakin "
 		"(\\Email{pakin_AT_cs.uiuc.edu}).  "
 		" "
 		"Another example is wemf.fmp to be used under Windows. See the misc "
 		"directory of the pstoedit source distribution. ",
 		(const char*) 0),
-	outputPageSize		(true, "-pagesize","page format",g_t,"set page size (e.g. a4) - used by TK and libplot backend only",
+	outputPageSize		(true, "-pagesize","page format",g_t,"set page size (e.g. a4) - used by TK and libplot output format driver only",
 		"set page size for output medium.  \n"
 		"This option sets the page size for the output medium. Currently this "
-		"is just used by the libplot backend, but might be used by other  "
-		"backends in future. The page size is specified in terms of the usual "
+		"is just used by the libplot output format driver, but might be used by other  "
+		"output format drivers in future. The page size is specified in terms of the usual "
 		"page size names, e.g. letter or a4. ",
 		""),
 	fromgui				(true, "-fromgui",noArgument,h_t,"internal - not for normal user",
@@ -513,7 +491,9 @@ public:
 	dumphelp			(true, "-dumphelp",noArgument,h_t,"show all options of all drivers in TeX format",
 		UseDefaultDoku,
 		false), 
-	backendonly			(true, "-bo",noArgument,g_t,"backend only - assumes an input file in the internal dump format, e.g. produced by a previous run using -f dump" , 
+	backendonly			(true, "-bo",noArgument,g_t,"backend only - This option is not useful for a \"normal\" user. "
+													"It is useful for programs which use pstoedit as output format generator "
+													"and can provide an input file which adheres to pstoedit's internal dump format." , 
 		"You can run backend processing only (without the PostScript "
 		"interpreter frontend) by first running \\textbf{pstoedit} \\Opt{-f dump} "
 		"\\Arg{infile} \\Arg{dumpfile} and then running \\textbf{pstoedit} "
@@ -587,6 +567,9 @@ public:
 
 	ADD(xscale);
 	ADD(yscale);
+	ADD(xshift);
+	ADD(yshift);
+	ADD(centered);
 
 	ADD(splitpages);
 	ADD(verbose );
@@ -606,11 +589,14 @@ public:
 	ADD(justgstest);
 	ADD(pscover);
 	ADD(nofontreplacement);
+	ADD(passglyphnames);
 	ADD(rotation );
 	ADD(explicitFontMapFile);
 	ADD(outputPageSize);
 	ADD(fromgui);
+#ifdef HAVEDIALOG
 	ADD(showdialog);
+#endif
 //	ADD(magnification); 
 	ADD(showdrvhelp) ;
 	ADD(showdocu_long) ;
@@ -628,6 +614,8 @@ public:
 		delete [] nameOfInputFile ;
 		delete [] nameOfOutputFile  ;	
 	}
+
+	virtual bool hideFromDoku(const OptionBase& opt) const { return opt.propsheet == h_t; }
 
 //		AutoDeleter < char >DeleterFordrivername(drivername, true);
 

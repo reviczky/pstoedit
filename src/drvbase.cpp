@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -36,8 +36,10 @@
 #include "miscutil.h"
 #endif
 
-static void splitFullFileName(const char *const fullName, char *pathName,
-							  char *baseName, char *fileExt)
+static void splitFullFileName(const char *const fullName, 
+							  char *pathName, unsigned int plen,
+							  char *baseName, unsigned int blen,
+							  char *fileExt, unsigned int elen)
 {
 	if (fullName == NIL)
 		return;
@@ -54,25 +56,25 @@ static void splitFullFileName(const char *const fullName, char *pathName,
 		baseName_T = cppstrdup(c + 1);
 		*(c + 1) = 0;
 		if (pathName != NIL)
-			strcpy(pathName, fullName_T);
+			strcpy_s(pathName, plen, fullName_T);
 	} else {
 		baseName_T = cppstrdup(fullName_T);
 		if (pathName != NIL)
-			strcpy(pathName, "");
+			strcpy_s(pathName, plen, "");
 	}
 
 	c = strrchr(baseName_T, '.');
 	if (c != NIL) {
 		if (fileExt != NIL)
-			strcpy(fileExt, c + 1);
+			strcpy_s(fileExt, elen, c + 1);
 		*c = 0;
 		if (baseName != NIL)
-			strcpy(baseName, baseName_T);
+			strcpy_s(baseName, blen, baseName_T);
 	} else {
 		if (fileExt != NIL)
-			strcpy(fileExt, "");
+			strcpy_s(fileExt, elen, "");
 		if (baseName != NIL)
-			strcpy(baseName, baseName_T);
+			strcpy_s(baseName, blen, baseName_T);
 	}
 	delete[]baseName_T;
 	delete[]fullName_T;
@@ -107,7 +109,7 @@ domerge(false),
 defaultFontName(0),
 ctorOK(true),
 saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), driveroptions(0),
-	// default for p1 and p2 and clippath
+	// default for PI1 and PI2 and clippath
 	currentPath(0), outputPath(0), lastPath(0)
 	// default for textInfo_ and lasttextInfo_
 {
@@ -121,9 +123,10 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 	}
 
 	if (nameOfOutputFile_p) {
-		outDirName = new char[strlen(nameOfOutputFile_p) + 1];
-		outBaseName = new char[strlen(nameOfOutputFile_p) + 1];
-		splitFullFileName(nameOfOutputFile_p, outDirName, outBaseName, NIL);
+		const unsigned int stringsize = strlen(nameOfOutputFile_p) + 1;
+		outDirName = new char[stringsize];
+		outBaseName = new char[stringsize];
+		splitFullFileName(nameOfOutputFile_p, outDirName, stringsize, outBaseName,stringsize, NIL,0);
 		if (verbose) {
 			errf << "nameofOutputFile:'" << nameOfOutputFile_p;
 			errf << "' outDirName:" << outDirName;
@@ -189,11 +192,11 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 	// all others will be updated with each newsegment
 
 
-	currentPath = &p1;
-	lastPath = &p2;
+	currentPath = &PI1;
+	lastPath = &PI2;
 	outputPath = currentPath;
 
-	if ((p1.path == 0) || (p2.path == 0) || (clippath.path == 0)) {
+	if ((PI1.path == 0) || (PI2.path == 0) || (clippath.path == 0)) {
 		errf << "new failed in drvbase::drvbase " << endl;
 		exit(1);
 	}
@@ -243,7 +246,7 @@ drvbase::~drvbase()
 			delete currentSaveLevel->next;
 		}
 	}
-	//lint -esym(1540,drvbase::currentSaveLevel)
+	currentSaveLevel = 0;
 }
 
 const RSString & drvbase::getPageSize() const { return globaloptions.outputPageSize(); }
@@ -328,12 +331,12 @@ bool drvbase::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) c
 	} else {
 		if (verbose)
 			errf << "Pathes are not mergable:" <<
-				" p1 st " << (int) path1.currentShowType <<
-				" p1 lt " << (int) path1.currentLineType <<
-				" p1 el " << path1.numberOfElementsInPath <<
-				" p2 st " << (int) path2.currentShowType <<
-				" p2 lt " << (int) path2.currentLineType <<
-				" p2 el " << path2.numberOfElementsInPath << endl;
+				" PI1 st " << (int) path1.currentShowType <<
+				" PI1 lt " << (int) path1.currentLineType <<
+				" PI1 el " << path1.numberOfElementsInPath <<
+				" PI2 st " << (int) path2.currentShowType <<
+				" PI2 lt " << (int) path2.currentLineType <<
+				" PI2 el " << path2.numberOfElementsInPath << endl;
 		return 0;
 	}
 }
@@ -487,6 +490,8 @@ void drvbase::showOrMergeText()
 					<< textInfo_.thetext << "'" << endl;
 			}
 			mergedTextInfo.thetext += textInfo_.thetext;
+			static const RSString space(" ");
+			(mergedTextInfo.glyphnames += space ) += textInfo_.glyphnames;
 			mergedTextInfo.x_end = textInfo_.x_end;
 			mergedTextInfo.y_end = textInfo_.y_end;
 		} else {
@@ -510,11 +515,12 @@ void drvbase::showOrMergeText()
 	}
 }
 
-void drvbase::pushText(const char *const thetext, const float x, const float y)
+void drvbase::pushText(const char *const thetext, const float x, const float y, const char * const glyphnames)
 {
 		textInfo_.x = x;
 		textInfo_.y = y;
 		textInfo_.thetext.copy(thetext);
+		textInfo_.glyphnames.copy(glyphnames ? glyphnames:"");
 		textInfo_.remappedfont= false;
 		const char *remappedFontName = drvbase::theFontMapper().mapFont(textInfo_.currentFontName);
 		// errf << " Mapping of " << textInfo_.currentFontName << " returned " << (remappedFontName ? remappedFontName:" ") << endl;
@@ -548,17 +554,17 @@ static unsigned short hexdecode( char high, char low) {
 	return 16*hextoint(high) + hextoint(low);
 }
 
-void drvbase::pushHEXText(const char *const thetext, const float x, const float y)
+void drvbase::pushHEXText(const char *const thetext, const float x, const float y, const char * const glyphnames)
 {
 	const unsigned int textlen = strlen(thetext);
 	if (textlen) {
 		char * decodedText = new char[ (textlen / 2 ) + 1 ];
 		for (unsigned int i = 0, j = 0; i < (textlen/2); i++) {
-			decodedText[i] = hexdecode(thetext[j], thetext[j+1]);
+			decodedText[i] = (char) hexdecode(thetext[j], thetext[j+1]);
 			j++;j++;
 		}
 		decodedText[textlen/2] = '\0';
-		pushText(decodedText,x,y);
+		pushText(decodedText,x,y,glyphnames);
 		delete [] decodedText;
 	}
 }
@@ -678,11 +684,11 @@ nrOfEntries(-1), numbers(0), offset(0)
 		pattern = patternAsSetDashString;
 		// now get the numbers
 		// repeat the numbers, if number of entries is odd
-		unsigned short rep = nrOfEntries % 2;	// rep is 1 for odd numbers 0 for even
+		unsigned int rep = nrOfEntries % 2;	// rep is 1 for odd numbers 0 for even
 		numbers = new float[nrOfEntries * (rep + 1)];
-		int cur = 0;
+		unsigned int cur = 0;
 #if 1
-		for (int i = 0; i <= rep; i++) {
+		for (unsigned int i = 0; i <= rep; i++) {
 			pattern = patternAsSetDashString;
 			while ((*pattern) && (*pattern != ']')) {
 				if (*pattern == ' ' && (*(pattern + 1) != ']')) {
@@ -702,7 +708,7 @@ nrOfEntries(-1), numbers(0), offset(0)
 		}
 #else
 		// this is the "C++" version. But this doesn't work with the GNU library under Linux
-		for (int i = 0; i <= rep; i++) {
+		for (unsigned int i = 0; i <= rep; i++) {
 			// on some systems istrstreams expects a non const char *
 			// so we need to make a copy
 			char *localpattern = new char[strlen(pattern + 1) + 1];
@@ -973,44 +979,44 @@ void drvbase::dumpPath(bool doFlushText)
 		setCurrentLineWidth(0.0f);
 	}
 
-	if (domerge && pathsCanBeMerged(p1, p2)) {
-		// make p1 the outputPath and clear p2
+	if (domerge && pathsCanBeMerged(PI1, PI2)) {
+		// make PI1 the outputPath and clear PI2
 		if (verbose) {
-			errf << "Path " << p1.nr << " type " << (int) p1.currentShowType << endl;
-			errf << p1.fillR << " " << p1.fillG << " " << p1.fillB << endl;
-			errf << p1.edgeR << " " << p1.edgeG << " " << p1.edgeB << endl;
-			errf << p1.currentLineWidth << endl;
+			errf << "Path " << PI1.nr << " type " << (int) PI1.currentShowType << endl;
+			errf << PI1.fillR << " " << PI1.fillG << " " << PI1.fillB << endl;
+			errf << PI1.edgeR << " " << PI1.edgeG << " " << PI1.edgeB << endl;
+			errf << PI1.currentLineWidth << endl;
 
-			errf << "Path " << p2.nr << " type " << (int) p2.currentShowType << endl;
-			errf << p2.fillR << " " << p2.fillG << " " << p2.fillB << endl;
-			errf << p2.edgeR << " " << p2.edgeG << " " << p2.edgeB << endl;
-			errf << p2.currentLineWidth << endl;
+			errf << "Path " << PI2.nr << " type " << (int) PI2.currentShowType << endl;
+			errf << PI2.fillR << " " << PI2.fillG << " " << PI2.fillB << endl;
+			errf << PI2.edgeR << " " << PI2.edgeG << " " << PI2.edgeB << endl;
+			errf << PI2.currentLineWidth << endl;
 			errf << " have been merged\n";
 		}
-		// merge p2 into p1
-		if (p1.currentShowType == stroke) {
-			// p2 is the fill
-			p1.currentShowType = p2.currentShowType;
-			p1.fillR = p2.fillR;
-			p1.fillG = p2.fillG;
-			p1.fillB = p2.fillB;
+		// merge PI2 into PI1
+		if (PI1.currentShowType == stroke) {
+			// PI2 is the fill
+			PI1.currentShowType = PI2.currentShowType;
+			PI1.fillR = PI2.fillR;
+			PI1.fillG = PI2.fillG;
+			PI1.fillB = PI2.fillB;
 		} else {
-			// p1 is the fill, so copy the line parameters from p2
-			p1.currentLineWidth = p2.currentLineWidth;
-			p1.edgeR = p2.edgeR;
-			p1.edgeG = p2.edgeG;
-			p1.edgeB = p2.edgeB;
+			// PI1 is the fill, so copy the line parameters from PI2
+			PI1.currentLineWidth = PI2.currentLineWidth;
+			PI1.edgeR = PI2.edgeR;
+			PI1.edgeG = PI2.edgeG;
+			PI1.edgeB = PI2.edgeB;
 		}
 		if (verbose) {
 			errf << " result is \n";
-			errf << "Path " << p1.nr << " type " << (int) p1.currentShowType << endl;
-			errf << p1.fillR << " " << p1.fillG << " " << p1.fillB << endl;
-			errf << p1.edgeR << " " << p1.edgeG << " " << p1.edgeB << endl;
-			errf << p1.currentLineWidth << endl;
+			errf << "Path " << PI1.nr << " type " << (int) PI1.currentShowType << endl;
+			errf << PI1.fillR << " " << PI1.fillG << " " << PI1.fillB << endl;
+			errf << PI1.edgeR << " " << PI1.edgeG << " " << PI1.edgeB << endl;
+			errf << PI1.currentLineWidth << endl;
 		}
-		outputPath = &p1;
-		p1.pathWasMerged = true;
-		p2.clear();
+		outputPath = &PI1;
+		PI1.pathWasMerged = true;
+		PI2.clear();
 	} else {
 		outputPath = lastPath;
 	}
@@ -1208,8 +1214,9 @@ unsigned int ColorTable::getColorIndex(float r, float g, float b)
 // j is either maxcolors or the index of the next free entry
 // add a copy to newColors
 	if (j < maxcolors) {
-		newColors[j] = new char[strlen(cmp) + 1];
-		strcpy(newColors[j], cmp);
+		const unsigned int size = strlen(cmp) + 1;
+		newColors[j] = new char[size];
+		strcpy_s(newColors[j], size, cmp);
 		return j + numberOfDefaultColors_;
 	} else {
 //      cerr << "running out of colors" << endl;

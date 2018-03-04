@@ -3,7 +3,7 @@
    simple backend for GNUplot format.
    Contributed by: Carsten Hammer (chammer_AT_hermes.hrz.uni-bielefeld.de)
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -39,6 +39,7 @@ constructBase
 
 drvGNUPLOT::~drvGNUPLOT()
 {
+	options=0;
 }
 
 

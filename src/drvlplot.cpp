@@ -156,6 +156,11 @@
 #define NO_LIBPLOTTER_CGM_SUPPORT
 #endif
 
+// new: define X missing for all systems - this make the whole lib much smaller and reduces the
+// prerequesites
+#define X_DISPLAY_MISSING
+#define NO_LIBPLOTTER_X_SUPPORT
+
 #if ! (defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix)  || defined (NetBSD) ) && ( ! (defined(_AIX)) )
 // just under Unix we have X11 support
 // AIX is treated as Unix - except here
@@ -224,8 +229,8 @@ struct page_size {
 // programmatic way of selecting it).  You may shift the viewport by
 // specifying a suitably modified PAGESIZE environment variable; see above.
 
-#define NUM_LIBPLOT_PAGE_SIZES 13
-static struct page_size known_page_sizes[NUM_LIBPLOT_PAGE_SIZES] = {
+
+static struct page_size known_page_sizes[] = {
 	{PAGE_ANSI_A, "a", "letter",
 	 8.5, 11.0, 8.0},
 	{PAGE_ANSI_B, "b", "tabloid",
@@ -253,6 +258,9 @@ static struct page_size known_page_sizes[NUM_LIBPLOT_PAGE_SIZES] = {
 	{PAGE_LEDGER, "ledger", 0,
 	 17.0, 11.0, 10.0}			// rotated ANSI B (an unofficial US size)
 };
+
+const unsigned short NUM_LIBPLOT_PAGE_SIZES = (sizeof(known_page_sizes) / sizeof(page_size)); 
+// 13
 
 #ifndef HAVE_LIBPLOTTER
 // we aren't linking with libplotter, so declare a fake Plotter class
@@ -449,7 +457,7 @@ inline void Plotter::emit_string(const char *s)
 			(*errstream) << "ERROR: Can't allocate memory" << endl;
 			return;
 		}
-		strcpy(t, s);
+		strcpy_s(t,strlen(s), s);
 		nl = strchr(t, '\n');
 		assert(nl);				// should be OK because also a newline was in s
 		*nl = '\0';
@@ -667,7 +675,7 @@ int Plotter::label(const char *s)
 		(*errstream) << "ERROR: Can't allocate memory" << endl;
 		return 0;
 	}
-	strcpy(t, s);
+	strcpy_s(t,strlen(s), s);
 	was_clean = clean_iso_string((unsigned char *) t);
 	if (!was_clean)
 		(*errstream) << "libplot: ignoring control character (e.g. CR or LF) in label" << endl;
@@ -757,7 +765,7 @@ drvplot::derivedConstructor(drvplot):constructBase
 
 	if (strcmp(Pdriverdesc->symbolicname, "gmfa") == 0) {
 		const char t[] = "yes";
-		Plotter::parampl("META_PORTABLE", (void *) t);
+		(void)Plotter::parampl("META_PORTABLE", (void *) t);
 		portable_metafile = true;	// won't need to reopen outf in binary mode
 	}
 
@@ -792,8 +800,8 @@ drvplot::derivedConstructor(drvplot):constructBase
 					ctorOK = false;
 					return;
 				}
-				strcpy(t, s);
-				Plotter::parampl("PAGESIZE", (void *) t);
+				strcpy_s(t,strlen(s), s);
+				(void)Plotter::parampl("PAGESIZE", (void *) t);
 				free(t);
 			} else
 				errf << "unknown page size" << endl;
@@ -888,7 +896,7 @@ drvplot::derivedConstructor(drvplot):constructBase
 			if (Verbose()) {
 				errf << "adding Plotter parameter " << d_argv[i] << ":" << d_argv[i + 1] << endl;
 			}
-			Plotter::parampl(d_argv[i], (void*)d_argv[i + 1]);
+			(void)Plotter::parampl(d_argv[i], (void*)d_argv[i + 1]);
 			i++;
 		}
 	}
@@ -996,6 +1004,7 @@ drvplot::~drvplot()
 {
 	// delete Plotter (either a genuine one from libplotter, or a fake one)
 	delete plotter;
+	options=0;
 }
 
 
@@ -1029,9 +1038,9 @@ void drvplot::print_coords()
 			{
 				const Point & p = elem.getPoint(0);
 				if (currently_at_lastpoint)
-					plotter->fcont(p.x_ + x_offset, p.y_ + y_offset);
+					(void)plotter->fcont(p.x_ + x_offset, p.y_ + y_offset);
 				else
-					plotter->fline(lastpoint.x_ + x_offset,
+					(void)plotter->fline(lastpoint.x_ + x_offset,
 								   lastpoint.y_ + y_offset, p.x_ + x_offset, p.y_ + y_offset);
 				lastpoint = p;
 				currently_at_lastpoint = true;
@@ -1045,7 +1054,7 @@ void drvplot::print_coords()
 				const Point & p3 = elem.getPoint(1);
 				const Point & p4 = elem.getPoint(2);
 
-				plotter->fbezier3(p1.x_ + x_offset, p1.y_ + y_offset,
+				(void)plotter->fbezier3(p1.x_ + x_offset, p1.y_ + y_offset,
 								  p2.x_ + x_offset, p2.y_ + y_offset,
 								  p3.x_ + x_offset, p3.y_ + y_offset,
 								  p4.x_ + x_offset, p4.y_ + y_offset);
@@ -1058,8 +1067,8 @@ void drvplot::print_coords()
 			if (currently_at_lastpoint)
 				/* have drawn at least one segment */
 			{
-				plotter->fcont(firstpoint.x_ + x_offset, firstpoint.y_ + y_offset);
-				plotter->endpath();
+				(void)plotter->fcont(firstpoint.x_ + x_offset, firstpoint.y_ + y_offset);
+				(void)plotter->endpath();
 				currently_at_lastpoint = true;
 				last_was_endpath = true;
 			}
@@ -1071,7 +1080,7 @@ void drvplot::print_coords()
 		}
 	}
 	if (last_was_endpath == false)
-		plotter->endpath();
+		(void)plotter->endpath();
 }
 
 void drvplot::open_page()
@@ -1082,7 +1091,7 @@ void drvplot::open_page()
 	double height = POINTS_PER_INCH * (double) known_page_sizes[page_type].height;
 	double width = POINTS_PER_INCH * (double) known_page_sizes[page_type].width;
 
-	plotter->openpl();
+	(void)plotter->openpl();
 	if (physical_page)
 		// output viewport is a square region of known size, centered on an
 		// output page of known size; so scale the input PS page so that it
@@ -1090,7 +1099,7 @@ void drvplot::open_page()
 		// output page
 	{
 		double viewport_size = POINTS_PER_INCH * (double) known_page_sizes[page_type].viewport_size;
-		plotter->fspace(0.5 * (width - viewport_size),
+		(void)plotter->fspace(0.5 * (width - viewport_size),
 						0.5 * (height - viewport_size),
 						0.5 * (width + viewport_size), 0.5 * (height + viewport_size));
 	} else
@@ -1099,19 +1108,19 @@ void drvplot::open_page()
 		// dimension fits neatly within the viewport
 	{
 		if (height > width)
-			plotter->fspace(-0.5 * (height - width), 0.0, 0.5 * (height + width), height);
+			(void)plotter->fspace(-0.5 * (height - width), 0.0, 0.5 * (height + width), height);
 		else
-			plotter->fspace(0.0, -0.5 * (width - height), width, 0.5 * (width + height));
+			(void)plotter->fspace(0.0, -0.5 * (width - height), width, 0.5 * (width + height));
 	}
 
 	// erase the output device (some Plotters need this because they have
 	// `persistent' graphics)
-	plotter->erase();
+	(void)plotter->erase();
 }
 
 void drvplot::close_page()
 {
-	plotter->closepl();
+	(void)plotter->closepl();
 }
 
 // convert to libplot's 16-bit representation for R, G, B intensities
@@ -1123,9 +1132,9 @@ static inline int plotcolor(const float f)
 void drvplot::show_text(const TextInfo & textinfo)
 {
 	if (strlen(textinfo.thetext.value()) > 0) {
-		plotter->ffontsize(textinfo.currentFontSize);
-		plotter->fontname(textinfo.currentFontName.value());
-		plotter->pencolor(plotcolor(textinfo.currentR),
+		(void)plotter->ffontsize(textinfo.currentFontSize);
+		(void)plotter->fontname(textinfo.currentFontName.value());
+		(void)plotter->pencolor(plotcolor(textinfo.currentR),
 						  plotcolor(textinfo.currentG), plotcolor(textinfo.currentB));
 		const float *matrix = getCurrentFontMatrix();
 		double sinv;
@@ -1133,14 +1142,14 @@ void drvplot::show_text(const TextInfo & textinfo)
 			sinv = 1.0 / textinfo.currentFontSize;
 		else
 			sinv = 0.0;
-		plotter->savestate();
-		plotter->fconcat(sinv * (double) matrix[0],
+		(void)plotter->savestate();
+		(void)plotter->fconcat(sinv * (double) matrix[0],
 						 sinv * (double) matrix[1],
 						 sinv * (double) matrix[2],
 						 sinv * (double) matrix[3], textinfo.x + x_offset, textinfo.y + y_offset);
-		plotter->fmove(0.0, 0.0);
-		plotter->label(textinfo.thetext.value());
-		plotter->restorestate();
+		(void)plotter->fmove(0.0, 0.0);
+		(void)plotter->label(textinfo.thetext.value());
+		(void)plotter->restorestate();
 	}
 }
 
@@ -1148,10 +1157,10 @@ void drvplot::show_text(const TextInfo & textinfo)
 void drvplot::set_line_style()
 {
 	// set cap style and join style
-	plotter->capmod(currentLineCap() == 0 ? "butt" :
+	(void)plotter->capmod(currentLineCap() == 0 ? "butt" :
 					currentLineCap() == 1 ? "round" :
 					currentLineCap() == 2 ? "projecting" : "butt");
-	plotter->joinmod(currentLineJoin() == 0 ? "miter" :
+	(void)plotter->joinmod(currentLineJoin() == 0 ? "miter" :
 					 currentLineJoin() == 1 ? "round" : currentLineJoin() == 2 ? "bevel" : "miter");
 
 	// set old-fashioned line style
@@ -1174,14 +1183,14 @@ void drvplot::set_line_style()
 		linestyle = "dotdotdashed";
 		break;
 	}
-	plotter->linemod(linestyle);
+	(void)plotter->linemod(linestyle);
 
 	// set dashing pattern, which most types of Plotter understand
 	DashPattern dash_pattern(dashPattern());
 	double *numbers = new double[dash_pattern.nrOfEntries];
 	for (int i = 0; i < dash_pattern.nrOfEntries; i++)
 		numbers[i] = (double) dash_pattern.numbers[i];
-	plotter->flinedash(dash_pattern.nrOfEntries, numbers, (double) dash_pattern.offset);
+	(void)plotter->flinedash(dash_pattern.nrOfEntries, numbers, (double) dash_pattern.offset);
 	delete[]numbers;
 }
 
@@ -1192,37 +1201,37 @@ void drvplot::set_filling_and_edging_style()
 {
 	switch (currentShowType()) {
 	case drvbase::stroke:
-		plotter->flinewidth(currentLineWidth());
-		plotter->pencolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
-		plotter->filltype(0);	// no filling
+		(void)plotter->flinewidth(currentLineWidth());
+		(void)plotter->pencolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
+		(void)plotter->filltype(0);	// no filling
 		break;
 
 	case drvbase::fill:
 		if (pathWasMerged()) {
-			plotter->flinewidth(currentLineWidth());
-			plotter->pencolor(plotcolor(edgeR()), plotcolor(edgeG()), plotcolor(edgeB()));
-			plotter->fillcolor(plotcolor(fillR()), plotcolor(fillG()), plotcolor(fillB()));
+			(void)plotter->flinewidth(currentLineWidth());
+			(void)plotter->pencolor(plotcolor(edgeR()), plotcolor(edgeG()), plotcolor(edgeB()));
+			(void)plotter->fillcolor(plotcolor(fillR()), plotcolor(fillG()), plotcolor(fillB()));
 		} else {
-			plotter->flinewidth(0.0);	// little or no edging
-			plotter->pencolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
-			plotter->fillcolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
+			(void)plotter->flinewidth(0.0);	// little or no edging
+			(void)plotter->pencolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
+			(void)plotter->fillcolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
 		}
-		plotter->filltype(1);
-		plotter->fillmod("winding");
+		(void)plotter->filltype(1);
+		(void)plotter->fillmod("winding");
 		break;
 
 	case drvbase::eofill:
 		if (pathWasMerged()) {
-			plotter->flinewidth(currentLineWidth());
-			plotter->pencolor(plotcolor(edgeR()), plotcolor(edgeG()), plotcolor(edgeB()));
-			plotter->fillcolor(plotcolor(fillR()), plotcolor(fillG()), plotcolor(fillB()));
+			(void)plotter->flinewidth(currentLineWidth());
+			(void)plotter->pencolor(plotcolor(edgeR()), plotcolor(edgeG()), plotcolor(edgeB()));
+			(void)plotter->fillcolor(plotcolor(fillR()), plotcolor(fillG()), plotcolor(fillB()));
 		} else {
-			plotter->flinewidth(0.0);	// little or no edging
-			plotter->pencolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
-			plotter->fillcolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
+			(void)plotter->flinewidth(0.0);	// little or no edging
+			(void)plotter->pencolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
+			(void)plotter->fillcolor(plotcolor(currentR()), plotcolor(currentG()), plotcolor(currentB()));
 		}
-		plotter->filltype(1);
-		plotter->fillmod("even-odd");
+		(void)plotter->filltype(1);
+		(void)plotter->fillmod("even-odd");
 		break;
 
 	default:
@@ -1243,7 +1252,7 @@ void drvplot::show_rectangle(const float llx, const float lly, const float urx, 
 {
 	set_line_style();
 	set_filling_and_edging_style();
-	plotter->fbox(llx, lly, urx, ury);
+	(void)plotter->fbox(llx, lly, urx, ury);
 }
 
 void drvplot::show_image(const PSImage &)

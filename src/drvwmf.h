@@ -130,14 +130,8 @@ private:
 	HBRUSH			coloredBrush;
 	HBRUSH			oldColoredBrush;
 
-	LOGFONT			theFontRec;
 	HFONT			myFont;
 	HFONT			oldFont;
-
-	long			fontsHeight, fontsWidth;
-
-	long			showFontList;
-	WORD			cntPalEntries;
 
 	long			maxX, maxY;
 	long			minX, minY;

@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_geocities.com
+  Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -63,7 +63,7 @@ drvASY::derivedConstructor(drvASY):
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 0.84 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2005 Wolfgang Glunz"
+       << "// pstoedit is Copyright (C) 1993 - 2006 Wolfgang Glunz"
        << " <wglunz34_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
@@ -73,6 +73,7 @@ drvASY::derivedConstructor(drvASY):
 // Destructor -- Tell Asymptote to end the file
 drvASY::~drvASY()
 {
+	options=0;
 }
 
 // Output a path
@@ -296,7 +297,7 @@ void drvASY::show_image(const PSImage & imageinfo)
   }
   
   imageinfo.writeEPSImage(outi);
-  remove(imageinfo.FileName.value());
+  (void)remove(imageinfo.FileName.value());
 
   outi.close();
 }
@@ -358,7 +359,7 @@ void drvASY::show_text(const TextInfo & textinfo)
 
   // Output the text using macros defined in the constructor
   outf << "label(";
-  if(prevFontAngle != 0.0) outf << "rotate(" << prevFontAngle << ")*";
+  if(prevFontAngle != 0.0) outf << "rotate(" << prevFontAngle << ")*(";
   bool texify=false;
   bool quote=false;
   for (const char *c = textinfo.thetext.value(); *c; c++) {
@@ -386,6 +387,7 @@ void drvASY::show_text(const TextInfo & textinfo)
   }
   if(quote) outf << "\"";
   if(texify) outf << ")";
+  if(prevFontAngle != 0.0) outf << ")";
   outf << ",(" << textinfo.x << ',' << textinfo.y << "),align,textpen);" 
        << endl;
 }
@@ -464,7 +466,7 @@ void drvASY::show_path()
       size_t n=currentDashPattern.length();
       p++;
       if(p < n)
-	currentDashPattern.erase(p,n-p);
+		(void)currentDashPattern.erase(p,n-p);
     }
     outf << "currentpen += linetype(" << currentDashPattern
 	 << ",false);" << endl;

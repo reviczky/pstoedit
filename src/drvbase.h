@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -146,7 +146,8 @@ class       DLLEXPORT    drvbase
 public:
 	// = PUBLIC TYPES 
 
-	enum showtype { stroke, fill, eofill }; //lint -esym(578,drvbase::fill)
+	//lint -esym(578,drvbase::fill,fill)
+	enum showtype { stroke, fill, eofill }; 
 	enum cliptype { clip , eoclip };
 	enum linetype { solid=0, dashed, dotted, dashdot, dashdotdot }; // corresponding to the CGM patterns
 	struct DLLEXPORT TextInfo {
@@ -156,6 +157,7 @@ public:
 		float 		x_end; // pen coordinates after show in PostScript
 		float		y_end; // 
 		RSString 	thetext;
+		RSString	glyphnames;
 		bool		is_non_standard_font;
 		RSString    currentFontName;
 		RSString    currentFontFamilyName;
@@ -352,7 +354,7 @@ private:
 	static bool	verbose; // access via Verbose() 
 	bool    	page_empty;	// indicates whether the current page is empty or not
 	char * 		driveroptions; // string containing options for backend
-	PathInfo 	p1,p2,clippath; // p1 and p2 are filled alternatively (to allow merge), clippath when a clippath is read
+	PathInfo 	PI1,PI2,clippath; // pi1 and pi2 are filled alternatively (to allow merge), clippath when a clippath is read
 	PathInfo * 	currentPath; // for filling from lexer
 	PathInfo * 	last_currentPath; // need to save during usage of currentPath for clippath
 protected: // for drvrtf
@@ -500,7 +502,8 @@ public:
 
 	void 		dumpPath(bool doFlushText = true);  // shows current path
 
-	enum		flushmode_t { flushall, flushtext, flushpath };
+	//lint -esym(578,flushall)  // flushall hides same name in stdio
+	enum		flushmode_t { flushall, flushtext, flushpath }; 
 
 	void		flushOutStanding( flushmode_t flushmode = flushall);
 
@@ -542,11 +545,13 @@ public:
 	// showOrMergeText(textinfo_) ;
 	void    	pushText(const char *const thetext,
 					const float x, 
-					const float y);
+					const float y,
+					const char * const glyphnames=0);
 
 	void		pushHEXText(const char *const thetext, 
 					const float x, 
-					const float y);
+					const float y,
+					const char * const glyphnames=0);
 
 	void		flushTextBuffer(bool useMergeBuffer); // flushes text from the text (merge) buffer 
 	void		showOrMergeText();
@@ -709,6 +714,7 @@ public:
 	// of memory needs to be done by the same dll which did the allocation.
 	// this is not simply achieved if plugins are loaded as DLL.
 	virtual void deleteyourself() { delete this; } 
+	virtual ~basedrawingelement() {}
 private:
 //	const unsigned int size;
 };
@@ -1013,8 +1019,10 @@ public:
 //	virtual void DeleteBackend(drvbase * & ptr) const { delete (T*) ptr; ptr = 0; }
 	virtual unsigned int getdrvbaseVersion() const { return drvbaseVersion; }
 
-private: typedef DriverDescriptionT<T> SHORTNAME;
-	NOCOPYANDASSIGN(SHORTNAME)
+private: 
+	// typedef DriverDescriptionT<T> SHORTNAME;
+	// NOCOPYANDASSIGN(SHORTNAME)
+	NOCOPYANDASSIGN(DriverDescriptionT<T>)
 };
 
 #if !( (defined (__GNUG__)  && (__GNUC__>=3) && defined (HAVESTL)) || defined (_MSC_VER) && (_MSC_VER >= 1300) )

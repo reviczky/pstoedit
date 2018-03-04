@@ -61,6 +61,7 @@ libp2edrvstd_la_SOURCES=			\
 	drvpcbfill.cpp	drvpcbfill.h                 \
 	drvgschem.cpp	drvgschem.h                 \
 	drvtk.cpp	drvtk.h                 \
+	drvsvm.cpp	drvsvm.h svm_actions.h	\
 	$(specific_drivers_src)                 \
         $(sample_drivers_src)                   
 libp2edrvstd_la_LIBADD=-L. libpstoedit.la
@@ -99,6 +100,7 @@ libpstoedit_la_SOURCES =			\
 	subpath.cpp  subpath.h			\
 	pstoedit.cpp				\
 	psfront.h				\
+	genericints.h 				\
 	version.h
 
 libpstoedit_la_LIBADD = ${CXX_STD_LIB} ${CXX_RUNTIME_LIB}
@@ -116,6 +118,7 @@ pkginclude_HEADERS =				\
 	drvbase.h				\
 	drvfuncs.h				\
 	miscutil.h				\
+	genericints.h				\
 	base64writer.h				\
 	poptions.h				\
 	ordlist.h				\
@@ -124,6 +127,7 @@ pkginclude_HEADERS =				\
 AM_CPPFLAGS=					\
 	${LIBPLOTTER_CFLAGS}			\
 	${LIBMING_CFLAGS}			\
+	${MKSTEMP_CFLAGS}			\
 	${LIBMAGICK_CFLAGS}			\
 	${LIBEMF_CFLAGS}			\
 	${LIBPNG_CFLAGS}			\

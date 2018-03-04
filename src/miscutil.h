@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,11 +40,6 @@ USESTD
 // used to eliminate compiler warnings about unused parameters
 inline void unused(const void * const) { }
 
-#if defined(riscos) || defined(__WATCOMC__)
-// rcw2: tempnam doesn't seem to be defined in UnixLib 3.7b for RiscOS 
-// and the Watcom clibs.
-  char *tempnam(const char *, const char *);
-#endif
 
 #if defined(_WIN32) || defined(__OS2__)
 const char directoryDelimiter = '\\';
@@ -69,15 +64,16 @@ const char directoryDelimiter = '/';
 // NOTE: The following two dup functions are made inline to solve the problem
 // of allocation and deallocation in different .dlls. 
 // a strdup which uses new instead of malloc
-inline char *cppstrdup(const char *src, unsigned int addon = 0)
+inline char *cppstrdup(const char * const src, unsigned int addon = 0)
 {
-	char *ret = new char[strlen(src) + 1 + addon];
-	strcpy(ret, src);
+	const unsigned int newlen = strlen(src) + 1 + addon;
+	char * const ret = new char[newlen];
+	strncpy_s(ret, newlen, src, newlen );
 	return ret;
 }
-inline char * cppstrndup(const char * src, unsigned int length, unsigned int addon = 0 )
+inline char * cppstrndup(const char * const src, const unsigned int length, const unsigned int addon = 0 )
 {
-	char *ret = new char[length + 1 + addon];
+	char * const ret = new char[length + 1 + addon];
 	for (unsigned int i = 0 ; i < length+1; i++)
 	{
 			ret[i] = src[i];
@@ -112,10 +108,10 @@ public:
 	unsigned int argc;
 	char * argv[maxargs];
 
-	Argv() : argc(0) { for (unsigned int i = 0; i< (unsigned) maxargs; i++)  argv[i] = 0; }
+	Argv() : argc(0) { for (unsigned int i = 0; i< (unsigned) maxargs; i++)  { argv[i] = 0; } }
 	~Argv() { clear(); }
 
-	void addarg(const char * arg) { 
+	void addarg(const char * const arg) { 
 		assert(argc<maxargs); //lint !e1776
 		argv[argc] = cppstrdup(arg); 
 		argc++; 
@@ -175,14 +171,13 @@ public:
 		}
 		return *this;
 	}
- 	const RSString& operator+= (const RSString &rs);
-	bool operator==(const RSString & rs) const
-	{ 	return ( (rs.stringlength == stringlength ) && (strncmp(content,rs.content,stringlength) == 0) );	}
-	bool operator!=(const RSString & rs) const 
-	{ 	return !(*this==rs); }
+ 	RSString& operator+= (const RSString &rs);
+	friend bool operator==(const RSString & ls,const RSString & rs);
+	friend bool operator!=(const RSString & ls,const RSString & rs); 
+
 //	bool operator<(const RSString & rs) const
 //	{	return strncmp(content,rs.content) < 0; }
-	char operator[](int i) const
+	char operator[](const int i) const
 	{	return content[i]; }
 	friend ostream & operator<<(ostream & out,const RSString &outstring)
 	{	if (outstring.content) out << outstring.content; return out; }
@@ -204,6 +199,11 @@ private:
 	unsigned int allocatedLength;
 	unsigned int stringlength; // needed for storing binary strings including \0 
 };
+
+inline bool operator==(const RSString & ls,const RSString & rs) 
+	{ 	return ( (rs.stringlength == ls.stringlength ) && (strncmp(ls.content,rs.content,ls.stringlength) == 0) );	}
+inline bool operator!=(const RSString & ls,const RSString & rs)  
+	{ 	return !(ls==rs); }
 
 
 DLLEXPORT bool fileExists (const char * filename);
@@ -255,12 +255,16 @@ public:
 
 private: 
 #ifndef BUGGYGPP
-typedef  Mapper<T>  ShortName;
+	NOCOPYANDASSIGN(Mapper<T>)
 #else /* BUGGYGPP */
-typedef  Mapper<T,K_Type,V_Type>  ShortName;
+
+#define COMMA ,
+	NOCOPYANDASSIGN(Mapper<T COMMA K_Type COMMA V_Type>)
+#undef COMMA
+
 #endif /* BUGGYGPP */
 
-	NOCOPYANDASSIGN(ShortName)	
+		
 };
 
 //lint -esym(1712,KeyValuePair) // no default ctor
@@ -280,8 +284,10 @@ private:
 public:
 		KeyValuePair<K,V> * nextEntry;
 
-private: typedef KeyValuePair<K,V> ShortName;
-		NOCOPYANDASSIGN(ShortName)
+private: 
+#define COMMA ,
+		NOCOPYANDASSIGN(KeyValuePair<K COMMA V>) 
+#undef COMMA
 };
 
 

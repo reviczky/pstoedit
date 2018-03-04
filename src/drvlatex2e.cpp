@@ -3,7 +3,7 @@
    Backend for Latex2E files
    Contributed by: Scott Pakin <pakin_AT_uiuc.edu>
 
-   Copyright (C) 1993 - 2005	Wolfgang Glunz, wglunz34_AT_pstoedit.net, 
+   Copyright (C) 1993 - 2006	Wolfgang Glunz, wglunz34_AT_pstoedit.net, 
 							Scott Pakin, pakin_AT_uiuc.edu
 
     This program is free software; you can redistribute it and/or modify
@@ -53,6 +53,7 @@ drvLATEX2E::derivedConstructor(drvLATEX2E):constructBase, buffer(tempFile.asOutp
 // Destructor
 drvLATEX2E::~drvLATEX2E()
 {
+	options=0;
 }
 
 struct Point2e {

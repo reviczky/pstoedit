@@ -2,7 +2,7 @@
    drvkillu.cpp : This file is part of pstoedit
    Implementation of Kontour output driver.
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    Copyright (C) 1998,1999 Kai-Uwe Sattler, kus_AT_iti.cs.uni-magdeburg.de
 
    This program is free software; you can redistribute it and/or modify
@@ -52,6 +52,7 @@ drvKontour::~drvKontour()
 	// driver specific deallocations
 	// and writing of trailer to output file
 	outf << "</killustrator>\n";
+	options=0;
 }
 
 void drvKontour::print_coords()

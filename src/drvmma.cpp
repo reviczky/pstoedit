@@ -5,7 +5,7 @@
    $Id: drvmma.cpp,v 1.5 2003/03/15 16:25:46 manfred Exp $
    Based on drvSAMPL.cpp
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net,
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net,
                              Manfred Thole, manfred_AT_thole.org
 
     This program is free software; you can redistribute it and/or modify
@@ -85,6 +85,7 @@ mmaDashing(solid), mmaThickness(0.0), mmaR(0.0), mmaG(0.0), mmaB(0.0), buffer(te
 drvMMA::~drvMMA()
 {
 	outf << "Sequence[]\n}\n";	// Dummy!
+	options=0;
 }
 
 // Output a point.

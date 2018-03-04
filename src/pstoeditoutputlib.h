@@ -1,7 +1,7 @@
 /*
    pstoeditoutputlib.h : 
 
-   Copyright (C) 2002 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 2002 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

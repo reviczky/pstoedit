@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -95,8 +95,9 @@ void DynLoader::open(const char *libname_P)
 		cerr << "error: DynLoader has already opened a library" << endl;
 		exit(1);
 	}
-	char *fulllibname = new char[strlen(libname_P) + 1];
-	strcpy(fulllibname, libname_P);
+	const unsigned int size = strlen(libname_P) + 1; 
+	char *fulllibname = new char[size];
+	strcpy_s(fulllibname, size, libname_P);
 	// not needed strcat(fulllibname_P,libsuffix);
 
 #if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
@@ -147,6 +148,7 @@ void DynLoader::close()
 DynLoader::~DynLoader()
 {
 	close();
+	libname=0;
 }
 
 int DynLoader::knownSymbol(const char *name) const
@@ -156,6 +158,10 @@ int DynLoader::knownSymbol(const char *name) const
 
 DynLoader::fptr DynLoader::getSymbol(const char *name, int check) const
 {
+	//
+	// see http://www.trilithium.com/johan/2004/12/problem-with-dlsym/ for a nice discussion
+	// about the cast problem
+	//
 #if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 	DynLoader::fptr rfptr = (DynLoader::fptr) dlsym(handle, name);	//lint !e611 //: Suspicious cast
 #elif defined(_WIN32)
@@ -356,9 +362,10 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 		WIN32_FIND_DATA finddata;
 
 		const char pattern[] = "/*.dll";
-		char *searchpattern = new char[strlen(pluginDir) + strlen(pattern) + 1];
-		strcpy(searchpattern, pluginDir);
-		strcat(searchpattern, pattern);
+		const unsigned int size = strlen(pluginDir) + strlen(pattern) + 1; 
+		char *searchpattern = new char[size];
+		strcpy_s(searchpattern, size, pluginDir);
+		strcat_s(searchpattern, size, pattern);
 		HANDLE findHandle = FindFirstFile(searchpattern, &finddata);
 		if (findHandle == INVALID_HANDLE_VALUE) {
 			if (verbose)
@@ -376,10 +383,11 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 				// -4 means go back the length of ".dll"
 				if (stricmp(&finddata.cFileName[len - 4], ".dll") == 0) {
 					// cout << &finddata.cFileName[len -4 ] << endl;
-					char *fullname = new char[strlen(pluginDir) + len + 3];
-					strcpy(fullname, pluginDir);
-					strcat(fullname, "\\");
-					strcat(fullname, finddata.cFileName);
+					const unsigned int size = strlen(pluginDir) + len + 3; 
+					char *fullname = new char[size];
+					strcpy_s(fullname, size, pluginDir);
+					strcat_s(fullname, size, "\\");
+					strcat_s(fullname, size, finddata.cFileName);
 //              errstream << "szExePath " << szExePath << endl;
 
 					if ((stricmp(fullname, szExePath) != 0)

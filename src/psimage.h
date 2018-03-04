@@ -3,7 +3,7 @@
 /*
    psimage.h : This file is part of pstoedit.
   
-   Copyright (C) 1997 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1997 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,6 +20,11 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+
+#ifndef cppcomp_h
+#include "cppcomp.h"
+#endif
+
 enum ImageType { colorimage, normalimage, imagemask }; 
 	// maybe do subclassing later
 

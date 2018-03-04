@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -90,7 +90,7 @@ public:
 	  optional(optional_p),
 	  membername(""){ // membername is set during "add" because it was simpler to grab the membername during the add
 	};
-	virtual ~OptionBase() {}
+	virtual ~OptionBase() { membername = 0; }
 	virtual ostream & writevalue(ostream & out) const = 0;
 	void toString(class RSString &) const;  
 	virtual bool copyvalue(const char *optname, const char *valuestring, unsigned int &currentarg) = 0;
@@ -98,12 +98,13 @@ public:
 //	virtual bool copyvalue_simple(bool boolvalue) = 0; 
 	virtual const char *gettypename() const = 0;
 	virtual unsigned int gettypeID() const = 0;
+	virtual void * GetAddrOfValue() = 0; // will return real type instead of void
 
 	//lint -esym(1540,OptionBase::flag) // not freed
 	//lint -esym(1540,OptionBase::description) // not freed
 	const char * const flag;		// -bf
 	const char * const argname;     // a meaningfull name of the argument (if not a boolean option)
-	int propsheet; // the number of the propertysheet to place this option on
+	int propsheet;					// the number of the propertysheet to place this option on
 	const char * const description;	// help text
 	const char * const TeXhelp;
 	bool optional;
@@ -160,11 +161,16 @@ public:
   	ValueType & operator()() { return value; }
 	const ValueType & operator()() const { return value; }
 	operator ValueType () const { return value; }
-	/* const ValueType & */ void operator =(const ValueType & arg) { /* return */ value = arg; } //  cannot return a reference, because char*::operator= doesn't
+	/* const ValueType & */ void operator =(const ValueType & arg) {
+		/* return */ value = arg; 
+		//lint -esym(1539,OptionBase::propsheet)  // not assigned in op=
+		//lint -esym(1539,OptionBase::membername) // not assigned in op=
+	} //  cannot return a reference, because char*::operator= doesn't
 	//lint -restore
 	bool operator !=(const ValueType & arg) const { return value != arg; }
 	bool operator ==(const ValueType & arg) const { return value == arg; }
 	bool operator !() const { return !value ; }
+	virtual void * GetAddrOfValue() { return &value;}
 
 
 	ValueType value;
@@ -182,20 +188,21 @@ ostream & Option<ValueType, ExtractorType>::writevalue(ostream & out) const {
 		return out;
 }
 
-//lint -esym(1509,ProgramOptions) // virtual dtor - not needed
-//lint -esym(1512,ProgramOptions) // virtual dtor - not needed
 class DLLEXPORT ProgramOptions {
 public:
 	ProgramOptions() : unhandledCounter(0), optcount(0)   { unhandledOptions[0]=0;alloptions[0]=0; };
 
-	~ProgramOptions() {}
+	virtual ~ProgramOptions() {}
 	unsigned int parseoptions(ostream & outstr, unsigned int argc, const char * const*argv) ;
 	// unsigned int sheet: -1 indicates "all"
 	void showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet = -1) const ;
 	void dumpunhandled(ostream & outstr) const ;	
 	void showvalues(ostream & outstr, bool withdescription = true) const ;
-	const OptionBase * const * getOptionIterator() const { return &alloptions[0]; }
+	const OptionBase * const * getOptionConstIterator() const { return &alloptions[0]; }
+	OptionBase *  * getOptionIterator()  { return &alloptions[0]; }
 	unsigned int numberOfOptions() const { return optcount; }
+	virtual bool hideFromDoku(const OptionBase& /* opt */ ) const { return false; } // some options may be hidden, i.e. debug only options
+
 
   protected:
 	void add(OptionBase * op, const char * const membername) ;

@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to GhostScript
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -62,8 +62,8 @@ char *createCmdLine(int argc, const char *const argv[])
 	*result = '\0';
 	{
 		for (unsigned int i = 0; i < (unsigned) argc; i++) {
-			strcat(result, argv[i]);
-			strcat(result, " ");	//lint !e803
+			strcat_s(result,sizeneeded + 1, argv[i]);
+			strcat_s(result,sizeneeded + 1, " ");	//lint !e803
 		}
 	}
 	return result;
@@ -71,38 +71,120 @@ char *createCmdLine(int argc, const char *const argv[])
 
 
 #if defined(_WIN32) || defined (__OS2__)
-//needed? extern char * cppstrdup(const char * src, unsigned int addon=0); // defined in drvbase.cpp
 
 // using GhostScript DLL
-#define main calldll
+#define WITHDLLSUPPORT 1
 
-#include "dwmainc.c"
+#ifdef WITHDLLSUPPORT
+
+#ifndef USEOLDAPI
+	#include "callgsdllviaiapi.cpp"
+#else
+// version which uses obsolete API and gsdll.h
+	#include "dwmaincgsdll.c"
+#endif
+
+#endif
+
 
 #if defined(_WIN32)
-
-//old #include "gvwgsver.c"			// ONLY WINDOWS
+// retrieve version to be used from registry
 #include "wgsver.c"			// ONLY WINDOWS
 #endif
 
-#undef main
+// #undef main
 
 #define WITHGETINI
 #ifdef WITHGETINI
 #include "getini.c"
 #endif
 
-int callgs(int argc, const char *const argv[])
+
+
+// Interface to GHostScript EXE - as an alternative to the DLL
+// The usage of the DLL makes problem in case of gsview, since 
+// there can only be one instance of the DLL and GHostScript active
+// in one process. So - if being called from gsview - we need to start 
+// ghostscript via the EXE.
+#include <windows.h>
+#include I_stdio
+static int callgsEXE(int argc, const char * const argv[])
 {
+	int gsresult = 0;
+//cerr << "running-win " << commandline << endl;
+
+	STARTUPINFO MyStartupInfo; // process data
+	memset(&MyStartupInfo,'\0',sizeof(MyStartupInfo));
+	MyStartupInfo.cb = sizeof(STARTUPINFO);
+	MyStartupInfo.wShowWindow=SW_SHOWMINNOACTIVE;
+
+	PROCESS_INFORMATION MyProcessInformation;
+         // CreateProcess fills in this structure
+    DWORD gs_status = 0;
+
+	char * commandline = createCmdLine(argc,argv);
+
+	BOOL status = CreateProcess(
+              NULL, // Application Name 
+              (LPSTR)commandline,
+              NULL, // Process attributes (NULL == Default)
+              NULL, // Thread-Attributes (Default)
+              FALSE, // InheritHandles
+              CREATE_NEW_PROCESS_GROUP, // CreationFlags
+              NULL, // Environment (NULL: same as calling-process)
+              NULL, // Current Directory (NULL: same as calling process)
+              (LPSTARTUPINFO)(&MyStartupInfo), // Windows-state at Startup
+ 				  // window of calling process gets minimized + and shown disabled
+             (LPPROCESS_INFORMATION)(&MyProcessInformation)
+            );
+
+    delete [] commandline;
+	if (status) gsresult=0;
+    else        gsresult=-1; // Failure
+
+    while (1) {
+        status=GetExitCodeProcess(MyProcessInformation.hProcess, &gs_status);
+		if ( !status ) {  // process-Status could not be determined
+			gsresult=-1;
+			break;  
+		} else if (gs_status==STILL_ACTIVE) { // gs still working
+			Sleep(500); // polling interval
+		} else break; // process terminated
+	}
+	if (gsresult != 0) {
+		cerr << "Interpreter failure: " << gsresult << endl;
+	}
+	(void)CloseHandle(MyProcessInformation.hProcess);
+	(void)CloseHandle(MyProcessInformation.hThread);
+	return gsresult;
+}
+
+// define PSTOEDITDEBUG
+
+int callgs(int argc, const char * const argv[]) { 
+
 #ifdef PSTOEDITDEBUG
 	cerr << "Commandline " << endl;
 	for (int i = 0; i < argc; i++) {
 		cerr << "argv[" << i << "]: " << argv[i] << endl;
 	}
 #endif
-	szDllName = argv[0];
-	const int result = calldll(argc, (char **) argv);
-	return result;
+
+	// check the first arg in the command line whether it contains gsdll32.dll
+	if (strstr(argv[0],"gsdll32.dll") != NULL) {
+
+#ifdef WITHDLLSUPPORT
+		return callgsDLL(argc, (char **) argv);
+#else
+		cerr << "Sorry, but DLL support was not enabled in this version of pstoedit" << endl;
+		return 2;
+#endif
+	} else {
+		return callgsEXE(argc,argv);
+	}
 }
+
+
 #else
 // not a windows system
 int callgs(int argc, const char *const argv[])
@@ -116,6 +198,7 @@ int callgs(int argc, const char *const argv[])
 
 #define str(x) #x
 #define xstr(x) str(x)
+
 
 const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 {
@@ -151,7 +234,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 		if (verbose)
 			errstream << "found value in registry" << endl;
 		static char buffer[2000];
-		strcpy(buffer, gstocallfromregistry.value());
+		strncpy_s(buffer,2000, gstocallfromregistry.value(),2000);
 		//  delete[]gstocallfromregistry;
 		gstocall = buffer;
 	} else {
@@ -192,11 +275,12 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 //      gstocall = getenv("GS");
 //      if (gstocall == 0) {
 
-			static char buf[256];
-			if (find_gs(buf, sizeof(buf), 550, TRUE, gsregbase)) {
+			static char buf[1000];
+			if (find_gs(buf, sizeof(buf), 550, getPstoeditsetDLLUsage() , gsregbase)) { 
 				if (verbose) {
 					(void)dumpgsvers(gsregbase);
-					errstream << "Latest GS DLL is " << buf << endl;
+					if (getPstoeditsetDLLUsage()) errstream << "Latest GS DLL is " << buf << endl;
+					else		errstream << "Latest GS EXE is " << buf << endl;
 				}
 				gstocall = buf;
 			} else {
@@ -223,7 +307,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 		if (verbose)
 			errstream << "found value in pstoedit.ini" << endl;
 		static char buffer[2000];
-		strcpy(buffer, gstocallfromregistry.value());
+		strncpy(buffer, gstocallfromregistry.value(),2000);
 		gstocall = buffer;
 	} else {
 		if (verbose)
@@ -249,7 +333,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 					do {
 						regfile.getline(line, 1000);
 						if (strstr(line, "GhostscriptDLL=")) {
-							strcpy(pathname, line + strlen("GhostscriptDLL="));
+							strncpy(pathname, line + strlen("GhostscriptDLL="),1000);
 							char *cr = strrchr(pathname, '\r');
 							if (cr)
 								*cr = 0;
@@ -288,7 +372,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 			if (verbose)
 				errstream << "found value in registry" << endl;
 			static char buffer[2000];
-			strcpy(buffer, gstocallfromregistry.value());
+			strncpy(buffer, gstocallfromregistry.value(),2000);
 			gstocall = buffer;
 		} else {
 			{
@@ -316,7 +400,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 
 
 #if defined(_WIN32)
-static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer)
+static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int /* buflen */ )
 {
 	const char *PIOptions = 0;
 	if (verbose)
@@ -372,7 +456,7 @@ static const char *getOSspecificOptions(int verbose, ostream & errstream, char *
 static const char * const lookupplace = "registry";
 
 #elif defined(__OS2__)
-static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer)
+static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int buflen)
 {
 	const char *PIOptions = 0;
 	if (verbose)
@@ -393,7 +477,7 @@ static const char *getOSspecificOptions(int verbose, ostream & errstream, char *
 				do {
 					regfile.getline(line, 1000);
 					if (strstr(line, "GhostscriptInclude=")) {
-						strcpy(buffer, line + strlen("GhostscriptInclude="));
+						strncpy(buffer, line + strlen("GhostscriptInclude="),buflen);
 						char *cr = strrchr(buffer, '\r');
 						if (cr)
 							*cr = 0;
@@ -415,7 +499,7 @@ static const char *getOSspecificOptions(int verbose, ostream & errstream, char *
 }
 static const char * const lookupplace = "pstoedit.ini";
 #else
-static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer)
+static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int buflen)
 {
 	return 0;
 }
@@ -457,12 +541,12 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 	if (PIOptionsfromregistry.value() != 0) {	// 1.
 		if (verbose)
 			errstream << "found value in " << lookupplace << endl;
-		strcpy(buffer, PIOptionsfromregistry.value());
+		strncpy_s(buffer,2000, PIOptionsfromregistry.value(),2000);
 		// delete[]PIOptionsfromregistry;
 		PIOptions = buffer;
 	} else {					//2.-4.
 
-		PIOptions = getOSspecificOptions(verbose, errstream, buffer);
+		PIOptions = getOSspecificOptions(verbose, errstream, buffer,2000);
 
 		if (PIOptions == NULL) {	//3.
 			if (verbose)
@@ -484,8 +568,8 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 
 	if (PIOptions && (PIOptions[0] != '-') && (PIOptions[1] != 'I')) {
 		static char returnbuffer[2000];
-		strcpy(returnbuffer, "-I");
-		strcat(returnbuffer, PIOptions);
+		strncpy_s(returnbuffer,2000, "-I",2000);
+		strcat_s(returnbuffer,2000, PIOptions);
 		PIOptions = returnbuffer;
 	}
 	if (verbose && PIOptions)

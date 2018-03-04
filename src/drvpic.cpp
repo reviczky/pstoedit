@@ -135,9 +135,10 @@ drvPIC::~drvPIC()
 // driver specific deallocations
 // and writing of trailer to output file
 	outf << ".\\\" PIC end\n";
+	options=0;
 }
 
-float drvPIC::x_coord(float x, float y)
+float drvPIC::x_coord(float x, float y) const
 {
 	if (options->landscape)
 		return (y + y_offset) / PIC_SCALE;
@@ -145,7 +146,7 @@ float drvPIC::x_coord(float x, float y)
 		return (x + x_offset) / PIC_SCALE;
 }
 
-float drvPIC::y_coord(float x, float y)
+float drvPIC::y_coord(float x, float y) const 
 {
 	if (options->landscape)
 		return pageheight - (x + x_offset) / PIC_SCALE;
@@ -265,7 +266,8 @@ void drvPIC::show_text(const TextInfo & textinfo)
 	const float x = x_coord(textinfo.x, textinfo.y);
 	const float y = y_coord(textinfo.x, textinfo.y);
 
-	static char selected_font[80];	// Could / should these be class members (wogl? ? ?) // Further, this is used before set !!
+	const unsigned int fontstringlen=80;
+	static char selected_font[fontstringlen];	// Could / should these be class members (wogl? ? ?) // Further, this is used before set !!
 	static bool font_selected = false;
 	static int selected_size = 0;	// ...
 	static int is_text = 0;		// ...
@@ -311,12 +313,12 @@ void drvPIC::show_text(const TextInfo & textinfo)
 
 		if (!font_selected) {
 			outf << ".ft " << tfont << endl;
-			strncpy(selected_font, tfont, sizeof(selected_font) - 1);
+			strncpy_s(selected_font, fontstringlen, tfont, sizeof(selected_font) - 1);
 			font_selected = true;
 		} else if (strncmp(tfont, selected_font, sizeof(selected_font) - 1)
 				   != 0) {
 			outf << ".ft " << tfont << endl;
-			strncpy(selected_font, tfont, sizeof(selected_font) - 1);
+			strncpy_s(selected_font, fontstringlen,tfont, sizeof(selected_font) - 1);
 		}
 		if (pointsize && selected_size != pointsize) {
 			outf << ".ps " << pointsize << endl;

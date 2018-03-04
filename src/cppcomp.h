@@ -4,7 +4,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,11 +23,36 @@
 */
 
 #ifdef _MSC_VER
-#ifndef DLLEXPORT
-#define DLLEXPORT __declspec( dllexport )
-#endif
+# ifndef DLLEXPORT
+# define DLLEXPORT __declspec( dllexport )
+# endif
 #else
-#define DLLEXPORT
+# define DLLEXPORT
+#endif
+
+#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+// for MS VS 8 (== cl version 14) we can use the new secure *_s string functions
+// for other systems we have to "emulate" them
+#define TARGETWITHLEN(str,len) str,len
+
+#else
+
+#define strcpy_s(de,si,so)        strcpy(de,so)
+#define strncpy_s(de,si,so,co)    strncpy(de,so,co)
+#define strcat_s(de,si,so)        strcat(de,so)
+
+// sprintf_s requires a second argument indicating the size of the target string
+// because sprintf can have any number of arguments, we cannot handle this in the 
+// same manner as the functions above. So we need to hide/unhide this second argument
+// for older compilers
+#define sprintf_s sprintf
+#define TARGETWITHLEN(str,len) str
+// sscanf_s requires a size argument for output strings, unless we use "to-string", we can use sscanf
+// but this has to be assured in each individual case !!!
+#define sscanf_s sscanf
+
+
+
 #endif
 
 #ifdef _AIX
@@ -38,6 +63,10 @@
 // MSVC 5 and 6 have ANSI C++ header files, but the compilation
 // is much slower and object files get bigger. 
 // add other compiler that support STL and the ANSI C++ standard here
+// 1100 means : compiler v 11 which is MSVC 5
+// 1200 - VS 6
+// 1300 - VS 7 (2002)
+// 1400 - VS 8 (2005)
 
 // NOTE: If your compiler or installation does not come with
 // an installation of the STL, just umcomment the next line
@@ -70,6 +99,11 @@
 //#if (__GNUC__>=3)
 #define  USE_NEWSTRSTREAM
 //#endif
+
+//#include <stdint.h>
+// really should have autoconf figure this out
+//#include <inttypes.h>
+//#include <sys/int_types.h>
 
 #endif
 
@@ -199,6 +233,11 @@ const bool true  = 1;
 // 0 pointers
 #define NIL 0
 #endif
+
+// This should really be decided via autoconf...
+#define _LITTLE_ENDIAN
+//#define _BIG_ENDIAN
+
 
 #endif
 

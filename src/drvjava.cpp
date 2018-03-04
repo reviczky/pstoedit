@@ -2,7 +2,7 @@
    drvJAVA.cpp : This file is part of pstoedit
    backend to generate a Java(TM) applet
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,10 +24,12 @@
 #include I_stdio
 #include I_stdlib
 
+//lint -esym(754,JavaFontDesc::javaname) // not used so far
+//lint -esym(754,JavaFontDesc::javastyle) // not used so far
 struct JavaFontDesc {
 	const char *psname;
-	const char *javaname;
-	const char *javastyle;
+ 	const char *javaname;
+ 	const char *javastyle;
 };
 
 static const JavaFontDesc JavaFonts[] = {	// predefined Fonts 
@@ -100,6 +102,7 @@ drvJAVA::~drvJAVA()
 	outf << "    	return " << currentPageNumber << ';' << endl;
 	outf << "    }" << endl;
 	outf << "}" << endl;
+	options=0;
 }
 
 void drvJAVA::print_coords()

@@ -68,7 +68,7 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 			}
 			fa = GetFileAttributes(szIniFile);
 			if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
-			  strcat(szIniFile, "\\");
+			  strcat_s(szIniFile,sizeofIniFile, "\\");
 			else
 				szIniFile[0] = '\0';
 			}
@@ -82,7 +82,7 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 	    /* If we didn't succeed, try %USERPROFILE% */
 	    char *p = getenv("USERPROFILE");
 	    if (p && *p) {
-			strcpy(szIniFile, p);
+			strcpy_s(szIniFile,sizeofIniFile, p);
 #ifdef __BORLANDC__
 			OemToCharBuff(szIniFile, szIniFile, lstrlen(szIniFile));
 #endif
@@ -92,7 +92,7 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 		/* check if USERPROFILE contains a directory name */
 			fa = GetFileAttributes(szIniFile);
 			if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
-				strcat(szIniFile, "\\");
+				strcat_s(szIniFile,sizeofIniFile, "\\");
 			else
 				szIniFile[0] = '\0';
 	    }
@@ -120,7 +120,7 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 	    }
 	}
 #endif
-	strcat(szIniFile, INIFILEname);
+	strcat_s(szIniFile,sizeofIniFile, INIFILEname);
 }
 
 #else /*OS/2*/

@@ -6,7 +6,7 @@
    Class declaration for a LaTeX2e output driver
    Contributed by: Scott Pakin <pakin@uiuc.edu>
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ private:
 
   // Convert from PostScript points to TeX points ("bp"-->"pt" in TeX
   // terminology).
-  inline void scalepoint (Point & somepoint) {
+  static inline void scalepoint (Point & somepoint) {
 	const float adjustment = 72.27f / 72.0f;
     somepoint.x_ *= adjustment;
     somepoint.y_ *= adjustment;

@@ -3,7 +3,7 @@
    Backend for MetaPost files
    Contributed by: Scott Pakin <pakin_AT_uiuc.edu>
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_geocities.com
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_geocities.com
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ constructBase,
 	outf << "% Converted from PostScript(TM) to MetaPost by pstoedit\n"
 		<<
 		"% MetaPost backend contributed by Scott Pakin <pakin_AT_uiuc.edu>\n"
-		<< "% pstoedit is Copyright (C) 1993 - 2005 Wolfgang Glunz" <<
+		<< "% pstoedit is Copyright (C) 1993 - 2006 Wolfgang Glunz" <<
 		" <wglunz34_AT_pstoedit.net>\n\n";
 
 	/*
@@ -81,6 +81,7 @@ constructBase,
 drvMPOST::~drvMPOST()
 {
 	outf << "end" << endl;
+	options=0;
 }
 
 
@@ -361,28 +362,28 @@ void drvMPOST::show_path()
 	const char *currentDashPattern = dashPattern();	// Current dash pattern string
 	unsigned long lengthOn, lengthOff;	// Fraction on vs. off
 	float dashOffset;			// Offset into dash pattern
-	if (sscanf(currentDashPattern, "[ ] %f", &dashOffset) == 1)
+	if (sscanf_s(currentDashPattern, "[ ] %f", &dashOffset) == 1)
 		prevDashPattern = "";
 	else {
 		char temptext[100];
 
-		if (sscanf(currentDashPattern, "[%lu] %f", &lengthOn, &dashOffset)
+		if (sscanf_s(currentDashPattern, "[%lu] %f", &lengthOn, &dashOffset)
 			== 2) {
 			if (dashOffset)
-				sprintf(temptext,
+				sprintf_s(TARGETWITHLEN(temptext,100),
 						" dashed evenly scaled %lubp shifted -%fbp", lengthOn, dashOffset);
 			else
-				sprintf(temptext, " dashed evenly scaled %lubp", lengthOn);
+				sprintf_s(TARGETWITHLEN(temptext,100), " dashed evenly scaled %lubp", lengthOn);
 			prevDashPattern = temptext;
 		} else
-			if (sscanf
+			if (sscanf_s
 				(currentDashPattern, "[%lu %lu] %f", &lengthOn, &lengthOff, &dashOffset) == 3) {
 			if (dashOffset)
-				sprintf(temptext,
+				sprintf_s(TARGETWITHLEN(temptext,100),
 						" dashed dashpattern(on %lubp off %lubp) shifted (-%f,0)",
 						lengthOn, lengthOff, dashOffset);
 			else
-				sprintf(temptext, " dashed dashpattern(on %lubp off %lubp)", lengthOn, lengthOff);
+				sprintf_s(TARGETWITHLEN(temptext,100), " dashed dashpattern(on %lubp off %lubp)", lengthOn, lengthOff);
 			prevDashPattern = temptext;
 		} else {
 			if (Verbose())

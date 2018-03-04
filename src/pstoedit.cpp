@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure 
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,11 +52,21 @@
 
 #include "psfront.h"
 
+#ifdef HAVEDIALOG
+#include "pstoeditdialog.h"
+
+// typedef void (pstoeditDialog_func) (void  *); /* in reality the params is is PsToEditOptions * */
+typedef void (pstoeditDialog_func) (PsToEditOptions *);
+typedef void (setPstoeditDialog_func) (pstoeditDialog_func*);
+
 static pstoeditDialog_func* RunDialog = 0;
 extern "C" DLLEXPORT void setPstoeditDialogFunction(pstoeditDialog_func* p)
 {
 	RunDialog = p;
 }
+
+#endif
+
 
 extern const char *defaultPIoptions(ostream & errstream, int verbose);	// in callgs.cpp
 
@@ -74,40 +84,7 @@ static void writeFileName(ostream & outstream, const char *const filename)
 
 
 
-#if 0
-static void oldusage(ostream & errstream)
-{
-	errstream <<
-		"usage: pstoedit "
-		"[-help] "
-		"[-bo] "
-		"[-df fontname] "
-		"[-dt] "
-		"[-adt] "
-		"[-dis] "
-		"[-flat nn] "
-		"[-fontmap mapfile] "
-		"[-gstest] "
-		"[-include file] "
-		"[-merge] "
-		"[-pagesize pagesize(e.g. a4)] " "[-scale nn] " "[-nb] " "[-nc] " "[-nomaptoisolatin1] "
-#if WITHCLIPSUPPORT
-		"[-noclip] "
-#endif
-		"[-nq] "
-		"[-nfr]"
-		"[-page nn] "
-		"[-psarg string] "
-		"[-pti] "
-		"[-pta] "
-		"[-rgb] "
-		"[-rotate angle] "
-		"[-sclip] "
-		"[-split] "
-		"[-ssp] "
-		"[-t2fontsast1] " "[-uchar char ] " "[-v] " "-f format [infile [outfile]]" << endl;
-}
-#endif
+
 
 static int grep(const char *const matchstring, const char *const filename, ostream & errstream)
 {
@@ -153,7 +130,7 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 			// is set in the ANSI version
 
 //
-// Note: THis caused again problems with g++3.0 in non STL mode, so this is avoided now by never writing an empty line
+// Note: This caused again problems with g++3.0 in non STL mode, so this is avoided now by never writing an empty line
 //
 
 			if (inFile_gcountresult == 0) {
@@ -178,6 +155,7 @@ class drvNOBACKEND : public drvbase {	// not really needed - just as template ar
 public:
 	derivedConstructor(drvNOBACKEND);	// Constructor
 	~drvNOBACKEND() {
+		options=0;
 	} // Destructor   
 	
 	class DriverOptions : public ProgramOptions {
@@ -303,7 +281,7 @@ extern FILE *yyin;				// used by lexer
 						// otherwise we could declare it locally where it is used
 
 
-static void usage(ostream & errstream, bool forTeX, bool withdetails, bool withcategories = false)
+static void usage(ostream & outstream, bool forTeX, bool withdetails, bool withcategories = false)
 {
 	PsToEditOptions dummy;
 	if (withcategories) {
@@ -318,16 +296,29 @@ static void usage(ostream & errstream, bool forTeX, bool withdetails, bool withc
 		// PropSheetEnum {g_t, t_t, a_t, b_t, d_t, h_t };
 		for (unsigned int sheet = PsToEditOptions::g_t ; sheet <= PsToEditOptions::d_t ; sheet++ ) {
 			if (sheet == PsToEditOptions::a_t) continue; // skip "about"
-			errstream << "\\subsection{"  << propSheetNames[sheet] << "}" << endl;
-			dummy.showhelp(errstream,forTeX,withdetails,sheet);
+			outstream << "\\subsection{"  << propSheetNames[sheet] << "}" << endl;
+			dummy.showhelp(outstream,forTeX,withdetails,sheet);
 		} 
-		errstream << "\\subsection{Input and outfile file arguments}" << endl;
-		errstream << "[ inputfile [outputfile] ] " << endl;
+		outstream << "\\subsection{Input and outfile file arguments}" << endl;
+		outstream << "[ inputfile [outputfile] ] " << endl;
 	} else {
-		dummy.showhelp(errstream,forTeX,withdetails);
-		errstream << "[ inputfile [outputfile] ] " << endl;
+		dummy.showhelp(outstream,forTeX,withdetails);
+		outstream << "[ inputfile [outputfile] ] " << endl;
 	}
 }
+static void shortusage(ostream & outstream)
+{
+	// just short version
+	outstream << "Usage: \"pstoedit -f format inputfile outputfile\" or run \"pstoedit -help\" to get a complete list available options." << endl;
+}
+
+bool f_useCoutForDiag = false; // default is cout - but some clients may redirect it to a file
+// Note - this could be seen as a "hack". The better way would be to pass the coutstream as parameter
+// but that would cause an incompatible interface change and is not feasible.
+
+extern "C" DLLEXPORT
+void useCoutForDiag(int flag) { f_useCoutForDiag = (bool) flag; }
+
 
 extern "C" DLLEXPORT
 	int pstoedit(int argc, const char *const argv[], ostream & errstream,
@@ -335,27 +326,35 @@ extern "C" DLLEXPORT
 				 whichPI_type whichPI, const DescriptionRegister * const pushinsPtr)
 {
 
-// Experimental
-//  if (0) {
-//      POptions options;
-//      getOptionsViaDialog(options);
-//      exit(1);
-//  }
-
-
 	Closer closerObject;
 
-
 	PsToEditOptions options;
+	ostream& diag = f_useCoutForDiag ? cout : errstream;
 
 #ifdef _DEBUG
 	const char buildtype [] = "debug build";
 #else
 	const char buildtype [] = "release build";
 #endif
+#ifdef __VERSION__
+	#ifdef __GNUG__
+		const char compversion [] = "g++ " __VERSION__;
+	#else
+		const char compversion [] = "unknown compiler " __VERSION__;
+    #endif
+#else
+	#ifdef _MSC_VER
+		#define XNUMTOSTRING(x) NUMTOSTRING(x)
+		#define NUMTOSTRING(x) #x
+		const char compversion [] = "MS VC++ " XNUMTOSTRING(_MSC_VER);
+	#else
+		const char compversion [] = "unknown compiler ";
+	#endif
+#endif
+
 	errstream << "pstoedit: version " << version << " / DLL interface " <<
-		drvbaseVersion << " (build " << __DATE__ << " - " << buildtype<< ")" 
-		" : Copyright (C) 1993 - 2005 Wolfgang Glunz\n";
+		drvbaseVersion << " (build " << __DATE__ << " - " << buildtype << " - " << compversion << ")" 
+		" : Copyright (C) 1993 - 2006 Wolfgang Glunz\n";
 	// int arg = 1;
 	drvbase::SetVerbose( false );	// init
 
@@ -381,15 +380,37 @@ extern "C" DLLEXPORT
 		break;
 			}
 	default:{
-		errstream << "more than two file arguments " << endl;
-		usage(errstream,false,false);
+		diag << "more than two file arguments " << endl;
+		shortusage(diag);
 		return 1;
 			}
 	}
 
-	if (options.showdialog && RunDialog) {
-		RunDialog(&options);
+#ifdef HAVEDIALOG
+	// setPstoeditDialogFunction(rundialog);
+	
+	if (options.showdialog) {
+		static initdone = false;
+		// the next code is needed for a full stand-alone pstoedit.exe.
+		if (!initdone) {
+			if ( !AfxWinInit(::GetModuleHandle(NULL), NULL, ::GetCommandLine(), 0))
+			{
+				// TODO: change error code to suit your needs
+				_tprintf(_T("Fatal Error: MFC initialization failed\n"));
+				//nRetCode = 1;
+			} 
+			initdone = true;
+		}
+		rundialog(options);
+#if 0
+		if (RunDialog) {
+			RunDialog(&options);
+		} else {
+			cerr << "Dialoghandler is not defined - cannot show dialog" << endl;
+		}
+#endif
 	}
+#endif
 
 	// options.showvalues(cout);
 
@@ -420,26 +441,26 @@ extern "C" DLLEXPORT
 
 	if (options.showdocu_short) {
 		// show general options
-		usage(cout,true,false);
+		usage(diag,true,false);
 		return 1;
 	}
 	if (options.showdocu_long) {
 		// show general options
-		usage(cout,true,true,true);
+		usage(diag,true,true,true);
 		return 1;
 	}
 	if (options.dumphelp) {
 		// show driver specific options
-		getglobalRp()->explainformats(cout,true);
+		getglobalRp()->explainformats(diag,true);
 		return 1;
 	}
 	if (options.showdrvhelp) {
-		usage(cout,false,false);
-		const char *gstocall = whichPI(cout, options.verbose, options.gsregbase.value.value());
+		usage(diag,false,false);
+		const char *gstocall = whichPI(diag, options.verbose, options.gsregbase.value.value());
 		if (gstocall != 0) {
-			cout << "Default interpreter is " << gstocall << endl;
+			diag << "Default interpreter is " << gstocall << endl;
 		}
-		getglobalRp()->explainformats(cout);
+		getglobalRp()->explainformats(diag);
 		return 1;
 	}
 
@@ -515,24 +536,24 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		// try to find driver according to suffix of input file
 		const char * suffixOfInputFile = 0;
 		if (!options.nameOfOutputFile) {
-			errstream << "No backend specified and backend could not be deduced from suffix of output file since no output file name was given" << endl;
-			usage(errstream,false,false);
+			diag << "No output format specified (-f option) and format could not be deduced from suffix of output file since no output file name was given" << endl;
+			shortusage(diag);
 			return 1;
 		} else {
 			suffixOfInputFile = strrchr(options.nameOfOutputFile,'.');
 			if (!suffixOfInputFile) {
-				errstream << "No backend specified and backend could not be deduced from suffix of output file since no suffix was found" << endl;
-				usage(errstream,false,false);
+				diag << "No output format specified (-f option) and format could not be deduced from suffix of output file since no suffix was found" << endl;
+				shortusage(diag);
 				return 1;
 			} else {
 				const DriverDescription *suffixDriverDesc = getglobalRp()->getDriverDescForSuffix((suffixOfInputFile+1)); // +1 == skip "."
 				if (suffixDriverDesc) {
-					errstream << "No explicit backend specified - using " << suffixDriverDesc->symbolicname << " as derived from suffix of output file" << endl;
+					errstream << "No explicit output format specified - using " << suffixDriverDesc->symbolicname << " as derived from suffix of output file" << endl;
 					options.drivername = suffixDriverDesc->symbolicname;
 				} else {
-					errstream << "No backend specified and backend could not be uniquely deduced from suffix " << suffixOfInputFile << " of output file" << endl;
+					diag << "No output format specified (-f option) and format could not be uniquely deduced from suffix " << suffixOfInputFile << " of output file" << endl;
 					// usage(errstream);
-					getglobalRp()->explainformats(cout); // ,true);
+					getglobalRp()->explainformats(diag); // ,true);
 					return 1;
 				}
 			}
@@ -549,13 +570,13 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		}
 		const DriverDescription *currentDriverDesc = getglobalRp()->getDriverDescForName(options.drivername.value.value());
 		if (currentDriverDesc == 0) {
-			errstream << "Unsupported driver " << options.drivername.value.value() << endl;
-			getglobalRp()->explainformats(errstream);
+			diag << "Unsupported output format " << options.drivername.value.value() << endl;
+			getglobalRp()->explainformats(diag);
 			return 1;
 		}
 
 		if ( currentDriverDesc->backendFileOpenType!=DriverDescription::normalopen && !options.nameOfOutputFile ) {
-			errstream << "This driver cannot write to standard output because it writes binary data" << endl;
+			diag << "The driver for the selected format cannot write to standard output because it writes binary data" << endl;
 			return 1;
 		}
 
@@ -563,8 +584,8 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		if (driveroptions && (strcmp(driveroptions, "-help") == 0)) {
 			ProgramOptions* dummy = currentDriverDesc->createDriverOptions();
 			if (dummy->numberOfOptions() ) {
-				errstream << "This driver supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
-				dummy->showhelp(errstream,false,false);
+				diag << "The driver for this output format supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
+				dummy->showhelp(diag,false,false);
 			}
 			delete dummy;
 			return 1;
@@ -573,7 +594,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 // TODO:
 			// Check for input file (exists, or stdin) stdout handling
 			if (!options.nameOfInputFile) {
-				errstream << "Cannot read from standard input if GS drivers are selected" << endl;
+				diag << "Cannot read from standard input if GS drivers are selected" << endl;
 				return 1;
 			}
 			// an input file was given as argument
@@ -584,23 +605,23 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			convertBackSlashes(options.nameOfInputFile);
 
 			if (!fileExists(options.nameOfInputFile)) {
-				errstream << "Could not open file " << options.nameOfInputFile << " for input" << endl;
+				diag << "Could not open file " << options.nameOfInputFile << " for input" << endl;
 				return 1;
 			}
 
 			if (!options.nameOfOutputFile) {
-				errstream <<
+				diag <<
 					"Cannot write to standard output if GS drivers are selected" << endl;
 				return 1;
 			}
 
 			if (options.backendonly) {
-				errstream << "The -bo option cannot be used if GS drivers are selected " << endl;
+				diag << "The -bo option cannot be used if GS drivers are selected " << endl;
 				return 1;
 			}
 
 			if (!driveroptions) {
-				errstream <<
+				diag <<
 					"The gs output driver needs a gs-device as argument, e.g. gs:pdfwrite" << endl;
 				return 1;
 			}
@@ -629,15 +650,15 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			commandline.addarg("-dBATCH");
 			char tempbuffer[1000];
 			tempbuffer[0] = '\0';
-			strcat(tempbuffer, "-sDEVICE=");
-			strcat(tempbuffer, driveroptions);	// e.g., pdfwrite ;
+			strcat_s(tempbuffer, 1000, "-sDEVICE=");
+			strcat_s(tempbuffer, 1000,driveroptions);	// e.g., pdfwrite ;
 			commandline.addarg(tempbuffer);
 			for (unsigned int psi = 0; psi < options.psArgs().argc; psi++) {
 				commandline.addarg(options.psArgs().argv[psi]);
 			}
 			tempbuffer[0] = '\0';
-			strcat(tempbuffer, "-sOutputFile=");
-			strcat(tempbuffer, options.nameOfOutputFile);
+			strcat_s(tempbuffer,1000, "-sOutputFile=");
+			strcat_s(tempbuffer,1000, options.nameOfOutputFile);
 			commandline.addarg(tempbuffer);
 			commandline.addarg("-c");
 			commandline.addarg("save");
@@ -716,7 +737,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				outputFilePtr = &outFile;
 				convertBackSlashes(options.nameOfOutputFile);
 				nameOfOutputFilewithoutpercentD = cppstrdup(options.nameOfOutputFile, 20);	// reserve 20 chars for page number
-				sprintf(nameOfOutputFilewithoutpercentD, options.nameOfOutputFile, 1);	//first page is page 1
+				sprintf_s(TARGETWITHLEN(nameOfOutputFilewithoutpercentD, strlen(options.nameOfOutputFile)+ 20) , options.nameOfOutputFile, 1);	//first page is page 1
 				if (currentDriverDesc->backendFileOpenType != DriverDescription::noopen) {
 					if (currentDriverDesc->backendFileOpenType == DriverDescription::binaryopen) {
 #if (defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD)  ) && !defined(DJGPP)
@@ -752,9 +773,11 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					outputFilePtr = &cout;
 					outputdriver =
 						currentDriverDesc->CreateBackend(driveroptions,
-														 cout, errstream,
+														 *outputFilePtr,
+														 errstream,
 														 options.nameOfInputFile,
-														 0, options);
+														 0, 
+														 options);
 				}
 			}
 
@@ -854,6 +877,9 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				if (options.nofontreplacement) {
 					inFileStream << "/pstoedit.checkfontnames false def " << endl;
 				}
+				if (options.passglyphnames) {
+					inFileStream << "/pstoedit.passglyphnames true def " << endl;
+				}
 				if (options.pscover) {
 					inFileStream << "/withpscover true def" << endl;
 				}
@@ -887,8 +913,10 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				inFileStream << "/pstoedit.rotation " << options.rotation << " def" << endl;
 				inFileStream << "/pstoedit.xscale " << options.xscale << " def" << endl;
 				inFileStream << "/pstoedit.yscale " << options.yscale << " def" << endl;
-
-
+				inFileStream << "/pstoedit.xshift " << options.xshift << " def" << endl;
+				inFileStream << "/pstoedit.yshift " << options.yshift << " def" << endl;
+				if (options.centered) { inFileStream << "/pstoedit.centered " << "true" << " def" << endl; }
+	
 				if (strequal(options.drivername.value.value(), "ps")
 					|| strequal(options.drivername.value.value(), "psf")) {
 					inFileStream << "/escapetext true def" << endl;
@@ -1242,7 +1270,8 @@ void ignoreVersionCheck()
 extern "C" DLLEXPORT
 	int pstoeditwithghostscript(int argc,
 								const char *const argv[],
-								ostream & errstream, const DescriptionRegister * const pushinsPtr)
+								ostream & errstream, 
+								const DescriptionRegister * const pushinsPtr)
 {
 	if (!versioncheckOK) {
 		errorMessage("wrong version of pstoedit");
@@ -1338,7 +1367,22 @@ extern "C" DLLEXPORT void clearPstoeditDriverInfo_plainC(DriverDescription_S * p
 }
 
 #if defined(_WIN32) || defined(__OS2__)
-extern void set_gs_write_callback(write_callback_type * new_cb);	// defined in d[wp]mainc.c
+
+//
+// under Windows we need to be able to switch between two modes of calling GS - 1 via DLL and 2 with EXE
+// the EXE is needed when being called from gsview - whereas in all other cases the DLL is the better way
+// So the useDLL is set to false - and the pstoedit stand-alone program sets it to true
+// gsview uses the default which is false - hence the ghostscript is called via its exe
+//
+
+static int useDLL = false;
+// need to use int instead of bool because of C mode
+extern "C" DLLEXPORT void setPstoeditsetDLLUsage(int useDLL_p) 
+{ useDLL = useDLL_p; }
+extern "C" DLLEXPORT int getPstoeditsetDLLUsage() 
+{ return useDLL; }
+
+extern void set_gs_write_callback(write_callback_type * new_cb);	// defined in callgsdllviaiapi.cpp
 
 extern "C" DLLEXPORT void setPstoeditOutputFunction(void *cbData, write_callback_type * cbFunction)
 {
@@ -1346,8 +1390,10 @@ extern "C" DLLEXPORT void setPstoeditOutputFunction(void *cbData, write_callback
 		errorMessage("wrong version of pstoedit");
 		return;
 	}
+
+	static callbackBuffer cbBuffer(0, 0);// default /dev/null
+
 	set_gs_write_callback(cbFunction);	// for the gswin.DLL
-	static callbackBuffer cbBuffer(0, 0);	// default /dev/null 
 	(void) cbBuffer.set_callback(cbData, cbFunction);
 #if defined(HAVESTL) || defined(__OS2__)
 	(void)cerr.rdbuf(&cbBuffer);
@@ -1356,6 +1402,5 @@ extern "C" DLLEXPORT void setPstoeditOutputFunction(void *cbData, write_callback
 #endif
 }
 
+// END WINDOWS ONLY SECTION
 #endif
- 
- 

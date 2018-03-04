@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2005 Wolfgang Glunz
+   Copyright (C) 1998 - 2006 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -64,8 +64,8 @@
 
 // windows structure for standard metafile
 // placeable header (aka Aldus Metafile)
-const long PLACEABLEKEY = 0x9AC6CDD7L;
-const int PLACEABLESIZE = 22;
+const DWORD32 PLACEABLEKEY = 0x9AC6CDD7L;
+const short PLACEABLESIZE = 22;
 // see also http://premium.microsoft.com/msdn/library/techart/html/emfdcode.htm
 // regarding alignment (Wo Gl)
 #pragma pack(2)
@@ -162,7 +162,10 @@ void drvWMF::initMetaDC(HDC hdc){
 }
 
 drvWMF::derivedConstructor(drvWMF):
-constructBase, enhanced(false)
+constructBase,
+oldColoredPen(NIL),
+oldColoredBrush(NIL),
+enhanced(false)
 {
 	// do some consistency checking
 	if (! ( (sizeof(PLACEABLEHEADER) == PLACEABLESIZE) || (sizeof(PLACEABLEHEADER) == (PLACEABLESIZE+2)) ) ) {
@@ -296,7 +299,7 @@ static void writeErrorCause(const char * mess)
 #ifdef _WIN32
 	DWORD ec = GetLastError(); 
 	LPVOID lpMsgBuf; 
-	FormatMessage( 
+	(void)FormatMessage( 
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 
 		NULL, 
 		ec, 
@@ -426,14 +429,14 @@ drvWMF::~drvWMF()
 				}
 			}
 			// close and commit metafile
-			DeleteEnhMetaFile(CloseEnhMetaFile(metaDC));
+			(void)DeleteEnhMetaFile(CloseEnhMetaFile(metaDC));
 		} else {
 			errf << "ERROR: could not open metafile for replay: " << outFileName << endl;
 		}
 
-		DeleteEnhMetaFile(hMeta);
+		(void)DeleteEnhMetaFile(hMeta);
 	} else {
-		DeleteMetaFile(CloseMetaFile(metaDC));
+		(void)DeleteMetaFile(CloseMetaFile(metaDC));
 
 		// add placeable header to standard metafile
 		const int BUFSIZE = 1024;
@@ -484,13 +487,16 @@ drvWMF::~drvWMF()
 
 			fclose(inFile);
 		}
-		remove(tempName.value());
+		(void)remove(tempName.value());
 		// cout << "tmp name " << tempName.value() << endl;
 
 	}
 
 	// delete desktop DC (might need it above)
 	ReleaseDC(GetDesktopWindow(), desktopDC);
+	desktopDC=0;
+	options=0;
+	metaDC=0;
 }
 
 
@@ -559,6 +565,7 @@ void drvWMF::setDrawAttr()
 
 int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int textAngle)
 {
+	LOGFONT			theFontRec;
 	theFontRec.lfHeight = -textHeight ;
 	theFontRec.lfWidth = 0;		// optimal fit
 	theFontRec.lfEscapement = textAngle;
@@ -658,21 +665,21 @@ int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int
 	if ((strstr(textinfo.currentFontFullName.value(), "Symbol") != NIL) ||
 		(strstr(textinfo.currentFontFullName.value(), "symbol") != NIL)) {
 		theFontRec.lfCharSet = SYMBOL_CHARSET;
-		strcpy(theFontRec.lfFaceName, "symbol");
+		strcpy_s(theFontRec.lfFaceName, LF_FACESIZE, "symbol");
 	} else if ((strstr(textinfo.currentFontFamilyName.value(), "Computer Modern") != NIL) ) {
 		// special handling for TeX Fonts - fix supplied by James F. O'Brien (job at cs.berkeley.edu)
         theFontRec.lfWeight = FW_NORMAL;
   	    theFontRec.lfItalic = 0;
   	    theFontRec.lfUnderline = 0;
 	    theFontRec.lfCharSet = ANSI_CHARSET;
-  	    strcpy(theFontRec.lfFaceName,  textinfo.currentFontName.value());
+  	    strcpy_s(theFontRec.lfFaceName,LF_FACESIZE,  textinfo.currentFontName.value());
 	} else 	{
 		theFontRec.lfCharSet = ANSI_CHARSET;
 
 		if (options->mapToArial)
-			strcpy(theFontRec.lfFaceName, "Arial");
+			strcpy_s(theFontRec.lfFaceName,LF_FACESIZE, "Arial");
 		else /* formerly we used currentFontFamilyName but FontName seems to be better */
-			strcpy(theFontRec.lfFaceName, textinfo.currentFontName.value());
+			strcpy_s(theFontRec.lfFaceName,LF_FACESIZE, textinfo.currentFontName.value());
 	}
 
 	if (myFont) {
@@ -982,7 +989,7 @@ void drvWMF::show_text(const TextInfo & textinfo)
 
 	// any need to change font handle?
 	if (fontchanged())
-		fetchFont(textinfo, textHeight, textAngle);
+		(void)fetchFont(textinfo, textHeight, textAngle);
 
 	const long x1 = transx(textinfo.x);
 	const long y1 = transy(textinfo.y);
@@ -1040,7 +1047,7 @@ void drvWMF::show_text(const TextInfo & textinfo)
 	}
 
 #if defined(_WIN32)
-	TextOut(metaDC, x1, y1, textinfo.thetext.value(), textLen);
+	(void)TextOut(metaDC, x1, y1, textinfo.thetext.value(), textLen);
 	// TextOut(metaDC, 10, 10, "hello",4);
 #else
 
@@ -1156,10 +1163,10 @@ void drvWMF::show_rectangle(const float llx, const float lly, const float urx, c
 		// wogl - this code is disabled. I don't know why this was this way. 
 		// one cannot use a RECT as Point * and a polyline needs 4 points to make a RECT.
 		// strange ....
-		Polyline(metaDC, (POINT *) & localRect, 2);
+		(void)Polyline(metaDC, (POINT *) & localRect, 2);
 		// but also using a Rectangle isn't correct. 
 	} else {
-		Rectangle(metaDC, transx(llx), transy(lly), transx(urx), transy(ury));
+		(void)Rectangle(metaDC, transx(llx), transy(lly), transx(urx), transy(ury));
 	}
 	}
 }
@@ -1273,7 +1280,7 @@ void drvWMF::show_image(const PSImage & image)
 				// okay, fetch source pixel value into 
 				// RGB triplet
 
-				unsigned char r(255), g(255), b(255), c, m, y, k;
+				unsigned char r(255), g(255), b(255), C, M, Y, K;
 
 				// how many components?
 				switch (image.ncomp) {
@@ -1288,25 +1295,26 @@ void drvWMF::show_image(const PSImage & image)
 					break;
 
 				case 4:
-					c = image.getComponent(sourceX, sourceY, 0);
-					m = image.getComponent(sourceX, sourceY, 1);
-					y = image.getComponent(sourceX, sourceY, 2);
-					k = image.getComponent(sourceX, sourceY, 3);
+					C = image.getComponent(sourceX, sourceY, 0);
+					M = image.getComponent(sourceX, sourceY, 1);
+					Y = image.getComponent(sourceX, sourceY, 2);
+					K = image.getComponent(sourceX, sourceY, 3);
 
 					// account for key
-					c += k;
-					m += k;
-					y += k;
+					C += K;
+					M += K;
+					Y += K;
 
 					// convert color
-					r = 255 - c;
-					g = 255 - m;
-					b = 255 - y;
+					r = 255 - C;
+					g = 255 - M;
+					b = 255 - Y;
 					break;
 
 				default:
 					errf << "\t\tFatal: unexpected case in drvwmf (line "
 						<< __LINE__ << ")" << endl;
+					delete [] output; // to make FlexeLint happier
 					abort();
 					return;
 				}

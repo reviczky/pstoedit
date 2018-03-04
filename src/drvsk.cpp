@@ -51,6 +51,7 @@ drvSK::derivedConstructor(drvSK)
 
 drvSK::~drvSK()
 {
+	options=0;
 }
 
 void drvSK::print_coords()

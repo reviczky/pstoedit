@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2005  Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2006  Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,6 +35,8 @@ extern "C"  char *getcwd(char *, size_t);
 #endif
 
 #else
+// not Unix like
+
 #if HAVE_DIRENT_H
 #include <dirent.h>
 #elif HAVE_SYS_NDIR_H
@@ -47,6 +49,12 @@ extern "C"  char *getcwd(char *, size_t);
 // last chance
 #include <direct.h>
 #endif
+
+#endif
+
+#ifdef HAVE_MKSTEMP
+// for using mkstemp we need errno
+#include <errno.h>
 #endif
 
 #include I_stdlib
@@ -67,12 +75,9 @@ extern "C"  char *getcwd(char *, size_t);
 
 #if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined (NetBSD) 
 //take this out (we may have backslashes w/ EMX(OS/2)):  || defined(__EMX__)
-void convertBackSlashes(char *string)
-{
-	unused(string);
-}
-
+void convertBackSlashes(char *) { }
 // nothing to do on systems with unix style file names ( / for directories)
+
 #else
 void convertBackSlashes(char *fileName)
 {
@@ -84,17 +89,22 @@ void convertBackSlashes(char *fileName)
 }
 #endif
 
+#ifndef HAVE_MKSTEMP
+//
+// if we do not have mkstemp we need to emulate it using old tempnam
+// for some systems we even have to provide an own tempnam
+//
 #if defined(__STRICT_ANSI__) 
 // normally this is in stdio.h except if __STRICT_ANSI__ is defined (GNU specific)
 // but it is in again - at least under Linux with g++3.0
 #if !( defined (__GNUG__)  && (__GNUC__>=3) )
-extern "C" char *tempnam(const char *, const char *pfx);
+	extern "C" char *tempnam(const char *, const char *pfx);
 #endif
 #endif
 
-#if defined(riscos)
+#if defined(riscos) 
 // rcw2: tempnam doesn't seem to be defined in UnixLib 3.7b for RiscOS
-char *tempnam(const char *, const char *pfx)
+static char *tempnam(const char *, const char *pfx)
 {
 	char tmp[1024];
 
@@ -106,7 +116,7 @@ char *tempnam(const char *, const char *pfx)
 
 #ifdef __WATCOMC__
 // tempnam doesn't seem to be defined in Watcoms clibs
-char *tempnam(const char *, const char *pfx)
+static char *tempnam(const char *, const char *pfx)
 {
 	const char *path;
 	char tmp[1024];
@@ -134,6 +144,7 @@ char *tempnam(const char *, const char *pfx)
 #if (defined(__mips) && defined(__sgi))
 #define strdup cppstrdup
 #endif
+
 #if (defined(DJGPP) && defined(BUGGYTEMPNAM)) || (defined(__mips) && defined(__sgi))
 // tempnam under DJGPP behaves different than on all other systems
 // and Irix doesn't seem to have tempnam
@@ -143,8 +154,39 @@ char *tempnam(const char *, const char *pfx)
 }
 #endif
 
+// endif for not having mkstemp
+
+#endif
+
 RSString full_qualified_tempnam(const char *pref)
 {
+#ifdef HAVE_MKSTEMP
+	const char *path = 0;
+	char * filename = 0;
+	const char XXXXXX[] = "XXXXXX" ; // needed for mkstemp template
+	(void) ((path = getenv("TEMP"))   == 0L && 
+		(path = getenv("TMP"))    == 0L &&
+		(path = getenv("TMPDIR")) == 0L
+		);
+	const unsigned int needed = strlen(path ? path:"" ) + 1 + strlen(pref) + 1 + strlen(XXXXXX) + 2;
+	filename = new char [ needed ];
+	filename[0] = '\0';
+// all getenvs returned 0
+	if (path) {
+		strncpy(filename, path, needed);
+		strcat(filename, "/");
+	}
+	strcat(filename, pref);
+	strcat(filename, XXXXXX);
+	cout << "using " << filename << " as template for mkstemp" << endl;
+	const int fd = mkstemp(filename);
+	cout << "returned " << filename << " and " << fd << endl;
+	if (fd == -1) {
+		cerr << "error in mkstemp for " << filename << " " << errno << endl;
+		exit(1);
+	}
+
+#else 
 #if defined (__BCPLUSPLUS__) || defined (__TCPLUSPLUS__)
 /* borland has a prototype that expects a char * as second arg */
 	char *filename = tempnam(0, (char *) pref);
@@ -153,6 +195,7 @@ RSString full_qualified_tempnam(const char *pref)
 #endif
 	// W95: Fkt. tempnam() erzeugt Filename+Pfad
 	// W3.1: es wird nur der Name zurueckgegeben
+#endif
 
 // rcw2: work round weird RiscOS naming conventions
 #ifdef riscos
@@ -164,10 +207,11 @@ RSString full_qualified_tempnam(const char *pref)
 	if ((strchr(filename, '\\') == 0) && (strchr(filename, '/') == 0)) {	// keine Pfadangaben..
 		char cwd[400];
 		(void) getcwd(cwd, 400);
-		char *buffer = new char[strlen(filename) + strlen(cwd) + 2];
-		strcpy(buffer, cwd);
-		strcat(buffer, "/");
-		strcat(buffer, filename);
+		const unsigned int size =  strlen(filename) + strlen(cwd) + 2;
+		char *buffer = new char[size];
+		strcpy_s(buffer,size, cwd);
+		strcat_s(buffer,size, "/");
+		strcat_s(buffer,size, filename);
 		free(filename);
 		const RSString result(buffer);
 		delete [] buffer;
@@ -240,8 +284,8 @@ RSString getRegistryValue(ostream & errstream, const char *typekey, const char *
 //  CString subkey = CString("SOFTWARE\\wglunz\\") + CString(product);
 	char subkeyn[1000];
 	subkeyn[0] = '\0';
-	strcat(subkeyn, "SOFTWARE\\wglunz\\");
-	strcat(subkeyn, typekey);
+	strcat_s(subkeyn,1000, "SOFTWARE\\wglunz\\");
+	strcat_s(subkeyn,1000, typekey);
 	RSString result = tryregistry(HKEY_CURRENT_USER, subkeyn, key);
 	if (!result.value() )
 		result = tryregistry(HKEY_LOCAL_MACHINE, subkeyn, key);
@@ -464,7 +508,7 @@ unsigned long searchinpath(const char *EnvPath, const char *name,
 			test += name;
 			//cout << "checking " << test.value() << endl;
 			if (fileExists(test.value())) {
-				strcpy(returnbuffer, test.value());
+				strcpy_s(returnbuffer,buflen, test.value());
 				delete[]path;
 				//cout << " FOUND !! " << endl;
 				return strlen(returnbuffer);
@@ -564,7 +608,7 @@ RSString::~RSString()
 }
 
 
-const RSString & RSString::operator += (const RSString & rs)
+RSString & RSString::operator += (const RSString & rs)
 {
 	assert(rs.content != 0);
 	assert(content != 0);
@@ -684,7 +728,7 @@ void FontMapper::readMappingTable(ostream & errstream, const char *filename)
 	unsigned int linenr = 0;
 	while (!inFile.getline(line, linesize).eof()) {
 		linenr++;
-		strcpy(save, line);
+		strcpy_s(save,linesize, line);
 #ifdef HAVESTL
 		// Notes regarding ANSI C++ version (from KB)
 		// istream::get( char* pch, int nCount, char delim ) is different in three ways: 

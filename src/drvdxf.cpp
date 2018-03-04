@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -575,12 +575,12 @@ public:
 	}
 #endif
 
-	const char * getLayerName(unsigned short r,unsigned short g,unsigned short b) {
+	const char * getLayerName(unsigned short r,unsigned short g,unsigned short b) const {
 		static char stringbuffer[20]; // format: "Cxx-xx-xx" (10 chars)
-		sprintf(stringbuffer,"C%02X-%02X-%02X",r,g,b);
+		sprintf_s(TARGETWITHLEN(stringbuffer,20),"C%02X-%02X-%02X",r,g,b);
 		return stringbuffer;
 	}
-	const char * getLayerName(float r, float g, float b) {
+	const char * getLayerName(float r, float g, float b) const {
 		// rgb is in range 0..1.0f
 		const unsigned short R = floatColTointCol(r);
 		const unsigned short G = floatColTointCol(g);
@@ -747,26 +747,26 @@ drvDXF::derivedConstructor(drvDXF):
 
 }
 
-void drvDXF::writelayerentry(ostream & outf, unsigned int color, const char * layername) {
-				outf <<
+void drvDXF::writelayerentry(ostream & outs, unsigned int color, const char * layername) {
+				outs <<
 					"  0\n"
 					"LAYER\n";
 				if (formatis14) {
-					writeHandle(outf);
-					outf <<
+					writeHandle(outs);
+					outs <<
 						"100\n"
 						"AcDbSymbolTableRecord\n"
 						"100\n"
 						"AcDbLayerTableRecord\n";
 				}
-				outf << "  2\n" 
+				outs << "  2\n" 
 					<< layername << endl; // layername
-				outf <<
+				outs <<
 					" 70\n"
 					"0\n"  // unfrozen
 					" 62\n";
-				outf << color << endl; // color
-				outf << "  6\n"
+				outs << color << endl; // color
+				outs << "  6\n"
 					"CONTINUOUS\n" ;		// linestyle
 
 }
@@ -809,6 +809,7 @@ drvDXF::~drvDXF()
 	header_postlayer = 0;
 	trailer = 0;
 	delete layers; layers = 0;
+	options=0;
 }
 
 void drvDXF::writeHandle(ostream & outs) {

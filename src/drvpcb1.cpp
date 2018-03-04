@@ -2,7 +2,7 @@
    drvPCB1.cpp : Hans-Jürgen Jahn    (Version 1.0  10.08.02)
    this code is derived from drvSAMPL.cpp, see text below
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -25,10 +25,9 @@
 #include I_stdio
 #include I_stdlib
 
-//#include "version.h"
 
 //output unit is mil
-const double pcb_scale = 1000.0/72.0;
+// const double pcb_scale = 1000.0/72.0;
 
 drvPCB1::derivedConstructor(drvPCB1):
 //(const char * driveroptions_p,ostream & theoutStream,ostream & theerrStream): // Constructor
@@ -51,6 +50,8 @@ drvPCB1::derivedConstructor(drvPCB1):
 
 	const char* env = getenv("pcbdrv_drill");
 	drill_data=false;	
+	drill_fixed=true;
+	drill_diameter=0.0f;
 	if (env!=NULL)
 	{
 	   if (0!=strcmp(env,"no"))
@@ -71,6 +72,7 @@ drvPCB1::~drvPCB1() {
 // and writing of trailer to output file
 	pcberrf << "Sample trailer \n";
 	pcberrf.close();
+	options=0;
 }
 
 void drvPCB1::print_coords()
@@ -435,7 +437,7 @@ bool drvPCB1::filledCircleOut()
 
 
 static DriverDescriptionT<drvPCB1> D_pcb("pcbi","engrave data - insulate/PCB format",
-										 "See \\URL{http://home.vr-web.de/~hans-juergen-jahn/software/devpcb.html} for more details.",
+										 "See \\URL{http://home.vr-web.de/\\Tilde hans-juergen-jahn/software/devpcb.html} for more details.",
 										 "pcb",
 								
 		false, // backend supports subpathes

@@ -6,14 +6,47 @@
 	</head>
 	<body>
 		<h1 align="left">Changelog for pstoedit</h1>
+		<H2>New or changed in 3.43:</H2>
+		<UL>
+			<LI>
+				some usability improvements as proposed in Debian Bug Report&nbsp;#347732 <A href="http://groups.google.com/group/linux.debian.bugs.dist/msg/c38e1f79d75b3152?dmode=source&amp;hl=de">
+					http://groups.google.com/group/linux.debian.bugs.dist/msg/c38e1f79d75b3152?dmode=source&amp;hl=de</A>
+			<LI>
+				cleaned some minor problems found by the&nbsp;Klocwork&nbsp;checker (<A href="http://www.klocwork.com">www.klocwork.com</A>
+			) &nbsp;
+			<LI>
+			replaced tempnam with mkstemp where available.
+			<LI>
+			replaced several string related functions with the secure versions where 
+			available (Windows - VC++2005)
+			<LI>
+			switched back again to calling GhostScript as .exe instead of via the DLL in 
+			case pstoedit is called via&nbsp;gsview. Reason - there can be only one 
+			instance of GhostScript per process and gsview needs a second instance.
+			<LI>
+			a&nbsp;new driver for the OpenOffice metafile format (drvsvm) contributed by 
+			Thorsten Behrens.&nbsp;
+			<LI>
+				source code cleanup considering messages issued by Gimpel's FlexeLint/PC-Lint (<A href="http://www.gimpel.com">www.gimpel.com</A>
+			).
+			<LI>
+			added a "-glyphs" option. Given this option, the PostScript frontend passes 
+			also (if possible) the glyph names to the backend. However, so far no backend 
+			really uses the glyph names. This is only a preparation for future work.
+			<LI>
+			changed the way how Image/Graphicmagick is handled by configure. Now configure 
+			tries to use pkg-config as proposed by the maintainer of the Debian version of 
+			pstoedit (Ray Dassen).
+			<LI>
+				included a further patch for the Aysmptote driver.</LI></UL>
 		<H2>New or changed in 3.42:</H2>
 		<UL>
 			<LI>
-			The Aysmptote driver now supports PNG images - thanks again to John Bowman
+			the Aysmptote driver now supports PNG images - thanks again to John Bowman
 			<LI>
 			fix of small compilation problem in drvlatex2e.cpp
 			<LI>
-				New driver (drvnoi) contributed by Nemetschek&nbsp;(<A href="http://www.nemetschek.de/">http://www.nemetschek.de/</A>). 
+				new driver (drvnoi) contributed by Nemetschek&nbsp;(<A href="http://www.nemetschek.de/">http://www.nemetschek.de/</A>). 
 				This driver - in combination with other DLLs which are installed as part of 
 				Nemetschek's AllPlan product - allows to convert PostScript and PDF to the 
 				AllPlan internal format. Without an installation of AllPlan - this driver is 
@@ -45,7 +78,7 @@
 			is no longer supported under non-Window systems since libemf has some 
 			fundamental problems.
 			<LI>
-			The PostScript/PDF Office import&nbsp;DLL (importps) can now be used 
+			the PostScript/PDF Office import&nbsp;DLL (importps) can now be used 
 			also&nbsp;within Visio (TM).&nbsp;
 			<LI>
 			fixed a bug in sub path handling - thanks to Soren Henriksen.
@@ -493,8 +526,7 @@
 			This means that all plugins need to be updated (just the .dll not the keys). 
 			Otherwise you will get an error message.
 			<li>
-				added a new backend for the sketch format ( <a href="http://sketch.sourceforge.net/">
-					http://sketch.sourceforge.net/</a> ) contributed by
+				added a new backend for the skencil (formerly sketch) format (<a href="http://www.skencil.org/">www.skencil.org</a>) contributed by
 				<br>
 				Bernhard Herzog (<a href="mailto:bernhard_AT_users.sourceforge.net">bernhard_AT_users.sourceforge.net</a>)
 			<li>
@@ -617,8 +649,9 @@
 			<li>
 				added the PIC backend contributed by Egil Kvaleberg (<a href="mailto:egil_AT_kvaleberg.no">egil_AT_kvaleberg.no</a>)
 			<li>
-				added the backend for the <a href="http://www.koffice.org/kontour">Kontour</a> format 
-				- contributed by Kai-Uwe Sattler <a href="mailto:(kus_AT_iti.cs.uni-magdeburg.de">(kus_AT_iti.cs.uni-magdeburg.de</a>)
+				added the backend for the Kontour (now replaced by <a href="http://www.koffice.org/karbon/">
+					Karbon</a>) format - contributed by Kai-Uwe Sattler <a href="mailto:(kus_AT_iti.cs.uni-magdeburg.de">
+					(kus_AT_iti.cs.uni-magdeburg.de</a>)
 			<li>
 			added some files missing for the compilation under Windows and adapted the 
 			makefile.

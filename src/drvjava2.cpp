@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -29,10 +29,13 @@
 // for fabs and sqrt
 #include <math.h>
 
+//lint -esym(754,JavaFontDescriptor::javaname) // not used so far
+//lint -esym(754,JavaFontDescriptor::javastyle) // not used so far
+
 struct JavaFontDescriptor {
 	const char *psname;
-	const char *javaname;
-	const char *javastyle;
+ 	const char *javaname;
+ 	const char *javastyle;
 };
 
 static const JavaFontDescriptor JavaFonts[] = {	// predefined Fonts
@@ -106,6 +109,7 @@ drvJAVA2::~drvJAVA2()
 	outf << "    super.init();" << endl;
 	outf << "  }" << endl;
 	outf << "}" << endl;
+	options=0;
 }
 
 
@@ -348,11 +352,13 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 		return;
 	}
 	// write image data to separate file
-	char *imgOutFileName = new char[strlen(outBaseName) + 21];
-	char *imgOutFullFileName = new char[strlen(outDirName) + strlen(outBaseName) + 21];
+	const unsigned int sizefilename = strlen(outBaseName) + 21;
+	char *imgOutFileName = new char[sizefilename];
+	const unsigned int sizefullfilename = strlen(outDirName) + strlen(outBaseName) + 21;
+	char *imgOutFullFileName = new char[sizefullfilename];
 
-	sprintf(imgOutFileName, "%s_%d.img", outBaseName, numberOfImages);
-	sprintf(imgOutFullFileName, "%s%s", outDirName, imgOutFileName);
+	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%d.img", outBaseName, numberOfImages);
+	sprintf_s(TARGETWITHLEN(imgOutFullFileName,sizefullfilename), "%s%s", outDirName, imgOutFileName);
 	outf << "    currentPage.add(new PSImageObject(" << imageinfo.
 		width << ", " << imageinfo.height << ", ";
 	outf << imageinfo.bits << ", " << imageinfo.ncomp << ", ";

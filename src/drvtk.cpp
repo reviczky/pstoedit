@@ -7,7 +7,7 @@
 
    drvsample.cpp : Backend for TK
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,16 +39,16 @@
 static const char *colorstring(float r, float g, float b)
 {
 	static char buffer[10];
-	sprintf(buffer, "%s%.2x%.2x%.2x", "#", (int) (r * 255), (int) (g * 255), (int) (b * 255));
+	sprintf_s(TARGETWITHLEN(buffer,10), "%s%.2x%.2x%.2x", "#", (int) (r * 255), (int) (g * 255), (int) (b * 255));
 	return buffer;
 }
 
 
-void drvTK::outputEscapedText(const char *string)
+void drvTK::outputEscapedText(const char *str)
 {
 	const char *i;
 
-	for (i = string; *i; i++) {
+	for (i = str; *i; i++) {
 		switch (*i) {
 		case '{':
 		case '}':
@@ -96,143 +96,145 @@ constructBase, buffer(tempFile.asOutput()), objectId(1)
 #endif
 
     const RSString pagesize = getPageSize();
-	strcpy(pwidth, "8.5i");
-	strcpy(pheight, "11.0i");
 	if (!strcmp(pagesize.value(), "a0")) {
-		strcpy(pwidth, "84.0c");
-		strcpy(pheight, "118.8c");
+		strcpy_s(pwidth,  ssize, "84.0c");
+		strcpy_s(pheight, ssize, "118.8c");
 	} else if (!strcmp(pagesize.value(), "a1")) {
-		strcpy(pwidth, "59.4c");
-		strcpy(pheight, "84.0c");
+		strcpy_s(pwidth,  ssize, "59.4c");
+		strcpy_s(pheight, ssize, "84.0c");
 	} else if (!strcmp(pagesize.value(), "a2")) {
-		strcpy(pwidth, "42.0c");
-		strcpy(pheight, "59.4c");
+		strcpy_s(pwidth,  ssize, "42.0c");
+		strcpy_s(pheight, ssize, "59.4c");
 	} else if (!strcmp(pagesize.value(), "a3")) {
-		strcpy(pwidth, "29.7c");
-		strcpy(pheight, "42.0c");
+		strcpy_s(pwidth,  ssize, "29.7c");
+		strcpy_s(pheight, ssize, "42.0c");
 	} else if (!strcmp(pagesize.value(), "a4")) {
-		strcpy(pwidth, "21.0c");
-		strcpy(pheight, "29.7c");
+		strcpy_s(pwidth,  ssize, "21.0c");
+		strcpy_s(pheight, ssize, "29.7c");
 	} else if (!strcmp(pagesize.value(), "a5")) {
-		strcpy(pwidth, "14.8c");
-		strcpy(pheight, "21.0c");
+		strcpy_s(pwidth,  ssize, "14.8c");
+		strcpy_s(pheight, ssize, "21.0c");
 	} else if (!strcmp(pagesize.value(), "b4")) {
-		strcpy(pwidth, "25.0c");
-		strcpy(pheight, "35.4c");
+		strcpy_s(pwidth,  ssize, "25.0c");
+		strcpy_s(pheight, ssize, "35.4c");
 	} else if (!strcmp(pagesize.value(), "b5")) {
-		strcpy(pwidth, "18.2c");
-		strcpy(pheight, "25.7c");
+		strcpy_s(pwidth,  ssize, "18.2c");
+		strcpy_s(pheight, ssize, "25.7c");
 	} else if (!strcmp(pagesize.value(), "tabloid")) {
-		strcpy(pwidth, "11.0i");
-		strcpy(pheight, "17.0i");
+		strcpy_s(pwidth,  ssize, "11.0i");
+		strcpy_s(pheight, ssize, "17.0i");
 	} else if (!strcmp(pagesize.value(), "ledger")) {
-		strcpy(pwidth, "17.0i");
-		strcpy(pheight, "11.0i");
+		strcpy_s(pwidth,  ssize, "17.0i");
+		strcpy_s(pheight, ssize, "11.0i");
 	} else if (!strcmp(pagesize.value(), "legal")) {
-		strcpy(pwidth, "8.5i");
-		strcpy(pheight, "14.0i");
+		strcpy_s(pwidth,  ssize, "8.5i");
+		strcpy_s(pheight, ssize, "14.0i");
 	} else if (!strcmp(pagesize.value(), "statement")) {
-		strcpy(pwidth, "5.5i");
-		strcpy(pheight, "8.5i");
+		strcpy_s(pwidth,  ssize, "5.5i");
+		strcpy_s(pheight, ssize, "8.5i");
 	} else if (!strcmp(pagesize.value(), "executive")) {
-		strcpy(pwidth, "7.25i");
-		strcpy(pheight, "10.5i");
+		strcpy_s(pwidth,  ssize, "7.25i");
+		strcpy_s(pheight, ssize, "10.5i");
 	} else if (!strcmp(pagesize.value(), "folio")) {
-		strcpy(pwidth, "8.5i");
-		strcpy(pheight, "13.0i");
+		strcpy_s(pwidth,  ssize, "8.5i");
+		strcpy_s(pheight, ssize, "13.0i");
 	} else if (!strcmp(pagesize.value(), "quarto")) {
-		strcpy(pwidth, "21.5c");
-		strcpy(pheight, "27.5c");
+		strcpy_s(pwidth,  ssize, "21.5c");
+		strcpy_s(pheight, ssize, "27.5c");
 	} else if (!strcmp(pagesize.value(), "10x14")) {
-		strcpy(pwidth, "10.0i");
-		strcpy(pheight, "14.0i");
+		strcpy_s(pwidth,  ssize, "10.0i");
+		strcpy_s(pheight, ssize, "14.0i");
 	} else if (!strcmp(pagesize.value(), "note")) {
-		strcpy(pwidth, "8.5i");
-		strcpy(pheight, "11.0i");
+		strcpy_s(pwidth,  ssize, "8.5i");
+		strcpy_s(pheight, ssize, "11.0i");
 	} else if (!strcmp(pagesize.value(), "env_9")) {
-		strcpy(pwidth, "3.875i");
-		strcpy(pheight, "8.875i");
+		strcpy_s(pwidth,  ssize, "3.875i");
+		strcpy_s(pheight, ssize, "8.875i");
 	} else if (!strcmp(pagesize.value(), "env_10")) {
-		strcpy(pwidth, "4.125i");
-		strcpy(pheight, "9.5i");
+		strcpy_s(pwidth,  ssize, "4.125i");
+		strcpy_s(pheight, ssize, "9.5i");
 	} else if (!strcmp(pagesize.value(), "env_11")) {
-		strcpy(pwidth, "4.5i");
-		strcpy(pheight, "10.375i");
+		strcpy_s(pwidth,  ssize, "4.5i");
+		strcpy_s(pheight, ssize, "10.375i");
 	} else if (!strcmp(pagesize.value(), "env_14")) {
-		strcpy(pwidth, "5.0i");
-		strcpy(pheight, "11.5i");
+		strcpy_s(pwidth,  ssize, "5.0i");
+		strcpy_s(pheight, ssize, "11.5i");
 	} else if (!strcmp(pagesize.value(), "env_dl")) {
-		strcpy(pwidth, "11.0c");
-		strcpy(pheight, "22.0c");
+		strcpy_s(pwidth,  ssize, "11.0c");
+		strcpy_s(pheight, ssize, "22.0c");
 	} else if (!strcmp(pagesize.value(), "env_c3")) {
-		strcpy(pwidth, "32.4c");
-		strcpy(pheight, "45.8c");
+		strcpy_s(pwidth,  ssize, "32.4c");
+		strcpy_s(pheight, ssize, "45.8c");
 	} else if (!strcmp(pagesize.value(), "env_c4")) {
-		strcpy(pwidth, "22.9c");
-		strcpy(pheight, "32.4c");
+		strcpy_s(pwidth,  ssize, "22.9c");
+		strcpy_s(pheight, ssize, "32.4c");
 	} else if (!strcmp(pagesize.value(), "env_c5")) {
-		strcpy(pwidth, "16.2c");
-		strcpy(pheight, "22.9c");
+		strcpy_s(pwidth,  ssize, "16.2c");
+		strcpy_s(pheight, ssize, "22.9c");
 	} else if (!strcmp(pagesize.value(), "env_c6")) {
-		strcpy(pwidth, "11.4c");
-		strcpy(pheight, "16.2c");
+		strcpy_s(pwidth,  ssize, "11.4c");
+		strcpy_s(pheight, ssize, "16.2c");
 	} else if (!strcmp(pagesize.value(), "env_b4")) {
-		strcpy(pwidth, "25.0c");
-		strcpy(pheight, "35.3c");
+		strcpy_s(pwidth,  ssize, "25.0c");
+		strcpy_s(pheight, ssize, "35.3c");
 	} else if (!strcmp(pagesize.value(), "env_b5")) {
-		strcpy(pwidth, "17.6c");
-		strcpy(pheight, "25.0c");
+		strcpy_s(pwidth,  ssize, "17.6c");
+		strcpy_s(pheight, ssize, "25.0c");
 	} else if (!strcmp(pagesize.value(), "env_b6")) {
-		strcpy(pwidth, "17.6c");
-		strcpy(pheight, "12.5c");
+		strcpy_s(pwidth,  ssize, "17.6c");
+		strcpy_s(pheight, ssize, "12.5c");
 	} else if (!strcmp(pagesize.value(), "env_italy")) {
-		strcpy(pwidth, "11.0c");
-		strcpy(pheight, "23.0c");
+		strcpy_s(pwidth,  ssize, "11.0c");
+		strcpy_s(pheight, ssize, "23.0c");
 	} else if (!strcmp(pagesize.value(), "env_monarch")) {
-		strcpy(pwidth, "3.875i");
-		strcpy(pheight, "7.5i");
+		strcpy_s(pwidth,  ssize, "3.875i");
+		strcpy_s(pheight, ssize, "7.5i");
 	} else if (!strcmp(pagesize.value(), "env_personal")) {
-		strcpy(pwidth, "3.625i");
-		strcpy(pheight, "6.5i");
+		strcpy_s(pwidth,  ssize, "3.625i");
+		strcpy_s(pheight, ssize, "6.5i");
 	} else if (!strcmp(pagesize.value(), "fanfold_us")) {
-		strcpy(pwidth, "14.875i");
-		strcpy(pheight, "11.0i");
+		strcpy_s(pwidth,  ssize, "14.875i");
+		strcpy_s(pheight, ssize, "11.0i");
 	} else if (!strcmp(pagesize.value(), "fanfold_std_german")) {
-		strcpy(pwidth, "8.5i");
-		strcpy(pheight, "12.0i");
+		strcpy_s(pwidth,  ssize, "8.5i");
+		strcpy_s(pheight, ssize, "12.0i");
 	} else if (!strcmp(pagesize.value(), "fanfold_lgl_german")) {
-		strcpy(pwidth, "8.5i");
-		strcpy(pheight, "13.0i");
+		strcpy_s(pwidth,  ssize, "8.5i");
+		strcpy_s(pheight, ssize, "13.0i");
 	} else if (!strcmp(pagesize.value(), "iso_b4")) {
-		strcpy(pwidth, "25.0c");
-		strcpy(pheight, "35.3c");
+		strcpy_s(pwidth,  ssize, "25.0c");
+		strcpy_s(pheight, ssize, "35.3c");
 	} else if (!strcmp(pagesize.value(), "japanese_postcard")) {
-		strcpy(pwidth, "10.0c");
-		strcpy(pheight, "14.8c");
+		strcpy_s(pwidth,  ssize, "10.0c");
+		strcpy_s(pheight, ssize, "14.8c");
 	} else if (!strcmp(pagesize.value(), "9x11")) {
-		strcpy(pwidth, "9.0i");
-		strcpy(pheight, "11.0i");
+		strcpy_s(pwidth,  ssize, "9.0i");
+		strcpy_s(pheight, ssize, "11.0i");
 	} else if (!strcmp(pagesize.value(), "10x11")) {
-		strcpy(pwidth, "10.0i");
-		strcpy(pheight, "11.0i");
+		strcpy_s(pwidth,  ssize, "10.0i");
+		strcpy_s(pheight, ssize, "11.0i");
 	} else if (!strcmp(pagesize.value(), "15x11")) {
-		strcpy(pwidth, "15.0i");
-		strcpy(pheight, "11.0i");
+		strcpy_s(pwidth,  ssize, "15.0i");
+		strcpy_s(pheight, ssize, "11.0i");
 	} else if (!strcmp(pagesize.value(), "env_invite")) {
-		strcpy(pwidth, "22.0c");
-		strcpy(pheight, "22.0c");
+		strcpy_s(pwidth,  ssize, "22.0c");
+		strcpy_s(pheight, ssize, "22.0c");
 	} else if (!strcmp(pagesize.value(), "a_plus")) {
-		strcpy(pwidth, "22.7c");
-		strcpy(pheight, "35.6c");
+		strcpy_s(pwidth,  ssize, "22.7c");
+		strcpy_s(pheight, ssize, "35.6c");
 	} else if (!strcmp(pagesize.value(), "b_plus")) {
-		strcpy(pwidth, "30.5c");
-		strcpy(pheight, "48.7c");
+		strcpy_s(pwidth,  ssize, "30.5c");
+		strcpy_s(pheight, ssize, "48.7c");
+	} else {
+		// default
+		strcpy_s(pwidth,  ssize, "8.5i");
+		strcpy_s(pheight, ssize, "11.0i");
 	}
 	if (options->swapHW) {
-		char psave[20];
-		strcpy(psave, pwidth);
-		strcpy(pwidth, pheight);
-		strcpy(pheight, psave);
+		char psave[ssize];
+		strcpy_s(psave,ssize, pwidth);
+		strcpy_s(pwidth, ssize,pheight);
+		strcpy_s(pheight, ssize,psave);
 	}
 
 	canvasCreate();
@@ -1082,6 +1084,7 @@ drvTK::~drvTK()
 	}
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
+	options=0;
 }
 
 void drvTK::print_coords()
@@ -1136,7 +1139,7 @@ void drvTK::show_text(const TextInfo & textinfo)
 	char *i;
 	int actualFontSize;
 
-	strcpy(tempfontname, textinfo.currentFontName.value());
+	strcpy_s(tempfontname, 1024, textinfo.currentFontName.value());
 	i = strchr(tempfontname, '-');
 	if (i != NIL) {
 		*i = '\0';

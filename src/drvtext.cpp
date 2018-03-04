@@ -3,7 +3,7 @@
    Skeleton for the implementation of text based backends
    for example this could be extended towards an HTML backend.
 
-   Copyright (C) 1993 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,16 +81,16 @@ drvTEXT::~drvTEXT()
 // and writing of trailer to output file
 	if (options->dumptextpieces) {
 		outf << "Sample trailer \n";
-	} else {
-		if (charpage) {
-			for (unsigned int i = 0; i < (unsigned int) options->pageheight; i++) {
-				delete[]charpage[i];
-				charpage[i] = 0;
-			}
-			delete[]charpage;
-			charpage = 0;
+	} 
+	if (charpage) {
+		for (unsigned int i = 0; i < (unsigned int) options->pageheight; i++) {
+			delete[]charpage[i];
+			charpage[i] = 0;
 		}
+		delete[]charpage;
+		charpage = 0;
 	}
+	options=0;
 }
 
 void drvTEXT::open_page()
@@ -162,6 +162,7 @@ void drvTEXT::show_text(const TextInfo & textinfo)
 		}
 		if (!inserted) {
 			Line *newline = new Line;
+			//lint -esym(429,newline) // newline is not freed here, but inserted into the list
 			page.insert(newline);
 			newline->y_max = textinfo.y + 0.1f * textinfo.currentFontSize;
 			newline->y_min = textinfo.y - 0.1f * textinfo.currentFontSize;

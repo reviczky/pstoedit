@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2005  Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1999 - 2006  Wolfgang Glunz, wglunz34_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,6 +24,13 @@
 
 #include "subpath.h"
 #include <float.h>
+
+// it would be much effort to check path in all situations. Normally it is OK.
+//lint -esym(613,sub_path::path)  // possibly use of null pointer 
+//lint -esym(794,sub_path::path)  // possibly use of null pointer 
+//lint -esym(613,sub_path_list::paths)
+//lint -esym(613,sub_path::points)
+//lint -esym(794,sub_path::points)
 
 static inline const Point & end_point(const basedrawingelement * e)
 {
@@ -280,7 +287,7 @@ bool sub_path::point_inside(const Point & p) const
 
 // Check if *this is inside of another path
 
-bool sub_path::is_inside_of(const sub_path & other)
+bool sub_path::is_inside_of(const sub_path & other) const
 {
 	unsigned int inside = 0;
 	unsigned int outside = 0;
@@ -388,8 +395,8 @@ void sub_path_list::read(const drvbase::PathInfo & path_info)
 }
 
 
-static float get_min_distance(basedrawingelement ** p1,
-							  basedrawingelement ** p2,
+static float get_min_distance( basedrawingelement * const * p1,
+							   basedrawingelement * const * p2,
 							  unsigned int size1,
 							  unsigned int size2, unsigned int &index1, unsigned int &index2)
 {
@@ -403,9 +410,9 @@ static float get_min_distance(basedrawingelement ** p1,
 				if (p1[i]->getType() != closepath) {
 					const float tmp1 = point1.x_ - point2.x_;
 					const float tmp2 = point1.y_ - point2.y_;
-					const float distance = tmp1 * tmp1 + tmp2 * tmp2;
-					if (distance < ret) {
-						ret = distance;
+					const float pdistance = tmp1 * tmp1 + tmp2 * tmp2;
+					if (pdistance < ret) {
+						ret = pdistance;
 						index1 = i;
 						index2 = j;
 					}
@@ -417,10 +424,8 @@ static float get_min_distance(basedrawingelement ** p1,
 }
 
 static void
-insert_subpath(basedrawingelement **
-			   parent_path,
-			   basedrawingelement **
-			   child_path,
+insert_subpath( basedrawingelement **  parent_path,
+			    basedrawingelement * const *  child_path,
 			   unsigned int parent_size,
 			   unsigned int child_size, unsigned int parent_index, unsigned int child_index)
 {
@@ -450,16 +455,12 @@ insert_subpath(basedrawingelement **
 
 void drvbase::PathInfo::rearrange()
 {
-	unsigned int i, j, k;
-	unsigned int tmp_num;
 	unsigned int test_parent_index, test_child_index;
 	unsigned int parent_index = 0, child_index = 0;
-	float min_distance;
-	float test_distance;
 	//  write(*this);
 	sub_path_list list;
-	sub_path *parent = 0;
-	sub_path *child = (sub_path *) 0;
+	sub_path *child  = (sub_path *) 0;
+	sub_path *parent = (sub_path *) 0;
 	//  cerr << "Reading subpaths" << endl;
 	list.read(*this);			// Read the list from this
 	//  cerr << "Searching for parents" << endl;
@@ -469,25 +470,25 @@ void drvbase::PathInfo::rearrange()
 	clear();					// Clear the path
 	//  cerr << "Rearranging path" << endl;
 	// Write the elements back
-	tmp_num = 0;
-	for (i = 0; i < list.num_paths; i++) {
+	unsigned int tmp_num = 0;
+	{for (unsigned int i = 0; i < list.num_paths; i++) {
 		// Find the next parent
 
 		if (list.paths[i].parent)
 			continue;
 		parent = &list.paths[i];
 		// Copy the elements of the parent path
-		for (j = 0; j < parent->num_elements; j++)
-			path[tmp_num + j] = parent->path[j];
+		{for (unsigned int j = 0; j < parent->num_elements; j++)
+			path[tmp_num + j] = parent->path[j];}
 		tmp_num += parent->num_elements;
-		for (j = 0; j < parent->num_children; j++) {
+		{for (unsigned int j = 0; j < parent->num_children; j++) {
 			// In this loop, we find the closest child and
 			// insert it into the path
-			min_distance = FLT_MAX;
-			for (k = 0; k < parent->num_children; k++) {
+			float min_distance = FLT_MAX;
+			for (unsigned int k = 0; k < parent->num_children; k++) {
 				if (parent->children[k]->flags & PS_PATH_IS_CONNECTED)
 					continue;
-				test_distance =
+				const float test_distance =
 					get_min_distance(&path
 									 [numberOfElementsInPath],
 									 parent->children[k]->path,
@@ -502,28 +503,31 @@ void drvbase::PathInfo::rearrange()
 					child = parent->children[k];
 				}
 			}
-			insert_subpath(path, child->path, tmp_num,
+//			assert(child != 0 && "fatal error in pstoedit::subpath.cpp::drvbase::PathInfo::rearrange");
+			if (child) {
+				insert_subpath(path, child->path, tmp_num,
 						   child->num_elements, parent_index + numberOfElementsInPath, child_index);
-			child->flags |= PS_PATH_IS_CONNECTED;
-			tmp_num += child->num_elements + 2;
-		}
+				child->flags |= PS_PATH_IS_CONNECTED;
+				tmp_num += child->num_elements + 2;
+			}
+		}}
 		numberOfElementsInPath = tmp_num;
-	}
+	} }
 
 	// Remove duplicate linetos
 
-	for (i = 0; i + 1 < numberOfElementsInPath; i++) {
+	{for (unsigned int i = 0; i + 1 < numberOfElementsInPath; i++) {
 		if ((path[i]->getType() == lineto)
 			&& (path[i + 1]->getType() == lineto)) {
 			const Point & pp1 = path[i]->getPoint(0);
 			const Point & pp2 = path[i + 1]->getPoint(0);
 			if ((pp1.x_ == pp2.x_) && (pp1.y_ == pp2.y_)) {
 				delete path[i];
-				for (j = i; j + 1 < numberOfElementsInPath; j++)
+				for (unsigned int j = i; j + 1 < numberOfElementsInPath; j++)
 					path[j] = path[j + 1];
 				numberOfElementsInPath--;
 			}
 		}
-	}
+	}}
 	//  write(*this);
 }

@@ -2,7 +2,7 @@
    drvPDF.cpp : This file is part of pstoedit
    Backend for PDF(TM) format
 
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

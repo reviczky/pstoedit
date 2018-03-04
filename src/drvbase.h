@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -338,7 +338,7 @@ protected:
 	RSString       	outBaseName; 	// just the basename (no path, no suffix)
 	unsigned int	d_argc;
 	const char **			d_argv; // array of driver argument strings
-	const class PsToEditOptions & globaloptions; 
+	class PsToEditOptions & globaloptions; /* non const because driver can also add an option during ctor */
 	float           currentDeviceHeight; // normally 792 pt (US Letter); used for flipping y values.
 	float           currentDeviceWidth;  
 	float           x_offset;
@@ -381,7 +381,7 @@ public:
 		ostream & theerrStream,		
 		const char* nameOfInputFile_p,
 		const char* nameOfOutputFile_p,
-		const PsToEditOptions & globaloptions_p,
+		PsToEditOptions & globaloptions_p,
 		const DriverDescription * Pdriverdesc_p
 	); // constructor
 	virtual ~drvbase();  		// destructor
@@ -828,7 +828,7 @@ typedef drawingelement<(unsigned int) 3,curveto> 	Curveto;
 	       ostream & theerrStream, 			\
 		   const char* nameOfInputFile_p,	\
 	       const char* nameOfOutputFile_p,	\
-		   const PsToEditOptions & globaloptions_p,		\
+		   PsToEditOptions & globaloptions_p, /* non const because driver can also add options */ 		\
 		   const DriverDescription * descptr)	
 
 #define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descptr), options((DriverOptions*)DOptions_ptr)
@@ -943,13 +943,13 @@ public:
 			 ostream & theerrStream,   
 			 const char* const nameOfInputFile,
 		     const char* const nameOfOutputFile,
-			 const PsToEditOptions & globaloptions_p
+			 PsToEditOptions & globaloptions_p
 			 ) const = 0;
 	virtual ProgramOptions * createDriverOptions() const = 0;
 
 	virtual unsigned int getdrvbaseVersion() const { return 0; } // this is only needed for the driverless backends (ps/dump/gs)
 
-	const char * const additionalInfo() const;
+	const char * additionalInfo() const;
  // Data members
 	const char * const symbolicname;
 	const char * const short_explanation;
@@ -1022,7 +1022,7 @@ public:
 		    ostream & theerrStream,   
 			const char* const nameOfInputFile,
 	       	const char* const nameOfOutputFile,
-			const PsToEditOptions & globaloptions_p
+			PsToEditOptions & globaloptions_p /* non const because driver can also add arguments */
 			 ) const
 	{ 
 		drvbase * backend = new T(driveroptions_P, theoutStream, theerrStream,nameOfInputFile,nameOfOutputFile, globaloptions_p,this); 

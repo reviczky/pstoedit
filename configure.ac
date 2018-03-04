@@ -10,10 +10,10 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.60,wglunz35_AT_pstoedit.net)
+AC_INIT(pstoedit,3.61,wglunz35_AT_pstoedit.net)
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.60)
+AM_INIT_AUTOMAKE(pstoedit,3.61)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)

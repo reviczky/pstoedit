@@ -6,7 +6,7 @@
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz@pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

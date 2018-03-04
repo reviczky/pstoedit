@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify

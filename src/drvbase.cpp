@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,7 +81,7 @@ drvbase::drvbase(const char *driveroptions_p, ostream & theoutStream,
 				 ostream & theerrStream,
 				 const char *nameOfInputFile_p,
 				 const char *nameOfOutputFile_p,
-				 const PsToEditOptions & globaloptions_p, 
+				 PsToEditOptions & globaloptions_p, 
 				 const DriverDescription * Pdriverdesc_p)
 :								// constructor
 Pdriverdesc(Pdriverdesc_p), 
@@ -1433,7 +1433,7 @@ checkfunc(checkfunc_p)
 	registry.registerDriver(this);
 }
 
-const char * const DriverDescription::additionalInfo() const {
+const char * DriverDescription::additionalInfo() const {
 	return ((checkfunc != 0) ? (checkfunc()? "" : "(license key needed, see pstoedit manual)") : "");
 }
 

@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -679,58 +679,7 @@ drvDXF::derivedConstructor(drvDXF):
 		header_postlayer = dxf9shortheader_postlayer;
 		trailer = dxf9shorttrailer;
 	}
-#if 0
-	if (d_argc > 0) {
-		if (Verbose())
-			errf << "% Driver options:" << endl;
-		for (unsigned int i = 0; i < d_argc; i++) {
-			assert(d_argv && d_argv[i]);
-			if (Verbose())
-				errf << "% " << d_argv[i] << endl;
-			if (strcmp(d_argv[i], "-polyaslines") == 0) {
-				polyaslines = 1;
-			} else if (strcmp(d_argv[i], "-mm") == 0) {
-				mm = true;
-			} else if (strcmp(d_argv[i], "-ctl") == 0) {
-				colorsToLayers = true;
-			} else if (strcmp(d_argv[i], "-splineasbezier") == 0) {
-				splinemode = asbezier;
-				formatis14 = true;
-				if (!withcurves) errf << "Option -splineasbezier ignored - only valid for dxf_c format" << endl;
-			} else if (strcmp(d_argv[i], "-splineaspolyline") == 0) {
-				splinemode = aspolyline;	formatis14 = true;
-				if (!withcurves) errf << "Option -splineaspolyline ignored - only valid for dxf_c format" << endl;
-			} else if (strcmp(d_argv[i], "-splineasnurb") == 0) {
-				splinemode = asnurb;		formatis14 = true;
-				if (!withcurves) errf << "Option -splineasmultispline ignored - only valid for dxf_c format" << endl;
-			} else if (strcmp(d_argv[i], "-splineasbspline") == 0) {
-				splinemode = asbspline;		formatis14 = true;
-				if (!withcurves) errf << "Option -splineasmultispline ignored - only valid for dxf_c format" << endl;
-			} else if (strcmp(d_argv[i], "-splineasmultispline") == 0) {
-				splinemode = asmultispline;	formatis14 = true;
-				if (!withcurves) errf << "Option -splineasmultispline ignored - only valid for dxf_c format" << endl;
-			} else if (strcmp(d_argv[i], "-splineassinglespline") == 0) {
-				splinemode = assinglespline;formatis14 = true;
-				if (!withcurves) errf << "Option -splineassinglespline ignored - only valid for dxf_c format" << endl;
-			} else if (strcmp(d_argv[i], "-splineprecision") == 0) {
-				i++;
-				if (i >= d_argc) {
-					errf << "-splineprecision requires a numeric argument >= 2 " << endl;
-				} else {
-					const int argi = atoi(d_argv[i]);
-					if (argi < 2) {
-						errf << "splineprecision argument should be >=2. Set to 2" << endl;
-						splineprecision = 2;
-					} else {
-						splineprecision = (unsigned int) argi;
-					}
-				}
-			} else {
-				errf << "unknown option " << d_argv[i] << " ignored " << endl;
-			}
-		}
-	}
-#endif
+
 			if (options->splineasbezier) {
 				splinemode = asbezier;
 				formatis14 = true;
@@ -775,7 +724,7 @@ drvDXF::derivedConstructor(drvDXF):
 		}
 	} else {
 		//
-		// unfortunately we cannot write the $MEASUREMENT statement in to old style files
+		// unfortunately we cannot write the $MEASUREMENT statement into old style files
 		// otherwise voloview does not accept the file
 		//
 		// so this may lead to "wrong" scaling. The -mm option turns on mm, but the file is 

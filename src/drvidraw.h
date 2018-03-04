@@ -6,7 +6,7 @@
    Backend for idraw files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,13 +58,11 @@ private:
   } color[IDRAW_NUMCOLORS];
 
   // Scale a PostScript value to an idraw value
-#if 0
-  inline const float iscale(float invalue) const { return invalue; }
-#else
-  inline const unsigned int iscale(float invalue) const {
+
+  inline  unsigned int iscale(float invalue) const {
      return (unsigned int) (invalue/IDRAW_SCALING + 0.5);
   }
-#endif
+
 private:
 
      //  int           objectId;

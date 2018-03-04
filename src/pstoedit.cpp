@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure 
 
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -378,7 +378,7 @@ extern "C" DLLEXPORT
 	if (!options.quiet) {
 		errstream << "pstoedit: version " << version << " / DLL interface " <<
 		drvbaseVersion << " (built: " << __DATE__ << " - " << buildtype << " - " << compversion << ")" 
-		" : Copyright (C) 1993 - 2011 Wolfgang Glunz\n";
+		" : Copyright (C) 1993 - 2012 Wolfgang Glunz\n";
 	}
 
 	//  handling of derived parameters
@@ -877,6 +877,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				const char *successstring;	// string that indicated success of .pro
 				ofstream inFileStream(gsin.value());
 				inFileStream << "/pstoedit.pagetoextract " << options.pagetoextract << " def" << endl;
+				inFileStream << "/pstoedit.versioninfo (" << version << " " << compversion << ") def" << endl;
 				if (options.nomaptoisolatin1) {
 					inFileStream << "/pstoedit.maptoisolatin1 false def" << endl;
 				}
@@ -921,6 +922,9 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					inFileStream << "/pstoedit.textastext false def" << endl;
 				} else {
 					inFileStream << "/pstoedit.textastext true def" << endl;
+				}
+				if (options.DrawGlyphBitmaps) {
+					inFileStream << "/pstoedit.DrawGlyphBitmaps true def" << endl;
 				}
 				if (options.disabledrawtext) {
 					inFileStream << "/pstoedit.disabledrawtext true def" << endl;
@@ -1148,12 +1152,23 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				if (options.verbose) {
 					commandline.addarg("-dESTACKPRINT");
 				}
+
 				if (options.withdisplay) {
 					commandline.addarg("-dNOPAUSE");
 				} else {
-					commandline.addarg("-dNODISPLAY");
+					if (options.pngimage.value.value()) {
+						commandline.addarg("-dNOPAUSE");
+						commandline.addarg("-dBATCH");
+						commandline.addarg("-sDEVICE=png16m");
+						RSString tempbuffer = "-sOutputFile=";
+						tempbuffer +=  options.pngimage.value;
+						commandline.addarg(tempbuffer.value());
+					} else {
+						commandline.addarg("-dNODISPLAY");
+					}
 				}
 				commandline.addarg("-dNOEPS"); // otherwise EPSF files create implicit showpages and a save/restore pair which disturbs the setPageSize handling
+
 				for (unsigned int psi = 0; psi < options.psArgs().argc; psi++) {
 					commandline.addarg(options.psArgs().argv[psi]);
 				}

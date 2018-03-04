@@ -4,7 +4,7 @@
    psfront.h : This file is part of pstoedit
    contains the class responsible for reading the dumped PostScript format
   
-   Copyright (C) 1993 - 2011 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2012 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,7 +40,7 @@ class PSFrontEnd {
 public:
 	PSFrontEnd(ostream & outfile_p, 
 			ostream & errstream,
-			const PsToEditOptions & globaloptions_p,
+			PsToEditOptions & globaloptions_p,
 			const char * infilename_p = 0,
 			const char * outfilename_p = 0, 
 			const DriverDescription * driverDesc = 0, 
@@ -73,7 +73,7 @@ private:
 	ostream &	errf;           // the error stream
 	const char * 	infilename;	
 	const char * 	outfilename;
-	const PsToEditOptions & globaloptions;
+	PsToEditOptions & globaloptions;
 	const DriverDescription * driverDesc;
 	const char * 	driveroptions;
 	const bool	splitpages;

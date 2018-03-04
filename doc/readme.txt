@@ -42,11 +42,20 @@ make
 make install; 
 
 
-Note - currently support for SWF needs version 0.3 or higher of ming. Version 0.2 does not work
+Support for SWF needs version 0.3 or higher of ming. Version 0.2 does not work
 
 
 There are several test cases included. To run them type `make test'.
 This works under *nix only.
+
+
+When building pstoedit under cygwin/Linux you may need to set LDFLAGS to /usr/local/lib in case you have some libraries (e.g. libEMF) installed there.
+
+Under some systems (e.g. cygwin) it is not possible to link static libraries (.a) into a dynamic library (.so/.dll). In this case, you need to have also a shared version of the relevant libs, e.g. of libEMF. In order to get a shared version, you normally need to set the option "--enabled-shared" during the "configure" run for the library.
+
+
+A note about libemf. Unfortunately this library seems to be no longer maintained by the original author. I have done some smaller changes - mainly compiler and OS adaptations - and put my version under http://sourceforge.net/projects/pstoedit in the download section. In the long term I will try to put the changes under libemf.sourceforge.net - but I haven't been able to contact the admin of that project so far.
+
 
 Installing pstoedit under Windows 9x/NT/2000/XP:
 -----------------------------------------------

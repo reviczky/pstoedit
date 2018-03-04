@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man.pl on Thu Jan  6 21:58:04 WEST 2005
+.\" Manual page created with latex2man.pl on Sun Aug  7 21:54:11 WEDT 2005
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "January 2005" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "August 2005" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -91,7 +91,7 @@ details.
 .PP
 .SS RELEASE LEVEL
 .PP
-This manpage documents release 3.40 of pstoedit\&.
+This manpage documents release 3.41 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -555,6 +555,10 @@ No driver specific options
  write raster images to separate files instead of embedding them 
 .PP
 .TP
+[\fB\-notextrendering\fP]
+ do not write textrendering attribute 
+.PP
+.TP
 [\fB\-border\fP\fI number\fP]
  additional border to draw around bare bounding box (in percent of width and height) 
 .PP
@@ -597,6 +601,10 @@ No driver specific options
  debug option \- keep the embedded bitmaps as external files 
 .PP
 .TP
+[\fB\-useoldpolydraw\fP]
+ do not use Windows PolyDraw but an emulation of it \- sometimes needed for certain programs reading the EMF files 
+.PP
+.TP
 [\fB\-OO\fP]
  generate OpenOffice compatible EMF file 
 .PP
@@ -626,6 +634,10 @@ No driver specific options
  debug option \- keep the embedded bitmaps as external files 
 .PP
 .TP
+[\fB\-useoldpolydraw\fP]
+ do not use Windows PolyDraw but an emulation of it \- sometimes needed for certain programs reading the EMF files 
+.PP
+.TP
 [\fB\-OO\fP]
  generate OpenOffice compatible EMF file 
 .PP
@@ -653,6 +665,10 @@ No driver specific options
 .TP
 [\fB\-keepimages\fP]
  debug option \- keep the embedded bitmaps as external files 
+.PP
+.TP
+[\fB\-useoldpolydraw\fP]
+ do not use Windows PolyDraw but an emulation of it \- sometimes needed for certain programs reading the EMF files 
 .PP
 .TP
 [\fB\-OO\fP]
@@ -708,6 +724,8 @@ No driver specific options
 [\fB\-debug\fP]
  enable debug output 
 .PP
+.SS asy \- Asymptote Format
+No driver specific options 
 .SS dxf \- CAD exchange format
 .TP
 [\fB\-polyaslines\fP]
@@ -962,6 +980,10 @@ No driver specific options
 [\fB\-nb\fP]
  do not calculate and write bounding box 
 .PP
+.TP
+[\fB\-OO\fP]
+ generate OpenOffice compatible EMF file 
+.PP
 .SS emf \- Enhanced Windows metafile
 .TP
 [\fB\-m\fP]
@@ -986,6 +1008,10 @@ No driver specific options
 .TP
 [\fB\-nb\fP]
  do not calculate and write bounding box 
+.PP
+.TP
+[\fB\-OO\fP]
+ generate OpenOffice compatible EMF file 
 .PP
 .SH NOTES
 

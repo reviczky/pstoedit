@@ -38,25 +38,21 @@ static inline const Point & end_point(const basedrawingelement * e)
 
 static void write(const basedrawingelement & e, ostream & o)
 {
-	Point p;
-	Dtype type = e.getType();
+	const Dtype type = e.getType();
 	if (type == moveto) {
-		p = e.getPoint(0);
+		const Point& p = e.getPoint(0);
 		o << p.x_ << " " << p.y_ << " moveto" << endl;
-	}
-	if (type == lineto) {
-		p = e.getPoint(0);
+	} else if (type == lineto) {
+		const Point& p = e.getPoint(0);
 		o << p.x_ << " " << p.y_ << " lineto" << endl;
-	}
-	if (type == curveto) {
-		p = e.getPoint(0);
+	} else if (type == curveto) {
+		const Point& p = e.getPoint(0);
 		o << p.x_ << " " << p.y_ << " ";
 		p = e.getPoint(1);
 		o << p.x_ << " " << p.y_ << " ";
 		p = e.getPoint(2);
 		o << p.x_ << " " << p.y_ << " curveto" << endl;
-	}
-	if (type == closepath) {
+	} else if (type == closepath) {
 		o << "closepath" << endl;
 	}
 }
@@ -70,41 +66,44 @@ static void write(const drvbase::PathInfo & p)
 
 #endif
 
-sub_path::sub_path() {
-    flags = 0;
-    num_elements = 0;
-    num_points = 0;
-    num_children = 0;
-    num_outside = 0;
+sub_path::sub_path()
+{
+	flags = 0;
+	num_elements = 0;
+	num_points = 0;
+	num_children = 0;
+	num_outside = 0;
 
-    // pointers
-    children = 0;
-    path = 0;
-    points = 0;
-    parents = 0;
+	// pointers
+	children = 0;
+	path = 0;
+	points = 0;
+	parents = 0;
 	parent = 0;
 
 	llx = FLT_MAX;
 	lly = FLT_MAX;
 	urx = -FLT_MAX;
 	ury = -FLT_MAX;
-  }
+}
 
 void sub_path::clean()
 {
-	// The moveto is always the first element of
-	//   the subpath
-	const Point & p = path[0]->getPoint(0);
-	basedrawingelement *newLineto = new Lineto(p.x_, p.y_);
-	// Now we can delete the path element, we no longer need p (& !!)
-	delete path[0];
-	path[0] = newLineto;
+	{
+		// The moveto is always the first element of the subpath
+		const Point & p = path[0]->getPoint(0);
+		basedrawingelement *newLineto = new Lineto(p.x_, p.y_);
+		// Now we can delete the path element, we no longer need p (& !!)
+		delete path[0];
+		path[0] = newLineto;
+	}
 	// Replace a final closepath with a lineto
 	if (path[num_elements - 1]->getType() == closepath) {
-		const Point & p1 = path[0]->getPoint(0);
-		newLineto = new Lineto(p1.x_, p1.y_);
+		const Point & p = path[0]->getPoint(0);
+		basedrawingelement *newLineto = new Lineto(p.x_, p.y_);
+		// Now we can delete the path element, we no longer need p (& !!)
 		delete path[num_elements - 1];
-		path[num_elements - 1] = new Lineto(p1.x_, p1.y_);
+		path[num_elements - 1] = newLineto;
 	}
 
 }
@@ -139,7 +138,7 @@ int sub_path::read(const drvbase::PathInfo & main_path, int start)
 
 	// Count the number of elements is this path
 
-	while (1) {
+	while (true) {
 		if (start + num_elements == main_path.numberOfElementsInPath)
 			break;
 		if (num_elements && (main_path.path[start + num_elements]->getType() == moveto))
@@ -203,19 +202,7 @@ static inline double ddet(const double a11, const double a12, const double a21, 
 	return a11 * a22 - a21 * a12;
 }
 
-#if 0
-// The following macros make just the code easier to read
-#define __det(a11,a12,a21,a22) ((a11)*(a22)-(a21)*(a12))
 
-#define x1 (-1.0)
-#define y1 (-1.0)
-#define x2 (p.x_)
-#define y2 (p.y_)
-#define x3 (points[i].x_)
-#define y3 (points[i].y_)
-#define x4 (points[i+1].x_)
-#define y4 (points[i+1].y_)
-#endif
 
 // Check if a Point is inside of *this
 
@@ -290,17 +277,6 @@ bool sub_path::point_inside(const Point & p) const
 	return (crossings & 1) ? true : false;
 }
 
-#if 0
-#undef x1
-#undef x2
-#undef x3
-#undef x4
-#undef y1
-#undef y2
-#undef y3
-#undef y4
-
-#endif
 
 // Check if *this is inside of another path
 
@@ -420,7 +396,7 @@ static float get_min_distance(basedrawingelement ** p1,
 	float ret = FLT_MAX;
 
 	for (unsigned int i = 0; i < size1; i++) {
-		if (p1[i]->getType() != closepath) {   // wogl - inserted this check 
+		if (p1[i]->getType() != closepath) {	// wogl - inserted this check 
 			const Point & point1 = end_point(p1[i]);
 			for (unsigned int j = 0; j < size2; j++) {
 				const Point & point2 = end_point(p2[j]);

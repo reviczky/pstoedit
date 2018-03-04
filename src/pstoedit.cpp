@@ -952,13 +952,21 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 							inFileStream << "/pstoedit.imagedevicename (png16m) def" << endl;
 							inFileStream << "/pstoedit.imagefilesuffix (.png)   def" << endl; 
 							break;
+					case DriverDescription::eps : 
+							inFileStream << "/backendSupportsFileImages true def" << endl;
+							inFileStream << "/withimages true def" << endl;
+							inFileStream << "/pstoedit.imagedevicename (epswrite) def" << endl;
+							inFileStream << "/pstoedit.imagefilesuffix (.eps)   def" << endl; 
+							break;
 					case DriverDescription::memoryeps : 
 							inFileStream << "/withimages true def" << endl;
 							break;
 					default:
 							break;
 				}
-				if ((currentDriverDesc->backendDesiredImageFormat !=  DriverDescription::noimage) 					&& (!options.nameOfOutputFile) ) {
+				if ((currentDriverDesc->backendDesiredImageFormat != DriverDescription::noimage) &&
+					(currentDriverDesc->backendDesiredImageFormat != DriverDescription::memoryeps) && 
+					(!options.nameOfOutputFile) ) {
 						errstream <<
 							"Warning: some types of raster images in the input file cannot be converted if the output is sent to standard output"
 							<< endl;

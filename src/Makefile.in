@@ -64,10 +64,10 @@ am__objects_1 = drvgnplt.lo drvtgif.lo drvfig.lo drvidraw.lo
 am__objects_2 = drvsampl.lo
 am_libp2edrvstd_la_OBJECTS = initlibrary.lo drvlwo.lo drvrib.lo \
 	drvrpl.lo drvdxf.lo drvjava.lo drvjava2.lo drvpdf.lo \
-	drvkillu.lo drvtext.lo drvsk.lo drvmpost.lo drvmma.lo \
-	drvlatex2e.lo drvpic.lo drvhpgl.lo drvpcb1.lo drvpcb2.lo \
-	drvpcbfill.lo drvgschem.lo drvtk.lo $(am__objects_1) \
-	$(am__objects_2)
+	drvkillu.lo drvtext.lo drvsk.lo drvmpost.lo drvasy.lo \
+	drvmma.lo drvlatex2e.lo drvpic.lo drvhpgl.lo drvpcb1.lo \
+	drvpcb2.lo drvpcbfill.lo drvgschem.lo drvtk.lo \
+	$(am__objects_1) $(am__objects_2)
 libp2edrvstd_la_OBJECTS = $(am_libp2edrvstd_la_OBJECTS)
 libp2edrvswf_la_DEPENDENCIES = $(am__DEPENDENCIES_1) libpstoedit.la
 am_libp2edrvswf_la_OBJECTS = drvswf.lo initlibrary.lo
@@ -96,12 +96,12 @@ depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/base64writer.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/callgs.Plo ./$(DEPDIR)/cbstream.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/cmdmain.Po ./$(DEPDIR)/drvbase.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/drvdxf.Plo ./$(DEPDIR)/drvfig.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/drvgnplt.Plo ./$(DEPDIR)/drvgschem.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/drvhpgl.Plo ./$(DEPDIR)/drvidraw.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/drvjava.Plo ./$(DEPDIR)/drvjava2.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/drvkillu.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/cmdmain.Po ./$(DEPDIR)/drvasy.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/drvbase.Plo ./$(DEPDIR)/drvdxf.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/drvfig.Plo ./$(DEPDIR)/drvgnplt.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/drvgschem.Plo ./$(DEPDIR)/drvhpgl.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/drvidraw.Plo ./$(DEPDIR)/drvjava.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/drvjava2.Plo ./$(DEPDIR)/drvkillu.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/drvlatex2e.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/drvlplot.Plo ./$(DEPDIR)/drvlwo.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/drvmagick++.Plo ./$(DEPDIR)/drvmma.Plo \
@@ -311,6 +311,7 @@ libp2edrvstd_la_SOURCES = \
 	drvtext.cpp 	drvtext.h		\
 	drvsk.cpp 	drvsk.h			\
 	drvmpost.cpp 	drvmpost.h		\
+	drvasy.cpp 	drvasy.h		\
 	drvmma.cpp 	drvmma.h		\
 	drvlatex2e.cpp 	drvlatex2e.h		\
 	drvpic.cpp 	drvpic.h		\
@@ -336,8 +337,8 @@ libp2edrvmagick___la_LIBADD = -L. libpstoedit.la
 libp2edrvmagick___la_LDFLAGS = -no-undefined ${LIBMAGICK_LDFLAGS}  -module
 @USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_SOURCES = drvwmf.cpp drvwmf.h initlibrary.cpp
 @USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_SOURCES = emflib.cpp drvwmf.cpp drvwmf.h initlibrary.cpp
-@USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_LDFLAGS = -no-undefined {LIBEMF_LDFLAGS} -L. libpstoedit.la -module
-@USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_LDFLAGS = -no-undefined {LIBEMF_LDFLAGS} -L. libpstoedit.la -module
+@USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_LDFLAGS = -no-undefined $(LIBEMF_LDFLAGS) -L. libpstoedit.la -module
+@USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_LDFLAGS = -no-undefined -L. libpstoedit.la -module
 libpstoedit_la_SOURCES = \
 	dynload.cpp dynload.h			\
 	callgs.cpp				\
@@ -523,6 +524,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/callgs.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cbstream.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmdmain.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvasy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvbase.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvdxf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvfig.Plo@am__quote@

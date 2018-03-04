@@ -6,6 +6,39 @@
 	</head>
 	<body>
 		<h1 align="left">Changelog for pstoedit</h1>
+		<H2>New or changed in 3.41:</H2>
+		<UL>
+			<LI>
+				added a .asy backend for Asymptote files ( <A href="http://asymptote.sourceforge.net/">
+					http://asymptote.sourceforge.net/</A>
+			). Thanks to John Bowman
+			<LI>
+				fixed three bugs (one memory leak, two other minor problems) detected by the 
+				Coverity Prevent tool&nbsp;(<A href="http://www.coverity.com/">http://www.coverity.com/</A>)
+			<LI>
+			PostScript frontend: fixed a bug in tracing the bounding box of raster images.
+			<LI>
+			updated gsdll.h to newer version in order to avoid misunderstandings with 
+			respect to license.
+			<LI>
+			new option "-useoldpolydraw" for advanced&nbsp;(w)emf driver -&nbsp;avoid usage 
+			of the&nbsp;Windows function PolyDraw which sometimes&nbsp;creates&nbsp;EMF 
+			files which cannot be loaded (but in most cases creates&nbsp;better EMF 
+			files&nbsp;than the old mode).&nbsp;
+			<LI>
+			improved resolution in the standard and free EMF driver. Note: the WMF format 
+			is no longer supported under non-Window systems since libemf has some 
+			fundamental problems.
+			<LI>
+			The PostScript/PDF Office import&nbsp;DLL (importps) can now be used 
+			also&nbsp;within Visio (TM).&nbsp;
+			<LI>
+			fixed a bug in sub path handling - thanks to Soren Henriksen.
+			<LI>
+			fixed the handling of some special characters in the LaTeX2e format driver.
+			<LI>
+				installed a sourceforge project at&nbsp;<A href="http://sourceforge.net/projects/pstoedit">http://sourceforge.net/projects/pstoedit</A></LI>
+		</UL>
 		<H2>New or changed in 3.40:</H2>
 		<UL>
 			<LI>

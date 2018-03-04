@@ -963,8 +963,9 @@ drvplot::derivedConstructor(drvplot):constructBase
 			plotter = new TekPlotter(cin, outf, errf);
 		}
 #ifndef NO_LIBPLOTTER_X_SUPPORT
-		else if (options->type.value == "X"0)
+		else if (options->type.value == "X") {
 			plotter = new XPlotter(cin, outf, errf);
+		}
 #endif
 		else if (options->type.value == "meta") {
 			if (portable_metafile == false)
@@ -1236,7 +1237,7 @@ void drvplot::show_path()
 	set_line_style();
 	set_filling_and_edging_style();
 	print_coords();
-};
+}
 
 void drvplot::show_rectangle(const float llx, const float lly, const float urx, const float ury)
 {
@@ -1291,8 +1292,8 @@ static DriverDescriptionT < drvplot > D_plotpnm("plot-pnm", "pnm  via GNU libplo
 												DriverDescription::noimage,
 												DriverDescription::normalopen,	// may close, reopen as binary
 												true,	// format supports multiple pages in one file
-												false, /*clipping */ 
-												driveroptions);
+												false /*clipping */ 
+												);
 #endif
 //#ifndef NO_LIBPLOTTER_GIF_SUPPORT
 //      else if (strcmp (type, "gif") == 0)
@@ -1390,8 +1391,8 @@ static DriverDescriptionT < drvplot > D_plotX("plot-X", "X    via GNU libplot", 
 											  DriverDescription::noimage,
 											  DriverDescription::normalopen,	// may close, reopen as binary
 											  true,	// format supports multiple pages in one file
-											  false, /*clipping */
-											  driveroptions);
+											  false /*clipping */
+											  );
 #endif
 
 #endif							// WITHSHORTCUTS

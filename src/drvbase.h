@@ -896,7 +896,7 @@ private:
 class DLLEXPORT DriverDescription {
 public:
 	enum opentype {noopen, normalopen, binaryopen};
-	enum imageformat { noimage, png, bmp, memoryeps }; // format to be used for transfer of raster images
+	enum imageformat { noimage, png, bmp, eps, memoryeps }; // format to be used for transfer of raster images
 
 	DriverDescription(const char * const s_name, 
 			const char * const short_expl, 

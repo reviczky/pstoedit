@@ -15,8 +15,8 @@
 }}
 
 \setVersionWord{Version}  %%% that's the default, no need to set it.
-\setVersion{3.40}
-\setDate{January 2005}    
+\setVersion{3.41}
+\setDate{August 2005}    
 
 \setlength{\emergencystretch}{1.5em}
 
@@ -533,6 +533,10 @@ TeX Mode
 write raster images to separate files instead of embedding them
 
 
+\item[\oOpt{-notextrendering}] 
+do not write textrendering attribute
+
+
 \item[\oOptArg{-border}{~number}] 
 additional border to draw around bare bounding box (in percent of width and height)
 
@@ -585,6 +589,10 @@ let windows calculate the bounding box (default)
 debug option - keep the embedded bitmaps as external files 
 
 
+\item[\oOpt{-useoldpolydraw}] 
+do not use Windows PolyDraw but an emulation of it - sometimes needed for certain programs reading the EMF files
+
+
 \item[\oOpt{-OO}] 
 generate OpenOffice compatible EMF file
 
@@ -617,6 +625,10 @@ let windows calculate the bounding box (default)
 debug option - keep the embedded bitmaps as external files 
 
 
+\item[\oOpt{-useoldpolydraw}] 
+do not use Windows PolyDraw but an emulation of it - sometimes needed for certain programs reading the EMF files
+
+
 \item[\oOpt{-OO}] 
 generate OpenOffice compatible EMF file
 
@@ -647,6 +659,10 @@ let windows calculate the bounding box (default)
 
 \item[\oOpt{-keepimages}] 
 debug option - keep the embedded bitmaps as external files 
+
+
+\item[\oOpt{-useoldpolydraw}] 
+do not use Windows PolyDraw but an emulation of it - sometimes needed for certain programs reading the EMF files
 
 
 \item[\oOpt{-OO}] 
@@ -710,6 +726,9 @@ enable debug output
 
 
 \end{description}
+%%// end of options 
+\subsubsection{asy - Asymptote Format}
+No driver specific options
 %%// end of options 
 \subsubsection{dxf - CAD exchange format}
 \begin{description}
@@ -1011,6 +1030,10 @@ Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated whe
 do not calculate and write bounding box
 
 
+\item[\oOpt{-OO}] 
+generate OpenOffice compatible EMF file
+
+
 \end{description}
 %%// end of options 
 \subsubsection{emf - Enhanced Windows metafile}
@@ -1037,6 +1060,10 @@ Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated whe
 
 \item[\oOpt{-nb}] 
 do not calculate and write bounding box
+
+
+\item[\oOpt{-OO}] 
+generate OpenOffice compatible EMF file
 
 
 \end{description}

@@ -153,8 +153,10 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 		d_argc = 1;
 		while (!optstream.eof()) {
 			optstream >> currentarg;
-			d_argv[d_argc] = cppstrdup(currentarg);
-			d_argc++;
+			if (strlen(currentarg) > 0) {
+				d_argv[d_argc] = cppstrdup(currentarg);
+				d_argc++;
+			}
 		}
 		d_argv[d_argc] = 0;
 		if (verbose) {
@@ -171,7 +173,7 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 			//debug errf << "DOptions_ptr: " << (void*) DOptions_ptr << endl;
 			const unsigned int remaining = DOptions_ptr->parseoptions(errf,d_argc,d_argv);
 			if (remaining > 0) {
-				errf << "the following options could not be handled by the driver: " << endl;
+				errf << "the following " << remaining  << " options could not be handled by the driver: " << endl;
 				for (unsigned int i = 0; i < remaining; i++) {
 					errf << DOptions_ptr->unhandledOptions[i] << endl;
 				}
@@ -843,7 +845,7 @@ void drvbase::dumpRearrangedPathes()
 			if (verbose)
 				errf << "dumping subpath from " << starti << " to " << end << endl;
 			outputPath->subpathoffset = starti;
-			outputPath->numberOfElementsInPath = end - start;
+			outputPath->numberOfElementsInPath = end - starti;
 			show_path();		// from start to end
 		}
 		starti = end;

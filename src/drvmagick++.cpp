@@ -222,7 +222,7 @@ void drvMAGICK::show_path()
 
 	static const Color NoColor;	// Bob says that a default color means no-fill/no-stroke
 
-	// Construct drawing list 
+	// Construct drawing list
 #ifndef onedrawlist
 	std::list < Magick::Drawable > drawList;
 #endif

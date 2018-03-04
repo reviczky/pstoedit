@@ -281,7 +281,49 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 		} else {
 			buffer << "\\turnbox{" << textinfo.currentFontAngle << "}{";
 		}
-	buffer << textinfo.thetext.value() << '}';
+	const char * cp = textinfo.thetext.value();
+	//buffer << textinfo.thetext.value() 
+
+#if 0
+// characters to be handled specially	
+% -> \%
+# -> \#
+{ -> \{
+} -> \}
+_ -> \_
+& -> \&
+$ -> \$  
+	Tritt auch manchmal mit veränderter Bedeutung als $$ auf: --> \$\$
+
+\ -> \textbackslash
+^ -> \textasciicircum
+~ -> \textasciitilde
+
+Zusätzlich machen folgende Zeichen oft Probleme:
+
+" -> \textquotedblright
+?`-> \textquestiondown
+!`-> \textexclamdown
+#endif
+	while (cp && *cp) {
+		if ((*cp == '%') ||
+			(*cp == '#') ||
+			(*cp == '{') ||
+			(*cp == '}') ||
+			(*cp == '$') ||
+			(*cp == '_') ||
+			(*cp == '&') )
+			buffer << '\\' << *cp ; // needs to be escaped
+		else if (*cp == '\\') buffer << "\textbackslash ";
+		else if (*cp == '^')  buffer << "\textasciicircum ";
+		else if (*cp == '~')  buffer << "\textasciitilde ";
+		else if (*cp == '"')  buffer << "\textquotedblright ";
+//		else if (*cp == '\\') buffer << "\textbackslash";
+//		else if (*cp == '\\') buffer << "\textbackslash";
+		else buffer << *cp;
+		cp++;
+	}
+	buffer << '}';
 	if (textinfo.currentFontAngle)
 		buffer << '}';
 

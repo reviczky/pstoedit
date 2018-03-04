@@ -615,8 +615,8 @@ public:
 
 	~PsToEditOptions() {
 		// delete drivername.value; // this crashes under Windows (heap problem) //lint !e605
-		delete nameOfInputFile ;
-		delete nameOfOutputFile  ;	
+		delete [] nameOfInputFile ;
+		delete [] nameOfOutputFile  ;	
 	}
 
 //		AutoDeleter < char >DeleterFordrivername(drivername, true);

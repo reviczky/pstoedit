@@ -34,6 +34,7 @@ public:
 	fptr getSymbol(const char * name, int check = 1) const;
 	int  knownSymbol(const char * name) const;
 	int  valid() const { return handle != 0; }
+	void * gethandle() const { return handle; }
 private:
 	const char * libname;
 	void* handle;	

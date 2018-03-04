@@ -24,7 +24,7 @@
 
 // we need __linux__ instead of just linux since the latter is not defined when -ansi is used.
 
-#if defined(__sparc) || defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(_WIN32) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) ) 
+#if defined(__sparc) || defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(_WIN32) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 #define HAVESHAREDLIBS
 #endif
 
@@ -46,7 +46,7 @@
 typedef void (*initfunctype) ();
 #endif
 
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) ) 
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 #include <dlfcn.h>
 #elif defined(__sparc)
 #if defined(__SVR4)
@@ -61,7 +61,6 @@ extern "C" {
 }
 #define RTLD_LAZY       1
 #endif
-
 #elif defined(__OS2__)
 #include <sys/types.h>
 #include <dlfcn.h>
@@ -80,15 +79,17 @@ static char dlerror()
 #error "system unsupported so far"
 #endif
 
-DynLoader::DynLoader(const char *libname_P, int verbose_p):libname(libname_P), handle(0), verbose(verbose_p)
+DynLoader::DynLoader(const char *libname_P, int verbose_p):libname(libname_P), handle(0),
+verbose(verbose_p)
 {
 	if (libname) {
-		if (verbose) cerr << "dlopening " << libname << endl;
+		if (verbose)
+			cerr << "dlopening " << libname << endl;
 		open(libname);
 	}
 }
 
-void DynLoader::open(const char *libname_P )
+void DynLoader::open(const char *libname_P)
 {
 	if (handle) {
 		cerr << "error: DynLoader has already opened a library" << endl;
@@ -98,46 +99,48 @@ void DynLoader::open(const char *libname_P )
 	strcpy(fulllibname, libname_P);
 	// not needed strcat(fulllibname_P,libsuffix);
 
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) ) 
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 	int loadmode = RTLD_LAZY;	// RTLD_NOW
 	handle = dlopen(fulllibname, loadmode);
 #elif defined(_WIN32)
 	handle = WINLOADLIB(fulllibname);
 #else
-	#error "system unsupported so far"
+#error "system unsupported so far"
 #endif
 	if (handle == 0) {
 		cerr << "Problem during opening " << fulllibname << ":" << dlerror()
 			<< endl;
-		delete [] fulllibname;
+		delete[]fulllibname;
 		return;
 	}
 	{
-		if (verbose) cerr << "loading dynamic library " << fulllibname << " completed successfully" << endl;
+		if (verbose)
+			cerr << "loading dynamic library " << fulllibname << " completed successfully" << endl;
 #if defined(__hpux) && defined (__GNUG__)
 		// in HPUX g++ this is called "_GLOBAL__DI" - on other systems it may be something like "_init"
 		// under HP-UX automatic initialization of dlopened shared libs doesn't work - at least not when compiled with g++
 		initfunctype fptr = (initfunctype) dlsym(handle, "_GLOBAL__DI");
 		if (fptr) {
-			if (verbose) cerr << "Found an init function for the library, so execute it " << endl;
+			if (verbose)
+				cerr << "Found an init function for the library, so execute it " << endl;
 			fptr();
 		}
 #endif
 	}
-	delete [] fulllibname;
+	delete[]fulllibname;
 }
 
 void DynLoader::close()
 {
 	if (handle) {
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) ) 
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 		dlclose(handle);
 #elif defined(_WIN32)
-		(void)WINFREELIB((HINSTANCE) handle);
+		(void) WINFREELIB((HINSTANCE) handle);
 #elif
-		#error "system unsupported so far"
+#error "system unsupported so far"
 #endif
-			handle = 0;
+		handle = 0;
 	}
 }
 
@@ -153,12 +156,12 @@ int DynLoader::knownSymbol(const char *name) const
 
 DynLoader::fptr DynLoader::getSymbol(const char *name, int check) const
 {
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) ) 
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 	DynLoader::fptr rfptr = (DynLoader::fptr) dlsym(handle, name);	//lint !e611 //: Suspicious cast
 #elif defined(_WIN32)
 	DynLoader::fptr rfptr = (DynLoader::fptr) GetProcAddress((HINSTANCE) handle, name);	//lint !e611 //: Suspicious cast
 #else
-	#error "system unsupported so far"
+#error "system unsupported so far"
 #endif
 	if ((rfptr == 0) && check) {
 		cerr << "error during getSymbol for " << name << ":" << dlerror()
@@ -200,27 +203,30 @@ public:
 
 static PluginVector LoadedPlugins;
 
-static void loadaPlugin(const char *filename, ostream & errstream,bool verbose)
+static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 {
-	if (verbose && filename) errstream << "loading plugin: " << filename << endl;
+	if (verbose && filename)
+		errstream << "loading plugin: " << filename << endl;
 
 	DriverDescription::currentfilename = filename;
-	DynLoader *dynloader = new DynLoader(filename,verbose);
+	DynLoader *dynloader = new DynLoader(filename, verbose);
 	if (!dynloader->valid()) {
 		delete dynloader;
-		errstream << "Problem during opening of pstoedit driver plugin: " << filename << ". This is no problem as long the driver in this library is not needed. Possibly you need to install further libraries and/or extend the LD_LIBRARY_PATH (*nix) or PATH (Windows) environment variables." << endl;
+		errstream << "Problem during opening of pstoedit driver plugin: " << filename <<
+			". This is no problem as long the driver in this library is not needed. Possibly you need to install further libraries and/or extend the LD_LIBRARY_PATH (*nix) or PATH (Windows) environment variables."
+			<< endl;
 		return;
 	} else {
 #if defined (__APPLE__)
 // on MacOS it seems necessary to at least do a dlsym to an existing symbol 
 // to get the global ctors beeing called
-		void (*fp)() =  ( ( void (*)() ) dynloader->getSymbol("initlibrary") );  
+		void (*fp) () = ((void (*)()) dynloader->getSymbol("initlibrary"));
 		if (fp) {
 			if (verbose) {
 				errstream << "getSymbol(\"initlibrary\") succeeded." << endl;
 			}
 		} else {
-				errstream << "getSymbol(\"initlibrary\") failed." << endl;
+			errstream << "getSymbol(\"initlibrary\") failed." << endl;
 		}
 #endif
 	}
@@ -252,22 +258,22 @@ static void loadaPlugin(const char *filename, ostream & errstream,bool verbose)
 }
 
 // for directory search
-#if (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) ) 
+#if (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 #include <dirent.h>
 #define DIR_VERSION 1
-#elif (defined (HAVE_SYS_NDIR_H) && (HAVE_SYS_NDIR_H==1 ) ) 
+#elif (defined (HAVE_SYS_NDIR_H) && (HAVE_SYS_NDIR_H==1 ) )
 #include <sys/ndir.h>
 #define DIR_VERSION 2
-#elif (defined (HAVE_SYS_DIR_H) && (HAVE_SYS_DIR_H==1 ) ) 
+#elif (defined (HAVE_SYS_DIR_H) && (HAVE_SYS_DIR_H==1 ) )
 #include <sys/dir.h>
 #define DIR_VERSION 3
-#elif (defined (HAVE_NDIR_H) && (HAVE_NDIR_H==1 ) ) 
+#elif (defined (HAVE_NDIR_H) && (HAVE_NDIR_H==1 ) )
 #include <ndir.h>
 #define DIR_VERSION 4
 #else
 //
 // last chance
-#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) 
+#if defined(__linux) || defined(__linux__) || defined(__CYGWIN32__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX)
 #include <direct.h>
 #define DIR_VERSION 5
 #else
@@ -278,73 +284,86 @@ static void loadaPlugin(const char *filename, ostream & errstream,bool verbose)
 
 #ifdef DIR_VERSION
 // this is for all *nix like systems
-void loadPlugInDrivers(const char *pluginDir, ostream & errstream,bool verbose)
+void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
-	DIR *dirp;
-	struct dirent *direntp;
+	if (pluginDir) {
+		DIR *dirp;
+		struct dirent *direntp;
 #if defined(__OS2__) || defined(__CYGWIN32__)
-	const char * const suffix = ".dll";
+		const char *const suffix = ".dll";
 #elif defined (__APPLE__)
-	const char * const suffix = ".dylib";
+		const char *const suffix = ".so";	// ".dylib";
+		// Note: the suffix depends on the way the plugin libraries are built via libtool.
+		// If the -module flag is set, then the output is a .so library,
+		// if no -module is given, then the output is a .dylib library.
+		// We use the .so since we use the -module option, since that is needed for other
+		// systems such as cygwin.
 #elif defined (__hpux)
-	const char * const suffix = ".sl";
+		const char *const suffix = ".sl";
 #else
-	const char * const suffix = ".so";
+		const char *const suffix = ".so";
 #endif
-	if (verbose && pluginDir )  errstream << "loading plugins from " << pluginDir << " using suffix: " << suffix << endl;
+		if (verbose && pluginDir)
+			errstream << "loading plugins from " << pluginDir << " using suffix: " << suffix <<
+				endl;
 
-	dirp = opendir(pluginDir);
-	if (!dirp) {
-		if (verbose && pluginDir )  errstream << "opendir failed on: " << pluginDir << endl;
-		return;
-	}
-
-	while ((direntp = readdir(dirp)) != NIL) {
-//      cout <<  direntp->d_name << endl;
-		unsigned int flen = strlen(direntp->d_name);
-		char *expectedpositionofsuffix = direntp->d_name + flen - strlen(suffix);
-//              if ( local filename starts with drv or plugins and ends with .so)
-#if defined (__CYGWIN32__)
-		const char * const libprefix = "cygp2edrv";
-#else
-		const char * const libprefix = "libp2edrv";
-#endif
-		if (((strstr(direntp->d_name, libprefix) == direntp->d_name) ||
-			 (strstr(direntp->d_name, "plugin") == direntp->d_name)
-			) &&
-			(strstr(expectedpositionofsuffix, suffix) == expectedpositionofsuffix)) {
-			char *fullname = new char[strlen(pluginDir) + flen + 2];
-			strcpy(fullname, pluginDir);
-			strcat(fullname, "/");
-			strcat(fullname, direntp->d_name);
-//          cout <<  direntp->d_name  << " " << fullname << endl;
-			loadaPlugin(fullname, errstream, verbose);
-			delete[]fullname;
+		dirp = opendir(pluginDir);
+		if (!dirp) {
+			if (verbose && pluginDir)
+				errstream << "opendir failed on: " << pluginDir << endl;
+			return;
 		}
 
-	}							// while
-	closedir(dirp);
+		while ((direntp = readdir(dirp)) != NIL) {
+//      cout <<  direntp->d_name << endl;
+			unsigned int flen = strlen(direntp->d_name);
+			char *expectedpositionofsuffix = direntp->d_name + flen - strlen(suffix);
+//              if ( local filename starts with drv or plugins and ends with .so)
+#if defined (__CYGWIN32__)
+			const char *const libprefix = "cygp2edrv";
+#else
+			const char *const libprefix = "libp2edrv";
+#endif
+			if (((strstr(direntp->d_name, libprefix) == direntp->d_name) ||
+				 (strstr(direntp->d_name, "plugin") == direntp->d_name)
+				) && (strstr(expectedpositionofsuffix, suffix) == expectedpositionofsuffix)) {
+				char *fullname = new char[strlen(pluginDir) + flen + 2];
+				strcpy(fullname, pluginDir);
+				strcat(fullname, "/");
+				strcat(fullname, direntp->d_name);
+//          cout <<  direntp->d_name  << " " << fullname << endl;
+				loadaPlugin(fullname, errstream, verbose);
+				delete[]fullname;
+			}
+
+		}						// while
+		closedir(dirp);
+	} else {
+		errstream << "Could not load plugins - parameter pluginDir is null " << endl;
+		return;
+	}
 }
 #elif defined(_WIN32)
 
 
-void loadPlugInDrivers(const char *pluginDir, ostream & errstream,bool verbose)
+void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
-	char szExePath[1000];
-	szExePath[0] = '\0';
-	(void) P_GetPathToMyself("pstoedit", szExePath, sizeof(szExePath));
-
-	WIN32_FIND_DATA finddata;
-//   = getPluginDirectory(errstream);
 	if (pluginDir != 0) {
+		char szExePath[1000];
+		szExePath[0] = '\0';
+		(void) P_GetPathToMyself("pstoedit", szExePath, sizeof(szExePath));
+
+		WIN32_FIND_DATA finddata;
+
 		const char pattern[] = "/*.dll";
 		char *searchpattern = new char[strlen(pluginDir) + strlen(pattern) + 1];
 		strcpy(searchpattern, pluginDir);
 		strcat(searchpattern, pattern);
 		HANDLE findHandle = FindFirstFile(searchpattern, &finddata);
 		if (findHandle == INVALID_HANDLE_VALUE) {
-			if (verbose) errstream << "Could not open plug-in directory (" << pluginDir
-				<< " or didn't find any plugin there" << endl;
+			if (verbose)
+				errstream << "Could not open plug-in directory (" << pluginDir
+					<< " or didn't find any plugin there" << endl;
 		} else {
 			BOOL more = FALSE;
 			do {
@@ -355,35 +374,39 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream,bool verbose)
 				// files such as e.g. .dllx
 				const unsigned int len = strlen(finddata.cFileName);
 				// -4 means go back the length of ".dll"
-				if (stricmp(&finddata.cFileName[len -4 ],".dll") == 0) {
-				// cout << &finddata.cFileName[len -4 ] << endl;
-				char *fullname = new char[strlen(pluginDir) + len + 3];
-				strcpy(fullname, pluginDir);
-				strcat(fullname, "\\");
-				strcat(fullname, finddata.cFileName);
+				if (stricmp(&finddata.cFileName[len - 4], ".dll") == 0) {
+					// cout << &finddata.cFileName[len -4 ] << endl;
+					char *fullname = new char[strlen(pluginDir) + len + 3];
+					strcpy(fullname, pluginDir);
+					strcat(fullname, "\\");
+					strcat(fullname, finddata.cFileName);
 //              errstream << "szExePath " << szExePath << endl;
 
-				if ( (stricmp(fullname, szExePath) != 0) && (stricmp(finddata.cFileName, "pstoedit.dll") !=0 ) ) {
-					// avoid loading dll itself again
-					//                 errstream << "loading " << fullname << endl;
-					loadaPlugin(fullname, errstream, verbose);
-				} else {
-					//                 errstream << "ignoring myself " << finddata.cFileName << endl;
-				}
-				delete[] fullname;
+					if ((stricmp(fullname, szExePath) != 0)
+						&& (stricmp(finddata.cFileName, "pstoedit.dll") != 0)) {
+						// avoid loading dll itself again
+						//                 errstream << "loading " << fullname << endl;
+						loadaPlugin(fullname, errstream, verbose);
+					} else {
+						//                 errstream << "ignoring myself " << finddata.cFileName << endl;
+					}
+					delete[]fullname;
 				}
 				more = FindNextFile(findHandle, &finddata);
 			} while (more);
 			(void) FindClose(findHandle);
 		}
 		delete[]searchpattern;
+	} else {
+		errstream << "Could not load plugins - parameter pluginDir is null " << endl;
+		return;
 	}
 }
 #else
 #error "system unsupported so far (directory reading)"
 #endif
 
-#endif 
+#endif
 // LEAN
 
 
@@ -395,9 +418,12 @@ using namespace std;
 #else
 class ostream;
 #endif
-void loadPlugInDrivers(const char *pluginDir, ostream & errstream,bool verbose)
+void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
-	if (verbose) { errstream << "dummy version of loadPlugInDrivers called since you system doesn't seem to support loading libraries at runtime - If you think that this is not correct, contact the author of this program (wglunz34_AT_pstoedit.net) " << endl; }
+	if (verbose) {
+		errstream <<
+			"dummy version of loadPlugInDrivers called since you system doesn't seem to support loading libraries at runtime - If you think that this is not correct, contact the author of this program (wglunz34_AT_pstoedit.net) "
+			<< endl;
+	}
 }								// just a dummy Version
 #endif
- 

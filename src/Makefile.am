@@ -50,6 +50,7 @@ libp2edrvstd_la_SOURCES=			\
 	drvtext.cpp 	drvtext.h		\
 	drvsk.cpp 	drvsk.h			\
 	drvmpost.cpp 	drvmpost.h		\
+	drvasy.cpp 	drvasy.h		\
 	drvmma.cpp 	drvmma.h		\
 	drvlatex2e.cpp 	drvlatex2e.h		\
 	drvpic.cpp 	drvpic.h		\
@@ -78,10 +79,10 @@ libp2edrvmagick___la_LDFLAGS=-no-undefined ${LIBMAGICK_LDFLAGS}  -module
 
 if USE_EMFBYSOURCE
 libp2edrvwmf_la_SOURCES=emflib.cpp drvwmf.cpp drvwmf.h initlibrary.cpp
-libp2edrvwmf_la_LDFLAGS=-no-undefined {LIBEMF_LDFLAGS} -L. libpstoedit.la -module
+libp2edrvwmf_la_LDFLAGS=-no-undefined -L. libpstoedit.la -module
 else
 libp2edrvwmf_la_SOURCES=drvwmf.cpp drvwmf.h initlibrary.cpp
-libp2edrvwmf_la_LDFLAGS=-no-undefined {LIBEMF_LDFLAGS} -L. libpstoedit.la -module
+libp2edrvwmf_la_LDFLAGS=-no-undefined $(LIBEMF_LDFLAGS) -L. libpstoedit.la -module
 endif
 
 libpstoedit_la_SOURCES =			\

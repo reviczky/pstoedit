@@ -438,7 +438,7 @@ unsigned long searchinpath(const char *EnvPath, const char *name,
 //      const char * EnvPath = getenv("PATH");
 	if (!EnvPath)
 		return 0;
-#if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) 
+#if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) || defined(__APPLE__)
 	const char separator = ':';
 #else
 	const char separator = ';';

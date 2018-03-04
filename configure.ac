@@ -10,9 +10,9 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.40,wglunz34_AT_pstoedit.net)
+AC_INIT(pstoedit,3.41,wglunz34_AT_pstoedit.net)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.40)
+AM_INIT_AUTOMAKE(pstoedit,3.41)
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
 
@@ -33,6 +33,14 @@ AC_LIBTOOL_WIN32_DLL
 
 AC_PROG_LIBTOOL
 AC_PROG_MAKE_SET
+
+dnl Check file command
+dnl FILECMD=""
+dnl AC_PATH_PROG(FILECMD,file)
+dnl if test -z "${FILECMD}"; then
+dnl    AC_MSG_ERROR([** Cannot find file command which is needed for libtool. Please install. ])
+dnl    exit 1
+dnl fi
 
 dnl Check Ghostscript
 GS=""
@@ -238,7 +246,7 @@ OLD_LIBS=
 
 
 AC_ARG_WITH(libemf-src,
-[  --with-libemf-src=DIR           look for libemf src in dir (e.g. /usr/local/lib)],
+[  --with-libemf-src=DIR           look for libEMF src in dir (e.g. /usr/local/lib)],
 libemf_lib_src=$withval, libemf_lib_src=)
 
 if test -n "${libemf_lib_src}"; then
@@ -253,11 +261,11 @@ else
 AM_CONDITIONAL(USE_EMFBYSOURCE, false )
 
 AC_ARG_WITH(libemf-lib,
-[  --with-libemf-lib=DIR           look for libemf library in dir (e.g. /usr/local/lib)],
+[  --with-libemf-lib=DIR           look for libEMF library in dir (e.g. /usr/local/lib)],
 libemf_lib_dir=$withval, libemf_lib_dir=)
 
 AC_ARG_WITH(libemf-include,
-[  --with-libemf-include=DIR       look for libemf header in dir (e.g. /usr/local/include/libEMF)],
+[  --with-libemf-include=DIR       look for libEMF header in dir (e.g. /usr/local/include/libEMF)],
 libemf_include_dir=$withval, libemf_include_dir=)
 
 OLD_LIBS=${LIBS}
@@ -270,7 +278,7 @@ if test -n "${LIBEMF_LDFLAGS}"; then
      LIBEMF_LDFLAGS="-L${libemf_lib_dir} ${LIBEMF_LDFLAGS}"
   fi   
 else
-      AC_MSG_WARN([** Cannot find libemf. libEMF supports are disabled.])
+      AC_MSG_WARN([** Cannot find libEMF. libEMF supports are disabled.])
 fi
 LIBS=${OLD_LIBS}
 

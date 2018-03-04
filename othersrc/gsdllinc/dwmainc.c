@@ -55,6 +55,7 @@
 #include <fcntl.h>
 #include <io.h>
 
+// old DLL (uses aladdin lic) #include "gsdll.hpp"
 #include "gsdll.h"
 
 #define MAXSTR 256
@@ -85,9 +86,11 @@ typedef struct tagGSDLL {
 	PFN_gsdll_exit		exit;
 	PFN_gsdll_lock_device	lock_device;
 #if defined (_WIN32)
+#ifdef OLDGSDLL
 	PFN_gsdll_copy_dib	copy_dib;
 	PFN_gsdll_copy_palette	copy_palette;
 	PFN_gsdll_draw		draw;
+#endif
 	/* pointer to mswindll device */
 	char FAR *device;
 #elif defined (__OS2__)
@@ -149,9 +152,11 @@ BOOL flag;
     gsdll.exit = NULL;
     gsdll.lock_device = NULL;
 #if defined (_WIN32)
+#ifdef OLDGSDLL
     gsdll.copy_dib = NULL;
     gsdll.copy_palette = NULL;
     gsdll.draw = NULL;
+#endif
 #elif defined (__OS2__)
     gsdll.get_bitmap = NULL;
 #endif
@@ -215,15 +220,18 @@ gs_load_dll(void)
     if ( (gsdll.lock_device = (PFN_gsdll_lock_device) 
 	GetProcAddress(gsdll.hmodule, "gsdll_lock_device")) == NULL)
 	return gs_load_dll_cleanup();
+#ifdef OLDGSDLL
     if ( (gsdll.copy_dib = (PFN_gsdll_copy_dib) 
 	GetProcAddress(gsdll.hmodule, "gsdll_copy_dib")) == NULL)
 	return gs_load_dll_cleanup();
+
     if ( (gsdll.copy_palette = (PFN_gsdll_copy_palette) 
 	GetProcAddress(gsdll.hmodule, "gsdll_copy_palette")) == NULL)
 	return gs_load_dll_cleanup();
     if ( (gsdll.draw = (PFN_gsdll_draw) 
 	GetProcAddress(gsdll.hmodule, "gsdll_draw")) == NULL)
 	return gs_load_dll_cleanup();
+#endif 
 #elif defined (__OS2__)
     char buf[MAXSTR + 40];
     APIRET rc;

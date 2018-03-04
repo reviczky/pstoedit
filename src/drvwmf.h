@@ -60,12 +60,13 @@ public:
 		Option < bool, BoolTrueExtractor> drawBoundingBox;
 		Option < bool, BoolTrueExtractor> pruneLineEnds;
 		Option < bool, BoolTrueExtractor> notforWindows;
-		Option < bool, BoolFalseExtractor> narrowbox;
+		Option < bool, BoolTrueExtractor> winbb;
+		Option < bool, BoolTrueExtractor> OpenOfficeMode ;
 
 		DriverOptions() :
 		mapToArial(true,"-m",0,0,"map to Arial",0,false),
 		emulateNarrowFonts(true,"-nf",0,0,"emulate narrow fonts",0,false),
-		drawBoundingBox(true,"-b",0,0,"draw bounding box",0,false),
+		drawBoundingBox(true,"-drawbb",0,0,"draw bounding box",0,false),
 		pruneLineEnds(true,"-p",0,0,"prune line ends",0,false),
 		notforWindows(true,"-nfw",0,0,"not for Windows (meaningful under *nix only)",
 		"Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. "
@@ -79,14 +80,17 @@ public:
 		"portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit "
 		"is executed under Windows anyway. In that case the output is portable "
 		"but nevertheless not split and still looks fine.", false),
-		narrowbox(true,"-nb",0,0,"do not calculate and write bounding box",0,true)
+		winbb(true,"-winbb",0,0,"let the Windows API calculate the Bounding Box (Windows only)",0,false),
+		OpenOfficeMode(true,"-OO", 0, 0, "generate OpenOffice compatible EMF file",0,false)
+
 		{
 			ADD(mapToArial);
 			ADD(emulateNarrowFonts);
 			ADD(drawBoundingBox);
 			ADD(pruneLineEnds);
 			ADD(notforWindows);
-			ADD(narrowbox); //FIXME - ist das die richtige Semantik??
+			ADD(winbb);
+			ADD(OpenOfficeMode);
 		}
 	
 	} * options;
@@ -107,6 +111,11 @@ private:
 
 	int		fetchFont			(const TextInfo & textinfo, short int, short int);
 
+	float scale() const;
+	long transx(float x) const;
+	long transy(float x) const;
+
+	void initMetaDC(HDC hdc);
 
 // This contains all private data of drvwmf.
 

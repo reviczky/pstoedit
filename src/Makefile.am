@@ -53,6 +53,7 @@ libp2edrvstd_la_SOURCES=			\
 	drvasy.cpp 	drvasy.h		\
 	drvmma.cpp 	drvmma.h		\
 	drvlatex2e.cpp 	drvlatex2e.h		\
+	drvnoi.cpp 	drvnoi.h		\
 	drvpic.cpp 	drvpic.h		\
 	drvhpgl.cpp 	drvhpgl.h		\
 	drvpcb1.cpp	drvpcb1.h                 \

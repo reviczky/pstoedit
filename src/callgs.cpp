@@ -117,7 +117,7 @@ int callgs(int argc, const char *const argv[])
 #define str(x) #x
 #define xstr(x) str(x)
 
-const char *whichPI(ostream & errstream, int verbose)
+const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 {
 // determines which PostScript interpreter to use
 // !FIXME: change the sequence to 2-1-3 (for Unix); with the upcoming gsview for X11 possibly introduce
@@ -193,9 +193,9 @@ const char *whichPI(ostream & errstream, int verbose)
 //      if (gstocall == 0) {
 
 			static char buf[256];
-			if (find_gs(buf, sizeof(buf), 550, TRUE)) {
+			if (find_gs(buf, sizeof(buf), 550, TRUE, gsregbase)) {
 				if (verbose) {
-					(void)dumpgsvers();
+					(void)dumpgsvers(gsregbase);
 					errstream << "Latest GS DLL is " << buf << endl;
 				}
 				gstocall = buf;
@@ -493,7 +493,7 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 	return PIOptions;
 }
 
-const char *whichPINoVerbose(ostream & errstream)
+const char *whichPINoVerbose(ostream & errstream, const char *gsregbase)
 {
-	return whichPI(errstream, 0);
+	return whichPI(errstream, 0, gsregbase);
 }

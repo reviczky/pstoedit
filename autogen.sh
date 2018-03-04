@@ -2,9 +2,10 @@
 AMVERSION=1.xxx
 AMVERSION=1.7
 AMVERSION=local
+AMVERSION=1.9
 
-BINDIR=/usr/bin
 BINDIR=/usr/local/bin
+BINDIR=/usr/bin
 set -x
 echo running aclocal
 if (aclocal-$AMVERSION --version)  < /dev/null > /dev/null 2>&1; then

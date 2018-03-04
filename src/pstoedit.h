@@ -54,13 +54,13 @@ typedef int (*execute_interpreter_function)(int argc, const char * const argv[])
 
 
 #ifdef __cplusplus
-typedef const char * (*whichPI_type)(ostream &,int);
+typedef const char * (*whichPI_type)(ostream &, int, const char *);
 
 class DescriptionRegister;
 
 /* for "C" functions we cannot use "bool"   */
 
-extern "C" DLLEXPORT 
+extern "C" DLLEXPORT
 int pstoedit(	int argc,
 				const char * const argv[],
 				ostream& errstream,

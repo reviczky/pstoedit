@@ -174,7 +174,6 @@ public:
 	Option < bool, BoolTrueExtractor > fromgui;
 	Option < bool, BoolTrueExtractor > showdialog;
 
-
 //	Option < double, DoubleValueExtractor >  magnification ;//= 1.0f;
 	Option < bool, BoolTrueExtractor > showdrvhelp ;//= false;
 	Option < bool, BoolTrueExtractor > showdocu_long ;//= false;
@@ -189,6 +188,7 @@ public:
 
 	Option < Argv, ArgvExtractor > psArgs;				// Pass through arguments to PostScript interpreter
 	Option < RSString, RSStringValueExtractor> drivername ;//= 0; // cannot be const char * because it is changed in pstoedit.cpp
+	Option < RSString, RSStringValueExtractor > gsregbase;
 	
 	PsToEditOptions() :
 
@@ -548,7 +548,16 @@ public:
 		"\\Opt{-f} format. If the format option is not given, pstoedit tries to guess the target format "
 		" from the suffix of the output filename. However, in a lot of cases, this is not a unique mapping "
 		"and hence pstoedit demands the \\Opt{-f} option.",
-		( char*)0)
+		( char*)0),
+	gsregbase (true, "-gsregbase", "GhostScript base registry path", g_t, 
+	  "use this registry key as a subkey to search for GhostScript",
+	  "registry path to use as a base path when searching GhostScript interpreter  \n"
+	  "This option provides means to specify a registry key under "
+	  "HKLM/Software where to search for GS interpreter key, version "
+	  "and \\verb+GS_DLL / GS_LIB+ values. Example: \"-gsregbase MyCompany\" means  "
+	  "that HKLM/Software/MyCompany/GPL GhostScript would be searched "
+	  "instead of HKLM/Software/GPL GhostScript. ", 
+	  "")
 	{
 
 	// nameOfInputFile (0);
@@ -611,7 +620,8 @@ public:
 	ADD(psArgs);	
 
 	ADD(drivername);
-}
+	ADD(gsregbase);
+} 
 
 	~PsToEditOptions() {
 		// delete drivername.value; // this crashes under Windows (heap problem) //lint !e605

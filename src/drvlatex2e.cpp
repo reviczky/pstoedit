@@ -284,27 +284,27 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 	const char * cp = textinfo.thetext.value();
 	//buffer << textinfo.thetext.value() 
 
-#if 0
 // characters to be handled specially	
-% -> \%
-# -> \#
-{ -> \{
-} -> \}
-_ -> \_
-& -> \&
-$ -> \$  
-	Tritt auch manchmal mit veränderter Bedeutung als $$ auf: --> \$\$
-
-\ -> \textbackslash
-^ -> \textasciicircum
-~ -> \textasciitilde
-
-Zusätzlich machen folgende Zeichen oft Probleme:
-
-" -> \textquotedblright
-?`-> \textquestiondown
-!`-> \textexclamdown
-#endif
+//
+// % -> \%
+// # -> \#
+// { -> \{
+// } -> \}
+// _ -> \_
+// & -> \&
+// $ -> \$  
+// 	Tritt auch manchmal mit veränderter Bedeutung als $$ auf: --> \$\$
+// 
+// \ -> \textbackslash
+// ^ -> \textasciicircum
+// ~ -> \textasciitilde
+// 
+// Zusätzlich machen folgende Zeichen oft Probleme:
+// 
+// " -> \textquotedblright
+// ?`-> \textquestiondown
+// !`-> \textexclamdown
+// 
 	while (cp && *cp) {
 		if ((*cp == '%') ||
 			(*cp == '#') ||

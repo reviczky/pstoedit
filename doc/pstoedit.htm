@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<!-- Manual page created with latex2man.pl on Sun Aug  7 21:54:14 WEDT 2005 --
+<!-- Manual page created with latex2man.pl on Fri Sep 23 22:29:37 WEDT 2005 --
 -- Author of latex2man.pl: Juergen.Vollmer@informatik-vollmer.de --
 -- NOTE: This file is generated, DO NOT EDIT. -->
 <html>
@@ -9,8 +9,8 @@
 PSTOEDIT 
 </h1>
 <h4 align=center>Dr. Wolfgang Glunz </h4>
-<h4 align=center>August 2005</h4>
-<h4 align=center>Version 3.41</h4>
+<h4 align=center>September 2005</h4>
+<h4 align=center>Version 3.42</h4>
 <tt>pstoedit</tt>
 - a tool converting PostScript and PDF files into various 
 vector graphic formats 
@@ -171,6 +171,7 @@ vector graphic formats
 [<b>-bo</b>]
 [<b>-psarg</b><i>&nbsp;argument string</i>]
 <b>-f</b><i>&nbsp;"format[:options]"</i>
+[<b>-gsregbase</b><i>&nbsp;GhostScript base registry path</i>]
 [ inputfile [outputfile] ] 
 <p>
 <h4><a name="section_3">From Gsview</a></h4>
@@ -195,7 +196,7 @@ details.
 <h4><a name="section_6">RELEASE LEVEL</a></h4>
 
 <p>
-This manpage documents release 3.41 of <tt>pstoedit</tt>.
+This manpage documents release 3.42 of <tt>pstoedit</tt>.
 <p>
 <h4><a name="section_7">USE</a></h4>
 
@@ -360,6 +361,13 @@ to get a full list of formats. See "Available formats and their specific options
 to <b>-f</b>
 format. If the format option is not given, pstoedit tries to guess the target format from the suffix of the output filename. However, in a lot of cases, this is not a unique mapping and hence pstoedit demands the <b>-f</b>
 option. 
+<p>
+</dd>
+<dt>[<b>-gsregbase</b><i>&nbsp;GhostScript base registry path</i>]
+</dt>
+<dd> 
+registry path to use as a base path when searching GhostScript interpreter 
+This option provides means to specify a registry key under HKLM/Software where to search for GS interpreter key, version and <tt>GS_DLL / GS_LIB</tt> values. Example: "-gsregbase MyCompany" means that HKLM/Software/MyCompany/GPL GhostScript would be searched instead of HKLM/Software/GPL GhostScript. 
 <p>
 </dd>
 </dl>
@@ -1473,7 +1481,7 @@ map to Arial
 emulate narrow fonts 
 <p>
 </dd>
-<dt>[<b>-b</b>]
+<dt>[<b>-drawbb</b>]
 </dt>
 <dd> 
 draw bounding box 
@@ -1491,10 +1499,10 @@ prune line ends
 Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the -pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the -nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 <p>
 </dd>
-<dt>[<b>-nb</b>]
+<dt>[<b>-winbb</b>]
 </dt>
 <dd> 
-do not calculate and write bounding box 
+let the Windows API calculate the Bounding Box (Windows only) 
 <p>
 </dd>
 <dt>[<b>-OO</b>]
@@ -1519,7 +1527,7 @@ map to Arial
 emulate narrow fonts 
 <p>
 </dd>
-<dt>[<b>-b</b>]
+<dt>[<b>-drawbb</b>]
 </dt>
 <dd> 
 draw bounding box 
@@ -1537,10 +1545,10 @@ prune line ends
 Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the -pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the -nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 <p>
 </dd>
-<dt>[<b>-nb</b>]
+<dt>[<b>-winbb</b>]
 </dt>
 <dd> 
-do not calculate and write bounding box 
+let the Windows API calculate the Bounding Box (Windows only) 
 <p>
 </dd>
 <dt>[<b>-OO</b>]

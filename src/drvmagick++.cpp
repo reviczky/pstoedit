@@ -274,7 +274,7 @@ void drvMAGICK::show_path()
 		const float *const d_numbers = dp.numbers;
 		// const int nr_of_entries = dp.nrOfEntries;
 		double *dasharray = new double[dp.nrOfEntries + 1];
-		for (unsigned int i = 0; i < dp.nrOfEntries; i++) {
+		for (int i = 0; i < dp.nrOfEntries; i++) {
 			dasharray[i] = d_numbers[i];
 		}
 		dasharray[dp.nrOfEntries] = 0;	// mark last element

@@ -52,7 +52,7 @@
  * Returns total number of versions in pver.
  */
 static int get_gs_versions_product(int *pver, int offset, 
-    const char *gs_productfamily)
+  const char *gs_productfamily, const char *gsregbase)
 {
     HKEY hkey;
     DWORD cbData;
@@ -62,7 +62,11 @@ static int get_gs_versions_product(int *pver, int offset,
     char *p;
     int n = 0;
 
-    sprintf(key, "Software\\%s", gs_productfamily);
+	if (strlen(gsregbase))
+	  sprintf(key, "Software\\%s\\%s", gsregbase, gs_productfamily);
+	else
+	  sprintf(key, "Software\\%s", gs_productfamily);
+
     hkeyroot = HKEY_LOCAL_MACHINE;
     if (RegOpenKeyExA(hkeyroot, key, 0, KEY_READ, &hkey) == ERROR_SUCCESS) {
 	/* Now enumerate the keys */
@@ -106,16 +110,16 @@ static int get_gs_versions_product(int *pver, int offset,
  * If the array is not large enough, return FALSE 
  * and set pver[0] to the number of Ghostscript versions installed.
  */
-BOOL get_gs_versions(int *pver)
+BOOL get_gs_versions(int *pver, const char *gsregbase)
 {
     int n;
     if (pver == (int *)NULL)
 	    return FALSE;
 
-    n = get_gs_versions_product(pver, 0, GS_PRODUCT_AFPL);
-    n = get_gs_versions_product(pver, n, GS_PRODUCT_ALADDIN);
-    n = get_gs_versions_product(pver, n, GS_PRODUCT_GPL);
-    n = get_gs_versions_product(pver, n, GS_PRODUCT_GNU);
+    n = get_gs_versions_product(pver, 0, GS_PRODUCT_AFPL, gsregbase);
+    n = get_gs_versions_product(pver, n, GS_PRODUCT_ALADDIN, gsregbase);
+    n = get_gs_versions_product(pver, n, GS_PRODUCT_GPL, gsregbase);
+    n = get_gs_versions_product(pver, n, GS_PRODUCT_GNU, gsregbase);
 
     if (n >= pver[0]) {
 	pver[0] = n;
@@ -170,7 +174,7 @@ gp_getenv_registry(HKEY hkeyroot, const char *key, const char *name,
 
 
 static BOOL get_gs_string_product(int gs_revision, const char *name, 
-    char *ptr, int len, const char *gs_productfamily)
+    char *ptr, int len, const char *gs_productfamily, const char *gsregbase)
 {
     /* If using Win32, look in the registry for a value with
      * the given name.  The registry value will be under the key
@@ -196,7 +200,11 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
 
     sprintf(dotversion, "%d.%02d", 
 	    (int)(gs_revision / 100), (int)(gs_revision % 100));
-    sprintf(key, "Software\\%s\\%s", gs_productfamily, dotversion);
+	
+	if (strlen(gsregbase))
+	  sprintf(key, "Software\\%s\\%s\\%s", gsregbase, gs_productfamily, dotversion);
+	else
+	  sprintf(key, "Software\\%s\\%s", gs_productfamily, dotversion);
 
     length = len;
     code = gp_getenv_registry(HKEY_CURRENT_USER, key, name, ptr, &length);
@@ -212,15 +220,16 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
     return FALSE;
 }
 
-BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len)
+BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len, 
+  const char *gsregbase)
 {
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_AFPL))
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_AFPL, gsregbase))
 	return TRUE;
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_ALADDIN))
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_ALADDIN, gsregbase))
 	return TRUE;
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GPL))
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GPL, gsregbase))
 	return TRUE;
-    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GNU))
+    if (get_gs_string_product(gs_revision, name, ptr, len, GS_PRODUCT_GNU, gsregbase))
 	return TRUE;
     return FALSE;
 }
@@ -229,7 +238,7 @@ BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len)
 
 /* Set the latest Ghostscript EXE or DLL from the registry */
 BOOL
-find_gs(char *gspath, int len, int minver, BOOL bDLL)
+find_gs(char *gspath, int len, int minver, BOOL bDLL, const char *gsregbase)
 {
     int count;
     int *ver;
@@ -243,14 +252,15 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL)
 	return FALSE;  // win32s
 
     count = 1;
-    (void)get_gs_versions(&count);
+    (void)get_gs_versions(&count, gsregbase);
     if (count < 1)
-	return FALSE;
+	  return FALSE;
+
     ver = (int *)malloc((count+1)*sizeof(int));
     if (ver == (int *)NULL)
 	return FALSE;
     ver[0] = count+1;
-    if (!get_gs_versions(ver)) {
+    if (!get_gs_versions(ver, gsregbase)) {
 	free(ver);
 	return FALSE;
     }
@@ -263,7 +273,7 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL)
     if (gsver < minver)	// minimum version (e.g. for gsprint)
 	return FALSE;
     
-    if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf)))
+    if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf), gsregbase))
 	return FALSE;
 
     if (bDLL) {
@@ -285,9 +295,9 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL)
 
 
 #ifdef DUMP_GSVER
-#define ENTRYPOINT main(int argc, char *argv[])
+#define ENTRYPOINT main(int argc, char *argv[], char *gsregbase)
 #else
-#define ENTRYPOINT dumpgsvers()
+#define ENTRYPOINT dumpgsvers(const char *gsregbase)
 #endif
 
 /* This is an example of how you can use the above functions */
@@ -298,13 +308,13 @@ int ENTRYPOINT
     int i;
     char buf[256];
 
-    if (find_gs(buf, sizeof(buf), 550, TRUE))
+    if (find_gs(buf, sizeof(buf), 550, TRUE, gsregbase))
 	printf("Latest GS DLL is %s\n", buf);
-    if (find_gs(buf, sizeof(buf), 550, FALSE))
+    if (find_gs(buf, sizeof(buf), 550, FALSE, gsregbase))
 	printf("Latest GS EXE is %s\n", buf);
 
     ver[0] = sizeof(ver) / sizeof(int);
-    flag = get_gs_versions(ver);
+    flag = get_gs_versions(ver, gsregbase);
     printf("Versions: %d\n", ver[0]);
 
     if (flag == FALSE) {
@@ -314,9 +324,9 @@ int ENTRYPOINT
 
     for (i=1; i <= ver[0]; i++) {
 	printf(" %d\n", ver[i]);
-	if (get_gs_string(ver[i], "GS_DLL", buf, sizeof(buf)))
+	if (get_gs_string(ver[i], "GS_DLL", buf, sizeof(buf), gsregbase))
 	    printf("   GS_DLL=%s\n", buf);
-	if (get_gs_string(ver[i], "GS_LIB", buf, sizeof(buf)))
+	if (get_gs_string(ver[i], "GS_LIB", buf, sizeof(buf), gsregbase))
 	    printf("   GS_LIB=%s\n", buf);
     }
     return 0;

@@ -233,8 +233,9 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 //lint -save -esym(715,errstream) -esym(1764,errstream)
 RSString getRegistryValue(ostream & errstream, const char *typekey, const char *key)
 {
-	//unused(&errstream);
+	
 #if defined(_WIN32)
+	unused(&errstream);
 
 //  CString subkey = CString("SOFTWARE\\wglunz\\") + CString(product);
 	char subkeyn[1000];
@@ -438,7 +439,7 @@ unsigned long searchinpath(const char *EnvPath, const char *name,
 //      const char * EnvPath = getenv("PATH");
 	if (!EnvPath)
 		return 0;
-#if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) || defined(__APPLE__)
+#if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) 
 	const char separator = ':';
 #else
 	const char separator = ';';

@@ -6,6 +6,21 @@
 	</head>
 	<body>
 		<h1 align="left">Changelog for pstoedit</h1>
+		<H2>New or changed in 3.42:</H2>
+		<UL>
+			<LI>
+			The Aysmptote driver now supports PNG images - thanks again to John Bowman
+			<LI>
+			fix of small compilation problem in drvlatex2e.cpp
+			<LI>
+				New driver (drvnoi) contributed by Nemetschek&nbsp;(<A href="http://www.nemetschek.de/">http://www.nemetschek.de/</A>). 
+				This driver - in combination with other DLLs which are installed as part of 
+				Nemetschek's AllPlan product - allows to convert PostScript and PDF to the 
+				AllPlan internal format. Without an installation of AllPlan - this driver is 
+				"useless". Nemetschek also contributed some code for circle detection but this 
+				is not yet included in pstoedit. It will be included in future and will then 
+				allow to generate circle primitives for formats which support such elements. 
+				(Currently circles are represented as Bezier curves)</LI></UL>
 		<H2>New or changed in 3.41:</H2>
 		<UL>
 			<LI>

@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man.pl on Sun Aug  7 21:54:11 WEDT 2005
+.\" Manual page created with latex2man.pl on Fri Sep 23 22:29:36 WEDT 2005
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "August 2005" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "September 2005" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -70,6 +70,7 @@ pstoedit
 [\fB\-bo\fP]
 [\fB\-psarg\fP\fI argument string\fP]
 \fB\-f\fP\fI "format[:options]"\fP
+[\fB\-gsregbase\fP\fI GhostScript base registry path\fP]
 [ inputfile [outputfile] ] 
 .PP
 .SS FROM GSVIEW
@@ -91,7 +92,7 @@ details.
 .PP
 .SS RELEASE LEVEL
 .PP
-This manpage documents release 3.41 of pstoedit\&.
+This manpage documents release 3.42 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -224,6 +225,11 @@ to get a full list of formats. See "Available formats and their specific options
 to \fB\-f\fP
 format. If the format option is not given, pstoedit tries to guess the target format from the suffix of the output filename. However, in a lot of cases, this is not a unique mapping and hence pstoedit demands the \fB\-f\fP
 option. 
+.PP
+.TP
+[\fB\-gsregbase\fP\fI GhostScript base registry path\fP]
+ registry path to use as a base path when searching GhostScript interpreter 
+This option provides means to specify a registry key under HKLM/Software where to search for GS interpreter key, version and GS_DLL / GS_LIB values. Example: "\-gsregbase MyCompany" means that HKLM/Software/MyCompany/GPL GhostScript would be searched instead of HKLM/Software/GPL GhostScript. 
 .PP
 .SS TEXT AND FONT HANDLING RELATED OPTIONS
 .TP
@@ -965,7 +971,7 @@ No driver specific options
  emulate narrow fonts 
 .PP
 .TP
-[\fB\-b\fP]
+[\fB\-drawbb\fP]
  draw bounding box 
 .PP
 .TP
@@ -977,8 +983,8 @@ No driver specific options
  Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the \-pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the \-nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again \- this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 .PP
 .TP
-[\fB\-nb\fP]
- do not calculate and write bounding box 
+[\fB\-winbb\fP]
+ let the Windows API calculate the Bounding Box (Windows only) 
 .PP
 .TP
 [\fB\-OO\fP]
@@ -994,7 +1000,7 @@ No driver specific options
  emulate narrow fonts 
 .PP
 .TP
-[\fB\-b\fP]
+[\fB\-drawbb\fP]
  draw bounding box 
 .PP
 .TP
@@ -1006,8 +1012,8 @@ No driver specific options
  Newer versions of Windows (2000, XP) will not accept WMF/EMF files generated when this option is set and the input contains Text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the \-pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the \-nfw options provides a sort of compromise between portability and nice to edit but still nice looking text. Again \- this option has no meaning when pstoedit is executed under Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 .PP
 .TP
-[\fB\-nb\fP]
- do not calculate and write bounding box 
+[\fB\-winbb\fP]
+ let the Windows API calculate the Bounding Box (Windows only) 
 .PP
 .TP
 [\fB\-OO\fP]

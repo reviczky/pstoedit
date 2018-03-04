@@ -10,9 +10,9 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.41,wglunz34_AT_pstoedit.net)
+AC_INIT(pstoedit,3.42,wglunz34_AT_pstoedit.net)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.41)
+AM_INIT_AUTOMAKE(pstoedit,3.42)
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
 
@@ -171,7 +171,7 @@ fi
 if test "${with_magick}" = "yes" ; then
 dnl
 dnl Driver::libmagick++
-dnl If magick++.h is found, use it.
+dnl If Magick++.h is found, use it.
 dnl
 HAVE_LIBMAGICK=no
 LIBMAGICK_CFLAGS=
@@ -197,24 +197,26 @@ if test "x${PSTOEDIT_GCC_OK}" = xno ; then
       AC_MSG_WARN([** gcc version >= 3 is required.]) 
       AC_MSG_WARN([** libMagick++ driver is disabled.])
 else
-	AC_PATH_PROG(MAGICK_CONFIG, Magick++-config)
+	AC_PATH_PROG(MAGICK_CONFIG, GraphicsMagick++-config)
 	if test -n "${MAGICK_CONFIG}"; then
-	   AC_MSG_CHECKING(for version of "ImageMagick++" )   
-	   dnl See if we have a 5.4.8 or newer version
+	   AC_MSG_CHECKING(for version of "GraphicsMagick++" )   
+	   dnl See if we have a 1.0.6 or newer version
+	   CPPFLAGS="$CPPFLAGS `GraphicsMagick++-config --cppflags`"
 	   AC_TRY_COMPILE( [#include <Magick++.h>
-	            #if MagickLibVersion >= 0x0548
+	            #if MagickLibVersion >= 0x000008
 		    int correct;
 		    #else
-		    old version of ImageMagick;
+		    old version of GraphicsMagick;
 		    #endif ],[ ],
 		    MAGICKCORRECTVERSION="YES";AC_MSG_RESULT(you seem to have a compatible version ),
-		    [AC_MSG_RESULT(you seem to have an older version - need at least version 5.4.8)])
+		    [AC_MSG_RESULT(you seem to have an older version - need at least version 1.0.6)])
+	   CPPFLAGS=$OLDCPPFLAGS
 	   if test -n "${MAGICKCORRECTVERSION}"; then
 	      HAVE_LIBMAGICK=yes
-	      LIBMAGICK_CFLAGS="-DHAVE_MAGIC `Magick++-config --cppflags`"
-	      LIBMAGICK_LDFLAGS="`Magick++-config --libs` `Magick++-config --ldflags`"
+	      LIBMAGICK_CFLAGS="-DHAVE_MAGIC `GraphicsMagick++-config --cppflags`"
+	      LIBMAGICK_LDFLAGS="`GraphicsMagick++-config --libs` `GraphicsMagick++-config --ldflags`"
 	   else
-	      AC_MSG_WARN([** libMagick++ driver is disabled because of too old version of ImageMagick (need at least 5.4.8).])
+	      AC_MSG_WARN([** libMagick++ driver is disabled because of too old version of GraphicsMagick (need at least 1.0.6).])
 	   fi
 	else
 		AC_MSG_WARN([** libMagick++ driver is disabled.])

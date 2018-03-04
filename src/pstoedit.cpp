@@ -435,7 +435,7 @@ extern "C" DLLEXPORT
 	}
 	if (options.showdrvhelp) {
 		usage(cout,false,false);
-		const char *gstocall = whichPI(cout, options.verbose);
+		const char *gstocall = whichPI(cout, options.verbose, options.gsregbase.value.value());
 		if (gstocall != 0) {
 			cout << "Default interpreter is " << gstocall << endl;
 		}
@@ -444,7 +444,7 @@ extern "C" DLLEXPORT
 	}
 
 	if (options.justgstest) {
-		const char *gstocall = whichPI(errstream, options.verbose);
+		const char *gstocall = whichPI(errstream, options.verbose, options.gsregbase.value.value());
 		if (gstocall == 0) {
 			return 3;
 		}
@@ -609,7 +609,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 //          char commandline[1000];
 			// TODO check for overflow
 //          commandline[0]= '\0';
-			const char *gstocall = whichPI(errstream, options.verbose);
+			const char *gstocall = whichPI(errstream, options.verbose, options.gsregbase.value.value());
 			if (gstocall == 0) {
 				return 3;
 			}
@@ -1039,7 +1039,8 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				// now call ghostscript
 
 				Argv commandline;
-				const char *gstocall = whichPI(errstream, options.verbose);
+				const char *gstocall = whichPI(errstream, options.verbose, 
+				  options.gsregbase.value.value());
 				if (gstocall == 0) {
 					return 3;
 				}
@@ -1222,7 +1223,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 }
 
 extern int callgs(int argc, const char *const argv[]);
-extern const char *whichPI(ostream & errstream, int verbose);
+extern const char *whichPI(ostream & errstream, int verbose, const char *gsregbase);
 
 static bool versioncheckOK = false;
 
@@ -1254,10 +1255,11 @@ extern "C" DLLEXPORT
 // the following functions provide the interface for gsview
 //
 static const char *givenPI = 0;
-static const char *returngivenPI(ostream & errstream, int verbose)
+static const char *returngivenPI(ostream & errstream, int verbose, const char *gsregbase)
 {
 	unused(&errstream);
 	unused(&verbose);
+	unused(&gsregbase);
 	return givenPI;
 }
 

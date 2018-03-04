@@ -1,0 +1,303 @@
+# Generated automatically from Makefile.in by configure.
+# Makefile for pstoedit. Modified for OS/2 DLL based version.
+
+# Install pstoedit in $prefix/bin and
+# fontmap files in $prefix/lib
+#
+SHELL=g:/bin/sh.exe
+prefix=g:
+exec_prefix=${prefix}
+bindir=${exec_prefix}/bin
+libdir=${exec_prefix}/lib
+mandir=${prefix}/man
+MANEXT=1
+MANDIR=$(mandir)/man$(MANEXT)
+
+#check this out ...
+#LOCALDEFINES=-DHAVE_LIBMING
+#LOCALLIBS=-lming
+
+AWK=gawk
+INSTALL=g:/bin/install.exe -c
+#do NOT use this! GS by definition points to the executable gs.exe
+#GS=gsdll2.dll
+
+PDLL=pstoedit.dll
+PDEF=pstoedit.def
+PLIB=pstoedit.a
+DEFFILE=pstoeditexe.def
+
+# Choose a compiler + linker
+CCC=gcc.exe -DBUGGYGPP -ansi -pedantic -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wstrict-prototypes
+LDLIBS=$(LOCALLIBS) -lm -ldl -lstdcpp
+#LDLIBS=-lcext -lstdcpp
+MAINLIBS=-lstdcpp
+
+#release
+CCFLAGS=-DDEFAULTGS=$(GS) -O2 -m486 -Zmt -DINTERNALBOOL -D__OS2__='' -I. -I../othersrc/gsdllinc
+#LINKDLL=gcc.exe -s -Zmtd -Zomf -Zdll -Zlinker "/noi"
+LINKDLL=gcc.exe -s -Zmts -Zsys -Zso -Zomf -Zdll -Zlinker "/noi"
+LINK=gcc.exe -Zmts -Zomf -Zexe -s
+#debug
+#CCFLAGS=-DDEFAULTGS=$(GS) -g -m486 -Zmt -DINTERNALBOOL -D__OS2__='' -I. -I../othersrc/gsdllinc
+#LINKDLL=gcc.exe  -Zmts -Zsys -Zso -Zomf -Zdll -Zlinker "/noi"
+#LINK=gcc.exe -Zmts -Zomf -Zexe
+
+IMPLIB=implib
+
+INSTALL_PROGRAM=$(INSTALL) 
+INSTALL_DATA=$(INSTALL) -m 644
+INSTALL_DIR=$(INSTALL) -d -m755     # or: mkdir -p
+OBJEXT=obj
+
+EXEEXT=.exe
+OUTPUT=-o pstoedit
+SPECIFICDRIVERS= drvtgif.$(OBJEXT)  drvfig.$(OBJEXT)  drvidraw.$(OBJEXT)  drvgnplt.$(OBJEXT) drvmet.$(OBJEXT) 
+MAIN=cmdmain
+target=pstoedit.exe
+
+# For developers only: 
+# Uncomment the following lines (LEXSOURCE= and PSHEADER=) if you  have 
+# pstoedit.pro and makeedit.l and need to make some changes in these files.
+#LEXSOURCE=lexyy.cpp
+# This is some sort ot hack. If LEXSOURCE is not defined, the make rule below
+# only relates to dummy.cpp, which is not used by the main target.
+#PSHEADER=pstoedit.ph
+# same comment applies to PSHEADER variable
+#############################################################
+
+
+default : $(target)
+# No changes should be necessary below this line
+
+.SUFFIXES: .cpp .obj .o .chk
+.cpp.o:
+	$(CCC) -c $(LOCALDEFINES) $(CCFLAGS) $(FORCECPPFLAGS) $<
+
+.cpp.obj:
+	$(CCC) -c -Zomf $(LOCALDEFINES) $(CCFLAGS) $(FORCECPPFLAGS) $<
+
+#	$(CCC) /c $(LOCALDEFINES) $(CCFLAGS) $&.cpp
+.c.o:
+	$(CCC) -c -Zomf $(LOCALDEFINES) $(CCFLAGS) -Zc++-comments $<
+
+$(DEFFILE):
+	@echo NAME pstoedit WINDOWCOMPAT > $@
+	@echo DESCRIPTION '"cmd line tool pstoedit.exe, THff 2002, (c) W. Glunz"' >> $@
+	@echo STACKSIZE  512000 >> $@
+	@echo  >> $@
+
+$(PDEF):
+	@echo LIBRARY pstoedit INITINSTANCE TERMINSTANCE > $@
+	@echo DESCRIPTION '"pstoedit.dll, THff 2002, (c) W. Glunz"' >> $@
+	@echo  >> $@
+	@echo DATA >> $@
+	@echo   MULTIPLE NONSHARED >> $@
+	@echo  >> $@
+	@echo EXPORTS >> $@
+	@echo '"pstoedit" @1' >> $@ 
+	@echo '"pstoedit_checkversion" @2' >> $@
+	@echo '"pstoeditwithghostscript" @3' >> $@
+	@echo '"pstoedit_plainC" @4' >> $@
+	@echo '"getPstoeditDriverInfo_plainC" @5' >> $@
+	@echo '"clearPstoeditDriverInfo_plainC" @6' >> $@
+	@echo '"setPstoeditOutputFunction" @7' >> $@
+	@echo >> $@
+
+
+# Standard Drivers (for all systems)
+STANDARDDRIVERS=\
+	drvlwo.$(OBJEXT)  \
+	drvrib.$(OBJEXT)  \
+	drvrpl.$(OBJEXT)  \
+	drvdxf.$(OBJEXT)  \
+	drvjava.$(OBJEXT) \
+	drvjava2.$(OBJEXT) \
+	drvlplot.$(OBJEXT) \
+	drvpdf.$(OBJEXT)  \
+	drvkillu.$(OBJEXT) \
+	drvsk.$(OBJEXT) \
+	drvmpost.$(OBJEXT) \
+	drvmma.$(OBJEXT) \
+	drvswf.$(OBJEXT) \
+	drvlatex2e.$(OBJEXT) \
+	drvpic.$(OBJEXT) \
+	drvhpgl.$(OBJEXT) \
+	drvtk.$(OBJEXT)
+
+HELPERS=
+
+# Comment out the next line if you don't want the sample driver to be included
+SAMPLEDRIVER=drvsampl.$(OBJEXT) 
+
+DRIVERS=$(STANDARDDRIVERS) $(LOCALDRIVERS) $(SAMPLEDRIVER) $(SPECIFICDRIVERS)
+OBJECTS=dynload.$(OBJEXT) callgs.$(OBJEXT) $(MAIN).$(OBJEXT) pstoedit.$(OBJEXT) lexyy.$(OBJEXT) miscutil.$(OBJEXT) cbstream.$(OBJEXT) image.$(OBJEXT) drvbase.$(OBJEXT) subpath.$(OBJEXT) $(DRIVERS) $(HELPERS)
+
+TESTDRIVER=drvpdf
+libdemo : libusagedemo.$(OBJEXT) drvbase.$(OBJEXT) $(TESTDRIVER).$(OBJEXT)
+	$(LINK) -o libusagedemo libusagedemo.$(OBJEXT) drvbase.$(OBJEXT) $(TESTDRIVER).$(OBJEXT)
+
+$(target) : $(PLIB) $(MAIN).$(OBJEXT) $(DEFFILE)
+	$(LINK) $(OUTPUT) $(MAIN).$(OBJEXT) $(PLIB) $(MAINLIBS) $(DEFFILE) 
+
+$(PLIB) : $(PDLL)
+	$(IMPLIB) /noignorecase $@ $<
+
+#	$(IMPLIB) -o $(PLIB) $(PDEF)
+
+$(PDLL) : $(OBJECTS) $(PDEF)
+	$(LINKDLL) -o $(PDLL) $(OBJECTS) $(LDLIBS) $(PDEF) 
+
+dummy.cpp $(LEXSOURCE) : makeedit.l
+	flex  -L -8 makeedit.l 
+	-mv lex.yy.c lexyy.cpp
+	-mv lexyy.c lexyy.cpp
+
+clean:
+	rm -f core pstoedit.pure pstoedit.proof pstoedit$(EXEEXT) *.$(OBJEXT) *.chk *.obj pstoedit.dll pstoedit.lib pstoedit.def pstoedit *~
+
+test: pstoedit$(EXEEXT)
+	-cd ../examples;\
+	../src/pstoedit -f tgif illusion.ps illusion.ps.obj;\
+	tgif illusion.ps.obj;\
+	../src/pstoedit -scale 2 -f tgif illusion.ps illusion.ps.obj;\
+	tgif illusion.ps.obj;\
+	../src/pstoedit -dt -f tgif illusion.ps illusion.ps.obj;\
+	tgif illusion.ps.obj;\
+	../src/pstoedit -f tgif eschertr.ps eschertr.ps.obj;\
+	tgif eschertr.ps.obj;\
+	../src/pstoedit -f fig illusion.ps illusion.ps.fig;\
+	xfig illusion.ps.fig;\
+	../src/pstoedit -f fig eschertr.ps eschertr.ps.fig;\
+	xfig eschertr.ps.fig;\
+	../src/pstoedit -f fig spiral.ps spiral.ps.fig;\
+	xfig spiral.ps.fig;\
+	echo "now trying RIB for RenderMan ";\
+	../src/pstoedit -dt -f rib illusion.ps illusion.ps.rib ;\
+	../src/pstoedit -dt -f rib eschertr.ps eschertr.ps.rib ;\
+	echo "now trying LWO for LightWave 3D ";\
+	../src/pstoedit -dt -f lwo illusion.ps illusion.ps.lwo ;\
+	../src/pstoedit -dt -f lwo eschertr.ps eschertr.ps.lwo ;\
+	echo "now trying RPL for Real3D ";\
+	../src/pstoedit -dt -f rpl illusion.ps illusion.ps.rpl ;\
+	../src/pstoedit -dt -f rpl eschertr.ps eschertr.ps.rpl ;\
+	echo "tests done";
+
+#	groff -man ../doc/pstoedit.1  > pstoedit.man.ps
+# if you don't have groff, try the following instead
+#	troff -man -Tpsc ../doc/pstoedit.1 | psdit > pstoedit.man.ps
+
+
+# for a really large test use the following
+TESTOPTIONS=-dt -nc -sclip -ssp "-flat 10" -merge "-page 1" -split
+TESTFILES=*.ps
+
+# for a small test use the following
+TESTOPTIONS=-v -dt "-flat 10" -merge
+TESTFILES=eschertr.ps
+
+bigtest: pstoedit$(EXEEXT)
+	-cd ../examples;\
+	echo "set -x " > runalltests; \
+	for format in `../src/pstoedit -help 2>&1 | awk 'BEGIN {p=0;} /^Available/ { p=1; next; } (p==1) { print $$1; }' | grep ":" | sed -e 's/://g' ` ; \
+	do \
+		for infile in $(TESTFILES) ; \
+		do \
+			for option  in $(TESTOPTIONS) ;  \
+			do \
+				echo ../src/pstoedit $${option} -f $${format} $${infile} $${infile}.out.$${format} >> runalltests; \
+			done; \
+		done; \
+	done; \
+	sh runalltests; \
+	echo "big tests done";
+
+
+drvmdraw.ph : drvmdraw.pro
+	$(AWK) -f mkmdraw.awk < drvmdraw.pro > drvmdraw.ph
+
+dummy.ph $(PSHEADER) : pstoedit.pro
+	$(AWK) -f mkpspro.awk < pstoedit.pro > pstoedit.ph
+
+install: pstoedit$(EXEEXT) ../doc/pstoedit.1
+	if [ ! -d $(bindir) ] ; then \
+		$(INSTALL_DIR) $(bindir); \
+	fi                                    
+	$(INSTALL_PROGRAM) pstoedit$(EXEEXT) $(bindir)
+	if [ ! -d $(libdir) ] ; then \
+		$(INSTALL_DIR) $(libdir); \
+	fi
+	$(INSTALL_DATA) ../misc/mpost.fmp $(libdir)
+	$(INSTALL_DATA) ../misc/latex2e.fmp $(libdir)
+	if [ ! -d $(MANDIR) ] ; then \
+		$(INSTALL_DIR) $(MANDIR); \
+	fi
+	$(INSTALL_DATA) ../doc/pstoedit.1  $(MANDIR)/pstoedit.$(MANEXT);
+	echo "please copy ../doc/pstoedit.htm to a suitable place"
+
+
+# Just for running static check tools
+LINTLIKECHECKER=cppchecker
+LINTLIKECHECKER=flintchecker
+ALLCHKS=\
+drvbase.chk\
+drvwmf.chk\
+drvdxf.chk\
+drvfig.chk\
+drvgnplt.chk\
+drvmet.chk\
+drvpdf.chk\
+drvjava.chk\
+drvsampl.chk\
+drvtgif.chk\
+drvidraw.chk\
+drvlwo.chk\
+drvrib.chk\
+drvrpl.chk\
+drvavf.chk\
+lexyy.chk\
+cmdmain.chk\
+pstoedit.chk\
+cdlib.chk
+
+.cpp.chk:
+	$(LINTLIKECHECKER) $< $@ -c $(LOCALDEFINES) $(CCFLAGS) $(FORCECPPFLAGS) 
+
+checknamed: $(ALLCHKS)
+	echo checks done
+
+checkall:
+	for f in *.cpp; do \
+		$(LINTLIKECHECKER) $$f `basename $$f .cpp`.log $(LOCALDEFINES) $(CCFLAGS) $(FORCECPPFLAGS) ;\
+	done
+
+#depend: 
+#	makedepend *.cpp
+# DO NOT DELETE
+
+
+lexyy.$(OBJEXT): lexyy.cpp drvbase.h drvfuncs.h image.h
+drvbase.$(OBJEXT): drvbase.cpp drvbase.h drvfuncs.h image.h
+pstoedit.$(OBJEXT): pstoedit.cpp drvbase.h drvfuncs.h psfront.h pstoedit.h pstoedit.ph version.h 
+$(MAIN).$(OBJEXT): $(MAIN).cpp pstoedit.h
+
+drvtgif.$(OBJEXT): drvtgif.cpp drvtgif.h drvbase.h drvfuncs.h image.h
+drvtk.$(OBJEXT): drvtk.cpp drvtk.h drvbase.h drvfuncs.h image.h
+drvlwo.$(OBJEXT): drvlwo.cpp drvlwo.h drvbase.h drvfuncs.h image.h
+drvrib.$(OBJEXT): drvrib.cpp drvrib.h drvbase.h drvfuncs.h image.h
+drvrpl.$(OBJEXT): drvrpl.cpp drvrpl.h drvbase.h drvfuncs.h image.h
+drvidraw.$(OBJEXT): drvidraw.cpp drvidraw.h drvbase.h drvfuncs.h image.h
+drvfig.$(OBJEXT): drvfig.cpp drvfig.h drvbase.h drvfuncs.h image.h
+drvgnplt.$(OBJEXT): drvgnplt.cpp drvgnplt.h drvbase.h drvfuncs.h image.h
+drvdxf.$(OBJEXT): drvdxf.cpp drvdxf.h drvbase.h drvfuncs.h image.h
+drvmet.$(OBJEXT): drvmet.cpp drvmet.h drvbase.h drvfuncs.h image.h
+drvpdf.$(OBJEXT): drvpdf.cpp drvpdf.h drvbase.h drvfuncs.h image.h
+drvtext.$(OBJEXT): drvtext.cpp drvtext.h drvbase.h drvfuncs.h image.h
+cdlib.$(OBJEXT): cdlib.cpp 
+drvmdraw.$(OBJEXT): drvmdraw.cpp drvbase.h drvmdraw.h drvfuncs.h image.h drvmdraw.ph
+drvsampl.$(OBJEXT): drvsampl.cpp drvbase.h drvsampl.h drvfuncs.h image.h
+drvjava.$(OBJEXT): drvjava.cpp drvbase.h drvjava.h drvfuncs.h image.h
+drvjava2.$(OBJEXT): drvjava2.cpp drvbase.h drvjava2.h drvfuncs.h image.h
+drvwmf.$(OBJEXT): drvwmf.cpp drvbase.h drvwmf.h drvfuncs.h image.h
+callgs.$(OBJEXT): callgs.cpp ../othersrc/gsdllinc/dwmainc.c ../othersrc/gsdllinc/getini.c
+pstoedit.ph: # dummy for RiscOS GNU make's screwed dependencies

@@ -1,0 +1,326 @@
+#ifndef miscutil_h
+#define miscutil_h
+/*
+   miscutil.h : This file is part of pstoedit
+   header declaring misc utility functions
+
+   Copyright (C) 1998 - 2005 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+#ifndef cppcomp_h
+#include "cppcomp.h"
+#endif
+
+#include I_iostream
+#include I_ostream
+#include I_istream
+#include I_fstream
+#include I_string_h
+
+USESTD
+
+#ifndef assert
+#include <assert.h>
+#endif
+
+// used to eliminate compiler warnings about unused parameters
+inline void unused(const void * const) { }
+
+#if defined(riscos) || defined(__WATCOMC__)
+// rcw2: tempnam doesn't seem to be defined in UnixLib 3.7b for RiscOS 
+// and the Watcom clibs.
+  char *tempnam(const char *, const char *);
+#endif
+
+#if defined(_WIN32) || defined(__OS2__)
+const char directoryDelimiter = '\\';
+#else
+const char directoryDelimiter = '/';
+#endif
+
+#if (defined (_MSC_VER) && _MSC_VER >= 1100) || defined (LINT)
+#define NOCOPYANDASSIGN(classname) \
+	private: \
+		classname(const classname&); \
+		const classname & operator=(const classname&);
+#else
+/* nothing - GNU has problems with this anyway. But, it doesn't harm. 
+   During compilation with VC++ potential misusages of the 
+   forbidden methods will be detected */
+#define NOCOPYANDASSIGN(classname) 
+#endif
+
+
+
+// NOTE: The following two dup functions are made inline to solve the problem
+// of allocation and deallocation in different .dlls. 
+// a strdup which uses new instead of malloc
+inline char *cppstrdup(const char *src, unsigned int addon = 0)
+{
+	char *ret = new char[strlen(src) + 1 + addon];
+	strcpy(ret, src);
+	return ret;
+}
+inline char * cppstrndup(const char * src, unsigned int length, unsigned int addon = 0 )
+{
+	char *ret = new char[length + 1 + addon];
+	for (unsigned int i = 0 ; i < length+1; i++)
+	{
+			ret[i] = src[i];
+	}
+	return ret;
+
+}
+
+// DLLEXPORT char * cppstrdup(const char * src, unsigned int addon = 0);
+// DLLEXPORT char * cppstrndup(const char * src, unsigned int length, unsigned int addon = 0);
+DLLEXPORT unsigned short hextoint(const char hexchar) ;
+
+// A temporary file, that is automatically removed after usage
+class  TempFile  {
+public:
+	DLLEXPORT TempFile()  ;
+	DLLEXPORT ~TempFile() ;
+	DLLEXPORT ofstream & asOutput();
+	DLLEXPORT ifstream & asInput();
+private:
+	void close() ;
+	char * tempFileName;
+	ofstream outFileStream;
+	ifstream inFileStream;
+
+	NOCOPYANDASSIGN(TempFile)
+};
+
+class Argv {
+	enum { maxargs=1000 };
+public:
+	unsigned int argc;
+	char * argv[maxargs];
+
+	Argv() : argc(0) { for (unsigned int i = 0; i< (unsigned) maxargs; i++)  argv[i] = 0; }
+	~Argv() { clear(); }
+
+	void addarg(const char * arg) { 
+		assert(argc<maxargs); //lint !e1776
+		argv[argc] = cppstrdup(arg); 
+		argc++; 
+	}
+	
+	void clear() {
+		for (unsigned int i = 0; i< (unsigned) argc &&  i< (unsigned) maxargs ; i++) { delete [] argv[i] ; argv[i]= 0; argc = 0;}
+	}
+	
+	NOCOPYANDASSIGN(Argv)
+};
+DLLEXPORT ostream & operator <<(ostream & out, const Argv & a);
+
+#ifdef HAVEAUTOPTR 
+#include <memory>
+#else
+template <class T> 
+class auto_ptr {
+public:
+// something that can be attached to a normal pointer
+// but which deletes the object when the Deleter goes
+// out of scope. Sort of very simple std::auto_ptr
+//
+	auto_ptr(T* ptr,bool isArray = false) : m_ptr(ptr), m_isArray(isArray) {}
+	~auto_ptr() { if (m_isArray) delete [] m_ptr; else delete m_ptr; m_ptr=0;}
+	T* operator->() const { return m_ptr; }
+private:
+	T* m_ptr; //lint !e1725
+	bool m_isArray;
+
+	NOCOPYANDASSIGN(auto_ptr<T>)
+
+//	auto_ptr(const auto_ptr<T> &); // no copy ctor please
+//	const auto_ptr<T>& operator =(const auto_ptr<T> &); // no assignment please
+};
+
+
+#endif
+
+// a very very simple resizing string
+// since STL is not yet available on all systems / compilers
+class DLLEXPORT RSString  {
+public:
+		
+	RSString(const char * arg = 0);
+	RSString(const char arg );
+	RSString(const char * arg , const unsigned int len);
+	RSString(const RSString & s);
+	virtual ~RSString();
+	const char * value() const { return content; }
+	unsigned int length() const { return stringlength; }
+	void copy(const char *src,const unsigned int len) ;
+	void copy(const char *src);
+	const RSString & operator = (const RSString & rs) {
+		if (&rs != this) {
+			copy(rs.value(),rs.length());
+		}
+		return *this;
+	}
+ 	const RSString& operator+= (const RSString &rs);
+	bool operator==(const RSString & rs) const
+	{ 	return ( (rs.stringlength == stringlength ) && (strncmp(content,rs.content,stringlength) == 0) );	}
+	bool operator!=(const RSString & rs) const 
+	{ 	return !(*this==rs); }
+//	bool operator<(const RSString & rs) const
+//	{	return strncmp(content,rs.content) < 0; }
+	char operator[](int i) const
+	{	return content[i]; }
+	friend ostream & operator<<(ostream & out,const RSString &outstring)
+	{	if (outstring.content) out << outstring.content; return out; }
+
+private:
+	//
+	// we need to make the memory allocation/deallocation
+	// virtual in order to force that these are executed
+	// always in the same context (either main EXE or the
+	// loaded DLL)
+	// Since the plugins are not and MFC extension DLL memory
+	// allocation and deallocation cannot be mixed across the EXE
+	// and the DLL. It must be done in a symmetric way - if the memory
+	// is allocated by the DLL, it must be destroyed there as well.
+	//
+	virtual void clearContent();
+	virtual char * newContent(unsigned int size);
+	char * content;
+	unsigned int allocatedLength;
+	unsigned int stringlength; // needed for storing binary strings including \0 
+};
+
+
+DLLEXPORT bool fileExists (const char * filename);
+DLLEXPORT RSString full_qualified_tempnam(const char * pref);
+DLLEXPORT void convertBackSlashes(char* string);
+//#define BUGGYGPP
+
+
+#ifndef BUGGYGPP
+template <class T> 
+#else /* BUGGYGPP */
+template <class T,class K_Type,class V_Type> 
+#endif /* BUGGYGPP */
+class DLLEXPORT Mapper {
+public:
+	Mapper() : firstEntry(0) {};
+	virtual ~Mapper() {
+		while (firstEntry != 0) {
+			T * nextEntry = firstEntry->nextEntry;
+			delete firstEntry;
+			firstEntry=nextEntry;
+		}
+	}
+public:
+#ifndef BUGGYGPP
+// define BUGGYGPP if your compiler complains about syntax error here.
+// see above
+	void insert(const typename T::K_Type & key, const  typename T::V_Type& value) {
+#else /* BUGGYGPP */
+	void insert(const K_Type & key, const  V_Type & value) {
+#endif /* BUGGYGPP */
+		firstEntry = new T(key,value,firstEntry);
+	}
+#ifndef BUGGYGPP
+	const  typename T::V_Type* getValue(const  typename T::K_Type & key) {
+#else /* BUGGYGPP */
+	const  V_Type* getValue(const  K_Type & key) {
+#endif /* BUGGYGPP */
+		T * curEntry = firstEntry;
+		while (curEntry != 0) {
+			if (curEntry->key() == key ) {
+				return &curEntry->value();
+			}
+			curEntry=curEntry->nextEntry;
+		}
+		return 0;
+	}
+	T * firstEntry;
+
+private: 
+#ifndef BUGGYGPP
+typedef  Mapper<T>  ShortName;
+#else /* BUGGYGPP */
+typedef  Mapper<T,K_Type,V_Type>  ShortName;
+#endif /* BUGGYGPP */
+
+	NOCOPYANDASSIGN(ShortName)	
+};
+
+//lint -esym(1712,KeyValuePair) // no default ctor
+template <class K, class V> 
+class DLLEXPORT KeyValuePair
+{
+public:
+		typedef K K_Type;
+		typedef V V_Type;
+		KeyValuePair(const K_Type & k,const V_Type & v, KeyValuePair<K,V> * next = 0):
+			key_(k), value_(v), nextEntry(next) {}
+		const K_Type & key()	const { return key_;}
+		const V_Type & value()	const { return value_;}
+private:
+		K_Type key_;
+		V_Type value_;
+public:
+		KeyValuePair<K,V> * nextEntry;
+
+private: typedef KeyValuePair<K,V> ShortName;
+		NOCOPYANDASSIGN(ShortName)
+};
+
+
+typedef KeyValuePair<RSString,RSString> FontMapping ;
+
+#ifdef _WIN32
+#pragma warning(disable: 4275)
+// non dll-interface class 'Mapper<class KeyValuePair<class RSString,class RSString> >' used as base for dll-interface class 'FontMapper'
+// miscutil.h(259) : see declaration of 'FontMapper'
+#endif
+
+#ifndef BUGGYGPP
+class DLLEXPORT FontMapper: public Mapper<FontMapping>
+#else /* BUGGYGPP */
+class DLLEXPORT FontMapper: public Mapper<FontMapping,RSString,RSString>
+#endif /* BUGGYGPP */
+{
+public:
+  void readMappingTable(ostream & errstream,const char * filename);
+  const char * mapFont(const RSString & fontname);
+};
+#ifdef _WIN32
+#pragma warning(default: 4275)
+#endif
+
+
+
+DLLEXPORT RSString getRegistryValue(ostream& errstream, const char * typekey, const char * key);
+DLLEXPORT unsigned long P_GetPathToMyself(const char *name, char * returnbuffer, unsigned long buflen);
+DLLEXPORT unsigned long searchinpath(const char* EnvPath,const char* name, char *returnbuffer,unsigned long buflen);
+DLLEXPORT void errorMessage(const char * text); // display an error message (cerr or msgbox)
+
+DLLEXPORT void copy_file(const istream& infile,ostream& outfile) ;
+
+
+
+#endif
+ 
+ 
+ 
+ 
+ 

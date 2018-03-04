@@ -1,0 +1,819 @@
+<html>
+	<head>
+		<title>Changelog for pstoedit</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+		<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+	</head>
+	<body>
+		<h1 align="left">Changelog for pstoedit</h1>
+		<H2>New or changed in 3.40:</H2>
+		<UL>
+			<LI>
+			added more diagnosis to dynload.cpp concerning dynamic loading.
+			<LI>
+			added an option -filledrecttostroke for converting filled rectangles to simple 
+			line strokes.
+			<LI>
+			support for cygwin environment.
+			<LI>
+			portability fixed concerning AIX, SGI, and Mac-OS. Many thanks especially to 
+			Maarten Sneep for his patience and support related to the Mac-OS port. Getting 
+			the dynamic loading of the plugins working was quite tricky.
+			<LI>
+			new versions of libtool, automake, and autoconf.
+			<LI>
+			new prologue for generated idraw files.
+			<LI>
+			the fig driver now supports "line cap styles" and "line join styles"
+			<LI>
+			some patches the the Mathematica backend by Manfred Thole.
+			<LI>
+			added -dNOEPS as option when calling GhostScript because pstoedit is tuned to 
+			the old (pre-8.0) behavior of GhostScript.
+			<LI>
+			fixed a bug in drvwmf.cpp concerning the handling of font names.
+			<LI>
+			disabled the WMF driver when libemf&nbsp;is used (all&nbsp;non-Windows 
+			systems).&nbsp;Libemf does not really handle WMF files. A CreateMetaFile 
+			effectively creates an EnhMetaFile - but that confuses programs which expect an 
+			real WMF file in a file with a .wmf suffix.
+			<LI>
+			added a workaround in the&nbsp;EMF driver for a bug/problem in the libemf which 
+			is used under *nix for EMF generation. The problem in libemf is that if text is 
+			rendered using the simple TextOut function call the resulting EMF file is no 
+			longer usable under newer versions of Windows. For more details see the 
+			description of the -nfw option of the wmf format driver.
+			<LI>
+			added an option "-usebbfrominput". If specified, pstoedit uses the BoundingBox 
+			as is (hopefully) found in the input file instead of one that is calculated by 
+			its own.
+			<LI>
+			fixed a bug concerning handling of leading white space in SVG text elements.
+			<LI>
+				add new driver to "insulate/PCB" format (see&nbsp;<A href="http://home.vr-web.de/~hans-juergen-jahn/software/devpcb.html">http://home.vr-web.de/~hans-juergen-jahn/software/devpcb.html</A>&nbsp;) 
+			contributed by Hans-Jürgen Jahn for more details.
+			<LI>
+				add new set of drivers for gschem ( <A href="http://www.geda.seul.org/tools/gschem/">
+					http://www.geda.seul.org/tools/gschem/</A> )&nbsp;and PCB (<A href="http://pcb.sourceforge.net">http://pcb.sourceforge.net</A>
+				) contributed by Mark Rages.<BR>
+				(see also <A href="http://mlug.missouri.edu/~markrages/software/pstoedit_additions/">
+					http://mlug.missouri.edu/~markrages/software/pstoedit_additions/</A>
+			)
+			<LI>
+			Updated code for finding newest version of ghostscript - thanks to Russell 
+			Lang.
+			<LI>
+			fixed a bug in the MIF backend concerning handling of PNG images (sometimes 
+			wrong rotation).
+			<LI>
+			the installation setup.exe for pstoedit now writes into the registry so gsview 
+			can find pstoedit at any place and hence it is no longer needed to install 
+			pstoedit within a subdirectory of gsview.
+			<LI>
+			the HPGL driver now also supports&nbsp;writing of text as text. So far, text 
+			was drawn as lines. Thanks to Peter Kuhlemann.
+			<LI>
+			option to allow merging of adjacent text fragments into one single text object 
+			(general option -mergetext).
+			<LI>
+			the DXF driver now allows to map objects to different layers based on their 
+			color (driver option -ctl). Default is to allocated all objects on layer 0.
+			<LI>
+			try to deduce driver name from the suffix of the output file if the driver name 
+			is not explicitly given via -f
+			<LI>
+				added option "-ups" for using plain strings instead of hex strings in 
+				intermediate format (for debug purposes only)</LI></UL>
+		<H2>New or changed in 3.33:</H2>
+		<ul>
+			<li>
+			removed duplicate entries in list of available formats.
+			<li>
+			improved configure and even better support for autotrace (thanks to Masatake 
+			for the patches).
+			<li>
+			removed some internal trace messages written to cout for debug purposes.
+			<li>
+			fixed a bug in CGM driver (wrong bounding box).
+			<li>
+			more robust parsing of fontmap files.
+			<li>
+			support of fonts that use \n and \r as character codes.
+			<LI>
+			added an option (-ndt) to fully disable the heuristics used by pstoedit to 
+			decide when to "draw" text instead of showing it as text. This may produce 
+			incorrect results, but in some cases it might nevertheless be useful. "Use at 
+			own risk".
+			<LI>
+			added a -correctdefinefont option for working around a problem related to 
+			ChemDraw generated PostScript files.
+			<LI>
+				Fixed bug concerning loading of shared libraries under HP-UX. Thanks to Antonio 
+				Carrarini for the support in tracking down the problem.</LI>
+		</ul>
+		<h2>New or changed in 3.32:</h2>
+		<ul>
+			<li>
+			some smaller bug and portability fixes.
+			<li>
+			workaround to cope with a change introduced since ghostscript 7.04. Some new 
+			operators were added to ghostscript's internal array of operators without 
+			increasing the maximum size of the array. This led to the problem, that 
+			pstoedit couldn't add further operators.
+			<li>
+				EMF backend now fully supported also under Linux and *nix like systems. Thanks 
+				to Allen Barnett <a href="mailto:(allen_AT_lignumcomputing.com">(allen_AT_lignumcomputing.com</a>) 
+			for getting libemf to work in combination with pstoedit.
+			<li>
+				new backend using the ImageMagick++ API. Thanks to Bob Friesenhahn <a href="mailto:(bfriesen_AT_simple.dallas.tx.us">
+					(bfriesen_AT_simple.dallas.tx.us</a>) for his patience and support. 
+			This works only with versions 5.4.8 and later of ImageMagick.
+			<li>
+			under Windows, now the registry is searched for the latest version of 
+			GhostScript if no GhostScript configuration setting was found from gsview. 
+			Thanks to Russell Lang for some example code concerning the registry lookup.
+			<li>
+				new code for translating PNG images to PostScript by Niklas Peinecke - <a href="mailto:peinecke_AT_informatik.uni-hannover.de">
+					peinecke_AT_informatik.uni-hannover.de</a>. (needs libgd (<a HREF="http://www.boutell.com/gd"><font COLOR="#0000ff"><u>http://www.boutell.com/gd</u></font></a>) 
+			to compile.) - not fully integrated yet.
+			<li>
+			internal redesign of option handling to keep the documentation and code closer 
+			together.
+			<li>
+			make pstoedit.h usable from plain C programs such as autotrace.
+			<li>
+			added a -use_correct_font_size option to the xfig driver to support the same 
+			option of xfig.
+			<li>
+				improved configure and Makefile.in - Thanks to Masatake Yamoto - <a href="mailto:jet_AT_gyve.org">
+					jet_AT_gyve.org</a>
+			<li>
+				pstoedit can now be used as sort of plugin to autotrace to make all formats 
+				supported by pstoedit available to autotrace - also this was done primarily by 
+				Masatake Yamoto.</li>
+		</ul>
+		<h2>New or changed in 3.31:</h2>
+		<ul>
+			<li>
+				prepared the EMF/WMF drivers to compile against the libEMF (<a href="mailto:libemf_AT_lignumcomputing.com">libemf_AT_lignumcomputing.com</a>) 
+			which allows to create EMF files under *nix. But - the libEMF is not yet 
+			released. Stay tuned.
+			<li>
+				include some patches for the OS/2 port and bug fixes for drvmma and drvmet 
+				submitted by Thomas Hoffmann (<a href="mailto:thoffman_AT_zappa.sax.de">thoffman_AT_zappa.sax.de</a>).
+			<li>
+			automatic conversion of curves to lines also in case the -bo (backend only) 
+			option is used and the target format/driver doesn't support curves.
+			<li>
+			Donald Arseneau (asnd_AT_triumf.ca) adds pen changes when color changes to the 
+			HPGL backend. To be activated using the -pencolors option.
+			<li>
+			several portability fixed, e.g. now pstoedit compiles with g++3.0.
+			<li>
+			changed the place where pstoedit's data file (font map tables, ...) are stored 
+			($prefix/share/pstoedit under *nix).
+			<li>
+			added support to produce the shared library libpstoedit.so under Linux - Thanks 
+			to Russell Lang.
+			<li>
+			added a general -help option for each driver to show driver specific options. 
+			For example -f xfig:-help shows specific options for the fig backend.
+			<li>
+			minor bug fix in CGM backend - some pathes triggered an assertion violation.
+			<li>
+				several enhancements for the DXF backend. Now it supports the DXF SPLINE 
+				element as well. Big thanks to Daniel Gehriger <a href="mailto:gehriger_AT_linkcad.com">
+					(gehriger_AT_linkcad.com</a>) for his help concerning the DXF format.
+			<li>
+				support for TeX fonts in the SVG backend. Big thanks to Michel Goossens for the 
+				suggestions and his help. He can also provide the SVG definitions of the CM TeX 
+				fonts. See also <a href="http://home.cern.ch/goossens/svgfonts.html">http://home.cern.ch/goossens/svgfonts.html</a>
+			.
+			<li>
+			Now the SVG driver also supports a font map.
+			<li>
+			some minor bug fixes in the PostScript frontend related to font handling.
+			<li>
+				changed "Killustrator" to "Kontour" where appropriate.</li>
+		</ul>
+		<h2>New or changed in 3.30:</h2>
+		<ul>
+			<li>
+			new backend for Mathematica - contributed by Manfred Thole 
+			&lt;manfred_AT_thole.org&gt;
+			<li>
+				new SWF backend (beta release state - still lot's of features missing (fonts, 
+				dash handling, ...). This backend is based on the ming API (<a href="http://www.opaque.net/ming/">www.opaque.net/ming/</a>).
+			<li>
+			cleanup of the xfig backend. In some cases X-splines looked very different from 
+			the original image. Now the X-splines that are produced by the xfig backend are 
+			constrained differently, so that they fit the bezier curve better. Thanks to 
+			Ian MacPhedran.
+			<li>
+			added an option -startdepth to the xfig driver
+			<li>
+			improved support for various types of PostScript image operators. Now there is 
+			an option for backend developers to ask for a PNG file to be generated directly 
+			by the frontend (at GhostScript level). Currently this is used only for the SVG 
+			backend, but more will follow later.
+			<li>
+			added an option -adt (automatic draw text). This selectively enables -dt for 
+			all fonts that don't look like a text font.
+			<li>
+			Now the BoundingBox is provided to the backends - though not all make use of it 
+			so far.
+			<li>
+			man improvements to the SVG backend (plugin) like support for dashes, clipping, 
+			raster images, Symbol font
+			<li>
+			fixed a bug which showed up with PostScript files generated by the new Adobe 
+			PostScript driver.
+			<li>
+			some extensions (new options) to the TK backend - contributed by Chris Cox
+			<li>
+			added support for writing the output to a file it the input is stdin (pstoedit 
+			-f format - outfile). This allows to implement a pstoedit printer driver via 
+			redmon. You can print directly to any format pstoedit supports directly from 
+			any Windows application.
+			<li>
+			-rgb (instead of now default CMYK)
+			<li>
+			now pages can be rotated arbitrarily (-rotate). Thanks to Andrew Birrell 
+			&lt;birrell_AT_pa.dec.com&gt; for the permission to use the corresponding code 
+			from pstotext).
+			<li>
+				made the source code almost clean concerning FlexeLint messages (By the way, I 
+				like this tool- see <a href="http://www.gimpel.com">www.gimpel.com</a>
+			)
+			<li>
+			addes some assertions in to the code to further runtime checking
+			<li>
+				added a %TGIF header to support the Unix file command. (Thanks to <a href="mailto:Gintautas.Grigelionis_AT_ki.ericsson.se">
+					Gintautas.Grigelionis_AT_ki.ericsson.se</a>)
+			<li>
+				fixed a compilation problem with SUN's C++ compilers.</li>
+		</ul>
+		<h2>New or changed in 3.21:</h2>
+		<ul>
+			<li>
+			some extensions (new options) to the TK backend. Now supports multiple pages as 
+			well - Thanks to Chris Cox. See manual for more details.
+			<li>
+			bugfix : -pagesize option was not recognized correctly.
+			<li>
+			minor bugfix in FIG backend to be compliant with prtfig.
+			<li>
+			bugfix in the frontend (lexer). Now the lexer can be started multiple times 
+			after each other. This is important for programs using the pstoedit.dll.
+			<li>
+			added support for writing PNG in image.cpp. Now backends can use this to write 
+			raster images into PNG files.
+			<li>
+			improved plugins: CGM (supports Bezier now), SVG (supports raster images) and 
+			EMF (supports raster images), importps (supports raster images).
+			<li>
+			reanimation of the OS/2 port - thanks to Thomas Hoffmann.
+			<li>
+				the binary releases are now linked with the libplotter (GNU plotutils <a href="http://www.gnu.org/software/plotutils/plotutils.html">
+					http://www.gnu.org/software/plotutils/plotutils.html</a>
+			) to allow direct access to the variety of drivers contained in that library 
+			(FIG, PCL, HPGL, TEK, X11 (Unix only), SVG, CGM, AI). Some formats are now 
+			available in two versions. One directly with a native driver in pstoedit and 
+			one via the libplot.
+			<li>
+				pstoedit now cooperates with autotrace. Autotrace can now produce a dump file 
+				for further processing by pstoedit using the -bo (backend only) option. 
+				Autotrace is a program written by a group around Martin Weber and can be found 
+				at&nbsp; <a href="http://sourceforge.net/projects/autotrace/">http://sourceforge.net/projects/autotrace/</a>
+			</li>
+		</ul>
+		<h2>New or changed in 3.20:</h2>
+		<ul>
+			<li>
+			fixed a bug with precision text (-pti/a).
+			<li>
+			fixed a bug in pstoedit.ph.
+			<li>
+				new backend latex2e contributed by <a href="mailto:pakin_AT_cs.uiuc.edu">Scott 
+					Pakin</a>.
+			<li>
+				include SVG driver into binary releases for Linux/Solaris.</li>
+		</ul>
+		<h2>New or changed in 3.19:</h2>
+		<ul>
+			<li>
+			experimental support for filling in the HPGL backend.
+			<li>
+			implement copypage same as showpage plus emit a warning.
+			<li>
+			fixed a bug in consistency checking (frontend vs. backend when using the -bo 
+			option)
+			<li>
+			automatic enabling of -dt option if backend doesn't support text.
+			<li>
+				fixed a bug in memory allocation. Windows requires that the memory is 
+				deallocated in the same DLL as it was allocated. This was a problem with some 
+				plugins.</li>
+		</ul>
+		<h2>New or changed in 3.18:</h2>
+		<ul>
+			<li>
+				new java2 backend which supports much better rendering than the old java1 
+				backend. Thanks to <a href="mailto:gisbert_AT_tapirsoft.de">Gisbert W. Selke</a>
+				of <a href="http://www.tapirsoft.de">TapirSoft Gisbert &amp; Harald Selke GbR</a>.
+			<li>
+			new option (-t2fontast1) to handle type 2 fonts similarly to t1 fonts - This is 
+			sort of experimental.
+			<li>
+			fixed one bug in the binary cgm (too long header).
+			<li>
+			fixed a bug in the configure script.
+			<li>
+			made the postscript output again more DSC compliant as pointed out by Russell 
+			Lang
+			<li>
+				made the code more "cleaner" concerning rules checked by CodeWizard (<a href="http://www.parasoft.com">www.parasoft.com</a>).</li>
+		</ul>
+		<h2>New or changed in 3.17:</h2>
+		<ul>
+			<li>
+			included a patch for idraw to support bitmap images. Thanks to Scott Johnston 
+			for the contribution.
+			<li>
+			much improved WMF backend by Thorsten Behrens.
+			<li>
+				experimental support for SVG (<a href="http://www.w3.org/Graphics/SVG">http://www.w3.org/Graphics/SVG</a>/) 
+				in the <a href="http://www.pstoedit.net/plugins/">plugins.dll</a>.
+			<li>
+			added a function to the DLL interface for gsview to clean up memory allocated 
+			by the pstoedit.dll.
+			<li>
+			added an option (-uchar) which allows to define the character to be used 
+			instead of characters that are not available in the standard character encoding 
+			but nevertheless used by the input PostScript/PDF file.
+			<li>
+			allow standard output to be used also for backends that don't support multiple 
+			pages as suggested by Andread Amann
+			<li>
+			added a BeginSetup / EndSetup to the PostScript output to allow reading in 
+			CorelDraw 3/4 as proposed by Martin Weber
+			<li>
+				added a consistency check if the -bo option is used to avoid problems when the 
+				selected backend has some restrictions, e.g. does not support curves.</li>
+		</ul>
+		<h2>New or changed in 3.16:</h2>
+		<ul>
+			<li>
+				fixed some small memory leaks (missing [] with delete) and a potential null 
+				pointer access. Thanks to <a href="http://www.parasoft.com">Parasoft</a>
+			for a temporary license for Linux of their Insure++. It was quite easy to find 
+			these bugs with this tool.
+			<li>
+			changed the starting depth of objects in xfig format from 999 to 499. This 
+			allows new objects to be inserted in front or behind the converted figure.
+			<li>
+				the makefile for pstoedit can now be configured automatically using configure - 
+				at least on Un*x like systems. Thanks <a href="mailto:pakin_AT_cs.uiuc.edu">Scott 
+					Pakin</a>
+			for providing the necessary packages.
+			<li>
+			added the -pti and -pta option which allows for "precision text" via individual 
+			placement of each character within a string.
+			<li>
+				the tgif backend now supports arbitray streched text. The text placement is 
+				currently not fully correct. This problem will probably be fixed in tgif 
+				4.1.26.
+			</li>
+		</ul>
+		<h2>New or changed in 3.15:</h2>
+		<ul>
+			<li>
+			fixed a compilation problem and makefile problem (make install).
+			<li>
+				switch to a new documentation style. The manual page is now originally written 
+				in LaTeX and translated to Un*x man format and HTML. Thanks to Rolf Niepraschk 
+				(<a href="mailto:niepraschk_AT_ptb.de">niepraschk_AT_ptb.de</a>)&nbsp; for 
+			this work. The Linux community will have big thanks for this contribution.
+			<li>
+			added a new option to set the page size for the output medium. However this is 
+			currently used by the libplot backend only.
+			<li>
+			some small correction on the libplot driver.
+			<li>
+			fixed the broken -scale option for the tgif backend.
+			<li>
+			backends can now access the current setting of the miterlimit using 
+			currentMiterLimit().
+			<li>
+			text consisting entirely of spaces is now suppressed. This caused problems with 
+			some backends, e.g. xfig.
+			<li>
+				changed the version of drvbase (because of the miterlimit and pagesize 
+				support). This means that all plugins need to be updated (just the .dll not the 
+				keys). Otherwise you will get an error message.</li>
+		</ul>
+		<h2>New or changed in 3.14:</h2>
+		<ul>
+			<li>
+			added two checkboxes for the importps dialog
+			<li>
+			bug fix related to font caching in the EMF backend
+			<li>
+			added a bugfix for the MetaPost backend received from Scott Pakin
+			<li>
+				incorporated a lot of improvements to the libplot driver. Thanks to Robert S. 
+				Maier (<a href="mailto:rsm_AT_math.arizona.edu">rsm_AT_math.arizona.edu</a>)<br>
+			Notice: most of these improvement will need at least libplot version 2.3. See 
+			drvlplot.cpp for all the new options.
+			<li>
+			pstoedit now implicitly looks for a driver specific fontmap file named 
+			&lt;drivername&gt;.fmp
+			<li>
+			fixed a problem (bug in gs??) which was caused by some PDF files when gs5.50 
+			was used. This problem did not occur anymore with newer versions of gs.
+			<li>
+				added the classed needed by the generated Java Code to the distribution (see 
+				java subdirectory)</li>
+		</ul>
+		<h2>New or changed in 3.13:</h2>
+		<ul>
+			<li>
+			change in frontend and drvbase: Now the full effective font matrix can be 
+			retrieved by backends
+			<li>
+			changed again the version of drvbase (because of the font matrix functions). 
+			This means that all plugins need to be updated (just the .dll not the keys). 
+			Otherwise you will get an error message.
+			<li>
+				added a new backend for the sketch format ( <a href="http://sketch.sourceforge.net/">
+					http://sketch.sourceforge.net/</a> ) contributed by
+				<br>
+				Bernhard Herzog (<a href="mailto:bernhard_AT_users.sourceforge.net">bernhard_AT_users.sourceforge.net</a>)
+			<li>
+			many improvements in the MetaPost backend and a better fontmap.mpost by Scott 
+			Pakin.
+			<li>
+			minor bug fix with line width and text elements in the TGIF backend.
+			<li>
+				added an option to the TGIF backend to generate HREF attributes for each text 
+				element (proposed by Tobias Buchal <a href="mailto:buchal41_AT_che41a0.der.edf.fr">buchal41_AT_che41a0.der.edf.fr</a>). 
+			This is still in an experimenal stage!
+			<li>
+			added an option (-nc) to force the replacement of curves with line segments 
+			even for backends that support curves.
+			<li>
+			fixed a bug with the -flat option not beeing honoured correctly in combination 
+			with the new -nc option
+			<li>
+				added an option to emulate clipping (-sclip). This however results in larger 
+				number of points ! Use it only if the missing support for clipping causes 
+				problems with your file.</li>
+		</ul>
+		<h2>New or changed in 3.12:</h2>
+		<ul>
+			<li>
+			small bug fix in the meta post backend (blank font names) and in the 
+			fontmap.mpost file.
+			<li>
+			several bug fixes and code reorganization in the subpath simulation part.
+			<li>
+			sub path simulation is now available for all backends, not just xfig. However, 
+			this was not tested very intensively so far. It works quite well with xfig and 
+			tgif.
+			<li>
+			bug fix for related to the usage of "-f gs:...".
+			<li>
+			small bug fix in the metapost driver and some additions to the fontmap.mpost 
+			file.
+			<li>
+			added a setglobal also for the "non -nb" case to pstoedit.pro to cope with 
+			gs5.82.
+			<li>
+			bux fix in documentation (-fontmap instead of -mapfile).
+			<li>
+			added some support for easier retrieval of dash patterns from within backends.
+			<li>
+			extended the check for "mergable" path to include also eofilled pathes and made 
+			pathsCanBeMerged virtual so it can be overloaded by a specific backend.
+			<li>
+			changed again the version of drvbase. This means that all plugins need to be 
+			updated (just the .dll not the keys). Otherwise you will get an error message.
+			<li>
+			bug fix in the EMF driver of the plugins.dll and importps.dll regarding the 
+			handling of closepath.
+			<li>
+				added an option to the xfig backend to set the paper width (-f "xfig:-depth <em>depth 
+					in inches</em>")
+			<li>
+			added an option to the ps2ai driver (-88) to activate the AI-88 format instead 
+			of the AI-3 format
+			<li>
+				added a fontmap.win in the misc directory as an example for a Windows fontmap 
+				file. (-fontmap option)</li>
+		</ul>
+		<h2>New or changed in 3.11:</h2>
+		<ul>
+			<li>
+			improved handling of TrueType fonts under Windows 9x/NT. Pstoedit can now deal 
+			with TrueType fonts if GhostScript is configured for TrueType support.
+			<li>
+			fixed an incompatibility with older version of GhostScript
+			<li>
+			fixed a bug that was caused when the GS_LIB variable was set.
+			<li>
+			added a new backend for the libplot (GNU plotutils) library () (GNU MetaFiles). 
+			This allows to use the additional format drivers of the GNU plotting utilities.
+			<li>
+				Burkhard Plaum <a href="mailto:(plaum_AT_IPF.Uni-Stuttgart.de">(plaum_AT_IPF.Uni-Stuttgart.de</a>) 
+			added support for complex filled paths (paths consisting of an arbitraty 
+			sequence of moveto, lineto and curveto in combination with fill and eofill) to 
+			the xfig backend. In future, this will be made available to other backend that 
+			don't support such pathes as well. In order to activate this feature you need 
+			to specify the -ssp (simulate sub paths) option.
+			<li>
+			changed again the version of drvbase due to the support for complex paths. This 
+			means that all plugins need to be updated (just the .dll not the keys). 
+			Otherwise you will get an error message.
+			<li>
+			improved the EMF driver in the importps.dll. I now generates much more compact 
+			EMF files.
+			<li>
+			Added a general option for specifying a file containing a font mapping 
+			(document font -&gt; font in target format). So far this was just used in the 
+			mpost backend but this is now available for general usage. See the misc 
+			directory in the source distribution for an example.
+			<li>
+			removed the STL dependency in the mport driver. This driver can now be compiled 
+			as well without having the STL.
+			<li>
+			some internal code reorganization.
+			<li>
+				fixed a bug in the test target of the makefile</li>
+		</ul>
+		<h2>New or changed in 3.10:</h2>
+		<ul>
+			<li>
+			replaced the -dNOBIND with -dDELAYBIND (Russell Lang pointed this out). This 
+			should avoid problems with files that redefine standards PostScript operators 
+			with totally different semantics, e.g. lt (less than) to mean lineto. If you 
+			notice different results than before use the -nb option to switch back to the 
+			previous style (-dNOBIND) and send an example to the author, please.
+			<li>
+			changed the version of drvbase due to a new virtual function. This means that 
+			all plugins need to be updated (just the .dll not the keys).
+			<li>
+			added a check for a failure in the constructor of drvWMF.
+			<li>
+			fixed a compilation problem for systems that don't support shared libraries and 
+			some warnings issued by the IRIX C++ compiler.
+			<li>
+				added the PIC backend contributed by Egil Kvaleberg (<a href="mailto:egil_AT_kvaleberg.no">egil_AT_kvaleberg.no</a>)
+			<li>
+				added the backend for the <a href="http://www.koffice.org/kontour">Kontour</a> format 
+				- contributed by Kai-Uwe Sattler <a href="mailto:(kus_AT_iti.cs.uni-magdeburg.de">(kus_AT_iti.cs.uni-magdeburg.de</a>)
+			<li>
+			added some files missing for the compilation under Windows and adapted the 
+			makefile.
+			<li>
+			changed the way the gsview32.ini file is searched.
+			<li>
+			pstoedit now also uses the GS_LIB path from the gsview32.ini file ( 
+			GhostscriptInclude entry). This was done because in some situations the 
+			gswin32.dll could not find its own init files.
+			<li>
+			activated the (dead) -s option again which allows to specify a scaling factor 
+			for the output. At the moment it is just active for the idraw backend.
+			<li>
+				added a MetaPost backend provided by <a href="mailto:pakin_AT_cs.uiuc.edu">Scott 
+					Pakin</a>.
+			<li>
+			changed the source code to be compilable against the ANSI iostream header 
+			files. This was needed because the metapost backend uses STL and the standard 
+			string class and thus the ANSI headers are needed.
+			<li>
+				In this version the drvbase class was changed. This means that you need to get 
+				a new version of the plugin.dll if you have a previous version. Otherwise you 
+				will get an error message.</li>
+		</ul>
+		<h2>New or changed in 3.03:</h2>
+		<ul>
+			<li>
+			better handling of "extreme" dash patterns. If the ratio on/off is &gt; 100 
+			then the line is treated as solid now.
+			<li>
+				source code available now.</li>
+		</ul>
+		<h2>New or changed in 3.02:</h2>
+		<ul>
+			<li>
+				new driver for the AI (Adobe Illustrator) format. This is not a real native 
+				pstoedit driver but instead just a conversion to the AI format using the 
+				ps2ai.ps that comes with every installation of GhostScript. It is included to 
+				provide the same "look-and-feel" for the conversion to AI. The additional 
+				benefit is that this conversion is now available also via the 
+				"convert-to-vector" menu of Gsview. However, lot's of files don't convert 
+				nicely or at all using ps2ai.ps. So a native pstoedit driver would be much 
+				better. Anyone out there to take this ? The AI format is usable for example by 
+				Mayura Draw (<a href="http://www.mayura.com">http://www.mayura.com</a> ). Also 
+				a driver to the Mayura native format would be nice.
+				<br>
+			However, this new driver relies on a slightly modified ps2ai.ps which hopefully 
+			will go into the next version of GhostScript.
+			<li>
+				Added the handling of GhostScript output in the case the pstoedit.dll is used 
+				by gsview. Now also messages from GhostScript can be seen in the Gsview message 
+				box.</li>
+		</ul>
+		<h2>New or changed in 3.01:</h2>
+		<ul>
+			<li>
+			Added a work-around for files redefining "length"
+			<li>
+				extended the trouble-shooting section in the manual.</li>
+		</ul>
+		<h2>New or changed in 3.00:</h2>
+		<ul>
+			<li>
+			Eliminated compatibility problem with GhostScript 5.xx
+			<li>
+			packed most stuff into a pstoedit.dll under windows. This dll can now be 
+			called&nbsp; by gsview. pstoedit.exe is just a small program calling the 
+			pstoedit.dll
+			<li>
+				additional drivers can now be put into separate plugin-libraries. See <a href="pstoedit.htm">
+					the manual </a>
+			for availability of such drivers.
+			<li>
+			pstoedit now calls GhostScript via the DLL interface under Windows. Thanks to 
+			Russell Lang for his help regarding this.
+			<li>
+				new HPGL driver contributed by Peter Katzmann (<a href="mailto:p.katzmann_AT_thiesen.com">p.katzmann_AT_thiesen.com</a>)
+			<li>
+			fix of a bug in pstoedit.ph which caused an infinite loop.
+			<li>
+			some changes in pstoedit.ph to cope with changes in newer version of 
+			ghostscript.
+			<li>
+				fix of s small bug in drvidraw by Jorge A. Gautier (<a href="mailto:jgautier_AT_netcom.com">jgautier_AT_netcom.com</a>)
+			<li>
+				include a new Java GUI contributed by Leszek Piotrowicz (<a href="mailto:leszek_AT_sopot.rodan.pl">leszek_AT_sopot.rodan.pl</a>)
+			<li>
+				new backend for Tcl/Tk contributed by Chris Cox&nbsp; (<a href="mailto:ccox_AT_airmail.net">ccox_AT_airmail.net</a>)
+			<li>
+			new internal architecture which now allows link time and run-time loading of 
+			backends.
+			<li>
+			temporarily dropped support for the OS/2 MET backend (the author was not able 
+			to adapt the backend to the new architecture so far),
+			<li>
+				rewrite of the WMF backend by Thorsten Behrens&nbsp; (<a href="mailto:Thorsten_Behrens_AT_public.uni-hamburg.de">Thorsten_Behrens_AT_public.uni-hamburg.de</a>) 
+			and Bjoern Petersen. The first version of this driver relied on Borland 5.0 and 
+			thus was not portable to other compilers. Now it uses the pure Windows API and 
+			thus compiles also with Visual C++
+			<li>
+			added a new "gs" pseudo backend which runs GhostScript with a given GhostScript 
+			output device, e.g. -f gs:pdfwrite runs the GhostScript PDF writer.
+			<li>
+			added a -v (for verbose) option
+			<li>
+			added a -split option to split the output into individual files for each page
+			<li>
+			Bug fix: a default font specified using -df was not used in the xfig backend
+			<li>
+			workarounds for two bugs on djgpp (binary open and tempnam)
+			<li>
+				-f ps supports emission of curvetos (proposal and partial patch from
+				<br>
+				Erik Lundh (<a href="mailto:Erik.Lundh_AT_compelcon.se">Erik.Lundh_AT_compelcon.se</a>))
+			<li>
+			PostScript output now generates some DSC comments. At least GhostView 
+			understands the output.
+			<li>
+			xfig output is compatible with new format of xfig 3.2
+			<li>
+			xfig output now creates x-splines
+			<li>
+				image support for xfig done by Leszek Piotrowicz&nbsp; (<a href="mailto:leszek_AT_sopot.rodan.pl">leszek_AT_sopot.rodan.pl</a>)
+			<li>
+			image support for Framemaker-MIF format
+			<li>
+			added support for dashes for Framemaker-MIF format
+			<li>
+			fixed a problem with detection of not available files (MSVC only)
+			<li>
+			Changed some code in drvbase.h in order to work around a not implemented 
+			feature of the HP-CC compiler.
+			<li>
+			Fixed a problem that causes Turbo C++ to hang (compiler problem)
+			<li>
+			changed usage of deviceinfo to currentpagedevice for better compatibility with 
+			newer version of GhostScript (thanks to Peter L. Deutsch for the hint).
+			<li>
+				fixed a bug caused by explicit HWResolution settings from with .ps file (font 
+				sizes were wrong)<br>
+			</li>
+		</ul>
+		<h2>New or changed in 2.60:</h2>
+		<ul>
+			<li>
+				New backend for idraw contributed by Scott Pakin (<a href="mailto:pakin_AT_cs.uiuc.edu">pakin_AT_cs.uiuc.edu</a>)
+			<li>
+			Internal redesign in order to support the usage of the drivers from other 
+			programs, not just from pstoedit.
+			<li>
+			Full implementation of kshow, xshow, yshow, xyshow
+			<li>
+			Added -psargs option and removed -rnnxnn option
+			<li>
+			Added -include option
+			<li>
+			Fixed the linecap and linejoin problem for MIF
+			<li>
+				Port to RiscOS done by Rob Warner (<a href="mailto:rcw2_AT_ukc.ac.uk">rcw2_AT_ukc.ac.uk</a>)
+			<li>
+			winp2eap.def missing in distribution
+			<li>
+			Fixed a problem with .ps files that redefined showpage themselves
+			<li>
+			Fixed some problems related to the 'string' operator. Some PostScript programs 
+			used to redefine 'string'.
+			<li>
+			Fixed a portabiltiy problem for DecAlpha
+			<li>
+			Fixed some OS/2 compilation problems
+			<li>
+			Fixed some DEC compilation problems
+			<li>
+			Fixed a problem that caused pstoedit to 'draw' each character when running 
+			gs3.5x
+			<li>
+			Added support for Frame-specific encoding of special characters
+			<li>
+				Fixed an encoding bug for PDF (minus was defined twice)
+			</li>
+		</ul>
+		<h2>New or changed in 2.50:</h2>
+		<ul>
+			<li>
+				New backend for WMF, contributed by Jens Weber ( <a href="mailto:wr_AT_lzh1.lzh.de">
+					wr_AT_lzh1.lzh.de</a>
+			)
+			<li>
+				Windows GUI, contributed by Jens Weber ( <a href="mailto:wr_AT_lzh1.lzh.de">wr_AT_lzh1.lzh.de</a>
+			)
+			<li>
+			direct handling of .pdf files (as input) (Thanks to ghostscript and the 
+			-dNOBIND option !!)
+			<li>
+			fixed a bug caused by ignoring the textmatrix
+			<li>
+			changed the pdf output so that xpdf accepts it
+			<li>
+			Fonts not supported by the selected backend, are now "drawn" automatically, as 
+			if the option -dt was given for them.
+			<li>
+			implemented the different show's for pdf
+			<li>
+			handling of reencoded fonts.
+			<li>
+			support for dashed lines (so far for cgm, xfig, and pdf only)
+			<li>
+				added workaround for bug in libg++ on some linux systems (Thanks to Derek B. 
+				Noonburg (<a href="mailto:derekn_AT_vw.ece.cmu.edu">derekn_AT_vw.ece.cmu.edu</a>) 
+				and Rainer Dorsch&nbsp; (<a href="mailto:rd_AT_berlepsch.wohnheim.uni-ulm.de">rd_AT_berlepsch.wohnheim.uni-ulm.de</a>) 
+			for taking care of this linux specific problem and the workaround)
+			<li>
+			fixed a bug with ordering of text and lines
+			<li>
+			replaced usage of tmpnam by tempnam so the user can control the place where 
+			temp files are allocated. (via TMPDIR under *nix, TMP or TEMP under DOS/Win)
+			<li>
+			Bold was not treated correctly in MIF backend
+			<li>
+			Gnuplot backend could not be called
+			<li>
+			zero length text caused problems with some backends
+			<li>
+			^M caused problems with some backends.
+			<li>
+			handling filenames containing \
+			<li>
+			fixed compile errors with some compilers in drvjava.cc
+			<li>
+				added support for linecaps in PDF backend
+			</li>
+		</ul>
+		<h2>New or changed in 2.41:</h2>
+		<ul>
+			<li>
+			changed makefile for DOS
+			<li>
+			fixed problem in pdf backend with '\' characters
+			<li>
+			fixed a problem with linewidth (all backends)
+			<li>
+				three new backends from
+			</li>
+		</ul>
+	</body>
+</html>

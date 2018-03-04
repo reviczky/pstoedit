@@ -1,0 +1,66 @@
+#
+# Makefile for pstoedit documentation
+# (adapted from `Makefile' in the latex2man package) 
+# Rolf Niepraschk, niepraschk@ptb.de, 99/08/20
+#
+
+BASE = pstoedit
+
+DVIPS_FLAGS = -Pwww                # use the type1 version of the cm fonts
+LATEX2MAN_FLAGS = -t pstoedit.trans
+
+.PHONY :    all clean realclean 
+.SUFFIXES : .htm .1 .tex .ps .info .texi .txt 
+
+all : $(BASE).1 $(BASE).htm $(BASE).txt # $(BASE).ps $(BASE).pdf $(BASE).info 
+	$(MAKE) -f Makefile.l2m clean
+
+%.dvi : %.tex
+	latex $<
+	# latex $<
+
+%.ps : %.dvi
+	dvips $(DVIPS_FLAGS) -o $@ $<
+
+%.pdf : %.tex
+	pdflatex $<
+	# pdflatex $<
+
+%.info : %.texi
+	makeinfo $<
+
+%.txt : %.1
+	groff -t -man -Tlatin1 $<    |	\
+		sed -e 's/.//g' 	\
+		    -e 's/7|//g' 	\
+		    -e 's/[6-9]//g' 	\
+		    -e 's///g'      	\
+		    -e 's/­$$/- /'      > $@
+
+%.1 : %.tex
+	latex2man $(LATEX2MAN_FLAGS) -M $< $@
+
+%.htm : %.tex
+	latex2man $(LATEX2MAN_FLAGS) -H $< $@
+
+%.texi : %.tex
+	latex2man $(LATEX2MAN_FLAGS) -T $< $@
+	
+%.rtf : %.1
+	rman -f RTF $< > $@
+	
+#$(BASE).1 : $(BASE).tex $(BASE).trans
+
+#$(BASE).htm : $(BASE).tex $(BASE).trans
+	
+
+clean :
+	rm -f $(BASE).aux $(BASE).log 
+#$(BASE).dvi 
+
+realclean : clean
+	$(RM) $(BASE).ps $(BASE).pdf $(BASE).1 $(BASE).htm $(BASE).texi \
+	  $(BASE).info $(BASE).txt $(BASE).rtf
+	
+
+# -- eof --

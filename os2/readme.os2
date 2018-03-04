@@ -1,0 +1,91 @@
+Second test release of pstoedit 3.31 for OS/2
+
+This is an update of the test releases for pstoedit 3.21 and
+3.30. Nothing spectacular new in here.
+
+These files are compiled and (somewhat) tested on a single
+machine using a German Warp 4(.5), FP 15.
+
+I make them available for anybody who is interested in 
+testing them. I am interested in any feedback. Send your 
+comments to 
+ 
+  thoffman@zappa.sax.de
+
+Please do not redistribute these files (i.e.,do not upload 
+them to public FTP servers).
+
+I would like to note that I added some minor modifications
+to code that resulted from the work of C.Jaeschke.
+
+To get this program working, pstoedit.exe must find 
+pstoedit.dll and gsdll2.dll. 
+I put them into the LIBPATH. Also make the runtime 
+libraries of emx available.
+
+pstoedit.dll is "gvpm-ready". In cooperation w/ R.Lang this 
+led to integration into this graphical tool
+(This version works w/ "stock" gvpm 4.0 at least).
+As of this moment, gvpm still contains the pstoedit.dll
+of version 3.21. You can simply copy this new dll over it.
+(Check: when the Mathematica backend is listed, you are using
+ v3.31)
+
+NEW: pstoedit.exe looks for configuration data into 
+pstoedit.ini, too. You receive a template of this ini with 
+this release.
+Change it according to your system's values  (use regedit2
+for this) and put it alongside
+with pstoedit.exe or in the directory of the SYSTEM_INI, i.e.
+os2.ini (e.g., C:\OS2).
+
+Search sequence changed: pstoedit looks for the GS_LIB dirs
+in the following order:
+1. look for pstoedit.ini (see above)
+2. look for gvpm.ini (the ASCII ini from gvpm)
+3. look for the environment variable GS_LIB
+4. look for a built-in value
+
+Buglet removed:
+pstoedit does not any longer create empty pstoedit.ini files
+in your working directory (did this before, if it could not 
+find an pstoedit.ini in the system or exe directory.).
+
+If you are using pstoedit.ini then you have to update the
+path of the ghostscript lib when upgrading these.
+
+The main differences to the "old" version for OS/2
+(must have been around v.2.60) are:
+
+-no longer necessary to use pstoedit.cmd: use pstoedit.exe
+-windowing code for met removed (pstoedit only writes to an 
+ output file, which you can look at using OS/2's picture
+ viewer)
+-info output goes to STDERR, you can redirect this output
+-limited support for images added (mostly taken from the
+ wmf driver code)
+-some of the "*nix formats" included (call pstoedit -help to
+ see a list of supported formats)
+-added pstoedit.inf (Thanks to A.Zabolotny for html2ipf).
+-made using autoconf et.al. with (not so) minor modifications of
+ the resulting Makefile, i.e. no hand crafted Makefile 
+ used (Thanks to H.C.Chu for autoconf).
+
+New in comparison with v3.21 is the added Mathematica backend.
+
+The directory examples contains the *ps files from the 
+original (source) distribution and output created for the
+met device. Compare the files to find out about the capa-
+bilities and limits of this program. 
+Known deficencies are:
+-image boundaries cannot be skewed (the content is rotated,
+ although): see imagetest.[ps,met]
+-"stairs" in text are not shown: see largetextspace.[ps,met]
+-text orientations are not always correct: see textmat.[ps,met]
+-content of multiple pages is printed on one page: twopages.[ps,met]
+-path handling fails: pathtest.[ps,met]
+
+
+January 2002
+Thomas Hoffmann
+thoffman@zappa.sax.de

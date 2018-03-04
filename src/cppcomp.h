@@ -234,9 +234,6 @@ const bool true  = 1;
 #define NIL 0
 #endif
 
-// This should really be decided via autoconf...
-#define _LITTLE_ENDIAN
-//#define _BIG_ENDIAN
 
 
 #endif

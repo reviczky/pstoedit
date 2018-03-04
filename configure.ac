@@ -10,9 +10,9 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.43,wglunz34_AT_pstoedit.net)
+AC_INIT(pstoedit,3.44,wglunz34_AT_pstoedit.net)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.43)
+AM_INIT_AUTOMAKE(pstoedit,3.44)
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
 
@@ -56,6 +56,8 @@ PKG_PROG_PKG_CONFIG
 
 AC_LANG(C++)
 
+AC_C_BIGENDIAN([CPPFLAGS="$CPPFLAGS -D_BIG_ENDIAN"], [CPPFLAGS="$CPPFLAGS -D_LITTLE_ENDIAN"])
+
 dnl check for directory handling
 AC_HEADER_DIRENT
 
@@ -93,7 +95,7 @@ AC_ARG_WITH(swf,
 with_swf=$withval, with_swf=yes)
 
 
-
+OLD_CPPFLAGS=${CPPFLAGS}
 CPPFLAGS="$CPPFLAGS -DX_DISPLAY_MISSING"
 
 if test "${with_libplot}" = "yes" ; then
@@ -228,6 +230,7 @@ else
 	if test -n "${MAGICK_CONFIG}"; then
 	   AC_MSG_CHECKING(for version of "GraphicsMagick++" )   
 	   dnl See if we have a 1.0.6 or newer version
+	   OLD_CPPFLAGS=${CPPFLAGS}
 	   CPPFLAGS="$CPPFLAGS `Magick++-config --cppflags`"
 	   AC_TRY_COMPILE( [#include <Magick++.h>
 	            #if MagickLibVersion >= 0x000008
@@ -437,14 +440,14 @@ AC_SUBST(CXX_RUNTIME_LIB)
 dnl Write the resulting Makefile.
 AC_CONFIG_FILES([Makefile 
 src/Makefile 
-config/Makefile config/pstoedit-config config/pstoedit.pc
+config/Makefile config/pstoedit.pc
 doc/Makefile
 examples/Makefile 
 java/Makefile java/java1/Makefile java/java2/Makefile 
 misc/Makefile misc/swffonts/Makefile 
 os2/Makefile 
 msdev/Makefile othersrc/Makefile othersrc/gsdllinc/Makefile],
-[chmod a+x config/pstoedit-config])
+[])
 
 AC_OUTPUT
  

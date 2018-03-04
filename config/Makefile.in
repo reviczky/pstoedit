@@ -39,13 +39,13 @@ host_triplet = @host@
 LIBOBJDIR =
 subdir = config
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/pstoedit-config.in $(srcdir)/pstoedit.pc.in
+	$(srcdir)/pstoedit.pc.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
-CONFIG_CLEAN_FILES = pstoedit-config pstoedit.pc
+CONFIG_CLEAN_FILES = pstoedit.pc
 SOURCES =
 DIST_SOURCES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
@@ -234,8 +234,6 @@ $(top_srcdir)/configure:  $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4):  $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-pstoedit-config: $(top_builddir)/config.status $(srcdir)/pstoedit-config.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 pstoedit.pc: $(top_builddir)/config.status $(srcdir)/pstoedit.pc.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 

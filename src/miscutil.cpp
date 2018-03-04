@@ -178,9 +178,9 @@ RSString full_qualified_tempnam(const char *pref)
 	}
 	strcat(filename, pref);
 	strcat(filename, XXXXXX);
-	cout << "using " << filename << " as template for mkstemp" << endl;
+	// cout << "using " << filename << " as template for mkstemp" << endl;
 	const int fd = mkstemp(filename);
-	cout << "returned " << filename << " and " << fd << endl;
+	// cout << "returned " << filename << " and " << fd << endl;
 	if (fd == -1) {
 		cerr << "error in mkstemp for " << filename << " " << errno << endl;
 		exit(1);

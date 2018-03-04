@@ -62,7 +62,7 @@ drvASY::derivedConstructor(drvASY):
 {
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
-       << "// Asymptote 0.84 (or later) backend contributed by John Bowman\n"
+       << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
        << "// pstoedit is Copyright (C) 1993 - 2006 Wolfgang Glunz"
        << " <wglunz34_AT_pstoedit.net>\n\n";
 	
@@ -286,7 +286,7 @@ void drvASY::show_image(const PSImage & imageinfo)
   ostringstream buf;
   buf << outBaseName << "." << imgcount << ".eps";
   
-  outf << "label(include(\"" << buf.str() << "\"),("
+  outf << "label(graphic(\"" << buf.str() << "\"),("
        << ll.x_ << "," << ll.y_ << "),align);" << endl;
   outf << "layer();" << endl;
   

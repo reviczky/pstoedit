@@ -4,7 +4,7 @@
    psfront.h : This file is part of pstoedit
    contains the class responsible for reading the dumped PostScript format
   
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -79,6 +79,7 @@ private:
 	const bool	splitpages;
 	drvbase *	backend;
 	unsigned int    currentPageNumber;
+	unsigned int    lineNumber;
 	float *         numbers; // The number stack [maxpoints]
 	unsigned int	nextFreeNumber;
 	unsigned int	pathnumber; // number of path (for debugging)

@@ -6,6 +6,56 @@
 	</head>
 	<body>
 		<h1 align="left">Changelog for pstoedit</h1>
+		<H2>New or changed in 3.50:</H2>
+		<UL>
+			<LI style="Z-INDEX: 0">
+			added an option (-gs) to specify the full path to GhostScript (under Windows - 
+			either the .exe or the DLL). This can be used by portable applications to 
+			direct pstoedit to use a specific GhostScript version.
+			<LI style="Z-INDEX: 0">
+				Stanislav Brabec&nbsp;contributed several improvements to the PCB driver. 
+				See&nbsp;<A href="http://www.penguin.cz/~utx/pstoedit-pcb/">http://www.penguin.cz/~utx/pstoedit-pcb/</A>&nbsp;on 
+			how these can be useful.
+			<LI style="Z-INDEX: 0">
+			Scott Pakin submitted several improvements to the mpost driver and the font 
+			substitution mechanism.
+			<LI style="Z-INDEX: 0">
+				new driver for .vtk files e.g. for ParaView - <A href="http://www.paraview.org/">http://www.paraview.org/</A>
+			- but&nbsp;this is still a very basic version. Thanks to Mitesh Patel for 
+			initiating and testing.
+			<LI style="Z-INDEX: 0">
+				new driver for cairo (<A href="http://cairographics.org/">http://cairographics.org/ </A>
+			) contributed by Dan McMahill. This driver generates C-code which can be 
+			compiled and linked against the cairo libraries. See the contrib/cairo 
+			directory for an example.
+			<LI style="Z-INDEX: 0">
+			several improvements on the DXF driver as suggested and sponsored by Markus 
+			Meyer.
+			<LI>
+			because pstoedit may write its output to stdout, all output written by 
+			GhostScript to stdout is now redirected to stderr in order to avoid mixed 
+			output.
+			<LI>
+			added a -q option to suppress the initial startup message of pstoedit. This can 
+			by useful when being called via a pipe, e.g. from inkscape. However, note that 
+			this does not suppress all output written to stderr - see also note above.
+			<LI>
+			John Bowman fixed a number of problems related to clipping and image support 
+			for the Asymptote backend.
+			<LI>
+			fixed a compilation problem with g++ V4.x.
+			<LI>
+				new driver for gcode (.ngc files) (tested with emc see <A href="http://linuxcnc.org">
+					http://linuxcnc.org</A>). Contributed by Lawrence Glaister.
+			<LI>
+			some adaptations for newer versions of libming
+			<LI>
+			fixed a line width problem for xfig format.
+			<LI>
+			corrected the broken pstoedit.m4 - thanks to Ian Abbott
+			<LI>
+				some minor code beautifying.</LI>
+		</UL>
 		<H2>New or changed in 3.45:</H2>
 		<UL>
 			<LI>
@@ -16,7 +66,8 @@
 			<LI>
 			added better support for pagesize handling in the driver framework.
 			<LI>
-			better handling of fonts using 0 encoded characters (thanks to Vladimir Eltsov)
+			better handling of fonts using 0 encoded characters (thanks to Vladimir 
+			Eltsov).
 			<LI>
 				fixed a problem which caused newer versions of&nbsp;GhostScript to go into an 
 				endless loop.</LI></UL>
@@ -399,7 +450,7 @@
 			<li>
 			fixed a bug in pstoedit.ph.
 			<li>
-				new backend latex2e contributed by <a href="mailto:pakin_AT_cs.uiuc.edu">Scott 
+				new backend latex2e contributed by <a href="mailto:scott+ps2ed_AT_pakin.org">Scott 
 					Pakin</a>.
 			<li>
 				include SVG driver into binary releases for Linux/Solaris.</li>
@@ -478,7 +529,7 @@
 			allows new objects to be inserted in front or behind the converted figure.
 			<li>
 				the makefile for pstoedit can now be configured automatically using configure - 
-				at least on Un*x like systems. Thanks <a href="mailto:pakin_AT_cs.uiuc.edu">Scott 
+				at least on Un*x like systems. Thanks <a href="mailto:scott+ps2ed_AT_pakin.org">Scott 
 					Pakin</a>
 			for providing the necessary packages.
 			<li>
@@ -690,7 +741,7 @@
 			activated the (dead) -s option again which allows to specify a scaling factor 
 			for the output. At the moment it is just active for the idraw backend.
 			<li>
-				added a MetaPost backend provided by <a href="mailto:pakin_AT_cs.uiuc.edu">Scott 
+				added a MetaPost backend provided by <a href="mailto:scott+ps2ed_AT_pakin.org">Scott 
 					Pakin</a>.
 			<li>
 			changed the source code to be compilable against the ANSI iostream header 
@@ -822,7 +873,7 @@
 		<h2>New or changed in 2.60:</h2>
 		<ul>
 			<li>
-				New backend for idraw contributed by Scott Pakin (<a href="mailto:pakin_AT_cs.uiuc.edu">pakin_AT_cs.uiuc.edu</a>)
+				New backend for idraw contributed by Scott Pakin (<a href="mailto:scott+ps2ed_AT_pakin.org">scott+ps2ed_AT_pakin.org</a>)
 			<li>
 			Internal redesign in order to support the usage of the drivers from other 
 			programs, not just from pstoedit.

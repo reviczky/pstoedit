@@ -5,7 +5,7 @@
    callbackBuffer : This file is part of pstoedit
    streambuf that writes the data to a user defineable call back function
 
-   Copyright (C) 1998 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

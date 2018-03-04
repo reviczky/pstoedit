@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -223,8 +223,8 @@ void drvJAVA2::show_text(const TextInfo & textinfo)
 	outf << ", " << javaFontNumber;
 #endif
 	const float *CTM = getCurrentFontMatrix();
-	if ((fabs(sqrt(CTM[0] * CTM[0] + CTM[1] * CTM[1]) - textinfo.currentFontSize) < 1e-5)
-		&& (fabs(sqrt(CTM[2] * CTM[2] + CTM[3] * CTM[3]) - textinfo.currentFontSize) < 1e-5)
+	if ((fabs(pythagoras(CTM[0], CTM[1] ) - textinfo.currentFontSize) < 1e-5)
+		&& (fabs(pythagoras(CTM[2] ,CTM[3] ) - textinfo.currentFontSize) < 1e-5)
 		&& (CTM[0] * CTM[3] - CTM[1] * CTM[2] >= 0)) {
 		outf << ", " << textinfo.currentFontSize << "f";
 		if (textinfo.currentFontAngle) {

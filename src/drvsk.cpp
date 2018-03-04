@@ -251,16 +251,16 @@ bool drvSK::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) con
 			const basedrawingelement *bd1 = first->path[i];
 			const basedrawingelement *bd2 = last->path[i];
 			if (!(*bd1 == *bd2))
-				return 0;
+				return false;
 		}
 //      cerr << "Merge: first " << first->nr
 //           << (first->currentShowType == stroke ? " stroke" : " fill")
 //           << ", last " << last->nr
 //           << (last->currentShowType == stroke ? " stroke" : " fill")
 //           << endl;
-		return 1;
+		return true;
 	} else {
-		return 0;
+		return false;
 	}
 }
 

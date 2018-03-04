@@ -128,7 +128,7 @@
    should specify "-DNO_LIBPLOTTER_X_SUPPORT" when compiling.
 
    Written by Robert S. Maier <rsm_AT_math.arizona.edu> and Wolfgang Glunz
-   <wglunz34_AT_pstoedit.net>.
+   <wglunz35_AT_pstoedit.net>.
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

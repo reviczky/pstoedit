@@ -3,34 +3,35 @@ AMVERSION=1.xxx
 AMVERSION=1.7
 AMVERSION=local
 AMVERSION=1.9
+
 AMVERSION=any
+ACLOCAL_FLAGS=--force
 
 BINDIR=/usr/local/bin
 BINDIR=/usr/bin
 set -x
-echo running aclocal
+
+
+echo "running libtoolize"
+
+libtoolize --force --copy 
+
+echo "running aclocal"
 if (aclocal-$AMVERSION --version)  < /dev/null > /dev/null 2>&1; then
     aclocal-$AMVERSION ${ACLOCAL_FLAGS}
 else
     $BINDIR/aclocal ${ACLOCAL_FLAGS}
 fi
 
-echo running automake
+echo "Running autoheader -f"
+autoheader -f 
+
+echo "running automake"
 if (automake-$AMVERSION --version) < /dev/null > /dev/null 2>&1; then
     automake-$AMVERSION -a
 else
     $BINDIR/automake -a
 fi
 
-echo running autoconf
+echo "running autoconf"
 $BINDIR/autoconf
-# CONFIG_DIR=config
-# echo aclocal -I /usr/local/share/aclocal/ --output=${CONFIG_DIR}/aclocal.m4
-# aclocal -I /usr/local/share/aclocal --output=${CONFIG_DIR}/aclocal.m4
-
-# echo automake -a
-# automake -a --include-deps
-
-# echo autoconf  --localdir=${CONFIG_DIR}
-# autoconf  --localdir=${CONFIG_DIR}
-

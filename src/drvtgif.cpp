@@ -2,7 +2,7 @@
    drvTGIF.cpp : This file is part of pstoedit
    Backend for TGIF
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -256,16 +256,16 @@ void drvTGIF::show_text(const TextInfo & textinfo)
 		for (int i = 0; i < 6; i++) {
 			buffer << " CTM [" << i << "] = " << CTM[i] << endl;
 		}
-		const float SX = sqrt(CTM[0] * CTM[0] + CTM[1] * CTM[1]);
-		const float SY = sqrt(CTM[2] * CTM[2] + CTM[3] * CTM[3]);
+		const float SX = pythagoras(CTM[0] , CTM[1] );
+		const float SY = pythagoras(CTM[2] , CTM[3] );
 		buffer << " SX " << SX << endl;
 		buffer << " SY " << SY << endl;
 #endif
 		// the CTM stuff 
-		buffer << "," << (CTM[0]*tgifscale / fontSize) * 1000;
-		buffer << "," << (-1.0 * CTM[1]*tgifscale / fontSize) * 1000;
-		buffer << "," << (-1.0 * CTM[2]*tgifscale / fontSize) * 1000;
-		buffer << "," << (CTM[3]*tgifscale / fontSize) * 1000;
+		buffer << "," << (CTM[0] / textinfo.currentFontSize) * 1000;
+		buffer << "," << (-1.0 * CTM[1] / textinfo.currentFontSize) * 1000;
+		buffer << "," << (-1.0 * CTM[2] / textinfo.currentFontSize) * 1000;
+		buffer << "," << (CTM[3] / textinfo.currentFontSize) * 1000;
 
 #ifdef TGIFDEBUG
 		buffer << "," << cosphi * 1000;

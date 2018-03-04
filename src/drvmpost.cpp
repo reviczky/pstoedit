@@ -1,9 +1,9 @@
 /*
    drvMPOST.cpp : This file is part of pstoedit
    Backend for MetaPost files
-   Contributed by: Scott Pakin <pakin_AT_uiuc.edu>
+   Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_geocities.com
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_geocities.com
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,6 +41,9 @@
 #if !(defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD)  )
 #define LINE_MAX 2048			// for MSVC
 #endif
+
+static const string emptystring("");
+
 // Constructor -- Initialize variables and take other per-document actions
 
 drvMPOST::derivedConstructor(drvMPOST):
@@ -52,12 +55,18 @@ constructBase,
 	prevDashPattern(""),		// Solid lines
 	fillmode(false)
 {
+	// Prevent the use of scientific notation, which MetaPost
+	// doesn't understand.	For now, we hardwire the precision to
+	// 6 digits after the decimal point.
+	outf.setf(ios::fixed);
+	outf.precision(6);
+
 	// Output copyright information
 	outf << "% Converted from PostScript(TM) to MetaPost by pstoedit\n"
 		<<
-		"% MetaPost backend contributed by Scott Pakin <pakin_AT_uiuc.edu>\n"
-		<< "% pstoedit is Copyright (C) 1993 - 2007 Wolfgang Glunz" <<
-		" <wglunz34_AT_pstoedit.net>\n\n";
+		"% MetaPost backend contributed by Scott Pakin <scott+ps2ed_AT_pakin.org>\n"
+		<< "% pstoedit is Copyright (C) 1993 - 2009 Wolfgang Glunz" <<
+		" <wglunz35_AT_pstoedit.net>\n\n";
 
 	/*
 	 * Output some useful assignments and macro defintions
@@ -111,7 +120,7 @@ void drvMPOST::print_coords()
 				break;
 
 			case closepath:
-				if (prevDashPattern == "")
+				if (prevDashPattern == emptystring)
 					outf << "--cycle;" << endl;
 				else
 					outf << "--cycle " << prevDashPattern << ';' << endl;
@@ -147,11 +156,12 @@ void drvMPOST::print_coords()
 				pointsOnLine = 0;
 			}
 		}
-		if (withinpath)			// Finish the final path
-			if (prevDashPattern == "")
+		if (withinpath) {			// Finish the final path
+			if (prevDashPattern == emptystring)
 				outf << "--cycle;" << endl;
 			else
 				outf << "--cycle " << prevDashPattern << ';' << endl;
+		}
 	} else {					// Stroking, not filling
 		for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
 			const basedrawingelement & elem = pathElement(n);
@@ -186,7 +196,7 @@ void drvMPOST::print_coords()
 				break;
 
 			case closepath:
-				if (prevDashPattern == "") {
+				if (prevDashPattern == emptystring ) {
 					outf << "--cycle;" << endl;
 				} else {
 					outf << "--cycle " << prevDashPattern << ';' << endl;
@@ -245,22 +255,22 @@ void drvMPOST::close_page()
 // Output a text string
 void drvMPOST::show_text(const TextInfo & textinfo)
 {
-	static bool texshortchar = 0;	// 0=ASCII; 1=TeX character set
+	static bool texshortchar = false;	// 0=ASCII; 1=TeX character set
 
 	// Change fonts
 	string thisFontName(textinfo.currentFontName.value());
-	if (thisFontName == "") {	// If we're this brain-damaged, we must be a TeX font
+	if (thisFontName ==  emptystring ) {	// If we're this brain-damaged, we must be a TeX font
 		thisFontName = textinfo.currentFontFullName.value();
 		if (!texshortchar) {
 			outf << "shortchar := char(24);" << endl;	// Cedilla in TeX land
-			texshortchar = 1;
+			texshortchar = true;
 		}
 		if (Verbose() && thisFontName != prevFontName)
 			errf << "nameless font (" << thisFontName << "?) -- "
 				<< "assuming TeX character set" << endl;
 	} else if (texshortchar) {
 		outf << "shortchar := \"_\";" << endl;
-		texshortchar = 0;
+		texshortchar = false;
 	}
 	if (thisFontName != prevFontName) {
 		outf << "defaultfont := \"" << thisFontName << "\";" << endl;

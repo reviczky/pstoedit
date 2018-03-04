@@ -5,7 +5,7 @@
    simple template for a sorted list. I didn't want to use STL
    because not all compilers support it yet. 
   
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,6 +57,7 @@ public:
 		clear();
 		delete (lastaccessptr); lastaccessptr=0;
 		delete (lastaccessindexptr);lastaccessindexptr=0;
+		first = 0;
 	}
 	void clear() {
 		ordlistElement * cur = first;
@@ -102,12 +103,12 @@ public:
 //				cerr << "returning via search from start " << endl;
 				start = first;
 				ind = 0;
-
 			} else {
 //				cerr << "returning via forward search" << endl;
 				start = (*lastaccessptr);
 				ind = (*lastaccessindexptr);
 			}
+			assert(start);
 			while(ind  < i) { start = start->next; ind++;}
 			// we need to cast away const for caching
 			(*lastaccessptr) = start;

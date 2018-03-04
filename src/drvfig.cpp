@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,8 +62,8 @@ static const float PntFig = 1200.0f / 72.0f;
 static const char *colorstring(float r, float g, float b)
 {
 	static char buffer[15];
-	sprintf_s(TARGETWITHLEN(buffer,15), "%s%.2x%.2x%.2x", "#", (unsigned int) (r * 255),
-			(unsigned int) (g * 255), (unsigned int) (b * 255));
+	sprintf_s(TARGETWITHLEN(buffer,15), "%s%.2x%.2x%.2x", "#", (unsigned int) (r * 255 + 0.5),
+			(unsigned int) (g * 255 + 0.5), (unsigned int) (b * 255 + 0.5));
 
 	return buffer;
 }
@@ -235,7 +235,7 @@ unsigned int
 
 void drvFIG::prpoint(ostream & os, const Point & p, bool withspaceatend) const
 {
-	os << (int) (PntFig * p.x_) << " " << (int) (y_offset - (PntFig * p.y_));
+	os << (int) (PntFig * p.x_ + 0.5f) << " " << (int) (y_offset - (PntFig * p.y_) + 0.5f);
 	if (withspaceatend)
 		os << " ";
 }
@@ -763,8 +763,8 @@ PostScript::special::Fontname
 		<< " " << fontflags << " "  
 		<< FigHeight << " "
 		<< FigLength << " "
-		<< (int) (PntFig * textinfo.x) << " "
-		<< (int) (y_offset - (PntFig * textinfo.y)) << " " << textinfo.thetext.value() << "\\001\n";
+		<< (int) (PntFig * textinfo.x + 0.5f) << " "
+		<< (int) (y_offset - (PntFig * textinfo.y) + 0.5f) << " " << textinfo.thetext.value() << "\\001\n";
 }
 
 void drvFIG::bbox_path()
@@ -798,14 +798,46 @@ void drvFIG::bbox_path()
 void drvFIG::show_path()
 {
 	float localLineWidth = currentLineWidth();
-#if 0
-	if (localLineWidth <= 1.0) localLineWidth = 1.0;
-#else
-	// line width of 0 remain 0 - everything else is at least 1 
-	if ((localLineWidth < 0.0) || ((localLineWidth > 0.0) && (localLineWidth <= 1.0))) {
-		localLineWidth = 1.0;
-	} 
-#endif
+	localLineWidth *= 80.0f/72.0f; // xfig scales width differently - added in 3.50 - wogl
+	// dont know whether this should be synchronized with -usecorrectfontsize option.
+
+
+
+	/*
+	3.50:
+Originally, the resolution of Fig lines was 1/80 inch, and it was thought that the line width of "1" looked too thick, so it was reduced.
+Therefore, the final width of lines in PostScript/EPS is:
+
+Figwidth == 1: 7.5
+Figwidth > 1: (Figwidth-1)*15
+
+Regards,
+Brian Smith
+
+in reverse:
+
+l < (15+7.5)/2 : f = 1
+f = (l /15) + 1
+
+	*/
+
+	const float boundaryforOneCase = (((15.0f + 7.5f)/2.0f) / 15.0f);  // 0.75
+	// if calculated linewidth is (without "+1 correction") > 0.75 
+	// then apply correction by 1 
+	// for the 0.75 case itself it means - map it to 1.75 and from there to 2
+	// if it is < 0.75, then leave it so and create in fig a 1 ( (int) 0.75+0.5 )
+	if (Verbose() ) {
+		cerr << "localLineWidth " << localLineWidth  << " b " << boundaryforOneCase << endl;
+	}
+	if (localLineWidth > boundaryforOneCase) { 
+		localLineWidth += 1.0f; // see above
+	} else {
+		// line width of 0 remain 0 - everything else is at least 1 
+		if ((localLineWidth < 0.0) || ((localLineWidth > 0.0) && (localLineWidth <= 1.0))) {
+			localLineWidth = 1.0;
+		} 
+	}
+
 	unsigned int linestyle = 0;
 	switch (currentLineType()) {
 	case solid:
@@ -834,7 +866,7 @@ void drvFIG::show_path()
 	if (curvetos == 0)			// polyline
 	{
 		buffer << "# polyline\n";
-		buffer << "2 1 " << linestyle << " " << (int) localLineWidth << " ";
+		buffer << "2 1 " << linestyle << " " << (int) (localLineWidth + 0.5f) << " ";
 		const unsigned int color = registercolor(currentR(), currentG(), currentB());
 		const int fill_or_nofill = (currentShowType() == drvbase::stroke) ? -1 : 20;
 		if (objectId)
@@ -851,7 +883,7 @@ void drvFIG::show_path()
 	{
 		buffer << "# spline\n";
 		// 3 2 means "open interpolated spline"
-		buffer << "3 4 " << linestyle << " " << (int) localLineWidth << " ";
+		buffer << "3 4 " << linestyle << " " << (int) (localLineWidth + 0.5f) << " ";
 		const unsigned int color = registercolor(currentR(), currentG(), currentB());
 		const int fill_or_nofill = (currentShowType() == drvbase::stroke) ? -1 : 20;
 		if (objectId)

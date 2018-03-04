@@ -5,6 +5,11 @@ dnl AM_PATH_PSTOEDIT([MINIMUM-VERSION, [ACTION-IF-FOUND [, ACTION-IF-NOT-FOUND]]
 dnl Test to see if libpstoedit is installed, and define PSTOEDIT_CFLAGS, LIBS
 dnl
 
+AC_DEFUN([AM_PATH_PSTOEDIT],
+[dnl
+dnl Get the cflags and libraries from the pstoedit-config script
+dnl
+
 AC_ARG_WITH(pstoedit-prefix,[  --with-pstoedit-prefix=PFX   Prefix where Pstoedit is installed (optional)],
             pstoedit_prefix="$withval", pstoedit_prefix="")
 AC_ARG_WITH(pstoedit-exec-prefix,[  --with-pstoedit-exec-prefix=PFX Exec prefix where Pstoedit is installed (optional)],

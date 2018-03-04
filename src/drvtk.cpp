@@ -7,7 +7,7 @@
 
    drvsample.cpp : Backend for TK
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -930,6 +930,7 @@ drvTK::~drvTK()
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
 	options=0;
+	paperinfo=0;
 }
 
 void drvTK::print_coords()

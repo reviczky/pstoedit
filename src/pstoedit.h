@@ -4,7 +4,7 @@
    pstoedit.h : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ typedef int (*execute_interpreter_function)(int argc, const char * const argv[])
 
 
 #ifdef __cplusplus
-typedef const char * (*whichPI_type)(ostream &, int, const char *);
+typedef const char * (*whichPI_type)(ostream &, int, const char *, const char *);
 
 class DescriptionRegister;
 

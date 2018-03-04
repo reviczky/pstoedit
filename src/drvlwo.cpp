@@ -7,7 +7,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,15 +64,15 @@ constructBase
 
 drvLWO::~drvLWO()
 {
-	unsigned long total_bytes = 0;
-	unsigned long count = 0;
-	LWO_POLY *p;
+	
+	
+
 
 	// driver specific deallocations
 	// and writing of trailer to output file
 	outf << "FORM";
 
-	total_bytes = 12L;			// LWOBPNTS+size
+	unsigned long total_bytes  = 12L;			// LWOBPNTS+size
 	total_bytes += (12L * total_vertices);	// PNTS section...
 	total_bytes += 8L;			// POLS+size
 	total_bytes += (4L * total_polys + 2L * total_vertices);	// POLS section...
@@ -84,6 +84,7 @@ drvLWO::~drvLWO()
 		errf << "ERROR!  Generated more than 65536 vertices!!!  Abort.";
 		return;
 	}
+	LWO_POLY *p ;
 	for (p = polys; p; p = p->next) {
 		for (unsigned long n = 0; n < p->num; n++) {
 			out_float(outf, p->x[n]);
@@ -95,7 +96,7 @@ drvLWO::~drvLWO()
 	// Now, output polygons...
 	outf << "POLS";
 	out_ulong(outf, 4L * total_polys + 2L * total_vertices);
-	count = 0;
+	unsigned long count  = 0;
 	for (p = polys; p; p = p->next) {
 		out_ushort(outf, p->num);
 		for (unsigned long n = 0; n < p->num; n++)

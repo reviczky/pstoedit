@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -102,7 +102,7 @@ currentPageNumber(0),
 domerge(false),
 defaultFontName(0),
 ctorOK(true),
-saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), driveroptions(0),
+saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driveroptions(0),
 	// default for PI1 and PI2 and clippath
 	currentPath(0), last_currentPath(0), outputPath(0), lastPath(0)
 	// default for textInfo_ and lasttextInfo_
@@ -128,6 +128,19 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 	}
 	// preparse driveroptions and build d_argc and d_argv
 	if (driveroptions_p) {
+#if 1
+		Argv driverargs;
+		driverargs.parseFromString(driveroptions_p);
+		d_argc = driverargs.argc;
+		d_argv = new const char *[d_argc + 2];  // 1 more for the argv[0]
+		d_argv[0] = cppstrdup(Pdriverdesc_p->symbolicname);
+		d_argc = 1;
+		for (unsigned int i = 0; i < driverargs.argc; i++) {
+			d_argv[d_argc] = cppstrdup(driverargs.argv[i]);
+			d_argc++;
+		}
+		d_argv[d_argc] = 0;
+#else
 		driveroptions = cppstrdup(driveroptions_p);
 		//C_istrstream optstream(driveroptions, strlen(driveroptions));
 		C_istrstream optstream(driveroptions); //, strlen(driveroptions));
@@ -154,6 +167,7 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 			}
 		}
 		d_argv[d_argc] = 0;
+#endif
 		if (verbose) {
 			errf << "got " << d_argc << " driver argument(s)" << endl;
 			for (unsigned int i = 0; i < d_argc; i++) {
@@ -194,7 +208,7 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(1), drivero
 	}
 
 	textInfo_.thetext.copy("");
-	setCurrentFontName("Courier", 1);
+	setCurrentFontName("Courier", true);
 	setCurrentFontFamilyName("Courier");
 	setCurrentFontWeight("Regular");
 	setCurrentFontFullName("Courier");
@@ -284,7 +298,7 @@ void drvbase::showpage()
 	if (!page_empty) {
 		close_page();
 	}
-	page_empty = 1;
+	page_empty = true;
 }
 
 bool drvbase::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) const
@@ -315,11 +329,11 @@ bool drvbase::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) c
 			if (verbose)
 				errf << "comparing " << *bd1 << " with " << *bd2 <<	" results in " << (int) result << endl;
 			if (!result)
-				return 0;
+				return false;
 		}
 		if (verbose)
 			errf << "Pathes are mergeable" << endl;
-		return 1;
+		return true;
 	} else {
 		if (verbose)
 			errf << "Pathes are not mergable:" <<
@@ -329,7 +343,7 @@ bool drvbase::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) c
 				" PI2 st " << (int) path2.currentShowType <<
 				" PI2 lt " << (int) path2.currentLineType <<
 				" PI2 el " << path2.numberOfElementsInPath << endl;
-		return 0;
+		return false;
 	}
 }
 
@@ -343,14 +357,14 @@ const basedrawingelement & drvbase::pathElement(unsigned int index) const
 bool basedrawingelement::operator == (const basedrawingelement & bd2) const
 {
 	if (this->getType() != bd2.getType()) {
-		return 0;
+		return false;
 	} else {
 		for (unsigned int i = 0; i < this->getNrOfPoints(); i++) {
 			if (!(this->getPoint(i) == bd2.getPoint(i)))
-				return 0;
+				return false;
 		}
 	}
-	return 1;
+	return true;
 }
 
 bool drvbase::textIsWorthToPrint(const RSString& thetext) const
@@ -607,13 +621,13 @@ bool drvbase::is_a_rectangle() const
 {
 //in most cases of rectangles there are 5 Elements
 	if (numberOfElementsInPath() != 5)
-		return 0;
-	if (pathElement(0).getType() == closepath || pathElement(4).getType() == closepath ) return 0;
+		return false;
+	if (pathElement(0).getType() == closepath || pathElement(4).getType() == closepath ) return false;
 
 //first and last points are identical
 	if (pathElement(0).getPoint(0).x_ != pathElement(4).getPoint(0).x_ ||
 		pathElement(0).getPoint(0).y_ != pathElement(4).getPoint(0).y_)
-		return 0;
+		return false;
 
 
 
@@ -631,21 +645,21 @@ bool drvbase::is_a_rectangle() const
 	{
 		for (unsigned int i = start_horic_test; i < 4; i++, i++)
 			if (pathElement(i).getPoint(0).x_ != pathElement((i + 1) % 4).getPoint(0).x_)
-				return 0;
+				return false;
 	}
 
 	{
 		for (unsigned int i = start_vert_test; i < 4; i++, i++)
 			if (pathElement(i).getPoint(0).y_ != pathElement((i + 1) % 4).getPoint(0).y_)
-				return 0;
+				return false;
 	}
-	return 1;
+	return true;
 }
 
 void drvbase::add_to_page()
 {
 	if (page_empty) {
-		page_empty = 0;
+		page_empty = false;
 		currentPageNumber++;
 		open_page();
 	}
@@ -807,7 +821,6 @@ unsigned int drvbase::nrOfSubpaths() const
 
 void drvbase::dumpRearrangedPathes()
 {
-
 	// Count the subpaths
 	unsigned int numpaths = nrOfSubpaths();
 	if (verbose)
@@ -871,10 +884,10 @@ bool drvbase::close_output_file_and_reopen_in_binary_mode()
 		
 #endif
 		if (Verbose()) cerr << "after open " << endl;
-		return 1;
+		return true;
 	} else {
 		cerr << "Error: This driver cannot write to stdout since it writes binary data " << endl;
-		return 0;
+		return false;
 	}
 //	return 0; // not reached - but to make some compilers happy
 }
@@ -946,7 +959,7 @@ void drvbase::dumpPath(bool doFlushText)
 
 	guess_linetype();			 // needs to be done here, because we must write to currentpath
 
-#if fixlater
+#ifdef fixlater
 	// this does not work as it is at the moment since
 	// * it changes the showtype also for subsequent segments which might have
 	//   more than 2 points AND
@@ -1128,8 +1141,6 @@ void drvbase::PathInfo::copyInfo(const PathInfo & p)
 {
 	// copies the whole path state except the path array
 	currentShowType = p.currentShowType;
-	// wogl: I added the following three ones since
-	// these were obviously missing
 	currentLineType = p.currentLineType;
 	currentLineCap = p.currentLineCap;
 	currentLineJoin = p.currentLineJoin;
@@ -1145,6 +1156,7 @@ void drvbase::PathInfo::copyInfo(const PathInfo & p)
 	fillR = p.fillR;
 	fillG = p.fillG;
 	fillB = p.fillB;
+	colorName = p.colorName;
 	dashPattern = p.dashPattern;
 }
 
@@ -1192,7 +1204,7 @@ unsigned int ColorTable::getColorIndex(float r, float g, float b)
 		}
 	}
 // look in new colors
-	unsigned int j = 0;
+	unsigned int j ;
 	for (j = 0; ((j < maxcolors) && (newColors[j] != 0)); j++) {
 		if (strcmp(cmp, newColors[j]) == 0) {
 			return j + numberOfDefaultColors_;
@@ -1233,8 +1245,7 @@ bool ColorTable::isKnownColor(float r, float g, float b) const
 		}
 	}
 	// look in new colors
-	unsigned int j = 0;
-	for (j = 0; ((j < maxcolors) && (newColors[j] != 0)); j++) {
+	for (unsigned int j = 0; ((j < maxcolors) && (newColors[j] != 0)); j++) {
 		if (strcmp(cmp, newColors[j]) == 0) {
 			return true;		// j+numberOfDefaultColors_;
 		}

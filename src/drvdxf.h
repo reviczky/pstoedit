@@ -5,7 +5,7 @@
    drvDXF.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -44,6 +44,10 @@ public:
 		Option < bool, BoolTrueExtractor > splineasmultispline ;
 		Option < bool, BoolTrueExtractor > splineasbezier ;
 		Option < int, IntValueExtractor >  splineprecision ;
+		Option < bool, BoolTrueExtractor > dumplayernames ;
+		Option < RSString, RSStringValueExtractor > layerpositivfilter;
+		Option < RSString, RSStringValueExtractor > layernegativfilter;
+
 		DriverOptions():
 			polyaslines(true,"-polyaslines",0,0,"use LINE instead of POLYLINE in DXF",0,false),
 			mm(true,"-mm",0,0,"use mm coordinates instead of points in DXF (mm=pt/72*25.4)",0,false),
@@ -55,8 +59,11 @@ public:
 			splineasmultispline(true,"-splineasmultispline",0,0,"experimental (only for -f dxf_s)",0,false),
 			splineasbezier(true,"-splineasbezier",0,0,"use Bezier splines in DXF format (only for -f dxf_s)",0,false),
 			splineprecision(true,"-splineprecision","number",0,
-				"number of samples to take from spline curve when doing approximation with -splineaspolyline or -splineasmultispline - should be >=2 (default 5)",0,5 )
-	
+				"number of samples to take from spline curve when doing approximation with -splineaspolyline or -splineasmultispline - should be >=2 (default 5)",0,5 ),
+			dumplayernames(true,"-dumplayernames",0,0,"dump all layer names found to standard output",0,false),
+			layerpositivfilter(true,"-layers","string",0,"layers to be shown (comma separated list of layer names, no space)",0,(const char *)""),
+			layernegativfilter(true,"-layerfilter","string",0,"layers to be hidden (comma separated list of layer names, no space)",0,(const char *)"")
+
 		{
 			ADD(polyaslines);
 			ADD(mm);
@@ -68,6 +75,9 @@ public:
 			ADD(splineasmultispline);
 			ADD(splineasbezier);
 			ADD(splineprecision);
+			ADD(dumplayernames);
+			ADD(layerpositivfilter);
+			ADD(layernegativfilter);
 		}
 	}*options;
 
@@ -81,9 +91,11 @@ private:
 		void curvetoAsBSpline(const basedrawingelement & elem, const Point & currentpoint);
 		void curvetoAsBezier(const basedrawingelement & elem, const Point & currentpoint);
 		void writeHandle(ostream & outs) ;
-		void writeLayer(float r, float g, float b) ;
+		void writeLayer(float r, float g, float b,const RSString& colorName) ;
 		void writelayerentry(ostream & outf, unsigned int color, const char * layername);
-
+		bool wantedLayer(float r, float g, float b,const RSString& colorName)  ; // layer shall be written
+		RSString calculateLayerString(float r, float g, float b,const RSString& colorName) ;
+		
 		
 		void printPoint(const Point & p, unsigned short add );
 		void writesplinetype(const unsigned short stype);

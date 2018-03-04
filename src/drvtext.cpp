@@ -3,7 +3,7 @@
    Skeleton for the implementation of text based backends
    for example this could be extended towards an HTML backend.
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -134,6 +134,7 @@ void drvTEXT::close_page()
 		}
 		page.clear();
 	} else {
+		assert(charpage);
 		for (unsigned int i = 0; i < (unsigned int) options->pageheight; i++) {
 			for (unsigned int j = 0; j < (unsigned int) options->pagewidth; j++) {
 				outf << (charpage[i])[j];
@@ -169,6 +170,7 @@ void drvTEXT::show_text(const TextInfo & textinfo)
 			newline->textpieces.insert(textinfo);
 		}
 	} else {
+		assert(charpage);
 		int x = (int) (options->pagewidth * (textinfo.x / 700.0f));
 		int y = (int) (options->pageheight * ((currentDeviceHeight + y_offset - textinfo.y) / 800.0f));
 		if ((x >= 0) && (y >= 0) && (x < options->pagewidth) && (y < options->pageheight)) {

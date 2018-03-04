@@ -1,10 +1,10 @@
 /*
    drvIDRAW.cpp : This file is part of pstoedit
    Backend for idraw files
-   Contributed by: Scott Pakin <pakin_AT_uiuc.edu>
+   Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -729,7 +729,7 @@ void drvIDRAW::print_coords()
 	const Point *lastpoint;
 	unsigned int totalpoints;	// Total number of points in shape
 	const Point dummypoint(-123.456f, -789.101112f);	// Used to help eliminate duplicates
-	const Point **pointlist = 0;	// List of points
+
 	unsigned int i, j;
 
 	// First, try to figure out what type of shape we have
@@ -741,7 +741,8 @@ void drvIDRAW::print_coords()
 		else if (pathElement(i).getType() == closepath)
 			closed = true;
 	}
-	pointlist = new const Point *[pathelts * 3];	// Allocate a conservative amount
+	const Point **pointlist = new const Point *[pathelts * 3];	// List of points
+	 	// Allocate a conservative amount
 	assert(pointlist != NIL);
 	firstpoint = NIL;
 	lastpoint = &dummypoint;
@@ -766,11 +767,11 @@ void drvIDRAW::print_coords()
 			const unsigned int pt_per_cp = 5;	// PostScript points per control point
 			const unsigned int min_innerpoints = 2;	// Minimum # of points to add
 			unsigned int innerpoints;	// Number of points to add
-			const Point **newpointlist = 0;	// List of points on curve
 			unsigned int newtotalpoints = 0;	// Number of points in curve
 
 			// ASSUMPTION: Curve is moveto+curveto+curveto+curveto+...
-			newpointlist = new const Point *[pathelts * 3000 / pt_per_cp];	// Allocate a conservative amount
+			// List of points on curve
+			const Point **newpointlist = new const Point *[pathelts * 3000 / pt_per_cp];	// Allocate a conservative amount
 			assert(newpointlist != NIL);
 			for (i = 0; i < totalpoints - 3; i += 3) {
 				const float x0 = pointlist[i]->x_;
@@ -787,25 +788,22 @@ void drvIDRAW::print_coords()
 				const float by = (y2 - y1) * 3 - cy;
 				const float ax = x3 - x0 - cx - bx;
 				const float ay = y3 - y0 - cy - by;
-				float t;
+				
 
 				// Longer lines get more control points
-				innerpoints =
-					(unsigned
-					 int) (sqrt((y1 - y0) * (y1 - y0) +
-								(x1 - x0) * (x1 - x0)) + sqrt((y2 -
-															   y1) * (y2 -
-																	  y1) + (x2 - x1) * (x2 - x1))
-						   + sqrt((y3 - y2) * (y3 - y2) + (x3 - x2) * (x3 - x2))) / pt_per_cp;
+				innerpoints =(unsigned int) (
+							pythagoras((y1 - y0),(x1 - x0) ) + 
+							pythagoras((y2 - y1),(x2 - x1) ) + 
+							pythagoras((y3 - y2),(x3 - x2) ) ) / pt_per_cp;
 				if (innerpoints < min_innerpoints)
 					innerpoints = min_innerpoints;
 
 				// Add points to the list
 				ADDPOINT(x0, y0);
 				for (j = 1; j <= innerpoints; j++) {
-					t = (float) j / (float) innerpoints;
-					float newx = (((ax * t) + bx) * t + cx) * t + x0;
-					float newy = (((ay * t) + by) * t + cy) * t + y0;
+					const float t = (float) j / (float) innerpoints;
+					const float newx = (((ax * t) + bx) * t + cx) * t + x0;
+					const float newy = (((ay * t) + by) * t + cy) * t + y0;
 					ADDPOINT(newx, newy);
 				}
 				ADDPOINT(x3, y3);

@@ -4,7 +4,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,9 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#ifdef HAVE_CONFIG_H
+#include "pstoedit_config.h"
+#endif
 
 #ifdef _MSC_VER
 # ifndef DLLEXPORT
@@ -166,6 +169,9 @@
 
 #if (defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) ) && !defined(DJGPP)
 #define I_strstream		<strstream.h>
+// next macro is to avoid usage of the above lengthy || list and because in .fl file __unix__ cannot be used sometimes because m4 
+// expands this sometimes to ""
+#define PSTOEDIT_UNIXLIKE
 #else
 #define I_strstream		<strstrea.h>
 #endif
@@ -223,6 +229,9 @@ const bool true  = 1;
 #else
 
 #include I_iostream
+#include I_string_h	// for strlen
+#include I_stdlib	// for exit
+
 USESTD
 
 // approach for emulation:

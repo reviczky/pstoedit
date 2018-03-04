@@ -1,10 +1,10 @@
 /*
    drvLATEX2E.cpp : This file is part of pstoedit
    Backend for Latex2E files
-   Contributed by: Scott Pakin <pakin_AT_uiuc.edu>
+   Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2007	Wolfgang Glunz, wglunz34_AT_pstoedit.net, 
-							Scott Pakin, pakin_AT_uiuc.edu
+   Copyright (C) 1993 - 2009	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
+							Scott Pakin, <scott+ps2ed_AT_pakin.org>
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -276,12 +276,13 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 	// Output the text string, optionally rotated.
 	// NOTE: Rotation requires the "rotation" package.
 	buffer << "  \\put" << Point2e(textpoint,options->integersonly) << '{';
-	if (textinfo.currentFontAngle)
+	if (textinfo.currentFontAngle) {
 		if (options->integersonly) {
 			buffer << "\\turnbox{" << long (textinfo.currentFontAngle + 0.5) << "}{";
 		} else {
 			buffer << "\\turnbox{" << textinfo.currentFontAngle << "}{";
 		}
+	}
 	const char * cp = textinfo.thetext.value();
 	//buffer << textinfo.thetext.value() 
 
@@ -315,12 +316,12 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 			(*cp == '_') ||
 			(*cp == '&') )
 			buffer << '\\' << *cp ; // needs to be escaped
-		else if (*cp == '\\') buffer << "\textbackslash ";
-		else if (*cp == '^')  buffer << "\textasciicircum ";
-		else if (*cp == '~')  buffer << "\textasciitilde ";
-		else if (*cp == '"')  buffer << "\textquotedblright ";
-//		else if (*cp == '\\') buffer << "\textbackslash";
-//		else if (*cp == '\\') buffer << "\textbackslash";
+		else if (*cp == '\\') buffer << "\\textbackslash ";
+		else if (*cp == '^')  buffer << "\\textasciicircum ";
+		else if (*cp == '~')  buffer << "\\textasciitilde ";
+		else if (*cp == '"')  buffer << "\\textquotedblright ";
+//		else if (*cp == '\\') buffer << "\\textbackslash";
+//		else if (*cp == '\\') buffer << "\\textbackslash";
 		else buffer << *cp;
 		cp++;
 	}

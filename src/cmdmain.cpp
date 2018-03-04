@@ -2,7 +2,7 @@
    cmdmain.cpp : This file is part of pstoedit
    main program for command line usage
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,7 +29,7 @@ int main(int argc, const char *const argv[])
 #if defined(_WIN32) || defined (__OS2__)
 	if (!pstoedit_checkversion(301))
 		return 1;
-	setPstoeditsetDLLUsage(true); // use the gs DLL in stand-alone mode
+	if (!getenv("PSTOEDITUSEGSEXE")) setPstoeditsetDLLUsage(true); // use the gs DLL in stand-alone mode
 #else
 	ignoreVersionCheck();
 #endif

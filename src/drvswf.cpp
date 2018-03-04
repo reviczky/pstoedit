@@ -2,7 +2,7 @@
    drvSWF.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,6 +32,7 @@
 //static bool cubic = false;
 
 #include "mingpp.h"
+#include "ming_config.h"
 
 #if defined(_WIN32)
 extern "C" {
@@ -86,6 +87,8 @@ constructBase, imgcount(0), swfscale(1.0f)
 
 
 	(void) Ming_init();
+
+	Ming_setCubicThreshold(100); // default of 10000 is too coarse
 
 	movie = new SWFMovie();
 	movie->setRate(12.0f);
@@ -321,7 +324,7 @@ void drvSWF::print_coords()
 						} else {
 							const bool approx = true;
 							if (approx) {
-								const unsigned int fitpoints = 4;
+								const unsigned int fitpoints = 10;
 								const Point & cp1 = elem.getPoint(0);
 								const Point & cp2 = elem.getPoint(1);
 								const Point & ep = elem.getPoint(2);
@@ -332,9 +335,96 @@ void drvSWF::print_coords()
 									const coordtype dx1 = swfx(p_at_t);
 									const coordtype dy1 = swfy(p_at_t);
 									s->drawLineTo(dx1, dy1);
+									if (options->trace) {
+										printf("s->drawLineTo(%d,%d);\n", (int) dx1, (int) dy1);
+									}
 								}
 							} else {
+//
+// see http://www.timotheegroleau.com/Flash/articles/cubic_bezier_in_flash.htm for a detailled discussion
+//
+#if 0
+// very basic approx - use intersection point of the cubic bezier tangents as control point
+// for the quadratic bezier
+								/*
 
+if x1 == x2; xs = x1;
+if x3 == x4; xs = x3;
+
+ys - y1   y2 - y1
+------ = ------- = m1
+xs - x1   x2 - x1
+
+ys - y3   y4 - y3
+------ = ------- = m2
+xs - x3   x4 - x3
+
+
+ys = y1 + m1 * (xs - x1) = y3 + m2 * (xs - x3)
+
+xs = (( y1 - m1*x1) - (y3 - m2*x3))/ ( m2 - m1)
+ys = y1 + m1 * (xs - x1)  
+								*/
+								if (bx != cpx) {
+									const coordtype m1 = (by - cpy) / (bx - cpx );
+									if (dx != cx) {
+										const coordtype m2 = (dy -  cy) / (dx -  cx );
+										if (m1 != m2) {
+											const coordtype xs = (( cpy - m1*cpx) - (cy - m2*cx))/(m2 - m1 );
+											const coordtype ys = cpy + m1 * (xs - cpx);
+											s->drawCurveTo(xs, ys, dx, dy);
+											if (options->trace) {
+												printf("s->drawCurveTo(%d,%d,%d,%d);\n", (int) xs, (int) ys,
+													(int) dx, (int) dy);
+											}
+										} else {
+											cout << "strange bezier with parallel control lines" << endl;
+										}
+									} else {
+										// dx == cx ; vertical second control line and first is not vertical
+										const coordtype xs = dx; // intersection is also on same coordinate
+										const coordtype ys = cpy + m1 * (xs - cpx);
+										s->drawCurveTo(xs, ys, dx, dy);
+										if (options->trace) {
+											printf("s->drawCurveTo(%d,%d,%d,%d);\n", (int) xs, (int) ys,
+												(int) dx, (int) dy);
+										}
+									}
+								} else {
+									// bx != cpx ; first control line is vertical								 
+									if (dx != cx) {
+										// second is not vertical
+										const coordtype xs = bx ;
+										const coordtype m2 = (dy -  cy) / (dx -  cx );
+										const coordtype ys = cy + m2 * (xs - cx);
+										s->drawCurveTo(xs, ys, dx, dy);
+										if (options->trace) {
+											printf("s->drawCurveTo(%d,%d,%d,%d);\n", (int) xs, (int) ys,
+												(int) dx, (int) dy);
+										}
+									} else {
+										cout << "strange bezier with parallel vertical control lines" << endl;
+									}
+								}
+#endif
+#if 1
+								// simple midpoint approach - use mid between the two ctrl points as new anchor point
+								const coordtype ax = (bx + cx )/2.0f;
+								const coordtype ay = (by + cy )/2.0f;
+
+									s->drawCurveTo(bx, by, ax, ay);
+										if (options->trace) {
+											printf("s->drawCurveTo(%d,%d,%d,%d);\n", (int) bx, (int) by,
+												(int) ax, (int) ay);
+										}
+									s->drawCurveTo(cx, cy, dx, dy);
+										if (options->trace) {
+											printf("s->drawCurveTo(%d,%d,%d,%d);\n", (int) cx, (int) cy,
+												(int) dx, (int) dy);
+										}
+
+#endif
+/*
 								s->drawLineTo(bx, by);
 								if (options->trace) {
 									printf("s->drawLineTo(%d,%d);\n", (int) bx, (int) by);
@@ -347,6 +437,7 @@ void drvSWF::print_coords()
 								if (options->trace) {
 									printf("s->drawLineTo(%d,%d);\n", (int) dx, (int) dy);
 								}
+*/
 							}
 						}
 					}
@@ -373,7 +464,7 @@ void drvSWF::print_coords()
 		printf("s->end();\n" "SWFDisplayItem * d = movie->add(s);\n" "d->move(0, 0); }\n");
 
 // delete s;
-	delete d;
+// delete d; // no longer needed in libming version > 0.4.0.beta6
 
 }
 
@@ -474,7 +565,7 @@ void drvSWF::show_text(const TextInfo & textinfo)
 	SWFDisplayItem_setMatrix(d->item, ma, mb, mc, md, mx, my);
 
 #endif
-	delete d;
+	// delete d;  // no longer needed in libming version > 0.4.0.beta6
 	// delete f;  // causes memory problems otherwise - at the cost of leaks - Hmmm
 	// delete t;
 
@@ -539,7 +630,7 @@ void drvSWF::show_image(const PSImage & imageinfo)
 		(void) remove(imageinfo.FileName.value());
 
 		SWFShape *s = new SWFShape;
-		SWFFill *swffill = s->addBitmapFill(bm);
+		SWFFill *swffill = s->addBitmapFill(bm, SWFFILL_TILED_BITMAP);
 		s->setRightFill(swffill);
 
 		const float h = (float) bm->getHeight();

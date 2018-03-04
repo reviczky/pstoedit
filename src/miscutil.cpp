@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2007  Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2009  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -81,9 +81,7 @@ void convertBackSlashes(char *) { }
 #else
 void convertBackSlashes(char *fileName)
 {
-
-	char *c = fileName;
-
+ 	char *c ;
 	while ((c = strchr(fileName, '\\')) != NIL)
 		*c = '/';
 }
@@ -582,7 +580,7 @@ RSString::RSString(const char arg) : content(0), allocatedLength(0), stringlengt
 	this->copy(tmp,1);
 }
 
-RSString::RSString(const char * arg  , const unsigned int len) :content(0), allocatedLength(0), stringlength(len)
+RSString::RSString(const char * arg  , const size_t len) :content(0), allocatedLength(0), stringlength(len)
 {
 	if (arg) {
 		this->copy(arg,stringlength);
@@ -596,7 +594,7 @@ RSString::RSString(const RSString & s):content(0), allocatedLength(0), stringlen
 	this->copy(s.value(),s.stringlength);
 }
 
-char *RSString::newContent(unsigned int size)
+char *RSString::newContent(size_t size)
 {
 	return new char[size];
 }
@@ -615,6 +613,10 @@ RSString::~RSString()
 	allocatedLength = 0;
 }
 
+bool RSString::contains(const RSString & s) const
+{
+	return strstr(value(),s.value()) != 0;
+}
 
 RSString & RSString::operator += (const char* rs)
 {
@@ -655,7 +657,7 @@ void RSString::copy(const char *src)
 
 }
 //      const char * value() const { return content; }
-void RSString::copy(const char *src, const unsigned int len )
+void RSString::copy(const char *src, const size_t len )
 {
 //          cerr << "copy " << src << " to " << (void *) this << endl;
 	if (src == 0) {
@@ -710,7 +712,7 @@ bool fileExists(const char *filename)
 
 static void skipws(char *&lineptr)
 {
-	while ((*lineptr != '\0') && (*lineptr == ' ') || (*lineptr == '\t'))
+	while ( (*lineptr != '\0') && ((*lineptr == ' ') || (*lineptr == '\t')))
 		lineptr++;
 	return;
 }
@@ -797,10 +799,56 @@ const char *FontMapper::mapFont(const RSString & fontname)
 	return 0;
 #endif
 	const RSString *r = getValue(fontname);
-	if (r)
+	if (r) {
 		return r->value();
-	else
+	} else {
+		for (unsigned int i=0; i<fontname.length(); i++) {
+			// patch from Scott Pakin
+			// I've noticed that Microsoft's PostScript printer driver, pscript5.dll, 
+			// produces EPS files with subsetted fonts and names the subsetted fonts 
+			// using a random (?) prefix.  For example, in the attached EPS file, the 
+			// subset of Officina Serif Bold is not called OfficinaSerif-Bold but rather 
+			// HJCBAA+OfficinaSerif-Bold.  When pstoedit tries to map that to a TeX name 
+			// (e.g., for the mpost driver) it fails because mpost.fmp knows only 
+			// OfficinaSerif-Bold.
+			//
+			// The attached patch adds a fallback case to FontMapper::mapFont().  
+			// If the specified font can't be mapped and it contains a "+" character, 
+			// the method tries a second time starting from after the "+".
+	        if (fontname[i] == '+') {
+		        const RSString altfontname(fontname.value() + i + 1);
+				r = getValue(altfontname);
+				if (r)
+			        return r->value();
+				else 
+					return 0;
+			}
+		}
 		return 0;
+    }
 }
- 
- 
+
+unsigned int Argv::parseFromString(const char * const argstring) {
+	unsigned int nrOfNewArgs = 0;
+	const char * cp = argstring;
+	while (cp && *cp) { // for all args
+		while (cp && *cp && (*cp == ' ')) cp++; // skip leading space
+		RSString result("");
+		if (*cp == '"')	{ // handle string arg - read everything until closing "
+				cp++; // skip leading "
+				while (cp && *cp && (*cp != '"')) {
+					result += *cp; 
+					cp++;
+				}
+				if (*cp) cp++; // skip trailing "
+		} else {
+				while (cp && *cp && (*cp != ' ')) {
+					result += *cp; 
+					cp++;
+				}
+		}
+		addarg(result);
+		nrOfNewArgs++;
+	}
+	return nrOfNewArgs;
+}

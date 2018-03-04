@@ -1,5 +1,5 @@
 dnl Configure a Makefile for pstoedit
-dnl initial version by Scott Pakin <pakin _AT_ uiuc.edu>
+dnl initial version by Scott Pakin <scott+ps2ed_AT_pakin.org>
 
 dnl Adapting automake
 dnl By Masatake YAMATO<jet _AT_ gyve.org>
@@ -10,10 +10,10 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.45,wglunz34_AT_pstoedit.net)
+AC_INIT(pstoedit,3.50,wglunz35_AT_pstoedit.net)
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.45)
+AM_INIT_AUTOMAKE(pstoedit,3.50)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
@@ -35,6 +35,8 @@ AC_LIBTOOL_WIN32_DLL
 
 AC_PROG_LIBTOOL
 AC_PROG_MAKE_SET
+
+AC_CONFIG_HEADER(src/pstoedit_config.h)
 
 dnl Check file command
 dnl FILECMD=""
@@ -98,6 +100,14 @@ with_swf=$withval, with_swf=yes)
 
 OLD_CPPFLAGS=${CPPFLAGS}
 CPPFLAGS="$CPPFLAGS -DX_DISPLAY_MISSING"
+
+if test -f src/drvwwmf.cpp ; then
+	HAVE_PLUGINSRC=true;
+	AM_CONDITIONAL(HAVE_PLUGINSRC, true)
+else
+	HAVE_PLUGINSRC=false;
+	AM_CONDITIONAL(HAVE_PLUGINSRC, false)
+fi
 
 if test "${with_libplot}" = "yes" ; then
 dnl
@@ -394,7 +404,8 @@ if test "$GXX" = yes; then
     AC_SUBST(LDLIBS)
   else
     AC_MSG_RESULT([GNU])
-    SPECIAL_CXXFLAGS="-DBUGGYGPP -pedantic -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith "
+#   need to disable long long warning here because of ImageMagick using it
+    SPECIAL_CXXFLAGS="-DBUGGYGPP -pedantic -Wall -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long "
   fi
   CXXFLAGS="-g" 
 elif test `echo "$CXX" | egrep -c 'xlC$'` -eq 1; then
@@ -444,7 +455,8 @@ src/Makefile
 config/Makefile config/pstoedit.pc
 doc/Makefile
 examples/Makefile 
-java/Makefile java/java1/Makefile java/java2/Makefile 
+contrib/Makefile contrib/cairo/Makefile
+contrib/java/Makefile contrib/java/java1/Makefile contrib/java/java2/Makefile 
 misc/Makefile misc/swffonts/Makefile 
 os2/Makefile 
 msdev/Makefile othersrc/Makefile othersrc/gsdllinc/Makefile],

@@ -3,7 +3,7 @@
    HPGL / HPGL2 Device driver supporting text commands
 
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
-   Copyright (C) 2000 - 2007 Katzmann & Glunz (fill stuff)
+   Copyright (C) 2000 - 2009 Katzmann & Glunz (fill stuff)
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
     This program is free software; you can redistribute it and/or modify

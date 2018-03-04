@@ -1,5 +1,5 @@
 PSTOEDIT 
-Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 pstoedit converts Postscript(TM) and PDF files to other vector graphic
 formats so that they can be edited graphically. See pstoedit.htm or
@@ -15,7 +15,7 @@ all different backends. Get in contact with the author if you need
 more information on how to use this framework.
 
 If you just find this program useful, have made some improvements or 
-implemented other backends please send an email to wglunz34_AT_pstoedit.net.
+implemented other backends please send an email to wglunz35_AT_pstoedit.net.
 
 If this programs saves you a lot of work consider sending a contribution
 of any kind.
@@ -57,8 +57,8 @@ Under some systems (e.g. cygwin) it is not possible to link static libraries (.a
 A note about libemf. Unfortunately this library seems to be no longer maintained by the original author. I have done some smaller changes - mainly compiler and OS adaptations - and put my version under http://sourceforge.net/projects/pstoedit in the download section. In the long term I will try to put the changes under libemf.sourceforge.net - but I haven't been able to contact the admin of that project so far.
 
 
-Installing pstoedit under Windows 9x/NT/2000/XP:
------------------------------------------------
+Installing pstoedit under Windows 9x/NT/2000/XP/Vista:
+------------------------------------------------------
 
 best use the pstoeditsetup.exe. 
 
@@ -119,14 +119,14 @@ Some features that are no supported by every backend of pstoedit:
 Special note about the Java backend:
 ------------------------------------
 The java backends generate a java source file that needs other files
-in order to be compiled and usable. See the files java/java1/readme_java.txt 
-and java/java2/readme_java2.htm for more details.
+in order to be compiled and usable. See the files contrib/java/java1/readme_java.txt 
+and contrib/java/java2/readme_java2.htm for more details.
 
 Extending pstoedit:
 -------------------
 To implement a new backend you can start from drvsampl.cpp.
 Please don't forget to send any new backend that might be of interest
-for others as well to the author (wglunz34_AT_pstoedit.net) so that
+for others as well to the author (wglunz35_AT_pstoedit.net) so that
 it can be incorporated into future versions of pstoedit. Such
 new backends will then be available with the GPL as well.
 

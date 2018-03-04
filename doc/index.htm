@@ -9,6 +9,40 @@ content="text/html; charset=iso-8859-1">
 
 <body>
 
+<div id="cse-search-results"></div>
+<script type="text/javascript">
+  var googleSearchIframeName = "cse-search-results";
+  var googleSearchFormName = "cse-search-box";
+  var googleSearchFrameWidth = 800;
+  var googleSearchDomain = "www.google.com";
+  var googleSearchPath = "/cse";
+</script>
+<script type="text/javascript" src="http://www.google.com/afsonline/show_afs_search.js"></script>
+
+
+<style type="text/css">
+@import url(http://www.google.com/cse/api/branding.css);
+</style>
+<div class="cse-branding-bottom" style="background-color:#FFFFFF;color:#000000">
+  <div class="cse-branding-form">
+    <form action="http://www.helga-glunz.homepage.t-online.de/pstoedit/" id="cse-search-box">
+      <div>
+        <input type="hidden" name="cx" value="partner-pub-2239328204426644:3mybph-3n0p" />
+        <input type="hidden" name="cof" value="FORID:10" />
+        <input type="hidden" name="ie" value="ISO-8859-1" />
+        <input type="text" name="q" size="31" />
+        <input type="submit" name="sa" value="Search" />
+      </div>
+    </form>
+  </div>
+  <div class="cse-branding-logo">
+    <img src="http://www.google.com/images/poweredby_transparent/poweredby_FFFFFF.gif" alt="Google" width="56" height="20" />
+  </div>
+  <div class="cse-branding-text">
+    Custom Search
+  </div>
+</div>
+
 
 <script type="text/javascript"><!--
 google_ad_client = "pub-2239328204426644";
@@ -28,7 +62,11 @@ google_ad_channel ="";
     <td width="85%" valign="top">
 
 
-<h1 align="center">pstoedit</h1>
+<p align="center">
+
+
+<img src=../pstoeditlogo-medium.png align="center" width="199" height="163" alt="pstoedit">
+</p>
 
 <h1><a name="Overview">Overview</a></h1>
 
@@ -55,19 +93,22 @@ google_ad_channel ="";
     <li>HPGL</li>
     <li>AI (Adobe Illustrator) (based on ps2ai.ps - not a real
         pstoedit driver - see notes below and manual)</li>
-    <li>Windows Meta Files (WMF) (Windows 9x/NT only) </li>
-    <li>Enhanced Windows Meta Files (EMF) (Windows 9x/NT only)</li>
+    <li>Windows Meta Files (WMF) (Windows&nbsp; only) </li>
+    <li>Enhanced Windows Meta Files (EMF) (Windows, but also Linux/Unix if 
+    libemf is available)</li>
     <li>OS/2 meta files (OS/2 only) </li>
     <li>PIC format for troff/groff</li>
     <li>MetaPost format for usage with TeX/LaTeX</li>
     <li>LaTeX2e picture</li>
     <li>Kontour</li>
     <li>GNU Metafile (plotutils / libplot)</li>
-    <li>Skencil( <a href="http://sketch.sourceforge.net">http://www.skencil.org</a>
+    <li>Skencil ( <a href="http://www.skencil.org">http://www.skencil.org</a>
         )</li>
     <li>Mathematica</li>
     <li>via ImageMagick to any format supported by ImageMagick</li>
     <li>SWF </li>
+    <li>CNC G code</li>
+    <li>VTK files for ParaView and similar visualization tools</li>
 </ul>
 
 <p>Besides these some further very special formats are supported. See the
@@ -112,9 +153,9 @@ drivers as plugins.</p>
 
 <ul>
     <li>Source tarball:
-    <a href="http://prdownloads.sourceforge.net/pstoedit/pstoedit-3.45.tar.gz?download">pstoedit-3.45.tar.gz</a> </li>
+    <a href="http://prdownloads.sourceforge.net/pstoedit/pstoedit-3.50.tar.gz?download">pstoedit-3.50.tar.gz</a> </li>
     <li>
-    <a href="http://prdownloads.sourceforge.net/pstoedit/pstoeditsetup345.exe?download">binary for Windows 9x/2K/NT/XP/Vista</a> - If you 
+    <a href="http://prdownloads.sourceforge.net/pstoedit/pstoeditsetup350.exe?download">binary for Windows 9x/2K/NT/XP/Vista</a> - If you 
     don't have the following two DLLs (msvcr70.dll and msvcp70.dll) already 
     installed, you need to install them as well - either in the system directory 
     or in the pstoedit directory. You can get a copy
@@ -200,7 +241,7 @@ don't like this policy, don't subscribe.</p>
 <hr>
 
 <address>
-    Wolfgang Glunz email: wglunz34_AT_pstoedit.net
+    Wolfgang Glunz email: wglunz35_AT_pstoedit.net
 </address>
     <p>&nbsp;</td>
     <td width="15%" valign="top">

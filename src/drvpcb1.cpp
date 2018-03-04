@@ -2,7 +2,7 @@
    drvPCB1.cpp : Hans-Jürgen Jahn    (Version 1.0  10.08.02)
    this code is derived from drvSAMPL.cpp, see text below
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -438,7 +438,7 @@ bool drvPCB1::filledCircleOut()
 
 static DriverDescriptionT<drvPCB1> D_pcb("pcbi","engrave data - insulate/PCB format",
 										 "See \\URL{http://home.vr-web.de/\\Tilde hans-juergen-jahn/software/devpcb.html} for more details.",
-										 "pcb",
+										 "dat",
 								
 		false, // backend supports subpathes
 		   // if subpathes are supported, the backend must deal with

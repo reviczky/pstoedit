@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1998 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include I_istream
 #include I_fstream
 #include I_string_h
+#include <math.h>
 
 USESTD
 
@@ -65,17 +66,18 @@ const char directoryDelimiter = '/';
 // of allocation and deallocation in different .dlls. 
 // a strdup which uses new instead of malloc
 
-inline char * cppstrndup(const char * const src, const unsigned int length, const unsigned int addon = 0 )
+inline char * cppstrndup(const char * const src, const size_t length, const size_t addon = 0 )
 {
-	char * const ret = new char[length + 1 + addon];
-	for (unsigned int i = 0 ; i < length+1; i++)
+	const size_t lp1 = length+1;
+	char * const ret = new char[lp1 + addon];
+	for (unsigned int i = 0 ; i < lp1; i++)
 	{
 			ret[i] = src[i];
 	}
 	return ret;
 
 }
-inline char *cppstrdup(const char * const src, unsigned int addon = 0)
+inline char *cppstrdup(const char * const src, const size_t addon = 0)
 {
 	return cppstrndup(src,strlen(src),addon);
 }
@@ -99,29 +101,6 @@ private:
 
 	NOCOPYANDASSIGN(TempFile)
 };
-
-class Argv {
-	enum { maxargs=1000 };
-public:
-	unsigned int argc;
-	char * argv[maxargs];
-
-	Argv() : argc(0) { for (unsigned int i = 0; i< (unsigned) maxargs; i++)  { argv[i] = 0; } }
-	~Argv() { clear(); }
-
-	void addarg(const char * const arg) { 
-		assert(argc<maxargs); //lint !e1776
-		argv[argc] = cppstrdup(arg); 
-		argc++; 
-	}
-	
-	void clear() {
-		for (unsigned int i = 0; i< (unsigned) argc &&  i< (unsigned) maxargs ; i++) { delete [] argv[i] ; argv[i]= 0; argc = 0;}
-	}
-	
-	NOCOPYANDASSIGN(Argv)
-};
-DLLEXPORT ostream & operator <<(ostream & out, const Argv & a);
 
 #ifdef HAVEAUTOPTR 
 #include <memory>
@@ -156,13 +135,14 @@ public:
 		
 	RSString(const char * arg = 0);
 	RSString(const char arg );
-	RSString(const char * arg , const unsigned int len);
+	RSString(const char * arg , const size_t len);
 	RSString(const RSString & s);
 	virtual ~RSString();
 	const char * value() const { return content; }
-	unsigned int length() const { return stringlength; }
-	void copy(const char *src,const unsigned int len) ;
+	size_t length() const { return stringlength; }
+	void copy(const char *src,const size_t len) ;
 	void copy(const char *src);
+	bool contains(const RSString & s) const;
 	const RSString & operator = (const RSString & rs) {
 		if (&rs != this) {
 			copy(rs.value(),rs.length());
@@ -175,6 +155,7 @@ public:
 	}
 
  	RSString& operator+= (const RSString &rs);
+	
 	RSString& operator+= (const char * rs);
 	friend bool operator==(const RSString & ls,const RSString & rs);
 	friend bool operator!=(const RSString & ls,const RSString & rs); 
@@ -198,16 +179,72 @@ private:
 	// is allocated by the DLL, it must be destroyed there as well.
 	//
 	virtual void clearContent();
-	virtual char * newContent(unsigned int size);
+	virtual char * newContent(size_t size);
 	char * content;
-	unsigned int allocatedLength;
-	unsigned int stringlength; // needed for storing binary strings including \0 
+	size_t allocatedLength;
+	size_t stringlength; // needed for storing binary strings including \0 
 };
+
+
+inline RSString  operator+ (const RSString & ls,const RSString &rs) 
+	{ RSString result(ls); result += rs; return result; }
 
 inline bool operator==(const RSString & ls,const RSString & rs) 
 	{ 	return ( (rs.stringlength == ls.stringlength ) && (strncmp(ls.content,rs.content,ls.stringlength) == 0) );	}
 inline bool operator!=(const RSString & ls,const RSString & rs)  
 	{ 	return !(ls==rs); }
+
+
+
+class Argv {
+	enum { maxargs=1000 };
+public:
+	unsigned int argc;
+// #define USE_RSSTRING 1
+#ifdef USE_RSSTRING
+	RSString argv[maxargs];
+#else
+	char * argv[maxargs];
+#endif
+
+	Argv() : argc(0) { for (unsigned int i = 0; i< (unsigned) maxargs; i++)  { argv[i] = 0; } }
+	~Argv() { clear(); }
+
+	void addarg(const char * const arg) { 
+		assert(argc<maxargs); //lint !e1776
+#ifdef USE_RSSTRING
+		argv[argc] = RSString(arg);
+#else
+		argv[argc] = cppstrdup(arg); 
+#endif
+		argc++; 
+	}
+	void addarg(const RSString & arg) { 
+		assert(argc<maxargs); //lint !e1776
+#ifdef USE_RSSTRING
+		argv[argc] = arg;
+#else
+		argv[argc] = cppstrdup(arg.value()); 
+#endif
+		argc++; 
+	}
+
+	unsigned int parseFromString(const char * const argstring);
+	
+	void clear() {
+#ifdef USE_RSSTRING
+#else
+		for (unsigned int i = 0; i< (unsigned) argc &&  i< (unsigned) maxargs ; i++) {
+
+			delete [] argv[i] ; argv[i]= 0; 
+		}
+#endif
+		argc = 0;
+	}
+	
+	NOCOPYANDASSIGN(Argv)
+};
+DLLEXPORT ostream & operator <<(ostream & out, const Argv & a);
 
 
 DLLEXPORT bool fileExists (const char * filename);
@@ -297,12 +334,13 @@ private:
 
 typedef KeyValuePair<RSString,RSString> FontMapping ;
 
-#ifdef _WIN32
+#if defined (_MSC_VER) 
 #pragma warning(disable: 4275)
 // non dll-interface class 'Mapper<class KeyValuePair<class RSString,class RSString> >' used as base for dll-interface class 'FontMapper'
 // miscutil.h(259) : see declaration of 'FontMapper'
 #endif
 
+//lint -esym(1790,Mapper*)
 #ifndef BUGGYGPP
 class DLLEXPORT FontMapper: public Mapper<FontMapping>
 #else /* BUGGYGPP */
@@ -313,7 +351,7 @@ public:
   void readMappingTable(ostream & errstream,const char * filename);
   const char * mapFont(const RSString & fontname);
 };
-#ifdef _WIN32
+#if defined (_MSC_VER) 
 #pragma warning(default: 4275)
 #endif
 
@@ -325,6 +363,7 @@ DLLEXPORT unsigned long searchinpath(const char* EnvPath,const char* name, char 
 DLLEXPORT void errorMessage(const char * text); // display an error message (cerr or msgbox)
 DLLEXPORT void copy_file(istream& infile,ostream& outfile) ;
 
+inline double pythagoras(const float x, const float y) { return sqrt( x*x + y*y); }
 
 
 #endif

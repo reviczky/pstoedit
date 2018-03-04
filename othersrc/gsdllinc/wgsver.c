@@ -308,25 +308,25 @@ int ENTRYPOINT
     char buf[256];
 
     if (find_gs(buf, sizeof(buf), 550, TRUE, gsregbase))
-	printf("Latest GS DLL is %s\n", buf);
+	fprintf(stderr,"Latest GS DLL is %s\n", buf);
     if (find_gs(buf, sizeof(buf), 550, FALSE, gsregbase))
-	printf("Latest GS EXE is %s\n", buf);
+	fprintf(stderr,"Latest GS EXE is %s\n", buf);
 
     ver[0] = sizeof(ver) / sizeof(int);
     flag = get_gs_versions(ver, gsregbase);
-    printf("Versions: %d\n", ver[0]);
+    fprintf(stderr,"Versions: %d\n", ver[0]);
 
     if (flag == FALSE) {
-	printf("get_gs_versions failed, need %d\n", ver[0]);
+	fprintf(stderr,"get_gs_versions failed, need %d\n", ver[0]);
 	return 1;
     }
 
     for (i=1; i <= ver[0]; i++) {
-	printf(" %d\n", ver[i]);
+	fprintf(stderr," %d\n", ver[i]);
 	if (get_gs_string(ver[i], "GS_DLL", buf, sizeof(buf), gsregbase))
-	    printf("   GS_DLL=%s\n", buf);
+	    fprintf(stderr,"   GS_DLL=%s\n", buf);
 	if (get_gs_string(ver[i], "GS_LIB", buf, sizeof(buf), gsregbase))
-	    printf("   GS_LIB=%s\n", buf);
+	    fprintf(stderr,"   GS_LIB=%s\n", buf);
     }
     return 0;
 }

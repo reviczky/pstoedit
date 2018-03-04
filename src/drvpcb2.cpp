@@ -1,9 +1,10 @@
 /* 
-   drvpcb.cpp : This file is part of pstoedit
+   drvpcb2.cpp : This file is part of pstoedit
    simple backend for Pcb format.
    Contributed / Copyright 2004 by: Mark Rages 
+   Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz34_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -27,56 +28,257 @@
 #include I_stdio
 #include I_string_h
 #include I_iostream
+#include <cmath>
+#include <iomanip>
 
+const double SCALE = (double)100000.0/(double)72.0;
+/* millimeter in mils/100. More exactly 3937.007874016, but pcb seems to use: */
+/* 3937.00775 */
+const double MM100 = (double)100000.0/(double)25.4;
 
+#define sqr(a) ((a)*(a))
+
+int drvPCB2::pcbScale_x(const Point & p) const
+{
+	return (int)((double)p.x_ * SCALE + (double)options->tshiftx * unit + (double)0.5);
+}
+int drvPCB2::pcbScale_y(const Point & p) const 
+{
+	return (int)((double)500000.0 - (double)p.y_ * SCALE + (double)options->tshifty * unit + (double)0.5);
+}
+int drvPCB2::pcbScale(const double & f)  
+{
+	return (int)((double)f * SCALE + (double)0.5);
+}
+
+int drvPCB2::_grid_snap (int value, double grid_p) 
+{
+	return (int)((int)(((double)value + grid_p / 2) / grid_p) * grid_p + (double)0.5);
+}
+
+int drvPCB2::grid_snap(int value, bool success) const 
+{
+	if ((options->grid != 0.0) && success) {
+		/* pixel-exact snap to pcb grid: */
+		return _grid_snap (value, grid);
+	} else {
+		return value;
+	}
+}
+
+void drvPCB2::try_grid_snap(int value, bool & success) const
+{
+	if (options->grid != 0.0) {
+		int value_snap;
+		value_snap = _grid_snap(value, grid);
+		if (abs (value_snap - value) > grid * options->snapdist) {
+			success = false;
+		}
+	}
+}
 
 drvPCB2::derivedConstructor(drvPCB2):
-//(const char * driveroptions_p,ostream & theoutStream,ostream & theerrStream):
 constructBase
 {
-// driver specific initializations
-  outf << "PCB[\"\" 600000 500000]\n\n";
-  outf << "Grid[2000.00000000 0 0 0]\n\n";
-  outf << "Layer(10 \"silk\")\n(\n";
+	unit = (options->mm ? MM100 : 100.0);
+	grid = (double)(options->grid) * unit;
+	outf << "PCB[\"\" 600000 500000]\n\n";
+	if (options->grid != 0.0) {
+		outf << "Grid[";
+		outf << fixed << setprecision(6) << grid;
+		outf << " 0 0 1]\n\n";
+	} else {
+		outf << "Grid[1000.000000 0 0 0]\n\n";
+	}
+}
+
+static void gen_layer (ostream & outf, C_ostrstream & layer, const char * layer_def, const bool & force)
+{
+	if (layer.tellp() || force) {
+		outf << "Layer(" << layer_def << "\")\n(\n"
+		     << layer.str()
+		     << ")\n";
+#ifdef USE_NEWSTRSTREAM
+		layer.str("");
+#endif
+	}
 }
 
 drvPCB2::~drvPCB2()
 {
-  outf << ")\n";
-  options=0;
+	if (options->stdnames)
+	{
+		gen_layer (outf, layer_polygons, "1 \"component", false);
+		gen_layer (outf, layer_pads, "2 \"solder", false);
+		gen_layer (outf, layer_polygons_nogrid, "3 \"GND", false);
+		gen_layer (outf, layer_pads_nogrid, "5 \"signal1", false);
+		gen_layer (outf, layer_boundaries_nogrid, "9 \"silk", false);
+		gen_layer (outf, layer_boundaries, "10 \"silk", true);
+	} else {
+		gen_layer (outf, layer_polygons, "1 \"poly", false);
+		gen_layer (outf, layer_polygons_nogrid, "2 \"poly.nogrid", false);
+		gen_layer (outf, layer_pads, "3 \"pads", false);
+		gen_layer (outf, layer_pads_nogrid, "4 \"pads.nogrid", false);
+		gen_layer (outf, layer_boundaries, "5 \"bound", false);
+		gen_layer (outf, layer_boundaries_nogrid, "6 \"bound.nogrid", false);
+		/* generate empty silk, otherwise bounds are interpreted as silk */
+		outf << "Layer(10 \"silk\")\n(\n"
+		     << ")\n";
+	}
+	options=0;
 }
 
 
 void drvPCB2::close_page()
 {
-  //outf << "#Seite beendet.\n";
 }
 
 void drvPCB2::open_page()
 {
-  //	outf << "#Neue Seite\n";
 }
-const float SCALE = (100000.0f/72.0f);
 
 void drvPCB2::show_path()
 {
-  //	outf << "\n#Polyline:\n";
+	bool round_success;
+	ostream *layer, *layer_nogrid;
+	if (isPolygon()) {
+		switch (currentShowType()) {
+		case drvbase::fill:
+		case drvbase::eofill:
+			unsigned int numberofvalidelements;
 
+			/* FIXME: How polygon with <3 vertices happen? */
+			if (numberOfElementsInPath() < 3)
+				return;
 
-	for (unsigned int n = 1; n < numberOfElementsInPath(); n++) {
-		const Point & p1 = pathElement(n-1).getPoint(0);
-		const Point & p = pathElement(n).getPoint(0);
-		outf << "Line[";
-		outf << (int)(p1.x_*SCALE) << " " 
-                     << (int)(500000-p1.y_*SCALE) << " " 
-                     << (int)(p.x_*SCALE) << " " 
-                     << (int)(500000-p.y_*SCALE) << " 1000 2000 0x00000020]\n";
+			{
+				const Point & p0 = pathElement(0).getPoint(0);
+				const Point & pl = pathElement(numberOfElementsInPath()-1).getPoint(0);
+
+				/* Polygons are closed automatically. Skip last element for already closed polygons. */
+				if (p0.x_ == pl.x_ && p0.y_ == pl.y_) {
+					numberofvalidelements = numberOfElementsInPath() - 1;
+				} else {
+					numberofvalidelements = numberOfElementsInPath();
+				}
+			}
+			/* If snap to grid fails for any of points draw into layer_polygons_nogrid layer */
+			round_success = true;
+			{for (unsigned int n = 0; n < numberofvalidelements; n++) {
+				try_grid_snap (pcbScale_x(pathElement(n).getPoint(0)), round_success);
+				try_grid_snap (pcbScale_y(pathElement(n).getPoint(0)), round_success);
+			}}
+			if (round_success)
+				layer = &layer_polygons;
+			else
+				layer = &layer_polygons_nogrid;
+			/* Put polygons in grid into component layer. They may be PCB copper areas. */
+			*layer << "\tPolygon(\"clearpoly\")\n"
+			       << "\t(\n";
+			{for (unsigned int n = 0; n < numberofvalidelements; n++) {
+				const Point & p = pathElement(n).getPoint(0);
+				int x = grid_snap (pcbScale_x(p), round_success),
+				    y = grid_snap (pcbScale_y(p), round_success);
+				*layer << "\t\t[" << x << " " << y << "]\n";
+			}}
+			*layer << "\t)\n";
+
+			/* Rectangles can be also soldering pads. Create pads of proper size as duplicates.
+			   User has to remove the unwanted instance. (Well, any tetragon is converted to pad)? */
+			if (numberofvalidelements == 4) {
+				Point try1_p1, try1_p2, try2_p1, try2_p2, pad_p1, pad_p2, pad_p1_corr, pad_p2_corr;
+				double lensq, widsq, try1_lensq, try2_lensq; 
+				/* Try1: line in direcion of vertices 0->1 */
+				try1_p1.x_ = (pathElement(1).getPoint(0).x_ + pathElement(2).getPoint(0).x_) / 2;
+				try1_p2.x_ = (pathElement(3).getPoint(0).x_ + pathElement(0).getPoint(0).x_) / 2;
+				try1_p1.y_ = (pathElement(1).getPoint(0).y_ + pathElement(2).getPoint(0).y_) / 2;
+				try1_p2.y_ = (pathElement(3).getPoint(0).y_ + pathElement(0).getPoint(0).y_) / 2;
+				try1_lensq = sqr(try1_p1.x_ - try1_p2.x_) + sqr(try1_p1.y_ - try1_p2.y_);
+				/* Try1: line in direcion of vertices 1->2 */
+				try2_p1.x_ = (pathElement(0).getPoint(0).x_ + pathElement(1).getPoint(0).x_) / 2;
+				try2_p2.x_ = (pathElement(2).getPoint(0).x_ + pathElement(3).getPoint(0).x_) / 2;
+				try2_p1.y_ = (pathElement(0).getPoint(0).y_ + pathElement(1).getPoint(0).y_) / 2;
+				try2_p2.y_ = (pathElement(2).getPoint(0).y_ + pathElement(3).getPoint(0).y_) / 2;
+				try2_lensq = sqr(try2_p1.x_ - try2_p2.x_) + sqr(try2_p1.y_ - try2_p2.y_);
+				/* Use the longer line from these two */
+				/* FIXME: what to do for square */
+				if (try1_lensq > try2_lensq) {
+					pad_p1.x_ = try1_p1.x_;
+					pad_p2.x_ = try1_p2.x_;
+					pad_p1.y_ = try1_p1.y_;
+					pad_p2.y_ = try1_p2.y_;
+					lensq = try1_lensq;
+					widsq = try2_lensq;
+				} else {
+					pad_p1.x_ = try2_p1.x_;
+					pad_p2.x_ = try2_p2.x_;
+					pad_p1.y_ = try2_p1.y_;
+					pad_p2.y_ = try2_p2.y_;
+					lensq = try2_lensq;
+					widsq = try1_lensq;
+				}
+				/* pcb adds line width to lenght. Subtract it. */
+				const double lwidth = sqrt(widsq);
+				const double lratio = sqrt(widsq/lensq/4);
+				pad_p1_corr.x_ = (float)(pad_p1.x_ - lratio*(pad_p1.x_-pad_p2.x_));
+				pad_p2_corr.x_ = (float)(pad_p2.x_ + lratio*(pad_p1.x_-pad_p2.x_));
+				pad_p1_corr.y_ = (float)(pad_p1.y_ - lratio*(pad_p1.y_-pad_p2.y_));
+				pad_p2_corr.y_ = (float)(pad_p2.y_ + lratio*(pad_p1.y_-pad_p2.y_));
+				round_success = true;
+				try_grid_snap (pcbScale_x(pad_p1_corr), round_success);
+				try_grid_snap (pcbScale_y(pad_p1_corr), round_success);
+				try_grid_snap (pcbScale_x(pad_p2_corr), round_success);
+				try_grid_snap (pcbScale_y(pad_p2_corr), round_success);
+				try_grid_snap (pcbScale(lwidth), round_success);
+				if (round_success)
+					layer = &layer_pads;
+				else
+					layer = &layer_pads_nogrid;
+				*layer << "\tLine["
+				       << grid_snap (pcbScale_x(pad_p1_corr), round_success) << " "
+				       << grid_snap (pcbScale_y(pad_p1_corr), round_success) << " "
+				       << grid_snap (pcbScale_x(pad_p2_corr), round_success) << " "
+				       << grid_snap (pcbScale_y(pad_p2_corr), round_success) << " "
+				       << grid_snap (pcbScale(lwidth), round_success) << " 200 \"clearline\"]\n";
+			}
+			break;
+
+		case drvbase::stroke:
+			/* Put lines with polygon inside to silk layer, as they cannot be component lines. */
+			layer = &layer_boundaries;
+			layer_nogrid = &layer_boundaries_nogrid;
+			goto polyline;
+			break;
+		}
+	} else {
+		/* Put lines that are not associated with polygon into component layer. They are probably PCB traces. */
+		layer = &layer_polygons;
+		layer_nogrid = &layer_polygons_nogrid;
+	polyline:
+		round_success = true;
+		{for (unsigned int n = 1; n < numberOfElementsInPath(); n++) {
+			try_grid_snap (pcbScale_x(pathElement(n).getPoint(0)), round_success);
+			try_grid_snap (pcbScale_y(pathElement(n).getPoint(0)), round_success);
+		}}
+		if (!round_success)
+			layer = layer_nogrid;
+		{for (unsigned int n = 1; n < numberOfElementsInPath(); n++) {
+			const Point & p1 = pathElement(n-1).getPoint(0);
+			const Point & p = pathElement(n).getPoint(0);
+			*layer << "\tLine["
+			       << grid_snap (pcbScale_x(p1), round_success) << " " 
+			       << grid_snap (pcbScale_y(p1), round_success) << " " 
+			       << grid_snap (pcbScale_x(p), round_success) << " " 
+			       << grid_snap (pcbScale_y(p), round_success) << " "
+			       << grid_snap (pcbScale(currentLineWidth()), round_success)
+			       << " 2000 0x00000020]\n";
+		}}
 	}
 }
 
 
 static DriverDescriptionT < drvPCB2 > D_pcb("pcb", "pcb format", 
-											"See also: \\URL{http://pcb.sourceforge.net} ","pcb", false,	// if backend supports subpathes
+											"See also: \\URL{http://pcb.sourceforge.net} and \\URL{http://www.penguin.cz/\\Tilde utx/pstoedit-pcb/} ","pcb", false,	// if backend supports subpathes
 												   // if subpathes are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)

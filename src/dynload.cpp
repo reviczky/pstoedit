@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -138,7 +138,7 @@ void DynLoader::close()
 		dlclose(handle);
 #elif defined(_WIN32)
 		(void) WINFREELIB((HINSTANCE) handle);
-#elif
+#else
 #error "system unsupported so far"
 #endif
 		handle = 0;
@@ -372,8 +372,8 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 				errstream << "Could not open plug-in directory (" << pluginDir
 					<< " or didn't find any plugin there" << endl;
 		} else {
-			BOOL more = FALSE;
-			do {
+			BOOL more = true;
+			while (more) {
 #ifdef xx
 #define stricmp _stricmp
 #endif
@@ -383,11 +383,11 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 				// -4 means go back the length of ".dll"
 				if (stricmp(&finddata.cFileName[len - 4], ".dll") == 0) {
 					// cout << &finddata.cFileName[len -4 ] << endl;
-					const unsigned int size = strlen(pluginDir) + len + 3; 
-					char *fullname = new char[size];
-					strcpy_s(fullname, size, pluginDir);
-					strcat_s(fullname, size, "\\");
-					strcat_s(fullname, size, finddata.cFileName);
+					const unsigned int size_2 = strlen(pluginDir) + len + 3; 
+					char *fullname = new char[size_2];
+					strcpy_s(fullname, size_2, pluginDir);
+					strcat_s(fullname, size_2, "\\");
+					strcat_s(fullname, size_2, finddata.cFileName);
 //              errstream << "szExePath " << szExePath << endl;
 
 					if ((stricmp(fullname, szExePath) != 0)
@@ -401,7 +401,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 					delete[]fullname;
 				}
 				more = FindNextFile(findHandle, &finddata);
-			} while (more);
+			}
 			(void) FindClose(findHandle);
 		}
 		delete[]searchpattern;
@@ -430,7 +430,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
 	if (verbose) {
 		errstream <<
-			"dummy version of loadPlugInDrivers called since you system doesn't seem to support loading libraries at runtime - If you think that this is not correct, contact the author of this program (wglunz34_AT_pstoedit.net) "
+			"dummy version of loadPlugInDrivers called since you system doesn't seem to support loading libraries at runtime - If you think that this is not correct, contact the author of this program (wglunz35_AT_pstoedit.net) "
 			<< endl;
 	}
 }								// just a dummy Version

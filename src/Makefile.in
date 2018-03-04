@@ -41,12 +41,13 @@ LIBOBJDIR =
 bin_PROGRAMS = pstoedit$(EXEEXT)
 subdir = src
 DIST_COMMON = $(pkginclude_HEADERS) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in
+	$(srcdir)/Makefile.in $(srcdir)/pstoedit_config.h.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(SHELL) $(top_srcdir)/mkinstalldirs
+CONFIG_HEADER = pstoedit_config.h
 CONFIG_CLEAN_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -72,12 +73,12 @@ libp2edrvmagick___la_OBJECTS = $(am_libp2edrvmagick___la_OBJECTS)
 libp2edrvstd_la_DEPENDENCIES = libpstoedit.la
 am__objects_1 = drvgnplt.lo drvtgif.lo drvfig.lo drvidraw.lo
 am__objects_2 = drvsampl.lo
-am_libp2edrvstd_la_OBJECTS = initlibrary.lo drvlwo.lo drvrib.lo \
-	drvrpl.lo drvdxf.lo drvjava.lo drvjava2.lo drvpdf.lo \
-	drvkillu.lo drvtext.lo drvsk.lo drvmpost.lo drvasy.lo \
-	drvmma.lo drvlatex2e.lo drvnoi.lo drvpic.lo drvhpgl.lo \
-	drvpcb1.lo drvpcb2.lo drvpcbfill.lo drvgschem.lo drvtk.lo \
-	drvsvm.lo $(am__objects_1) $(am__objects_2)
+am_libp2edrvstd_la_OBJECTS = initlibrary.lo drvgcode.lo drvcairo.lo \
+	drvlwo.lo drvrib.lo drvrpl.lo drvdxf.lo drvjava.lo drvjava2.lo \
+	drvpdf.lo drvkillu.lo drvtext.lo drvsk.lo drvmpost.lo \
+	drvasy.lo drvmma.lo drvlatex2e.lo drvnoi.lo drvpic.lo \
+	drvhpgl.lo drvpcb1.lo drvpcb2.lo drvpcbfill.lo drvgschem.lo \
+	drvtk.lo drvvtk.lo drvsvm.lo $(am__objects_1) $(am__objects_2)
 libp2edrvstd_la_OBJECTS = $(am_libp2edrvstd_la_OBJECTS)
 libp2edrvswf_la_DEPENDENCIES = $(am__DEPENDENCIES_1) libpstoedit.la
 am_libp2edrvswf_la_OBJECTS = drvswf.lo initlibrary.lo
@@ -103,7 +104,7 @@ PROGRAMS = $(bin_PROGRAMS)
 am_pstoedit_OBJECTS = cmdmain.$(OBJEXT)
 pstoedit_OBJECTS = $(am_pstoedit_OBJECTS)
 pstoedit_LDADD = $(LDADD)
-DEFAULT_INCLUDES = -I. -I$(srcdir)
+DEFAULT_INCLUDES = -I. -I$(srcdir) -I.
 depcomp = $(SHELL) $(top_srcdir)/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -159,14 +160,14 @@ CYGPATH_W = @CYGPATH_W@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DLLTOOL = @DLLTOOL@
-ECHO = @ECHO@
+DSYMUTIL = @DSYMUTIL@
+DUMPBIN = @DUMPBIN@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
-F77 = @F77@
-FFLAGS = @FFLAGS@
+FGREP = @FGREP@
 GREP = @GREP@
 GS = @GS@
 HAVE_LIBEMF_FALSE = @HAVE_LIBEMF_FALSE@
@@ -179,10 +180,13 @@ HAVE_LIBPLOTTER_FALSE = @HAVE_LIBPLOTTER_FALSE@
 HAVE_LIBPLOTTER_TRUE = @HAVE_LIBPLOTTER_TRUE@
 HAVE_LIBPNG_FALSE = @HAVE_LIBPNG_FALSE@
 HAVE_LIBPNG_TRUE = @HAVE_LIBPNG_TRUE@
+HAVE_PLUGINSRC_FALSE = @HAVE_PLUGINSRC_FALSE@
+HAVE_PLUGINSRC_TRUE = @HAVE_PLUGINSRC_TRUE@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
 INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
+LD = @LD@
 LDFLAGS = @LDFLAGS@
 LDLIBS = @LDLIBS@
 LIBEMF_CFLAGS = @LIBEMF_CFLAGS@
@@ -201,6 +205,7 @@ LIBPNG_LDFLAGS = @LIBPNG_LDFLAGS@
 LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LINK = @LINK@
+LIPO = @LIPO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
 MAGICK_CONFIG = @MAGICK_CONFIG@
@@ -209,8 +214,12 @@ MAINTAINER_MODE_FALSE = @MAINTAINER_MODE_FALSE@
 MAINTAINER_MODE_TRUE = @MAINTAINER_MODE_TRUE@
 MAKEINFO = @MAKEINFO@
 MKSTEMP_CFLAGS = @MKSTEMP_CFLAGS@
+NM = @NM@
+NMEDIT = @NMEDIT@
 OBJDUMP = @OBJDUMP@
 OBJEXT = @OBJEXT@
+OTOOL = @OTOOL@
+OTOOL64 = @OTOOL64@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -219,6 +228,8 @@ PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
 PKG_CONFIG = @PKG_CONFIG@
+PKG_CONFIG_LIBDIR = @PKG_CONFIG_LIBDIR@
+PKG_CONFIG_PATH = @PKG_CONFIG_PATH@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -232,7 +243,7 @@ YACC = @YACC@
 YFLAGS = @YFLAGS@
 ac_ct_CC = @ac_ct_CC@
 ac_ct_CXX = @ac_ct_CXX@
-ac_ct_F77 = @ac_ct_F77@
+ac_ct_DUMPBIN = @ac_ct_DUMPBIN@
 am__fastdepCC_FALSE = @am__fastdepCC_FALSE@
 am__fastdepCC_TRUE = @am__fastdepCC_TRUE@
 am__fastdepCXX_FALSE = @am__fastdepCXX_FALSE@
@@ -278,13 +289,29 @@ sharedstatedir = @sharedstatedir@
 subdirs = @subdirs@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
+to_host_path_cmd = @to_host_path_cmd@
 EXTRA_DIST = pstoedit.ph makefile.txt
+
+# LIBPLUGINS_ENTRY=libp2edrvplugins.la
 @HAVE_LIBPLOTTER_TRUE@LIBPLOTTER_ENTRY = libp2edrvlplot.la
 @HAVE_LIBMING_TRUE@LIBMING_ENTRY = libp2edrvswf.la
 @HAVE_LIBMAGICK_TRUE@LIBMAGICK_ENTRY = libp2edrvmagick++.la
 @HAVE_LIBEMF_TRUE@LIBEMF_ENTRY = libp2edrvwmf.la
+AM_CPPFLAGS = \
+	${LIBPLOTTER_CFLAGS}			\
+	${LIBMING_CFLAGS}			\
+	${MKSTEMP_CFLAGS}			\
+	${LIBMAGICK_CFLAGS}			\
+	${LIBEMF_CFLAGS}			\
+	${LIBPNG_CFLAGS}			\
+        -DDEFAULTGS=$(GS)			\
+	-DPSTOEDITDATADIR="\"$(pkgdatadir)\""	\
+	-DPSTOEDITLIBDIR="\"$(pkglibdir)\""	\
+        ${SPECIAL_CXXFLAGS}
+
 lib_LTLIBRARIES = libpstoedit.la
 pkglib_LTLIBRARIES = libp2edrvstd.la		\
+	${LIBPLUGINS_ENTRY}			\
 	${LIBPLOTTER_ENTRY}			\
 	${LIBMING_ENTRY}			\
 	${LIBMAGICK_ENTRY}			\
@@ -300,6 +327,8 @@ specific_drivers_src = \
 
 libp2edrvstd_la_SOURCES = \
 	initlibrary.cpp 			\
+	drvgcode.cpp    drvgcode.h		\
+	drvcairo.cpp    drvcairo.h		\
 	drvlwo.cpp      drvlwo.h		\
 	drvrib.cpp      drvrib.h		\
 	drvrpl.cpp      drvrpl.h		\
@@ -323,22 +352,31 @@ libp2edrvstd_la_SOURCES = \
 	drvpcbfill.cpp	drvpcbfill.h                 \
 	drvgschem.cpp	drvgschem.h                 \
 	drvtk.cpp	drvtk.h                 \
+	drvvtk.cpp	drvvtk.h                 \
 	drvsvm.cpp	drvsvm.h svm_actions.h	\
 	$(specific_drivers_src)                 \
         $(sample_drivers_src)                   
 
 libp2edrvstd_la_LIBADD = -L. libpstoedit.la
 libp2edrvstd_la_LDFLAGS = -no-undefined -module
+
+#libp2edrvplugins_la_SOURCES=drvmif.cpp drvcgm.cpp drvrtf.cpp drvwwmf.cpp
+#libp2edrvplugins_la_LIBADD=
+#libp2edrvplugins_la_LDFLAGS=
+#libp2edrvplugins_la_CFLAGS=-I../Check/ -I../othersrc/cdlib
 libp2edrvlplot_la_SOURCES = drvlplot.cpp drvlplot.h initlibrary.cpp
 libp2edrvlplot_la_LIBADD = $(LIBPLOTTER_LDFLAGS) -L. libpstoedit.la
 libp2edrvlplot_la_LDFLAGS = -no-undefined -module
 libp2edrvswf_la_SOURCES = drvswf.cpp drvswf.h initlibrary.cpp
 libp2edrvswf_la_LIBADD = $(LIBMING_LDFLAGS) -L. libpstoedit.la
 libp2edrvswf_la_LDFLAGS = -no-undefined -module
+
+# note the __ stand for ++ - automake treats all no alphanums chars as _
 libp2edrvmagick___la_SOURCES = drvmagick++.cpp drvmagick++.h initlibrary.cpp
 libp2edrvmagick___la_LIBADD = -L. libpstoedit.la
 libp2edrvmagick___la_LDFLAGS = -no-undefined ${LIBMAGICK_LDFLAGS}  -module
 @USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_SOURCES = drvwmf.cpp drvwmf.h initlibrary.cpp
+# moved to configure.ac because needed only for g++ libp2edrvmagick___la_CPPFLAGS=$(LIBMAGICK_CFLAGS) $(AM_CPPFLAGS) -Wno-long-long
 @USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_SOURCES = emflib.cpp drvwmf.cpp drvwmf.h initlibrary.cpp
 @USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_LDFLAGS = -no-undefined $(LIBEMF_LDFLAGS) -L. libpstoedit.la -module
 @USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_LDFLAGS = -no-undefined -L. libpstoedit.la -module
@@ -358,7 +396,7 @@ libpstoedit_la_SOURCES = \
 	genericints.h 				\
 	version.h
 
-libpstoedit_la_LIBADD = ${CXX_STD_LIB} ${CXX_RUNTIME_LIB} -ldl
+libpstoedit_la_LIBADD = ${CXX_STD_LIB} ${CXX_RUNTIME_LIB} -ldl -lm
 libpstoedit_la_LDFLAGS = -no-undefined
 pstoedit_SOURCES = cmdmain.cpp
 pstoedit_LDFLAGS = -no-undefined -L. libpstoedit.la ${LIBLD_LDFLAGS}
@@ -378,19 +416,8 @@ pkginclude_HEADERS = \
 	ordlist.h				\
 	psimage.h
 
-AM_CPPFLAGS = \
-	${LIBPLOTTER_CFLAGS}			\
-	${LIBMING_CFLAGS}			\
-	${MKSTEMP_CFLAGS}			\
-	${LIBMAGICK_CFLAGS}			\
-	${LIBEMF_CFLAGS}			\
-	${LIBPNG_CFLAGS}			\
-        -DDEFAULTGS=$(GS)			\
-	-DPSTOEDITDATADIR="\"$(pkgdatadir)\""	\
-	-DPSTOEDITLIBDIR="\"$(pkglibdir)\""	\
-        ${SPECIAL_CXXFLAGS}
-
-all: all-am
+all: pstoedit_config.h
+	$(MAKE) $(AM_MAKEFLAGS) all-am
 
 .SUFFIXES:
 .SUFFIXES: .cpp .lo .o .obj
@@ -423,6 +450,23 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
+
+pstoedit_config.h: stamp-h1
+	@if test ! -f $@; then \
+	  rm -f stamp-h1; \
+	  $(MAKE) stamp-h1; \
+	else :; fi
+
+stamp-h1: $(srcdir)/pstoedit_config.h.in $(top_builddir)/config.status
+	@rm -f stamp-h1
+	cd $(top_builddir) && $(SHELL) ./config.status src/pstoedit_config.h
+$(srcdir)/pstoedit_config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps) 
+	cd $(top_srcdir) && $(AUTOHEADER)
+	rm -f stamp-h1
+	touch $@
+
+distclean-hdr:
+	-rm -f pstoedit_config.h stamp-h1
 install-libLTLIBRARIES: $(lib_LTLIBRARIES)
 	@$(NORMAL_INSTALL)
 	test -z "$(libdir)" || $(mkdir_p) "$(DESTDIR)$(libdir)"
@@ -533,8 +577,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmdmain.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvasy.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvbase.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvcairo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvdxf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvfig.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvgcode.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvgnplt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvgschem.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvhpgl.Plo@am__quote@
@@ -563,6 +609,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvtext.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvtgif.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvtk.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvvtk.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvwmf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dynload.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/emflib.Plo@am__quote@
@@ -602,7 +649,7 @@ clean-libtool:
 	-rm -rf .libs _libs
 
 distclean-libtool:
-	-rm -f libtool
+	-rm -f libtool config.lt
 uninstall-info-am:
 install-pkgincludeHEADERS: $(pkginclude_HEADERS)
 	@$(NORMAL_INSTALL)
@@ -632,11 +679,11 @@ ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	mkid -fID $$unique
 tags: TAGS
 
-TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+TAGS:  $(HEADERS) $(SOURCES) pstoedit_config.h.in $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	list='$(SOURCES) $(HEADERS) pstoedit_config.h.in $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
 	  done | \
@@ -648,11 +695,11 @@ TAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
 	    $$tags $$unique; \
 	fi
 ctags: CTAGS
-CTAGS:  $(HEADERS) $(SOURCES)  $(TAGS_DEPENDENCIES) \
+CTAGS:  $(HEADERS) $(SOURCES) pstoedit_config.h.in $(TAGS_DEPENDENCIES) \
 		$(TAGS_FILES) $(LISP)
 	tags=; \
 	here=`pwd`; \
-	list='$(SOURCES) $(HEADERS)  $(LISP) $(TAGS_FILES)'; \
+	list='$(SOURCES) $(HEADERS) pstoedit_config.h.in $(LISP) $(TAGS_FILES)'; \
 	unique=`for i in $$list; do \
 	    if test -f "$$i"; then echo $$i; else echo $(srcdir)/$$i; fi; \
 	  done | \
@@ -699,7 +746,8 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS)
+all-am: Makefile $(LTLIBRARIES) $(PROGRAMS) $(HEADERS) \
+		pstoedit_config.h
 install-binPROGRAMS: install-libLTLIBRARIES
 
 installdirs:
@@ -739,7 +787,7 @@ distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
 	-rm -f Makefile
 distclean-am: clean-am distclean-compile distclean-generic \
-	distclean-libtool distclean-tags
+	distclean-hdr distclean-libtool distclean-tags
 
 dvi: dvi-am
 
@@ -787,18 +835,19 @@ uninstall-am: uninstall-binPROGRAMS uninstall-info-am \
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libLTLIBRARIES clean-libtool \
 	clean-pkglibLTLIBRARIES ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-data install-data-am install-exec \
-	install-exec-am install-info install-info-am \
-	install-libLTLIBRARIES install-man install-pkgincludeHEADERS \
-	install-pkglibLTLIBRARIES install-strip installcheck \
-	installcheck-am installdirs maintainer-clean \
-	maintainer-clean-generic mostlyclean mostlyclean-compile \
-	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
-	tags uninstall uninstall-am uninstall-binPROGRAMS \
-	uninstall-info-am uninstall-libLTLIBRARIES \
-	uninstall-pkgincludeHEADERS uninstall-pkglibLTLIBRARIES
+	distclean-generic distclean-hdr distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-data \
+	install-data-am install-exec install-exec-am install-info \
+	install-info-am install-libLTLIBRARIES install-man \
+	install-pkgincludeHEADERS install-pkglibLTLIBRARIES \
+	install-strip installcheck installcheck-am installdirs \
+	maintainer-clean maintainer-clean-generic mostlyclean \
+	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
+	pdf pdf-am ps ps-am tags uninstall uninstall-am \
+	uninstall-binPROGRAMS uninstall-info-am \
+	uninstall-libLTLIBRARIES uninstall-pkgincludeHEADERS \
+	uninstall-pkglibLTLIBRARIES
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

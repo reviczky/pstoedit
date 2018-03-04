@@ -6,7 +6,7 @@
    Backend for Asymptote files
    Contributed by: John Bowman
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -58,6 +58,8 @@ public:
 
 private:
   void print_coords();
+  void save();
+  void restore();
   // Previous values of graphics state variables
   string prevFontName;
   string prevFontWeight;
@@ -79,6 +81,9 @@ private:
   bool firstpage;
   
   int imgcount;
+  
+  unsigned int level;
+  // gsave nesting level
   
   std::list<bool> clipstack;
   std::list<bool> gsavestack;

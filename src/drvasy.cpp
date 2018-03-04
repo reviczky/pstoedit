@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_geocities.com
+  Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -58,13 +58,14 @@ drvASY::derivedConstructor(drvASY):
   clipmode(false),
   evenoddmode(false),
   firstpage(true),
-  imgcount(0)
+  imgcount(0),
+  level(0)
 {
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2007 Wolfgang Glunz"
-       << " <wglunz34_AT_pstoedit.net>\n\n";
+       << "// pstoedit is Copyright (C) 1993 - 2009 Wolfgang Glunz"
+       << " <wglunz35_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
 }
@@ -76,6 +77,29 @@ drvASY::~drvASY()
 	options=0;
 }
 
+void drvASY::save()
+{
+  while(gsavestack.size() && gsavestack.front()) {
+    gsavestack.pop_front();
+    outf << "gsave();" << endl;
+    ++level;
+    clipstack.push_back(false);
+  }
+}
+  
+void drvASY::restore() {
+  while(gsavestack.size() && !gsavestack.front()) {
+    gsavestack.pop_front();
+    while(clipstack.size() > 0) {
+      if(clipstack.back())
+	outf << "endclip();" << endl;
+      clipstack.pop_back();
+    }
+    outf << "grestore();" << endl;
+    if(level > 0) --level;
+  }
+}
+
 // Output a path
 void drvASY::print_coords()
 {
@@ -84,11 +108,7 @@ void drvASY::print_coords()
   bool havecycle=false;
   bool firstpoint=false;
 
-  while(gsavestack.size() && gsavestack.front()) {
-    gsavestack.pop_front();
-    outf << "gsave();" << endl;
-    clipstack.push_back(false);
-  }
+  save();
   
   if (fillmode || clipmode) {
     for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
@@ -247,16 +267,7 @@ void drvASY::print_coords()
       outf << ");" << endl;
     }
   }
-  
-  while(gsavestack.size() && !gsavestack.front()) {
-    gsavestack.pop_front();
-    if(clipstack.size() > 0) {
-      if(clipstack.back())
-	outf << "endclip();" << endl;
-      clipstack.pop_back();
-    }
-    outf << "grestore();" << endl;
-  }
+  restore();
 }
 
 // Each page will produce a different figure
@@ -272,6 +283,8 @@ void drvASY::close_page()
 
 void drvASY::show_image(const PSImage & imageinfo)
 {
+  restore();
+  
   if (outBaseName == "" ) {
     errf << "images cannot be handled via standard output. Use an output file" << endl;
     return;
@@ -285,9 +298,13 @@ void drvASY::show_image(const PSImage & imageinfo)
   ostringstream buf;
   buf << outBaseName << "." << imgcount << ".eps";
   
-  outf << "label(graphic(\"" << buf.str() << "\"),("
+  outf << "label(graphic(\"" << buf.str() << "\",\"bb="
+       << ll.x_ << " " << ll.y_ << " " << ur.x_ << " " << ur.y_ << "\"),("
        << ll.x_ << "," << ll.y_ << "),align);" << endl;
-  outf << "layer();" << endl;
+  
+  // Try to draw image in a separate layer.
+  if(level == 0) 
+    outf << "layer();" << endl;
   
   ofstream outi(buf.str().c_str());
   if (!outi) {
@@ -304,6 +321,8 @@ void drvASY::show_image(const PSImage & imageinfo)
 // Output a text string
 void drvASY::show_text(const TextInfo & textinfo)
 {
+  restore();
+  
   // Change fonts
   string thisFontName(textinfo.currentFontName.value());
   string thisFontWeight(textinfo.currentFontWeight.value());
@@ -320,8 +339,8 @@ void drvASY::show_text(const TextInfo & textinfo)
       outf << ");" << endl;
     } else {
       outf << "textpen += " << thisFontName << "(";
-      if(thisFontWeight == "Bold") outf << "\"b\"";
-      else if(thisFontWeight == "Condensed") outf << "\"c\"";
+      if(thisFontWeight == string("Bold")) outf << "\"b\"";
+      else if(thisFontWeight == string("Condensed")) outf << "\"c\"";
       outf << ");" << endl;
     }
     prevFontName = thisFontName;
@@ -361,7 +380,8 @@ void drvASY::show_text(const TextInfo & textinfo)
   if(prevFontAngle != 0.0) outf << "rotate(" << prevFontAngle << ")*(";
   bool texify=false;
   bool quote=false;
-  for (const char *c = textinfo.thetext.value(); *c; c++) {
+  const char *c=textinfo.thetext.value();
+  if(*c) for (; *c; c++) {
     if (*c >= ' ' && *c != '\\' && *c <= '~') {
       if(!texify) {
 	if(quote) outf << "\"+";
@@ -383,7 +403,7 @@ void drvASY::show_text(const TextInfo & textinfo)
       }
       outf << "\\char" << (int) *c;
     }
-  }
+  } else outf << "\"\"";
   if(quote) outf << "\"";
   if(texify) outf << ")";
   if(prevFontAngle != 0.0) outf << ")";

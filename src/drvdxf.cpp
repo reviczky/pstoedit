@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -512,16 +512,50 @@ static inline unsigned short floatColTointCol(float fcol) {
 
 class DXFLayers {
 public:
+
+	static RSString normalizeColorName(const RSString & s){
+		// normalizes color names such that they can be used as DXF layer names
+		// all characters are converted to upper case
+		// all non-alphanumeric characters are replaced by '_'
+		RSString normalized(s);
+		char * cp = (char *) normalized.value();
+		while (cp && *cp) {
+			if(islower(*cp) && isascii(*cp)) {
+				*cp = (char) toupper(*cp);
+			}
+			if (!isalnum(*cp)) {
+				*cp = '_'; // replace all not alphanumeric characters with _
+			}
+			cp++;
+		}
+		return normalized;
+	}
+
 	struct Layer {
-		Layer(float r, float g, float b,struct Layer * next_p = 0): rgb(floatColTointCol(r),floatColTointCol(g),floatColTointCol(b)), next(next_p) {}
+		Layer(float r, float g, float b, struct Layer * next_p = 0): rgb(floatColTointCol(r),floatColTointCol(g),floatColTointCol(b)), next(next_p) {}
 		DXFColor::rgbcolor rgb;
 		struct Layer * next;
 	};
+	struct NamedLayer {
+		NamedLayer(RSString s, struct NamedLayer * next_p=0): layerName(s), next(next_p) {}
+		RSString layerName;
+		struct NamedLayer* next;
+	};
 
 	Layer * LayerTable[DXFColor::numberOfColors];
+	
+	// for each color as defined in dxfcolor, we can have a linked list of layers
+	// This acts like a hash table with numberofcolors entries and the LayerList as buckets.
+	// we may at the end have several layers for the same color ("same" modulo the number of
+	// entries in DXFColor, i.e. "best match") - but the layerNames are still representing the exact color.
+
 	unsigned int numberOfLayers;
 
-	DXFLayers() : numberOfLayers(0) { 
+	NamedLayer * namedLayers; // just a list of Layernames - these names from from PostScript Separation names
+	// and are used in the DXF without any color values (or better said - mapped to B&W color)
+
+
+	DXFLayers() : numberOfLayers(0), namedLayers(0) { 
 		for (unsigned int i = 0; i < DXFColor::numberOfColors; i++) LayerTable[i]= 0; 
 	}
 
@@ -535,6 +569,24 @@ public:
 			}
 			LayerTable[i]= 0;
 		}
+		NamedLayer* nl = namedLayers;
+		while (nl) {
+			NamedLayer* pnext = nl->next;
+			delete nl;
+			nl = pnext;
+		}
+	}
+
+	void rememberLayerName(const RSString & s) {
+		NamedLayer* nl = namedLayers;
+		while (nl) {
+			if (nl->layerName == s) return;
+			nl = nl->next;
+		}
+		// not found - so prepend to list;
+		NamedLayer* newlayer = new  NamedLayer(s,namedLayers);
+		namedLayers = newlayer; // prepend to list;
+		numberOfLayers++;
 	}
 
 	bool alreadyDefined(float r, float g, float b, unsigned int index) const {
@@ -568,19 +620,13 @@ public:
 		LayerTable[index] = newlayer;
 		numberOfLayers++;
 	}
-#if 0
-	void defineLayer(float r, float g, float b) {
-		const unsigned int index = DXFColor::getDXFColor(r,g,b);
-		defineLayer(r,g,b,index);
-	}
-#endif
 
-	const char * getLayerName(unsigned short r,unsigned short g,unsigned short b) const {
+	static const char * getLayerName(unsigned short r,unsigned short g,unsigned short b) {
 		static char stringbuffer[20]; // format: "Cxx-xx-xx" (10 chars)
 		sprintf_s(TARGETWITHLEN(stringbuffer,20),"C%02X-%02X-%02X",r,g,b);
 		return stringbuffer;
 	}
-	const char * getLayerName(float r, float g, float b) const {
+	static const char * getLayerName(float r, float g, float b) {
 		// rgb is in range 0..1.0f
 		const unsigned short R = floatColTointCol(r);
 		const unsigned short G = floatColTointCol(g);
@@ -768,7 +814,6 @@ void drvDXF::writelayerentry(ostream & outs, unsigned int color, const char * la
 				outs << color << endl; // color
 				outs << "  6\n"
 					"CONTINUOUS\n" ;		// linestyle
-
 }
 
 drvDXF::~drvDXF()
@@ -788,11 +833,20 @@ drvDXF::~drvDXF()
 			DXFLayers::Layer * layer = layers->LayerTable[i];
 			while (layer) {
 				DXFLayers::Layer* pnext = layer->next;
-
-				writelayerentry(outf,i,layers->getLayerName(layer->rgb.r,layer->rgb.g,layer->rgb.b));
-
+				if (options->dumplayernames) {
+					cout << "Layer (generated): " << DXFLayers::getLayerName(layer->rgb.r,layer->rgb.g,layer->rgb.b) << endl;
+				}
+				writelayerentry(outf,i,DXFLayers::getLayerName(layer->rgb.r,layer->rgb.g,layer->rgb.b));
 				layer = pnext;
 			}
+		}
+		DXFLayers::NamedLayer * nl = layers->namedLayers;
+		while (nl) {
+			if (options->dumplayernames) {
+				cout << "Layer (defined in input): " << nl->layerName.value() << endl;
+			}
+			writelayerentry(outf,7,nl->layerName.value());
+			nl = nl->next;
 		}
 	}
 
@@ -819,7 +873,7 @@ void drvDXF::writeHandle(ostream & outs) {
 	handleint++;
 }
 
-void drvDXF::writeLayer(float r, float g, float b) 
+void drvDXF::writeLayer(float r, float g, float b, const RSString& colorName) 
 {
 	//
 	// Some notes about layers:
@@ -830,15 +884,21 @@ void drvDXF::writeLayer(float r, float g, float b)
 	//
 
 	buffer << "  8\n";
-	if (options->colorsToLayers) {
-// map black (0,0,0) to layer 7-black and white (1,1,1) to 7-white
+#if 1
+	buffer << calculateLayerString(r,g,b,colorName) << endl;
+#else
+	if (options->colorsToLayers) {		
 		const float roundinglimit = 0.001f;
-		if ((r < roundinglimit) && 
+
+		// map black (0,0,0) to layer 7-black and white (1,1,1) to 7-white
+
+		if (colorName != "") {
+			cout << colorName << endl;
+		} else if ((r < roundinglimit) && 
 			(g < roundinglimit) && 
 			(b < roundinglimit) ) {
 					// black
 			buffer << "C00-00-00-BLACK" << endl;
-
 		} else if (	(r > (1.0f- roundinglimit)) && 
 					(g > (1.0f- roundinglimit)) && 
 					(b > (1.0f- roundinglimit)) ) {
@@ -846,7 +906,7 @@ void drvDXF::writeLayer(float r, float g, float b)
 						// white
 		} else {
 			const unsigned int dxfcolor = DXFColor::getDXFColor(r,g,b,1);
-			const char * layerString = layers->getLayerName(r,g,b);
+			const char * layerString = DXFLayers::getLayerName(r,g,b);
 			if (! (layers->alreadyDefined(r,g,b,dxfcolor))) {
 				layers->defineLayer(r,g,b,dxfcolor);
 	//			cout << "defined new layer " << layerString << endl;
@@ -856,6 +916,69 @@ void drvDXF::writeLayer(float r, float g, float b)
 	} else {
 		buffer << "0\n";
 	}
+#endif
+}
+RSString drvDXF::calculateLayerString(float r, float g, float b, const RSString& colorName) 
+{
+	//
+	// Some notes about layers:
+	//
+	// If layers are not defined in the header, they implicitly get color white.
+	// An object drawn on a specific layer can either get the color by the layer (BYLAYER) 
+	// or define its own color (so far BYLAYER is not used by pstoedit)
+	//
+
+	if (options->colorsToLayers) {		
+		const float roundinglimit = 0.001f;
+
+		// map black (0,0,0) to layer 7-black and white (1,1,1) to 7-white
+
+		if (colorName != "") {
+			layers->rememberLayerName(colorName);
+			return colorName ;
+		} else if ((r < roundinglimit) && 
+			(g < roundinglimit) && 
+			(b < roundinglimit) ) {
+					// black
+			return RSString( "C00-00-00-BLACK");
+		} else if (	(r > (1.0f- roundinglimit)) && 
+					(g > (1.0f- roundinglimit)) && 
+					(b > (1.0f- roundinglimit)) ) {
+			return RSString( "CFF-FF-FF-WHITE");
+						// white
+		} else {
+			const unsigned int dxfcolor = DXFColor::getDXFColor(r,g,b,1);
+			const char * layerString = DXFLayers::getLayerName(r,g,b);
+			if (! (layers->alreadyDefined(r,g,b,dxfcolor))) {
+				layers->defineLayer(r,g,b,dxfcolor);
+	//			cout << "defined new layer " << layerString << endl;
+			}
+			return RSString(layerString);
+		}
+	} else {
+		return RSString("0");
+	}
+}
+
+bool drvDXF::wantedLayer(float r, float g, float b,const RSString& colorName)  // layer shall be written
+{ 
+	// inspect layerpositivfilter and layerpositivfilter
+	// use colorname if set, else calculate layername from color
+	// then if positivfilter is set, then check if contained in that one -> true
+	// else if negativfilter is set, then check if contained in that one -> false
+	// else -> true
+	static const RSString comma(","); // used as delimiter for string based containment test
+	if (options->layerpositivfilter.value != "" ) {
+		static const RSString compareto = comma + options->layerpositivfilter.value + comma;
+		const RSString layerstring = comma + calculateLayerString(r,g,b,colorName) + comma ;
+		// cout << "L: " << layerstring << " P:" << options->layerpositivfilter << " " << options->layerpositivfilter.value.contains(layerstring) << endl;
+		return compareto.contains(layerstring);
+	} else if (options->layernegativfilter.value != "" ) {
+		const RSString layerstring = comma + calculateLayerString(r,g,b,colorName) + comma;
+		static const RSString compareto = comma + options->layerpositivfilter.value + comma;
+		// cout << "L: " << layerstring << " N:" << options->layernegativfilter << " " << !options->layernegativfilter.value.contains(layerstring) << endl;
+		return !compareto.contains(layerstring);
+	} else return true;
 }
 
 void drvDXF::close_page()
@@ -870,16 +993,17 @@ void drvDXF::open_page()
 
 void drvDXF::show_text(const TextInfo & textinfo)
 {
+	if (wantedLayer(textinfo.currentR, textinfo.currentG, textinfo.currentB,DXFLayers::normalizeColorName(textinfo.colorName))) {
 	buffer << "  0\n"
 			"TEXT\n";
 
 	if (formatis14) {
 		writeHandle(buffer);
 		buffer << "100\n" "AcDbEntity\n";
-		writeLayer(textinfo.currentR, textinfo.currentG, textinfo.currentB); //"  8\n" "0\n"
+		writeLayer(textinfo.currentR, textinfo.currentG, textinfo.currentB,DXFLayers::normalizeColorName(textinfo.colorName)); //"  8\n" "0\n"
 		buffer << "100\n" "AcDbText\n";
 	} else {
-		writeLayer(textinfo.currentR, textinfo.currentG, textinfo.currentB); //buffer << "  8\n" "0\n";
+		writeLayer(textinfo.currentR, textinfo.currentG, textinfo.currentB,DXFLayers::normalizeColorName(textinfo.colorName)); //buffer << "  8\n" "0\n";
 	}
 
 	// color
@@ -898,6 +1022,7 @@ void drvDXF::show_text(const TextInfo & textinfo)
 		buffer << "100\n"
 				"AcDbText\n";
 	}
+	}
 }
 
 void drvDXF::printPoint(const Point & p, unsigned short add)
@@ -909,9 +1034,9 @@ void drvDXF::printPoint(const Point & p, unsigned short add)
 
 void drvDXF::drawVertex(const Point & p, bool withlinewidth, int val70)
 {
-
+	if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	buffer << "  0\nVERTEX\n"; // "  8\n0\n";
-	writeLayer(currentR(), currentG(), currentB());
+	writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()));
 	printPoint(p, 10);
 	if (withlinewidth) {
 		const double lineWidth = currentLineWidth()* scalefactor;
@@ -919,25 +1044,27 @@ void drvDXF::drawVertex(const Point & p, bool withlinewidth, int val70)
 	}
 	if (val70)					// used only for try with spline type polylines (which doesn't work anyway)
 		buffer << " 70\n    16\n";
+	}
 }
 
 void drvDXF::drawLine(const Point & start_p, const Point & end_p)
 {
-
+if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	buffer << "  0\nLINE\n"; // "  8\n0\n";
 	if (formatis14) {
 		writeHandle(buffer);
 		//entity 
 		buffer <<	"100\n" "AcDbEntity\n";
-		writeLayer(currentR(), currentG(), currentB()); //buffer <<	"  8\n" "0\n" ;
+		writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName())); //buffer <<	"  8\n" "0\n" ;
 		buffer <<	"100\n" "AcDbLine" << endl;
 	} else {
-		writeLayer(currentR(), currentG(), currentB());
+		writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()));
 	}
 	// color
 	if (!options->colorsToLayers) buffer << " 62\n     " << DXFColor::getDXFColor(currentR(), currentG(), currentB()) << '\n';
 	printPoint(start_p, 10);
 	printPoint(end_p, 11);
+}
 }
 
 #if 0
@@ -1049,12 +1176,12 @@ void drvDXF::curvetoAsBezier(const basedrawingelement & elem, const Point & curr
 	// each curveto is one SPLINE element
 	// only the 4 points of the curveto are used
 	//
-
+if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	buffer << "  0\nSPLINE\n";
 
 	writeHandle(buffer);
 	buffer << "100\n" "AcDbEntity\n";
-	writeLayer(currentR(), currentG(), currentB()); //buffer << "  8\n0\n";			/* Layer */
+	writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName())); //buffer << "  8\n0\n";			/* Layer */
 	buffer << "100\n" "AcDbSpline\n";
 
 	buffer << "210\n0.0\n220\n0.0\n230\n1.0\n";	/* Norm vector */
@@ -1094,7 +1221,7 @@ void drvDXF::curvetoAsBezier(const basedrawingelement & elem, const Point & curr
 	printPoint(cp1, 10);		
 	printPoint(cp2, 10);	
 	printPoint(ep,  10);		
-
+}
 }
 
 void drvDXF::curvetoAsNurb(const basedrawingelement & elem, const Point & currentpoint)
@@ -1106,10 +1233,11 @@ void drvDXF::curvetoAsNurb(const basedrawingelement & elem, const Point & curren
 	// Here we use the mapping to Nurbs as described in Schneiders Nurbs tutorial
 	// 
 	// 
+	if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	buffer << "  0\nSPLINE\n";
 	writeHandle(buffer);
 	buffer << "100\n" "AcDbEntity\n";
-	writeLayer(currentR(), currentG(), currentB()); //buffer << "  8\n0\n";			/* Layer */
+	writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName())); //buffer << "  8\n0\n";			/* Layer */
 	buffer << "100\n" "AcDbSpline\n";
 
 	buffer << "210\n0.0\n220\n0.0\n230\n1.0\n";	/* Norm vector */
@@ -1150,7 +1278,7 @@ void drvDXF::curvetoAsNurb(const basedrawingelement & elem, const Point & curren
 	printPoint(cp2, 10);	
 	printPoint(ep,  10);		
 
-
+	}
 }
 
 void drvDXF::curvetoAsBSpline(const basedrawingelement & elem, const Point & currentpoint)
@@ -1161,11 +1289,11 @@ void drvDXF::curvetoAsBSpline(const basedrawingelement & elem, const Point & cur
 	//
 	// The Bezier points are transformed to the corresponding B-Spline control points.
 	// 
-
+if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	buffer << "  0\nSPLINE\n";
 	writeHandle(buffer);
 	buffer << "100\n" "AcDbEntity\n";
-	writeLayer(currentR(), currentG(), currentB()); //buffer << "  8\n0\n";			/* Layer */
+	writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName())); //buffer << "  8\n0\n";			/* Layer */
 	buffer << "100\n" "AcDbSpline\n";
 
 	buffer << "210\n0.0\n220\n0.0\n230\n1.0\n";	/* Norm vector */
@@ -1228,7 +1356,7 @@ void drvDXF::curvetoAsBSpline(const basedrawingelement & elem, const Point & cur
 	printPoint(sp1, 10);		
 	printPoint(sp2, 10);	
 	printPoint(sp3, 10);	
-
+}
 }
 
 
@@ -1245,10 +1373,11 @@ void drvDXF::curvetoAsOneSpline(const basedrawingelement & elem, const Point & c
 
 
 	// 
+	if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	buffer << "  0\nSPLINE\n";
 	writeHandle(buffer);
 	buffer << "100\n" "AcDbEntity\n";
-	writeLayer(currentR(), currentG(), currentB()); // << "  8\n0\n";			/* Layer */
+	writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName())); // << "  8\n0\n";			/* Layer */
 	buffer << "100\n" "AcDbSpline\n";
 
 	buffer << "210\n0.0\n220\n0.0\n230\n1.0\n";	/* Norm vector */
@@ -1314,19 +1443,19 @@ void drvDXF::curvetoAsOneSpline(const basedrawingelement & elem, const Point & c
 	printPoint(c, 10);		// 12 22 32
 	printPoint(d, 10);		// 13 23 33
 	printPoint(d + delta2 , 10);		// 13 23 33
-
+	}
 }
 
 void drvDXF::curvetoAsMultiSpline(const basedrawingelement & elem, const Point & currentpoint)
 {
-
+	if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	// multiple fit points on a single SPLINE
 	const unsigned int fitpoints = options->splineprecision.value ; // 4;
 
 	buffer << "  0\nSPLINE\n";
 	writeHandle(buffer);
 	buffer << "100\n" "AcDbEntity\n";
-	writeLayer(currentR(), currentG(), currentB()); // << "  8\n0\n";			/* Layer */
+	writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName())); // << "  8\n0\n";			/* Layer */
 	buffer << "100\n" "AcDbSpline\n";
 
 	buffer << "210\n0.0\n220\n0.0\n230\n1.0\n";	/* Norm vector */
@@ -1361,18 +1490,19 @@ void drvDXF::curvetoAsMultiSpline(const basedrawingelement & elem, const Point &
 		printPoint(pt, 11);		// 12 22 32   fit points
 	}
 
-
+	}
 }
 
 void drvDXF::curvetoAsPolyLine(const basedrawingelement & elem, const Point & currentpoint)
 {
+	if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 	// approximate spline with lines.
 	const unsigned int sections = options->splineprecision.value ; // 20;
 
 	buffer << "  0\nLWPOLYLINE\n";
 	writeHandle(buffer);
 	buffer << "100\n" "AcDbEntity\n";
-	writeLayer(currentR(), currentG(), currentB()); // buffer << "  8\n0\n";
+	writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName())); // buffer << "  8\n0\n";
 	buffer << "100\n" "AcDbPolyline\n";
 	buffer << " 90\n"; // number of edges
 	buffer << (sections+1) << endl;
@@ -1400,6 +1530,7 @@ void drvDXF::curvetoAsPolyLine(const basedrawingelement & elem, const Point & cu
 		printPoint(pt,10);
 	}
 //nolw	buffer << "  0\nSEQEND\n  8\n0\n";
+	}
 }
 
 #if 0
@@ -1433,7 +1564,6 @@ if (0) {
 	}
 	buffer << "  0\nSEQEND\n  8\n0\n";
 
-}
 #endif
 
 void drvDXF::show_path()
@@ -1506,10 +1636,11 @@ void drvDXF::show_path()
 			drawLine(p, q);
 		}
 	} else {
+		if (wantedLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()))) {
 		// no curveto and not forced to draw LINEs - use PolyLine/VERTEX then
 		buffer << "  0\nPOLYLINE\n";
 		// layer
-		writeLayer(currentR(), currentG(), currentB());
+		writeLayer(currentR(), currentG(), currentB(),DXFLayers::normalizeColorName(currentColorName()));
 		// color
 		if (!options->colorsToLayers) buffer << " 62\n     " << DXFColor::getDXFColor(currentR(), currentG(), currentB())
 			<< "\n";
@@ -1531,8 +1662,10 @@ void drvDXF::show_path()
 			drawVertex(p, true, 0);
 		}
 		buffer << "  0\nSEQEND\n"" 8\n0\n";
+		}
 	}
 }
+
 
 
 static DriverDescriptionT < drvDXF > D_dxf("dxf", "CAD exchange format","", "dxf", false,	// if backend supports subpathes, else 0

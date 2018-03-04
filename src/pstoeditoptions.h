@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options 
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -132,6 +132,7 @@ public:
 	Option < RSString, RSStringValueExtractor> replacementfont;// = "Courier";
  	Option < bool, BoolTrueExtractor > nomaptoisolatin1 ;//= false;
 	Option < bool, BoolTrueExtractor > withdisplay ;//= false;
+	Option < bool, BoolTrueExtractor > quiet ;//= false;
 	Option < bool, BoolTrueExtractor > noquit ;//= false;
 	Option < bool, BoolTrueExtractor > nocurves ;//= false;		// normally curves are shown as curves if backend supports
 	Option < bool, BoolTrueExtractor > nosubpathes ;//= false;	// normally we use subpathes if the backend support them
@@ -166,6 +167,7 @@ public:
 	Option < bool, BoolTrueExtractor > simulateClipping ;//= false;	// simulate clipping most useful in combination with -dt
 	Option < bool, BoolTrueExtractor > usePlainStrings; //= false;
 	Option < bool, BoolTrueExtractor > useRGBcolors ;//= false;
+	Option < bool, BoolTrueExtractor > useAGL ;//= false;
 	Option < bool, BoolTrueExtractor > noclip ;//= false;
 	Option < bool, BoolTrueExtractor > t2fontsast1 ;//= false;	// handle T2 fonts (often come as embedded fonts in PDF files) same as T1
 	Option < bool, BoolTrueExtractor > keepinternalfiles ;//= false;
@@ -173,11 +175,13 @@ public:
 	Option < bool, BoolTrueExtractor > pscover ;//= false;
 	Option < bool, BoolTrueExtractor > nofontreplacement ;//= false;
 	Option < bool, BoolTrueExtractor > passglyphnames; 
+	Option < bool, BoolTrueExtractor > useoldnormalization; 
 	Option < int, IntValueExtractor > rotation ;//= 0;
 	Option < RSString, RSStringValueExtractor> explicitFontMapFile ;//= 0;
 	Option < RSString, RSStringValueExtractor > outputPageSize;//("");
 	Option < bool, BoolTrueExtractor > fromgui;
 	Option < bool, BoolTrueExtractor > showdialog;
+	Option < RSString, RSStringValueExtractor> GSToUse ;
 
 //	Option < double, DoubleValueExtractor >  magnification ;//= 1.0f;
 	Option < bool, BoolTrueExtractor > showdrvhelp ;//= false;
@@ -223,6 +227,9 @@ public:
 	withdisplay			(true, "-dis",noArgument,b_t,"let GhostScript display the file during conversion" , 
 		"Open a display during processing by Ghostscript. Some files "
 		"only work correctly this way. ",
+		false),
+	quiet				(true, "-q",noArgument,b_t,"quiet mode - do not write startup message" ,
+		UseDefaultDoku,
 		false),
 	noquit				(true, "-nq",noArgument,b_t,"don't quit GhostScript after PostScript processing - for debugging only" ,
 		"No exit from the PostScript interpreter. Normally Ghostscript "
@@ -397,6 +404,9 @@ public:
 	useRGBcolors		(true, "-rgb",noArgument,g_t,"use RGB colors instead of CMYK" , 
 		"Since version 3.30 pstoedit uses the CMYK colors internally. The -rgb option turns on the old behavior to use RGB values.",
 		false),
+	useAGL		(true, "-useagl",noArgument,g_t,"use Adobe Glyph List instead of the IsoLatin1 table (this is experimental)" , 
+		UseDefaultDoku,
+		false),
 	noclip				(true, "-noclip",noArgument,g_t,"don't use clipping (relevant only if output format supports clipping at all)" , 
 		UseDefaultDoku,
 		false),
@@ -424,6 +434,9 @@ public:
 	passglyphnames		(true, "-glyphs",noArgument,t_t,"pass glyph names to output format driver" , 
 		"pass glyph names to the output format driver. So far no output format driver really uses the glyph names, so this does not have any effect at the moment. "
 		"It is a preparation for future work.",
+		false),
+	useoldnormalization		(true, "-useoldnormalization",noArgument,t_t,"use legacy (pre 3.50) method for normalizing font encodings" , 
+			"Just use this option in case the new heuristic introduced in 3.5 doesn't produce correct results - however, this normalization of font encoding will always be a best-effort approach since there is no real general solution to it with reasonable effort",
 		false),
 	rotation			(true, "-rotate","angle (0-360)",g_t,"rotate the image",
 		"Rotage image by angle.",
@@ -460,7 +473,7 @@ public:
 		"equivalents. This is useful because MetaPost is frequently used with "
 		"\\TeX/\\LaTeX\\ and those programs don't use standard font names. This file and "
 		"the MetaPost output format driver are provided by Scott Pakin "
-		"(\\Email{pakin_AT_cs.uiuc.edu}).  "
+		"(\\Email{scott+ps2ed_AT_pakin.org}).  "
 		" "
 		"Another example is wemf.fmp to be used under Windows. See the misc "
 		"directory of the pstoedit source distribution. ",
@@ -478,7 +491,8 @@ public:
 	showdialog			(true, "-showdialog",noArgument,h_t,"internal - not for normal user",
 		UseDefaultDoku,
 		false),
-	//	magnification		(true, "-scale","scale result",1.0), 
+	GSToUse				(true, "-gs","path to the ghostscript executable/DLL ",g_t,"tells pstoedit which ghostscript executable/DLL to use - overwrites the internal search heuristic",
+	UseDefaultDoku,(const char*)0), 
 	showdrvhelp			(true, "-help",noArgument,g_t,"show the help information",
 		UseDefaultDoku,
 		false) ,
@@ -550,6 +564,7 @@ public:
 	ADD(replacementfont);
 	ADD(nomaptoisolatin1);
 	ADD(withdisplay);
+	ADD(quiet);
 	ADD(noquit);
 	ADD(nocurves );
 	ADD(nosubpathes);	
@@ -583,6 +598,7 @@ public:
 	ADD(simulateClipping);	
 	ADD(usePlainStrings);	
 	ADD(useRGBcolors);
+	ADD(useAGL);
 	ADD(noclip);
 	ADD(t2fontsast1);	
 	ADD(keepinternalfiles);
@@ -590,6 +606,7 @@ public:
 	ADD(pscover);
 	ADD(nofontreplacement);
 	ADD(passglyphnames);
+	ADD(useoldnormalization);
 	ADD(rotation );
 	ADD(explicitFontMapFile);
 	ADD(outputPageSize);
@@ -601,6 +618,7 @@ public:
 	ADD(showdrvhelp) ;
 	ADD(showdocu_long) ;
 	ADD(showdocu_short) ;
+	ADD(GSToUse);
 	ADD(dumphelp ); 
 	ADD(backendonly);	
 	ADD(psArgs);	

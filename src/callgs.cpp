@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to GhostScript
 
-   Copyright (C) 1993 - 2007 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -95,7 +95,7 @@ static RSString createCmdLine(int argc, const char *const argv[])
 
 // Interface to GHostScript EXE - as an alternative to the DLL
 // The usage of the DLL makes problem in case of gsview, since 
-// there can only be one instance of the DLL and GHostScript active
+// there can only be one instance of the DLL and GhostScript active
 // in one process. So - if being called from gsview - we need to start 
 // ghostscript via the EXE.
 #include <windows.h>
@@ -167,7 +167,7 @@ int callgs(int argc, const char * const argv[]) {
 	*/
 
 	// check the first arg in the command line whether it contains gsdll32.dll
-	if (strstr(argv[0],"gsdll32.dll") != NULL) {
+	if ((strstr(argv[0],"gsdll32.dll") != NULL) || (strstr(argv[0],"gsdll64.dll") != NULL)) {
 
 #ifdef WITHDLLSUPPORT
 		return callgsDLL(argc, (char **) argv);
@@ -186,9 +186,47 @@ int callgs(int argc, const char * const argv[]) {
 // not a windows system
 int callgs(int argc, const char *const argv[])
 {
-	const RSString& commandline = createCmdLine(argc, argv);
+#ifndef USE_FORK
+	RSString commandline = createCmdLine(argc, argv);
+	commandline += " 1>&2" ; // redirect all stdout of ghostscript to stderr
+							 // in order not to interfere with stdout of pstoedit
 	const int result = system(commandline.value());
 	return result;
+#else
+	//
+	// version using fork as proposed by Guan Xin - but this does not handle stdout redirection.
+	//
+
+	/* Return values:
+	   -1:          error spawning gs
+	   -2:          error waiting gs
+	   otherwise:   exit status of gs
+	*/
+
+	const int pid = fork();
+	
+	switch(pid)
+	{
+		case -1:
+			perror("fork");
+			return -1;
+		case 0:
+			execvp(argv[0], argv);
+			perror("execvp");
+			return -1;
+		default:
+		{
+			int status;
+			
+			if(pid == waitpid(pid, &status, 0) && WIFEXITED(status))
+			{
+				return WEXITSTATUS(status);
+			}
+			return -2;
+		}
+	}
+#endif
+
 }
 #endif
 
@@ -196,7 +234,7 @@ int callgs(int argc, const char *const argv[])
 #define xstr(x) str(x)
 
 
-const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
+const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, const char * gsToUse)
 {
 // determines which PostScript interpreter to use
 // !FIXME: change the sequence to 2-1-3 (for Unix); with the upcoming gsview for X11 possibly introduce
@@ -226,6 +264,13 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase)
 	if (verbose)
 			errstream << endl << "Looking up where to find the PostScript interpreter." << endl;
 
+	if (gsToUse != 0) {
+		if (verbose) {
+			errstream << " an explicit path was given - using : " << gsToUse << endl;
+		}
+		// an explicit path is given as option already - this overrules everthing
+		return gsToUse;
+	}
 #if defined (_WIN32)
 
 	RSString gstocallfromregistry = getRegistryValue(errstream, "common", "gstocall");
@@ -577,7 +622,7 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 	return PIOptions;
 }
 
-const char *whichPINoVerbose(ostream & errstream, const char *gsregbase)
+const char *whichPINoVerbose(ostream & errstream, const char *gsregbase, const char * gsToUse)
 {
-	return whichPI(errstream, 0, gsregbase);
+	return whichPI(errstream, 0, gsregbase, gsToUse);
 }

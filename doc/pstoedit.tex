@@ -15,8 +15,8 @@
 }}
 
 \setVersionWord{Version}  %%% that's the default, no need to set it.
-\setVersion{3.45}
-\setDate{September 2007}    
+\setVersion{3.50}
+\setDate{August 2009}    
 
 \setlength{\emergencystretch}{1.5em}
 
@@ -44,6 +44,7 @@
 \oOptArg{-df}{~font name} 
 \oOpt{-nomaptoisolatin1} 
 \oOpt{-dis} 
+\oOpt{-q} 
 \oOpt{-nq} 
 \oOpt{-nc} 
 \oOpt{-nsp} 
@@ -72,16 +73,19 @@
 \oOpt{-sclip} 
 \oOpt{-ups} 
 \oOpt{-rgb} 
+\oOpt{-useagl} 
 \oOpt{-noclip} 
 \oOpt{-t2fontsast1} 
 \oOpt{-keep} 
 \oOpt{-gstest} 
 \oOpt{-nfr} 
 \oOpt{-glyphs} 
+\oOpt{-useoldnormalization} 
 \oOptArg{-rotate}{~angle (0-360)} 
 \oOptArg{-fontmap}{~name of font map file for pstoedit} 
 \oOptArg{-pagesize}{~page format} 
 \oOpt{-help} 
+\oOptArg{-gs}{~path to the ghostscript executable/DLL } 
 \oOpt{-bo} 
 \oOptArg{-psarg}{~argument string} 
 \OptArg{-f}{~"format\Lbr:options\Rbr"} 
@@ -196,6 +200,10 @@ Select a single page from a multi page PostScript or PDF file.
 Since version 3.30 pstoedit uses the CMYK colors internally. The -rgb option turns on the old behavior to use RGB values.
 
 
+\item[\oOpt{-useagl}] 
+use Adobe Glyph List instead of the IsoLatin1 table (this is experimental)
+
+
 \item[\oOpt{-noclip}] 
 don't use clipping (relevant only if output format supports clipping at all)
 
@@ -211,6 +219,10 @@ This option sets the page size for the output medium. Currently this is just use
 
 \item[\oOpt{-help}] 
 show the help information
+
+
+\item[\oOptArg{-gs}{~path to the ghostscript executable/DLL }] 
+tells pstoedit which ghostscript executable/DLL to use - overwrites the internal search heuristic
 
 
 \item[\oOpt{-bo}] 
@@ -281,6 +293,10 @@ In normal mode pstoedit replaces bitmap fonts with a font as defined by the \Opt
 pass glyph names to the output format driver. So far no output format driver really uses the glyph names, so this does not have any effect at the moment. It is a preparation for future work.
 
 
+\item[\oOpt{-useoldnormalization}] 
+Just use this option in case the new heuristic introduced in 3.5 doesn't produce correct results - however, this normalization of font encoding will always be a best-effort approach since there is no real general solution to it with reasonable effort
+
+
 \item[\oOptArg{-fontmap}{~name of font map file for pstoedit}] 
 The font map is a simple text file containing lines in the following format:\\  
  
@@ -303,7 +319,7 @@ $<$\emph{The directory where the pstoedit executably is located}$>$\verb+/../lib
  
 \end{itemize} 
  
-The mpost.fmp in the misc directory of the pstoedit distibution is a sample map file with mappings from over 5000 PostScript font names to their \TeX equivalents. This is useful because MetaPost is frequently used with \TeX/\LaTeX\ and those programs don't use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\Email{pakin_AT_cs.uiuc.edu}).   Another example is wemf.fmp to be used under Windows. See the misc directory of the pstoedit source distribution. 
+The mpost.fmp in the misc directory of the pstoedit distibution is a sample map file with mappings from over 5000 PostScript font names to their \TeX equivalents. This is useful because MetaPost is frequently used with \TeX/\LaTeX\ and those programs don't use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\Email{scott+ps2ed_AT_pakin.org}).   Another example is wemf.fmp to be used under Windows. See the misc directory of the pstoedit source distribution. 
 
 
 \end{description}
@@ -311,6 +327,10 @@ The mpost.fmp in the misc directory of the pstoedit distibution is a sample map 
 \begin{description}
 \item[\oOpt{-dis}] 
 Open a display during processing by Ghostscript. Some files only work correctly this way. 
+
+
+\item[\oOpt{-q}] 
+quiet mode - do not write startup message
 
 
 \item[\oOpt{-nq}] 
@@ -551,8 +571,52 @@ do not write a group around pathes
 don't write a view box
 
 
-\item[\oOpt{-withnamespace}] 
-write xmlns declaration into output file
+\item[\oOpt{-texmode}] 
+TeX Mode
+
+
+\item[\oOpt{-imagetofile}] 
+write raster images to separate files instead of embedding them
+
+
+\item[\oOpt{-notextrendering}] 
+do not write textrendering attribute
+
+
+\item[\oOptArg{-border}{~number}] 
+additional border to draw around bare bounding box (in percent of width and height)
+
+
+\item[\oOptArg{-title}{~string}] 
+text to use as title for the generated document
+
+
+\end{description}
+%%// end of options 
+\subsubsection{xaml - eXtensible Application Markup Language}
+\begin{description}
+\item[\oOpt{-localdtd}] 
+use local DTD
+
+
+\item[\oOpt{-standalone}] 
+create stand-alone type svg
+
+
+\item[\oOpt{-withdtd}] 
+write DTD
+
+
+\item[\oOpt{-withgrouping}] 
+write also ordinary save/restores as SVG group
+
+
+\item[\oOpt{-nogroupedpath}] 
+do not write a group around pathes
+
+
+\item[\oOpt{-noviewbox}] 
+don't write a view box
 
 
 \item[\oOpt{-texmode}] 
@@ -569,6 +633,10 @@ do not write textrendering attribute
 
 \item[\oOptArg{-border}{~number}] 
 additional border to draw around bare bounding box (in percent of width and height)
+
+
+\item[\oOptArg{-title}{~string}] 
+text to use as title for the generated document
 
 
 \end{description}
@@ -802,6 +870,18 @@ use Bezier splines in DXF format (only for -f dxf\_s)
 number of samples to take from spline curve when doing approximation with -splineaspolyline or -splineasmultispline - should be $>=$ 2 (default 5)
 
 
+\item[\oOpt{-dumplayernames}] 
+dump all layer names found to standard output
+
+
+\item[\oOptArg{-layers}{~string}] 
+layers to be shown (comma separated list of layer names, no space)
+
+
+\item[\oOptArg{-layerfilter}{~string}] 
+layers to be hidden (comma separated list of layer names, no space)
+
+
 \end{description}
 %%// end of options 
 \subsubsection{dxf\_s - CAD exchange format with splines}
@@ -844,6 +924,18 @@ use Bezier splines in DXF format (only for -f dxf\_s)
 
 \item[\oOptArg{-splineprecision}{~number}] 
 number of samples to take from spline curve when doing approximation with -splineaspolyline or -splineasmultispline - should be $>=$ 2 (default 5)
+
+
+\item[\oOpt{-dumplayernames}] 
+dump all layer names found to standard output
+
+
+\item[\oOptArg{-layers}{~string}] 
+layers to be shown (comma separated list of layer names, no space)
+
+
+\item[\oOptArg{-layerfilter}{~string}] 
+layers to be hidden (comma separated list of layer names, no space)
 
 
 \end{description}
@@ -977,9 +1069,38 @@ See \URL{http://home.vr-web.de/\Tilde hans-juergen-jahn/software/devpcb.html} fo
 No driver specific options
 %%// end of options 
 \subsubsection{pcb - pcb format}
-See also: \URL{http://pcb.sourceforge.net} 
+See also: \URL{http://pcb.sourceforge.net} and \URL{http://www.penguin.cz/\Tilde utx/pstoedit-pcb/} 
 
-No driver specific options
+\begin{description}
+\item[\oOptArg{-grid}{~missing arg name}] 
+attempt to snap relevant output to grid (mils) and put failed objects to a different layer
+
+
+\item[\oOptArg{-snapdist}{~missing arg name}] 
+grid snap distance ratio (0 < snapdist <= 0.5, default 0.1)
+
+
+\item[\oOptArg{-tshiftx}{~missing arg name}] 
+additional x shift measured in target units (mils)
+
+
+\item[\oOptArg{-tshifty}{~missing arg name}] 
+additional y shift measured in target units (mils)
+
+
+\item[\oOptArg{-grid}{~missing arg name}] 
+attempt to snap relevant output to grid (mils) and put failed objects to a different layer
+
+
+\item[\oOpt{-mm}] 
+Switch to metric units (mm)
+
+
+\item[\oOpt{-stdnames}] 
+use standard layer names instead of descriptive names
+
+
+\end{description}
 %%// end of options 
 \subsubsection{pcbfill - pcb format with fills}
 See also: \URL{http://pcb.sourceforge.net} 
@@ -1286,8 +1407,8 @@ The java output format drivers generate a java source file that needs other file
 order to be compiled and usable. These other files are Java classes (one
 applet and support classes) that allow to step through the individual pages
 of a converted PostScript document. This applet can easily be activated from
-a html-document. See the \File{java/java1/readme_java1.txt} or 
-\File{java/java2/readme_java2.htm} file for more details.
+a html-document. See the \File{contrib/java/java1/readme_java1.txt} or 
+\File{contrib/java/java2/readme_java2.htm} file for more details.
  
 \end{itemize}
 
@@ -1320,7 +1441,7 @@ Try to use PostScript fonts instead of the bitmap fonts when generating a PostSc
 
 \section{AUTHOR}
 
-Wolfgang Glunz, \Email{wglunz34_AT_pstoedit.net}
+Wolfgang Glunz, \Email{wglunz35_AT_pstoedit.net}
 
 
 \section{CANONICAL ARCHIVE SITE}
@@ -1389,7 +1510,7 @@ about new releases and bug-fixes.
   \item Patrick Gosling \Email{jpmg_AT_eng.cam.ac.uk} made some suggestions
      regarding the usage of pstoedit in Ghostscript's SAFER mode.
 
-  \item Scott Pakin \Email{pakin_AT_cs.uiuc.edu} for the Idraw output format driver and the 
+  \item Scott Pakin \Email{scott+ps2ed_AT_pakin.org} for the Idraw output format driver and the 
 	autoconf support.
 
   \item Peter Katzmann \Email{p.katzmann_AT_thiesen.com} for the HPGL output format driver.
@@ -1407,7 +1528,7 @@ about new releases and bug-fixes.
   \item Kai-Uwe Sattler \Email{kus_AT_iti.cs.uni-magdeburg.de} implemented the
      output format driver for Kontour.
 
-  \item Scott Pakin,  \Email{pakin_AT_cs.uiuc.edu})   provided the MetaPost and LaTeX2e output format driver.
+  \item Scott Pakin,  \Email{scott+ps2ed_AT_pakin.org}   provided the MetaPost and LaTeX2e output format driver.
   
   \item Burkhard Plaum \Email{plaum_AT_IPF.Uni-Stuttgart.de} added support for
      complex filled paths for the xfig output format driver.

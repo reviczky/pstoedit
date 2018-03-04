@@ -123,14 +123,14 @@ drvNOI::derivedConstructor(drvNOI): constructBase, imgcount(0)
 	}	  
 #endif
 
-  NoiSetOptions(options->ResourceFile.value.value(), options->BezierSplitLevel);
+  (void)NoiSetOptions(options->ResourceFile.value.value(), options->BezierSplitLevel);
   }
 
 // destructor - write the xml file and unload the dll
 drvNOI::~drvNOI()
   {
   if (hProxyDLL.valid() && outFileName.value())
-	NoiWriteXML(outFileName.value());
+	(void)NoiWriteXML(outFileName.value());
 
   hProxyDLL.close();
   options=0;
@@ -184,7 +184,7 @@ void drvNOI::draw_polyline()
 	switch (elem.getType()) 
 	  {
 	  case moveto:
-	    NoiDrawPolyline(points, npoints);	
+	    (void)NoiDrawPolyline(points, npoints);	
 		npoints = 0;	  
 		  
 		p0 = elem.getPoint(0) + pf;
@@ -202,21 +202,21 @@ void drvNOI::draw_polyline()
 
 	  case closepath:
 	    AddPoint(points, p0, npoints);
-  	    NoiDrawPolyline(points, npoints);	
+  	    (void)NoiDrawPolyline(points, npoints);	
 		npoints = 0;	  
 	    AddPoint(points, p0, npoints);
 		break;
 
 	  case curveto:
 		{
-  	    NoiDrawPolyline(points, npoints);		  
+  	    (void)NoiDrawPolyline(points, npoints);		  
 		npoints = 0;
 		
 		Point p[3];
 		p[0] = elem.getPoint(0) + pf;
 		p[1] = elem.getPoint(1) + pf;
 		p[2] = elem.getPoint(2) + pf;
-		NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
+		(void)NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
 		pc = p[2];
 		
 		AddPoint(points, pc, npoints);
@@ -225,8 +225,8 @@ void drvNOI::draw_polyline()
 	  }
 	}
 	
-  NoiDrawPolyline(points, npoints);		  
-  NoiEndPolyline();
+  (void)NoiDrawPolyline(points, npoints);		  
+  (void)NoiEndPolyline();
   delete []points;
   }
 
@@ -247,7 +247,7 @@ void drvNOI::draw_polygon()
 	switch (elem.getType()) 
 	  {
 	  case moveto:
-	    NoiDrawPolyline(points, npoints);	
+	    (void)NoiDrawPolyline(points, npoints);	
 		npoints = 0;	  
 	  
   		p0 = elem.getPoint(0) + pf;
@@ -267,7 +267,7 @@ void drvNOI::draw_polygon()
 	    AddPoint(points, p0, npoints);
 	    if (!isFillObject)
 	      {
-  		  NoiDrawPolyline(points, npoints);
+  		  (void)NoiDrawPolyline(points, npoints);
   		  npoints = 0;
 	      AddPoint(points, p0, npoints);
 	      }
@@ -278,14 +278,14 @@ void drvNOI::draw_polygon()
 	  case curveto:
 		{
 		isFillObject = false;
-		NoiDrawPolyline(points, npoints);		  
+		(void)NoiDrawPolyline(points, npoints);		  
 		npoints = 0;  
 
 		Point p[3];
 		p[0] = elem.getPoint(0) + pf;
 		p[1] = elem.getPoint(1) + pf;
 		p[2] = elem.getPoint(2) + pf;
-		NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
+		(void)NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
 		pc = p[2];
 		
 		AddPoint(points, pc, npoints);
@@ -296,20 +296,20 @@ void drvNOI::draw_polygon()
 
   isFillObject = isFillObject && (pc == p0);
   if (isFillObject)
-	NoiDrawFill(points, npoints);
+	(void)NoiDrawFill(points, npoints);
   else
-	NoiDrawPolyline(points, npoints);
+	(void)NoiDrawPolyline(points, npoints);
 
-  NoiEndPolyline();
+  (void)NoiEndPolyline();
   delete []points;
   }
   
 void drvNOI::show_path()
   {
-  NoiSetLineParams(currentLineWidth(), currentLineCap(), dashPattern());
-  NoiSetCurrentColor((BYTE)(255 * currentR()), (BYTE)(255 * currentG()), 
+  (void)NoiSetLineParams(currentLineWidth(), currentLineCap(), dashPattern());
+  (void)NoiSetCurrentColor((BYTE)(255 * currentR()), (BYTE)(255 * currentG()), 
     (BYTE)(255 * currentB()));
-  NoiSetFillColor((BYTE)(255 * fillR()), (BYTE)(255 * fillG()), (BYTE)(255 * fillB()));
+  (void)NoiSetFillColor((BYTE)(255 * fillR()), (BYTE)(255 * fillG()), (BYTE)(255 * fillB()));
     
   if (isPolygon())
     draw_polygon();
@@ -332,15 +332,15 @@ void drvNOI::show_path()
 void drvNOI::show_rectangle(const float llx, const float lly, const float urx, 
   const float ury)
   {
-  NoiSetLineParams(currentLineWidth(), currentLineCap(), dashPattern());
-  NoiSetCurrentColor((BYTE)(255 * currentR()), (BYTE)(255 * currentG()), 
+  (void)NoiSetLineParams(currentLineWidth(), currentLineCap(), dashPattern());
+  (void)NoiSetCurrentColor((BYTE)(255 * currentR()), (BYTE)(255 * currentG()), 
     (BYTE)(255 * currentB()));
-  NoiSetFillColor((BYTE)(255 * fillR()), (BYTE)(255 * fillG()), (BYTE)(255 * fillB()));
+  (void)NoiSetFillColor((BYTE)(255 * fillR()), (BYTE)(255 * fillG()), (BYTE)(255 * fillB()));
   
-  NoiDrawLine(llx + x_offset, lly + y_offset, urx + x_offset, lly + y_offset);
-  NoiDrawLine(urx + x_offset, lly + y_offset, urx + x_offset, ury + y_offset);
-  NoiDrawLine(urx + x_offset, ury + y_offset, llx + x_offset, ury + y_offset);
-  NoiDrawLine(llx + x_offset, ury + y_offset, llx + x_offset, lly + y_offset);
+  (void)NoiDrawLine(llx + x_offset, lly + y_offset, urx + x_offset, lly + y_offset);
+  (void)NoiDrawLine(urx + x_offset, lly + y_offset, urx + x_offset, ury + y_offset);
+  (void)NoiDrawLine(urx + x_offset, ury + y_offset, llx + x_offset, ury + y_offset);
+  (void)NoiDrawLine(llx + x_offset, ury + y_offset, llx + x_offset, lly + y_offset);
   }
 
 // text objects
@@ -348,13 +348,13 @@ void drvNOI::show_text(const TextInfo &textinfo)
   {
   Point pf(x_offset, y_offset);
 
-  NoiSetCurrentColor((BYTE)(255 * textinfo.currentR), (BYTE)(255 * textinfo.currentG), 
+  (void)NoiSetCurrentColor((BYTE)(255 * textinfo.currentR), (BYTE)(255 * textinfo.currentG), 
     (BYTE)(255 * textinfo.currentB));
 
-  NoiSetFont(textinfo.currentFontName.value(), textinfo.currentFontFullName.value(), 
+  (void)NoiSetFont(textinfo.currentFontName.value(), textinfo.currentFontFullName.value(), 
     atof(textinfo.currentFontWeight.value()), textinfo.currentFontSize);
   
-  NoiDrawText(textinfo.thetext.value(), textinfo.x + pf.x_, textinfo.y + pf.y_, 
+  (void)NoiDrawText(textinfo.thetext.value(), textinfo.x + pf.x_, textinfo.y + pf.y_, 
 	textinfo.x_end - textinfo.x + pf.x_, textinfo.y_end - textinfo.y + pf.y_, 
 	textinfo.currentFontAngle);
   }
@@ -368,7 +368,7 @@ void drvNOI::show_image(const PSImage &imageinfo)
   Point pf(x_offset, y_offset);
   p1 += pf;
   p2 += pf;
-  NoiDrawImage(p1.x_, p1.y_, p2.x_, p2.y_, imageinfo.FileName.value());
+  (void)NoiDrawImage(p1.x_, p1.y_, p2.x_, p2.y_, imageinfo.FileName.value());
   }
 
 // paging support - each new page is placed on the right

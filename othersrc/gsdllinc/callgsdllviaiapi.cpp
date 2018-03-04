@@ -41,11 +41,15 @@ typedef int (GSDLLCALLPTR gs_write_callback_funcptr) (void * cb_data, const char
 static int 
 GSDLLCALL default_gs_addmess(void * /* cb_data */ , const char* text, int length)
 {
-	//cout << " called default gs_addmess " << endl;
-    //fputs(text, stdout);
+	// this default is just used in test environment. In real version, the output handler
+	// is set via pstoedit.c
+#define OUTPUTSTREAM stderr
+	// from pstoedit 3.50 on we redirect all stdout of ghostscript to stderr in order to avoid problems
+	// in case pstoedit's output is written to stdout (e.g. this is done if being called from inkscape)
+	//fprintf(OUTPUTSTREAM,"in default_gs_addmess\n");
 	if (text) {
-		fwrite(text,1,length,stdout);
-		fflush(stdout);
+		fwrite(text,1,length,OUTPUTSTREAM);
+		fflush(OUTPUTSTREAM);
 		return length;
 	} else {
 		return 0; 
@@ -56,17 +60,21 @@ static gs_write_callback_funcptr current_write_callback = default_gs_addmess;
 
 
 void set_gs_write_callback(gs_write_callback_funcptr new_cb) {
-	// cout << "CB set " << endl;
+	//  cout << "CB set " << endl;
 	current_write_callback = new_cb;
 }
 
 
 static char messagebuffer[1000]; // just for local formatting
 static void writemessage(const char *msg = messagebuffer) {
-	current_write_callback(0,msg,strlen(msg));
+	(void)current_write_callback(0,msg,strlen(msg));
 }
-static int GSDLLCALL std_inHandler(void * /*caller_handle*/, char * /*buf*/, int /*len*/)
-{ return 0; }
+static int GSDLLCALL std_inHandler(void * /*caller_handle*/, char *  buf , int  len )
+{ 
+	// return 0; 
+	const size_t result = fread(buf,1,len,stdin);
+	return result;
+}
 
 /* main handler for the GS DLL */
 class GSDLL {
@@ -202,7 +210,7 @@ callgsDLL(int argc, char *argv[])
 		return 1;
 	}
 
-	gsapi.set_stdio(gsapi.minst,std_inHandler,current_write_callback,current_write_callback);
+	(void)gsapi.set_stdio(gsapi.minst,std_inHandler,current_write_callback,current_write_callback); // params: in, out, err
 
     code = gsapi.init_with_args(gsapi.minst, argc, argv);
 

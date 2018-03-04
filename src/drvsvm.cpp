@@ -263,7 +263,7 @@ void drvSVM::setAttrs( LineColorAction eLineAction,
     ++actionCount;
 }
 
-void drvSVM::ClipPath(cliptype clipmode)
+void drvSVM::ClipPath(cliptype /* clipmode*/)
 {
 }
 

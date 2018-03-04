@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2007  Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1999 - 2009  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -168,7 +168,7 @@ int sub_path::read(const drvbase::PathInfo & main_path, int start)
 		// cout << num_points << " done" << endl;
 	}
 	// cout << "done with copy path " << num_points << endl;
-	points = new Point[num_points];
+	points = new Point[num_points?num_points:1]; // at least 1 - at least for FlexeLint
 
 	// Copy ALL points
 	// cout << "now copy points " << num_points << endl;
@@ -218,7 +218,8 @@ bool sub_path::point_inside(const Point & p) const
 	int crossings = 0;
 
 	const double x1 = -1.0;
-	const double y1 = -1.0;
+	//lint -esym(578,y1) // under MSVC math.h contains a y1
+	const double y1 = -1.0; 
 	const double x2 = p.x_;
 	const double y2 = p.y_;
 
@@ -429,26 +430,22 @@ insert_subpath( basedrawingelement **  parent_path,
 			   unsigned int parent_size,
 			   unsigned int child_size, unsigned int parent_index, unsigned int child_index)
 {
-	unsigned int i;
-	basedrawingelement *first_lineto = (basedrawingelement *) 0;
-	basedrawingelement *last_lineto = (basedrawingelement *) 0;
-	unsigned int src_index;
 	// First find the point we have to lineto
 	const Point & point1 = end_point(child_path[child_index]);
-	first_lineto = new Lineto(point1.x_, point1.y_);
+	basedrawingelement *first_lineto = new Lineto(point1.x_, point1.y_);
 	const Point & point2 = end_point(parent_path[parent_index]);
-	last_lineto = new Lineto(point2.x_, point2.y_);
+	basedrawingelement *last_lineto = new Lineto(point2.x_, point2.y_);
 	// Make a little space
-	for (i = parent_size - 1; i >= parent_index + 1; i--)
-		parent_path[i + child_size + 2] = parent_path[i];
+	{for (unsigned int i = parent_size - 1; i >= parent_index + 1; i--)
+		parent_path[i + child_size + 2] = parent_path[i]; }
 	parent_path[parent_index + 1] = first_lineto;
-	src_index = child_index;
-	for (i = 0; i < child_size; i++) {
+	unsigned int src_index = child_index;
+	{for (unsigned int i = 0; i < child_size; i++) {
 		src_index++;
 		if (src_index == child_size)
 			src_index = 0;
 		parent_path[parent_index + 2 + i] = child_path[src_index];
-	}
+	}}
 
 	parent_path[parent_index + 2 + child_size] = last_lineto;
 }

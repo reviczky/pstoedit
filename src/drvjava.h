@@ -6,7 +6,7 @@
    Class declaration for a sample output driver with no additional attributes
    and methods (minimal interface)
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,8 +31,6 @@ class drvJAVA : public drvbase {
 public:
 
 	derivedConstructor(drvJAVA);
-	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
-
 	~drvJAVA(); // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:

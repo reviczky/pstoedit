@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2006 Wolfgang Glunz, wglunz34_AT_pstoedit.net
+   Copyright (C) 1993 - 2009 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -62,6 +62,7 @@ public:
 	static unsigned int gettypeID();
 };
 
+//lint -esym(1790,BoolBaseExtractor)
 class DLLEXPORT BoolInvertingExtractor : public BoolBaseExtractor {
 public:
 	static bool getvalue(const char *optname, const char *instring, unsigned int &currentarg, bool &result) ;
@@ -199,7 +200,7 @@ public:
 	void dumpunhandled(ostream & outstr) const ;	
 	void showvalues(ostream & outstr, bool withdescription = true) const ;
 	const OptionBase * const * getOptionConstIterator() const { return &alloptions[0]; }
-	OptionBase *  * getOptionIterator()  { return &alloptions[0]; }
+	OptionBase * const * getOptionIterator() const { return &alloptions[0]; }
 	unsigned int numberOfOptions() const { return optcount; }
 	virtual bool hideFromDoku(const OptionBase& /* opt */ ) const { return false; } // some options may be hidden, i.e. debug only options
 

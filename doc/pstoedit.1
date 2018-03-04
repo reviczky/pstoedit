@@ -1,5 +1,5 @@
 '\" t
-.\" Manual page created with latex2man on Sun Sep  9 20:05:30 WEDT 2007
+.\" Manual page created with latex2man on Mon Aug 10 18:45:59 WEDT 2009
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -10,7 +10,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "September 2007" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "August 2009" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -32,6 +32,7 @@ pstoedit
 [\fB\-df\fP\fI font name\fP]
 [\fB\-nomaptoisolatin1\fP]
 [\fB\-dis\fP]
+[\fB\-q\fP]
 [\fB\-nq\fP]
 [\fB\-nc\fP]
 [\fB\-nsp\fP]
@@ -60,16 +61,19 @@ pstoedit
 [\fB\-sclip\fP]
 [\fB\-ups\fP]
 [\fB\-rgb\fP]
+[\fB\-useagl\fP]
 [\fB\-noclip\fP]
 [\fB\-t2fontsast1\fP]
 [\fB\-keep\fP]
 [\fB\-gstest\fP]
 [\fB\-nfr\fP]
 [\fB\-glyphs\fP]
+[\fB\-useoldnormalization\fP]
 [\fB\-rotate\fP\fI angle (0\-360)\fP]
 [\fB\-fontmap\fP\fI name of font map file for pstoedit\fP]
 [\fB\-pagesize\fP\fI page format\fP]
 [\fB\-help\fP]
+[\fB\-gs\fP\fI path to the ghostscript executable/DLL \fP]
 [\fB\-bo\fP]
 [\fB\-psarg\fP\fI argument string\fP]
 \fB\-f\fP\fI "format[:options]"\fP
@@ -95,7 +99,7 @@ details.
 .PP
 .SS RELEASE LEVEL
 .PP
-This manpage documents release 3.45 of pstoedit\&.
+This manpage documents release 3.50 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -193,6 +197,10 @@ recommended for processing PDF and PostScript files.
  Since version 3.30 pstoedit uses the CMYK colors internally. The \-rgb option turns on the old behavior to use RGB values. 
 .PP
 .TP
+[\fB\-useagl\fP]
+ use Adobe Glyph List instead of the IsoLatin1 table (this is experimental) 
+.PP
+.TP
 [\fB\-noclip\fP]
  don\&'t use clipping (relevant only if output format supports clipping at all) 
 .PP
@@ -208,6 +216,10 @@ This option sets the page size for the output medium. Currently this is just use
 .TP
 [\fB\-help\fP]
  show the help information 
+.PP
+.TP
+[\fB\-gs\fP\fI path to the ghostscript executable/DLL \fP]
+ tells pstoedit which ghostscript executable/DLL to use \- overwrites the internal search heuristic 
 .PP
 .TP
 [\fB\-bo\fP]
@@ -308,6 +320,10 @@ option but then it strongly depends on the application reading the the generated
  pass glyph names to the output format driver. So far no output format driver really uses the glyph names, so this does not have any effect at the moment. It is a preparation for future work. 
 .PP
 .TP
+[\fB\-useoldnormalization\fP]
+ Just use this option in case the new heuristic introduced in 3.5 doesn\&'t produce correct results \- however, this normalization of font encoding will always be a best\-effort approach since there is no real general solution to it with reasonable effort 
+.PP
+.TP
 [\fB\-fontmap\fP\fI name of font map file for pstoedit\fP]
  The font map is a simple text file containing lines in the following format:
 .br 
@@ -347,7 +363,7 @@ Unix:
 .RE
 .RE
 .PP
-The mpost.fmp in the misc directory of the pstoedit distibution is a sample map file with mappings from over 5000 PostScript font names to their TeXequivalents. This is useful because MetaPost is frequently used with TeX/LaTeX and those programs don\&'t use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\fBpakin_AT_cs.uiuc.edu\fP).
+The mpost.fmp in the misc directory of the pstoedit distibution is a sample map file with mappings from over 5000 PostScript font names to their TeXequivalents. This is useful because MetaPost is frequently used with TeX/LaTeX and those programs don\&'t use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\fBscott+ps2ed_AT_pakin.org\fP).
 Another example is wemf.fmp to be used under Windows. See the misc directory of the pstoedit source distribution. 
 .PP
 .RE
@@ -357,6 +373,10 @@ Another example is wemf.fmp to be used under Windows. See the misc directory of 
 .TP
 [\fB\-dis\fP]
  Open a display during processing by Ghostscript. Some files only work correctly this way. 
+.PP
+.TP
+[\fB\-q\fP]
+ quiet mode \- do not write startup message 
 .PP
 .TP
 [\fB\-nq\fP]
@@ -567,8 +587,49 @@ No driver specific options
  don\&'t write a view box 
 .PP
 .TP
-[\fB\-withnamespace\fP]
- write xmlns declaration into output file 
+[\fB\-texmode\fP]
+ TeX Mode 
+.PP
+.TP
+[\fB\-imagetofile\fP]
+ write raster images to separate files instead of embedding them 
+.PP
+.TP
+[\fB\-notextrendering\fP]
+ do not write textrendering attribute 
+.PP
+.TP
+[\fB\-border\fP\fI number\fP]
+ additional border to draw around bare bounding box (in percent of width and height) 
+.PP
+.TP
+[\fB\-title\fP\fI string\fP]
+ text to use as title for the generated document 
+.PP
+.SS xaml \- eXtensible Application Markup Language
+.TP
+[\fB\-localdtd\fP]
+ use local DTD 
+.PP
+.TP
+[\fB\-standalone\fP]
+ create stand\-alone type svg 
+.PP
+.TP
+[\fB\-withdtd\fP]
+ write DTD 
+.PP
+.TP
+[\fB\-withgrouping\fP]
+ write also ordinary save/restores as SVG group 
+.PP
+.TP
+[\fB\-nogroupedpath\fP]
+ do not write a group around pathes 
+.PP
+.TP
+[\fB\-noviewbox\fP]
+ don\&'t write a view box 
 .PP
 .TP
 [\fB\-texmode\fP]
@@ -585,6 +646,10 @@ No driver specific options
 .TP
 [\fB\-border\fP\fI number\fP]
  additional border to draw around bare bounding box (in percent of width and height) 
+.PP
+.TP
+[\fB\-title\fP\fI string\fP]
+ text to use as title for the generated document 
 .PP
 .SS cgmb1 \- CGM binary Format (V1)
 No driver specific options 
@@ -791,6 +856,18 @@ No driver specific options
 [\fB\-splineprecision\fP\fI number\fP]
  number of samples to take from spline curve when doing approximation with \-splineaspolyline or \-splineasmultispline \- should be >= 2 (default 5) 
 .PP
+.TP
+[\fB\-dumplayernames\fP]
+ dump all layer names found to standard output 
+.PP
+.TP
+[\fB\-layers\fP\fI string\fP]
+ layers to be shown (comma separated list of layer names, no space) 
+.PP
+.TP
+[\fB\-layerfilter\fP\fI string\fP]
+ layers to be hidden (comma separated list of layer names, no space) 
+.PP
 .SS dxf_s \- CAD exchange format with splines
 .TP
 [\fB\-polyaslines\fP]
@@ -831,6 +908,18 @@ No driver specific options
 .TP
 [\fB\-splineprecision\fP\fI number\fP]
  number of samples to take from spline curve when doing approximation with \-splineaspolyline or \-splineasmultispline \- should be >= 2 (default 5) 
+.PP
+.TP
+[\fB\-dumplayernames\fP]
+ dump all layer names found to standard output 
+.PP
+.TP
+[\fB\-layers\fP\fI string\fP]
+ layers to be shown (comma separated list of layer names, no space) 
+.PP
+.TP
+[\fB\-layerfilter\fP\fI string\fP]
+ layers to be hidden (comma separated list of layer names, no space) 
 .PP
 .SS fig \- .fig format for xfig
 The xfig format driver supports special fontnames, which may be produced by using a fontmap file. The following types of names are supported : 
@@ -937,8 +1026,36 @@ for more details.
 No driver specific options 
 .SS pcb \- pcb format
 See also: \fBhttp://pcb.sourceforge.net\fP
+and \fBhttp://www.penguin.cz/~utx/pstoedit\-pcb/\fP
 .PP
-No driver specific options 
+.TP
+[\fB\-grid\fP\fI missing arg name\fP]
+ attempt to snap relevant output to grid (mils) and put failed objects to a different layer 
+.PP
+.TP
+[\fB\-snapdist\fP\fI missing arg name\fP]
+ grid snap distance ratio (0 < snapdist <= 0.5, default 0.1) 
+.PP
+.TP
+[\fB\-tshiftx\fP\fI missing arg name\fP]
+ additional x shift measured in target units (mils) 
+.PP
+.TP
+[\fB\-tshifty\fP\fI missing arg name\fP]
+ additional y shift measured in target units (mils) 
+.PP
+.TP
+[\fB\-grid\fP\fI missing arg name\fP]
+ attempt to snap relevant output to grid (mils) and put failed objects to a different layer 
+.PP
+.TP
+[\fB\-mm\fP]
+ Switch to metric units (mm) 
+.PP
+.TP
+[\fB\-stdnames\fP]
+ use standard layer names instead of descriptive names 
+.PP
 .SS pcbfill \- pcb format with fills
 See also: \fBhttp://pcb.sourceforge.net\fP
 .PP
@@ -1253,9 +1370,9 @@ The java output format drivers generate a java source file that needs other file
 order to be compiled and usable. These other files are Java classes (one 
 applet and support classes) that allow to step through the individual pages 
 of a converted PostScript document. This applet can easily be activated from 
-a html\-document. See the java/java1/readme_java1.txt
+a html\-document. See the contrib/java/java1/readme_java1.txt
 or 
-java/java2/readme_java2.htm
+contrib/java/java2/readme_java2.htm
 file for more details. 
 .PP
 .SH FAQS
@@ -1291,7 +1408,7 @@ Try to use PostScript fonts instead of the bitmap fonts when generating a PostSc
 .SH AUTHOR
 
 .PP
-Wolfgang Glunz, \fBwglunz34_AT_pstoedit.net\fP
+Wolfgang Glunz, \fBwglunz35_AT_pstoedit.net\fP
 .PP
 .SH CANONICAL ARCHIVE SITE
 
@@ -1397,7 +1514,7 @@ regarding the usage of pstoedit in Ghostscript\&'s SAFER mode.
 .PP
 .TP
 .B *
-Scott Pakin \fBpakin_AT_cs.uiuc.edu\fP for the Idraw output format driver and the
+Scott Pakin \fBscott+ps2ed_AT_pakin.org\fP for the Idraw output format driver and the
 autoconf support. 
 .PP
 .TP
@@ -1429,7 +1546,7 @@ output format driver for Kontour.
 .PP
 .TP
 .B *
-Scott Pakin, \fBpakin_AT_cs.uiuc.edu\fP) provided the MetaPost and LaTeX2e output format driver.
+Scott Pakin, \fBscott+ps2ed_AT_pakin.org\fP provided the MetaPost and LaTeX2e output format driver.
 .PP
 .TP
 .B *

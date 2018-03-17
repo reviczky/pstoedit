@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to Ghostscript
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -155,7 +155,7 @@ static int callgsEXE(int argc, const char * const argv[])
 int callgs(int argc, const char * const argv[]) { 
 	const bool verbose = false; // debug only
 
-// #define PSTOEDITDEBUG 1
+//#define PSTOEDITDEBUG 1 
 #ifdef PSTOEDITDEBUG
 	cerr << "Commandline " << endl;
 	for (int i = 0; i < argc; i++) {

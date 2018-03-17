@@ -1,5 +1,5 @@
 PSTOEDIT 
-Copyright (C) 1993 - 2013 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+Copyright (C) 1993 - 2015 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 pstoedit converts PostScript(TM) and PDF files to other vector graphic
 formats so that they can be edited graphically. See pstoedit.htm or

@@ -268,7 +268,6 @@ void drvPIC::show_text(const TextInfo & textinfo)
 
 	// const unsigned int fontstringlen=80;
 	static RSString selected_font;	// Could / should these be class members (wogl? ? ?) 
-	static bool font_selected = false;
 
 	static int is_text = 0;		// ...
 
@@ -312,6 +311,7 @@ void drvPIC::show_text(const TextInfo & textinfo)
 		static int selected_size = 0;	// ...
 		ps_end();
 
+	        static bool font_selected = false;
 		if (!font_selected) {
 			outf << ".ft " << tfont << endl;
 			selected_font = tfont;

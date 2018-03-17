@@ -10,10 +10,10 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.70,wglunz35_AT_pstoedit.net)
+AC_INIT(pstoedit,3.71,wglunz35_AT_pstoedit.net)
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.70)
+AM_INIT_AUTOMAKE(pstoedit,3.71)
 AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
@@ -473,7 +473,7 @@ if test "$GXX" = yes; then
   else
     AC_MSG_RESULT([GNU])
 #   need to disable long long warning here because of ImageMagick using it
-    SPECIAL_CXXFLAGS="-DBUGGYGPP_NOLONGERNEEDE -pedantic -Wall -Wextra -Wuninitialized -Wswitch-default -Wunused -Wshadow -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long"
+    SPECIAL_CXXFLAGS="-DBUGGYGPP_NOLONGERNEEDED -pedantic -Wall -Wextra -Wuninitialized -Wswitch-default -Wunused -Wshadow -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long"
   fi
 elif test `echo "$CXX" | egrep -c 'xlC$'` -eq 1; then
   AC_MSG_RESULT([AIX xlC])

@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,31 +93,6 @@ private:
 	NOCOPYANDASSIGN(TempFile)
 };
 
-#ifdef HAVE_AUTOPTR 
-#include <memory>
-#else
-template <class T> 
-class auto_ptr {
-public:
-// something that can be attached to a normal pointer
-// but which deletes the object when the Deleter goes
-// out of scope. Sort of very simple std::auto_ptr
-//
-	auto_ptr(T* ptr,bool isArray = false) : m_ptr(ptr), m_isArray(isArray) {}
-	~auto_ptr() { if (m_isArray) delete [] m_ptr; else delete m_ptr; m_ptr=0;}
-	T* operator->() const { return m_ptr; }
-private:
-	T* m_ptr; //lint !e1725
-	bool m_isArray;
-
-	NOCOPYANDASSIGN(auto_ptr<T>)
-
-//	auto_ptr(const auto_ptr<T> &); // no copy ctor please
-//	const auto_ptr<T>& operator =(const auto_ptr<T> &); // no assignment please
-};
-
-
-#endif
 
 #if defined (_MSC_VER) 
 #pragma warning(disable: 4275)
@@ -141,8 +116,8 @@ inline bool string_contains(const RSString & s, const RSString & substr) { retur
 class DLLEXPORT RSString  {
 public:
 		
-	RSString(const char * arg = 0);
-	RSString(const char arg );
+	explicit RSString(const char * arg = 0);
+	explicit RSString(const char arg );
 	RSString(const char * arg , const size_t len);
 	RSString(const RSString & s);
 	virtual ~RSString();
@@ -271,11 +246,7 @@ DLLEXPORT RSString full_qualified_tempnam(const char * pref);
 DLLEXPORT void convertBackSlashes(char* string);
 
 
-#ifndef BUGGYGPP
 template <class T> 
-#else /* BUGGYGPP */
-template <class T,class K_Type,class V_Type> 
-#endif /* BUGGYGPP */
 class DLLEXPORT Mapper {
 public:
 	Mapper() : firstEntry(0) {};
@@ -287,20 +258,10 @@ public:
 		}
 	}
 public:
-#ifndef BUGGYGPP
-// define BUGGYGPP if your compiler complains about syntax error here.
-// see above
 	void insert(const typename T::K_Type & key, const  typename T::V_Type& value) {
-#else /* BUGGYGPP */
-	void insert(const K_Type & key, const  V_Type & value) {
-#endif /* BUGGYGPP */
 		firstEntry = new T(key,value,firstEntry);
 	}
-#ifndef BUGGYGPP
 	const  typename T::V_Type* getValue(const  typename T::K_Type & key) const {
-#else /* BUGGYGPP */
-	const  V_Type* getValue(const  K_Type & key) const {
-#endif /* BUGGYGPP */
 		T * curEntry = firstEntry;
 		while (curEntry != 0) {
 			if (curEntry->key() == key ) {
@@ -313,17 +274,7 @@ public:
 	T * firstEntry;
 
 private: 
-#ifndef BUGGYGPP
 	NOCOPYANDASSIGN(Mapper<T>)
-#else /* BUGGYGPP */
-
-#define COMMA ,
-	NOCOPYANDASSIGN(Mapper<T COMMA K_Type COMMA V_Type>)
-#undef COMMA
-
-#endif /* BUGGYGPP */
-
-		
 };
 
 //lint -esym(1712,KeyValuePair) // no default ctor

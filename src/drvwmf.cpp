@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2014 Wolfgang Glunz
+   Copyright (C) 1998 - 2018 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify

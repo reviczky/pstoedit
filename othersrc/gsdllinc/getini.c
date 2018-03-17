@@ -37,6 +37,7 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 	    p = szExePath;
 	*p = '\0';
 #endif
+	assert(szIniFile);
 
 	/* get path to INI file */
 	szIniFile[0] = '\0';

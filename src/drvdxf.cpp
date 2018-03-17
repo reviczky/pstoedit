@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -1109,7 +1109,6 @@ DXF: X value; APP: 3D point
 */
 
 #endif
-
 
 //NU const unsigned short ClosedSpline	= 1 ; //= Closed spline
 //NU const unsigned short PeriodicSpline = 2 ; //= Periodic spline

@@ -3,9 +3,9 @@
 
 /*
    pstoeditoptions.h : This file is part of pstoedit
-   definition of program options 
+   definition of program options
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,9 @@
 
 #include "miscutil.h"
 #include "poptions.h"
+
+// with support for -DREALLYDELAYBIND - needed for gs9.22
+#define WITHRDB 1
 
 enum advancedTypeIDs { start_ty=char_ty, rsstring_ty, charstring_ty, constcharstring_ty, argv_ty };
 
@@ -63,7 +66,6 @@ public:
 	static unsigned int gettypeID() { return charstring_ty; }
 };
 
- 
 template < >
 inline ostream & Option< char *, charstringValueExtractor>::writevalue(ostream & out) const {
 		out << (value ? value : "");
@@ -86,7 +88,6 @@ public:
 	static unsigned int gettypeID() { return constcharstring_ty; }
 };
 
- 
 template < >
 inline ostream & Option< const char *, constcharstringValueExtractor>::writevalue(ostream & out) const {
 	out << (value ? value : "");
@@ -116,16 +117,26 @@ static const char * const noArgument = emptyString;
 static const char * const UseDefaultDoku = emptyString;
 
 
-class  PsToEditOptions : public ProgramOptions {
+class DLLEXPORT PsToEditOptions : public ProgramOptions {
 public:
 	static PsToEditOptions& theOptions(); // singleton
-	enum PropSheetEnum {g_t=0, t_t, a_t, b_t, d_t, h_t };
+	enum PropSheetEnum {g_t=0, t_t, d_t,/* a_t, */ b_t, h_t };
 	// g - general
 	// t - text
+	// d - drawing
 	// a - unused
 	// b - debug
-	// d - drawing
 	// h - hidden
+	static const char * propSheetName(PropSheetEnum sheet) {
+	  switch (sheet) {
+		case g_t : return "General options"; break;
+		case t_t : return "Text and font handling related options"; break;
+		case d_t : return "Drawing related options"; break;
+		case b_t : return "Debug options"; break;
+		case h_t : return "Hidden options"; break;
+		default  : return "out of range sheet type";
+	  }
+    }
 		// cannot be const  because it needs to be changed on non UNIX systems (convertBackSlashes)
 	char *nameOfInputFile  ; //= 0;
 	char *nameOfOutputFile ; //= 0;	// can contain %d for page splitting
@@ -145,7 +156,7 @@ public:
 	OptionT < bool, BoolTrueExtractor > drawtext ;//= false;
 	OptionT < bool, BoolTrueExtractor > autodrawtext ;//= false;
 	OptionT < bool, BoolTrueExtractor > disabledrawtext ;//= false;
-	OptionT < bool, BoolTrueExtractor > DrawGlyphBitmaps ;//= false; 
+	OptionT < bool, BoolTrueExtractor > DrawGlyphBitmaps ;//= false;
 	OptionT < bool, BoolTrueExtractor > correctdefinefont ;//= false;
 
 	OptionT < bool, BoolTrueExtractor > ptioption;
@@ -162,13 +173,17 @@ public:
 
 	OptionT < RSString, RSStringValueExtractor> pagenumberformat ;
 	OptionT < bool, BoolTrueExtractor > splitpages ;//= false;
-	OptionT < bool, BoolTrueExtractor > verbose ;//= false;
+	OptionT < bool, BoolTrueExtractor > verboseflag ;//= false;
+	OptionT < int, IntValueExtractor> verboselevel; //= 0;
 	OptionT < bool, BoolTrueExtractor > useBBfrominput; //= false;
 	OptionT < bool, BoolTrueExtractor > simulateSubPaths ;//= false;
 	OptionT < bool, BoolTrueExtractor > simulateFill ;//= false;
 	OptionT < RSString, RSStringValueExtractor> unmappablecharstring ;//= 0;
 	OptionT < bool, BoolTrueExtractor > dontloadplugins ;//= false;
 	OptionT < bool, BoolTrueExtractor > nobindversion ;//= false;	// use old NOBIND instead of DELAYBIND
+#if WITHRDB
+	OptionT < bool, BoolTrueExtractor > reallydelaybindversion ;//= false;	// use REALLYDELAYBIND instead of DELAYBIND which not supported in gs 9.22
+#endif
 	OptionT < int, IntValueExtractor > pagetoextract ;//= 0;		// 0 stands for all pages
 	OptionT < double, DoubleValueExtractor > flatness ;//= 1.0f;		// used for setflat
 	OptionT < bool, BoolTrueExtractor > simulateClipping ;//= false;	// simulate clipping most useful in combination with -dt
@@ -182,8 +197,8 @@ public:
 	OptionT < bool, BoolTrueExtractor > justgstest ;//= false;
 	OptionT < bool, BoolTrueExtractor > pscover ;//= false;
 	OptionT < bool, BoolTrueExtractor > nofontreplacement ;//= false;
-	OptionT < bool, BoolTrueExtractor > passglyphnames; 
-	OptionT < bool, BoolTrueExtractor > useoldnormalization; 
+	OptionT < bool, BoolTrueExtractor > passglyphnames;
+	OptionT < bool, BoolTrueExtractor > useoldnormalization;
 	OptionT < int, IntValueExtractor > rotation ;//= 0;
 	OptionT < RSString, RSStringValueExtractor> explicitFontMapFile ;//= 0;
 	OptionT < RSString, RSStringValueExtractor > outputPageSize;//("");
@@ -205,9 +220,11 @@ public:
 	// previous call with -f debug
 
 	OptionT < Argv, ArgvExtractor > psArgs;				// Pass through arguments to PostScript interpreter
-	OptionT < int, IntValueExtractor > psLanguageLevel; 
+	OptionT < int, IntValueExtractor > psLanguageLevel;
 	OptionT < RSString, RSStringValueExtractor> drivername ;//= 0; // cannot be const char * because it is changed in pstoedit.cpp
 	OptionT < RSString, RSStringValueExtractor > gsregbase;
+
+	int verbose() const { return (int) verboselevel ? (int) verboselevel : (int) verboseflag; }
 	
 private:
 	PsToEditOptions() :
@@ -221,8 +238,8 @@ private:
 		"executed just before the normal input is read. This is helpful for "
 		"including specific page settings or for disabling potentially unsafe "
 		"PostScript operators, e.g., file, renamefile, or deletefile.",		
-		emptyString),	// 
-	replacementfont		(true, "-df","font name",t_t,"default replacement font for raster fonts", 
+		emptyString),	//
+	replacementfont		(true, "-df","font name",t_t,"default replacement font for raster fonts",
 		" Sometimes fonts embedded in a PostScript "
 		"program do not have a fontname. For example, this happens in PostScript "
 		"files generated by \\Cmd{dvips}{1}. In such a case \\Prog{pstoedit} uses a "
@@ -230,7 +247,7 @@ private:
 		"specified using the \\Opt{-df} option. \\Opt{-df Helvetica} causes all "
 		"unnamed fonts to be replaced by Helvetica.",
 		(const char *) "Courier"),
-	nomaptoisolatin1	(true, "-nomaptoisolatin1",noArgument,t_t,"do not map to ISO Latin 1 encoding", 
+	nomaptoisolatin1	(true, "-nomaptoisolatin1",noArgument,t_t,"do not map to ISO Latin 1 encoding",
 		"Normally \\Prog{pstoedit} maps all character "
 		"codes to the ones defined by the ISO Latin1 encoding. If you specify "
 		"\\Opt{-nomaptoisolatin1} then the encoding from the input PostScript is "
@@ -238,7 +255,7 @@ private:
 		"on the other hand may be the only way to get some fonts converted appropriately. "
 		"Try what fits best to your concrete case.",
 		false),
-	withdisplay			(true, "-dis",noArgument,b_t,"let Ghostscript display the file during conversion", 
+	withdisplay			(true, "-dis",noArgument,b_t,"let Ghostscript display the file during conversion",
 		"Open a display during processing by Ghostscript. Some files "
 		"only work correctly this way.",
 		false),
@@ -256,7 +273,7 @@ private:
 		"useful to avoid this. If you do, you will have to type quit at the "
 		"\\verb+GS>+ prompt to exit from Ghostscript.",
 		false),
-	nocurves			(true, "-nc",noArgument,d_t,"normally curves are shown as curves if the output format does support it. This options forces curves to be always converted to line segments.", 
+	nocurves			(true, "-nc",noArgument,d_t,"normally curves are shown as curves if the output format does support it. This options forces curves to be always converted to line segments.",
 		"no curves.\n"
 		"Normally pstoedit tries to keep curves from the input and transfers them to "
 		"the output if the output format supports curves. If the output format does not "
@@ -264,11 +281,11 @@ private:
 		"also \\Opt{-flat} option). However, in some cases the user might wish to "
 		"have this behavior also for output formats that originally support curves. This "
 		"can be forced via the \\Opt{-nc} option.",
-		false),		// 
+		false),		//
 /*
 	nosubpaths			(true, "-nsp",noArgument,d_t,"normally subpaths are used if the output format support them. This option turns off subpaths.",
 		UseDefaultDoku,
-		false),	*/ 
+		false),	*/
 	mergelines			(true, "-mergelines",noArgument,d_t,"merge adjacent paths if one is a stroke and the other is a fill. This depends on the capabilities of the selected output format",
 		"Some output formats permit the representation of filled "
 		"polygons with edges that are in a different color than the fill color. "
@@ -293,25 +310,25 @@ private:
 		"parts and seems to work quite well so far. But there are certainly cases "
 		"where this simple heuristic fails. So please check the results carefully.",
 		false),
-	drawtext			(true, "-dt",noArgument,t_t,"draw text, i.e. convert text to polygons", 
+	drawtext			(true, "-dt",noArgument,t_t,"draw text, i.e. convert text to polygons",
 		"draw text. Text is drawn as polygons. This might produce a large output file. This option is automatically "
 		"switched on if the selected output format does not support text, e.g. "
-		"\\Cmd{gnuplot}{1}.", 
+		"\\Cmd{gnuplot}{1}.",
 		false),
-	autodrawtext		(true, "-adt",noArgument,t_t,"automatic draw text. This draws text only for text that uses fonts with non standard encodings", 
+	autodrawtext		(true, "-adt",noArgument,t_t,"automatic draw text. This draws text only for text that uses fonts with non standard encodings",
 	"automatic draw text. This option turns on the \\Opt{-dt} option selectively for fonts that seem to be no normal text fonts, e.g. Symbol.",
 		false),
-	disabledrawtext		(true, "-ndt",noArgument,t_t,"fully disable any \"intelligence\" for drawing text", 
+	disabledrawtext		(true, "-ndt",noArgument,t_t,"fully disable any \"intelligence\" for drawing text",
 		"never draw text. Fully disable the heuristics used by pstoedit to decide when to \"draw\" text "
-		"instead of showing it as text. This may produce incorrect results, but in some cases it might nevertheless be useful. \"Use at own risk\".", 
+		"instead of showing it as text. This may produce incorrect results, but in some cases it might nevertheless be useful. \"Use at own risk\".",
 		false),
 
-	DrawGlyphBitmaps		(true, "-dgbm",noArgument,t_t,"experimental - draw also bitmaps generated by fonts/glyphs", 
-		UseDefaultDoku, 
+	DrawGlyphBitmaps		(true, "-dgbm",noArgument,t_t,"experimental - draw also bitmaps generated by fonts/glyphs",
+		UseDefaultDoku,
 		false),
 
 
-	correctdefinefont	(true, "-correctdefinefont",noArgument,t_t,"apply some \"corrective\" actions to definefont - use this for ChemDraw generated PostScript files", 
+	correctdefinefont	(true, "-correctdefinefont",noArgument,t_t,"apply some \"corrective\" actions to definefont - use this for ChemDraw generated PostScript files",
 		"Some PostScript files, e.g. such as generated by ChemDraw, "
 		"use the PostScript definefont operator in a way that is incompatible with "
 		"pstoedit's assumptions. The new font is defined by copying an old font "
@@ -340,14 +357,14 @@ private:
 	xscale				(true, "-xscale","number",g_t,"scale by a factor in x-direction",
 		UseDefaultDoku,
 		1.0),
-	yscale				(true, "-yscale","number",g_t,"scale by a factor in y-direction", 
+	yscale				(true, "-yscale","number",g_t,"scale by a factor in y-direction",
 		UseDefaultDoku,
 		1.0),
 
 	xshift				(true, "-xshift","number",g_t,"shift image in x-direction",
 		UseDefaultDoku,
 		0.0f),
-	yshift				(true, "-yshift","number",g_t,"shift image in y-direction", 
+	yshift				(true, "-yshift","number",g_t,"shift image in y-direction",
 		UseDefaultDoku,
 		0.0f),
 
@@ -355,7 +372,7 @@ private:
 		UseDefaultDoku,
 		false),
 
-	minlinewidth		(true, "-minlinewidth","number",g_t,"minimal line width. All lines thinner than this will be drawn in this line width - especially zero-width lines", 
+	minlinewidth		(true, "-minlinewidth","number",g_t,"minimal line width. All lines thinner than this will be drawn in this line width - especially zero-width lines",
 		UseDefaultDoku,
 		0.0f),
 
@@ -365,7 +382,7 @@ private:
 		"Default is empty string which results in formatting the page number using \\%d. "
 		"This results in page numbers like 1, 2, ..., 10. "
 		"Sometimes you may want to have fixed length with leading 0, "
-		"so you might want to specify 02 which means 2 digits with leading 0.", 
+		"so you might want to specify 02 which means 2 digits with leading 0.",
 		UseDefaultDoku,
 		emptyString),
 		
@@ -375,14 +392,18 @@ private:
 		"number. This option is automatically switched on for output formats that do not "
 		"support multiple pages within one file, e.g. fig or gnuplot.",
 		false),
-	verbose				(true, "-v",noArgument,b_t,"turns on verbose mode", 
+	verboseflag			(true, "-v",noArgument,b_t,"turns on verbose mode",
 		"Switch on verbose mode. Some additional information is shown "
 		"during processing.",
 		false),
-	useBBfrominput		(true, "-usebbfrominput",noArgument,g_t,"extract BoundingBox from input file rather than determining it during processing", 
+	verboselevel(true, "-vl", noArgument, b_t, "turns on verbose mode with a given verbosity level",
+		"Switch on verbose mode with a given level. Some additional information is shown "
+		"during processing.",
+		0),
+	useBBfrominput		(true, "-usebbfrominput",noArgument,g_t,"extract BoundingBox from input file rather than determining it during processing",
 		"If specified, pstoedit uses the BoundingBox as is (hopefully) found in the input file instead of one that is calculated by its own.",
 		false),
-	simulateSubPaths	(true, "-ssp",noArgument,d_t,"simulate subpaths", 
+	simulateSubPaths	(true, "-ssp",noArgument,d_t,"simulate subpaths",
 		"simulate subpaths.\n"
 		"Several output formats do not support PostScript paths containing subpaths, i.e. "
 		"paths with intermediate movetos. In the normal case, each subpath is "
@@ -393,7 +414,7 @@ private:
 		"tries to eliminate these problems. However, this option is CPU time "
 		"intensive!",
 		false),
-	simulateFill	(true, "-sfill",noArgument,d_t,"simulate fill", 
+	simulateFill	(true, "-sfill",noArgument,d_t,"simulate fill",
 		"simulate filling by individual strokes.\n"
 		"",
 		false),
@@ -408,7 +429,7 @@ private:
 	dontloadplugins		(true, "-dontloadplugins",noArgument,h_t,"internal option - not relevant for normal user",
 		UseDefaultDoku,
 		false),
-	nobindversion		(true, "-nb",noArgument,b_t,"use old NOBIND instead of DELAYBIND - try this if Ghostscript has problems", 
+	nobindversion		(true, "-nb",noArgument,b_t,"use old NOBIND instead of DELAYBIND - try this if Ghostscript has problems",
 		"Since version 3.10 \\Prog{pstoedit} uses the "
 		"\\texttt{-dDELAYBIND} option when calling Ghostscript. Previously the "
 		"\\texttt{-dNOBIND} option was used instead but that sometimes caused "
@@ -417,8 +438,21 @@ private:
 		"old style can be activated again in case the \\texttt{-dDELAYBIND} gives "
 		"different results as before. In such a case please also contact the "
 		"author.",
-		false),	// 
-	pagetoextract		(true, "-page","page number",g_t,"extract a specific page: 0 means all pages", 
+		false),	//
+#if WITHRDB
+	reallydelaybindversion	(true, "-rdb",noArgument,b_t,"use REALLYDELAYBIND option for gs, instead of the former DELAYBIND which is not supported anymore since gs 9.2x",
+		"Since version 3.10 \\Prog{pstoedit} uses the "
+		"\\texttt{-dDELAYBIND} option when calling Ghostscript. But since version 9.2x of "
+		"GhostScript, that option is not supported anymore because of security reasons. " 
+		"As a fallback, newer versions of Ghostscript provide the REALLYDELAYBIND option "
+		"and pstoedit can use this if you supply the \\Opt{-rdb} option. "
+		"Use this with caution as it might open security risks, e.g. a PostScript file "
+		"injecting some malicious code into PostScript standard operators. " 
+		"However, not using this option can cause some of the PostScript drawings operations "
+		"to be not seen by pstoedit, hence causing missing artefacts in the output.",
+		false),	//
+#endif
+	pagetoextract		(true, "-page","page number",g_t,"extract a specific page: 0 means all pages",
 		"Select a single page from a multi-page PostScript or PDF file.",
 		0),		// 0 stands for all pages
 	flatness			(true, "-flat","flatness factor",d_t,"the precision used for approximating curves by lines if needed",
@@ -429,7 +463,7 @@ private:
 		"\\textbf{setflat} command. Higher numbers, e.g. 10 give rougher, lower "
 		"numbers, e.g. 0.1, give finer approximations.",
 		1.0),		// used for setflat
-	simulateClipping	(true, "-sclip",noArgument,d_t,"simulate clipping - probably you need to set this if you use -dt", 
+	simulateClipping	(true, "-sclip",noArgument,d_t,"simulate clipping - probably you need to set this if you use -dt",
 		"simulate clipping.\n"
 		"Most output formats of pstoedit do not have native support for clipping. For that "
 		"\\Prog{pstoedit} offers an option to perform the clipping of the graphics "
@@ -444,16 +478,16 @@ private:
 	usePlainStrings		(true, "-ups",noArgument,b_t,"write text as plain string instead of hex string in intermediate format - normally useful for trouble shooting and debugging only.",
 		UseDefaultDoku,
 		false),
-	useRGBcolors		(true, "-rgb",noArgument,g_t,"use RGB colors instead of CMYK", 
+	useRGBcolors		(true, "-rgb",noArgument,g_t,"use RGB colors instead of CMYK",
 		"Since version 3.30 pstoedit uses the CMYK colors internally. The -rgb option turns on the old behavior to use RGB values.",
 		false),
-	useAGL		(true, "-useagl",noArgument,g_t,"use Adobe Glyph List instead of the ISO Latin-1 table (this is experimental)", 
+	useAGL		(true, "-useagl",noArgument,g_t,"use Adobe Glyph List instead of the ISO Latin-1 table (this is experimental)",
 		UseDefaultDoku,
 		false),
-	noclip				(true, "-noclip",noArgument,g_t,"do not use clipping (relevant only if output format supports clipping at all)", 
+	noclip				(true, "-noclip",noArgument,g_t,"do not use clipping (relevant only if output format supports clipping at all)",
 		UseDefaultDoku,
 		false),
-	t2fontsast1			(true, "-t2fontsast1",noArgument,t_t,"handle T2 fonts (often come as embedded fonts in PDF files) same as T1", 
+	t2fontsast1			(true, "-t2fontsast1",noArgument,t_t,"handle T2 fonts (often come as embedded fonts in PDF files) same as T1",
 		"Handle Type 2 fonts same as Type 1. Type 2 fonts sometimes occur as "
 		"embedded fonts within PDF files. In the default mode, text using such fonts is drawn as polygons "
 		"since pstoedit assumes that such a font is not available on the user's machine. If this option "
@@ -470,24 +504,24 @@ private:
 	justgstest			(true, "-gstest",noArgument,b_t,"perform a basic test of the interworking with Ghostscript",
 		UseDefaultDoku,
 		false),
-	pscover				(true, "-pscover",noArgument,h_t,"perform coverage statistics about the pstoedit PostScript proloque - for debug and test only", 
+	pscover				(true, "-pscover",noArgument,h_t,"perform coverage statistics about the pstoedit PostScript proloque - for debug and test only",
 		UseDefaultDoku,
 		false),
-	nofontreplacement	(true, "-nfr",noArgument,t_t,"do not replace non standard encoded fonts with a replacement font", 
+	nofontreplacement	(true, "-nfr",noArgument,t_t,"do not replace non standard encoded fonts with a replacement font",
 		"In normal mode pstoedit replaces bitmap fonts with a font as defined by the \\Opt{-df} option. This is done, because most output formats cannot handle such fonts. This behavior can be "
 		"switched off using the \\Opt{-nfr} option but then it strongly depends on the application reading the generated file whether the file is usable and correctly interpreted or not. Any problems are then out of control of pstoedit.",
 		false),
-	passglyphnames		(true, "-glyphs",noArgument,t_t,"pass glyph names to output format driver", 
+	passglyphnames		(true, "-glyphs",noArgument,t_t,"pass glyph names to output format driver",
 		"pass glyph names to the output format driver. So far no output format driver really uses the glyph names, so this does not have any effect at the moment. "
 		"It is a preparation for future work.",
 		false),
-	useoldnormalization		(true, "-useoldnormalization",noArgument,t_t,"use legacy (pre 3.50) method for normalizing font encodings", 
+	useoldnormalization		(true, "-useoldnormalization",noArgument,t_t,"use legacy (pre 3.50) method for normalizing font encodings",
 			"Just use this option in case the new heuristic introduced in 3.5 does not produce correct results - however, this normalization of font encoding will always be a best-effort approach since there is no real general solution to it with reasonable effort",
 		false),
 	rotation			(true, "-rotate","angle (0-360)",g_t,"rotate the image",
 		"Rotate image by angle.",
 		0),
-	explicitFontMapFile	(true, "-fontmap","name of font map file for pstoedit",t_t,"use a font mapping from a file", 
+	explicitFontMapFile	(true, "-fontmap","name of font map file for pstoedit",t_t,"use a font mapping from a file",
 		"The font map is a "
 		"simple text file containing lines in the following format:BREAK\n"
 		"\n\n"
@@ -511,7 +545,7 @@ private:
 		"  \\item MS Windows: The same directory where the \\Prog{pstoedit} executable is located\n"
 		"\n"
 		"  \\item Unix:BREAK\n"
-		"  $<$\\emph{The directory where the pstoedit executable is located}$>$\\verb+/../lib/+\n"
+		"  The default installation directory. If it fails, then $<$\\emph{The directory where the pstoedit executable is located}$>$\\verb+/../lib/+\n"
 		"\n"
 		"\\end{itemize}\n"
 		"\n"
@@ -544,7 +578,7 @@ private:
 		UseDefaultDoku,
 		false),
 	GSToUse				(true, "-gs","path to the Ghostscript executable/DLL",g_t,"tells pstoedit which Ghostscript executable/DLL to use - overwrites the internal search heuristic",
-	UseDefaultDoku,emptyString), 
+	UseDefaultDoku,emptyString),
 	showdrvhelp			(true, "-help",noArgument,g_t,"show the help information",
 		UseDefaultDoku,
 		false) ,
@@ -556,14 +590,14 @@ private:
 		false) ,
 	dumphelp			(true, "-dumphelp",noArgument,h_t,"show all options of all drivers in TeX format",
 		UseDefaultDoku,
-		false), 
+		false),
 	listdrivers			(true, "-listdrivers",noArgument,h_t,"list all available drivers",
 		UseDefaultDoku,
-		false), 
+		false),
 		
 	backendonly			(true, "-bo",noArgument,g_t,"backend only - This option is not useful for a \"normal\" user. "
 													"It is useful for programs which use pstoedit as output format generator "
-													"and can provide an input file which adheres to pstoedit's internal dump format.", 
+													"and can provide an input file which adheres to pstoedit's internal dump format.",
 		"You can run backend processing only (without the PostScript "
 		"interpreter frontend) by first running \\textbf{pstoedit} \\Opt{-f dump} "
 		"\\Arg{infile} \\Arg{dumpfile} and then running \\textbf{pstoedit} "
@@ -582,18 +616,18 @@ private:
 		"See the Ghostscript manual for other possible options."
 		),
 
-	psLanguageLevel		(true, "-pslanguagelevel","PostScript Language Level 1, 2, or 3 to be used.", g_t, 
+	psLanguageLevel		(true, "-pslanguagelevel","PostScript Language Level 1, 2, or 3 to be used.", g_t,
 		"PostScript Language Level 1, 2, or 3 to be used. "
 		"You can switch Ghostscript into PostScript Level 1 only mode by "
 		"\\Opt{-pslanguagelevel 1}. This can be useful for example if the PostScript file to be "
-		"converted uses some Level 2 specific custom color models that are not supported " 
+		"converted uses some Level 2 specific custom color models that are not supported "
 		"by pstoedit. However, this requires that the PostScript program checks for the "
 		"PostScript level supported by the interpreter and \"acts\" accordingly. "
 		"The default language level is 3.",
 		UseDefaultDoku,
 		3),
 
-	drivername			(false,"-f","\"format[:options]\"",g_t,"target format identifier", 
+	drivername			(false,"-f","\"format[:options]\"",g_t,"target format identifier",
 		"target output format recognized by "
 		"\\Prog{pstoedit}. Since other format drivers can be loaded dynamically, "
 		"type  \\texttt{pstoedit -help} to get a full list of formats. See "
@@ -603,14 +637,14 @@ private:
 		" from the suffix of the output filename. However, in a lot of cases, this is not a unique "
 		"mapping and hence pstoedit demands the \\Opt{-f} option.",
 		emptyString),
-	gsregbase (true, "-gsregbase", "Ghostscript base registry path", g_t, 
+	gsregbase (true, "-gsregbase", "Ghostscript base registry path", g_t,
 	  "use this registry key as a subkey to search for Ghostscript",
 	  "registry path to use as a base path when searching Ghostscript interpreter.\n"
 	  "This option provides means to specify a registry key under "
 	  "HKLM/Software where to search for GS interpreter key, version "
 	  "and \\verb+GS_DLL / GS_LIB+ values. Example: \"-gsregbase MyCompany\" means "
 	  "that HKLM/Software/MyCompany/GPL Ghostscript would be searched "
-	  "instead of HKLM/Software/GPL Ghostscript.", 
+	  "instead of HKLM/Software/GPL Ghostscript.",
 	  emptyString)
 	{
 
@@ -651,13 +685,17 @@ private:
 
 	ADD(pagenumberformat);
 	ADD(splitpages);
-	ADD(verbose );
+	ADD(verboseflag);
+	ADD(verboselevel);
 	ADD(useBBfrominput);
 	ADD(simulateSubPaths);
 	ADD(simulateFill);
 	ADD(unmappablecharstring);
 	ADD(dontloadplugins);
 	ADD(nobindversion );
+#if WITHRDB
+	ADD(reallydelaybindversion );
+#endif
 	ADD(pagetoextract);	
 	ADD(flatness);		
 	ADD(simulateClipping);	
@@ -680,20 +718,20 @@ private:
 #ifdef HAVE_DIALOG
 	ADD(showdialog);
 #endif
-//	ADD(magnification); 
+//	ADD(magnification);
 	ADD(showdrvhelp) ;
 	ADD(showdocu_long) ;
 	ADD(showdocu_short) ;
 	ADD(GSToUse);
-	ADD(dumphelp); 
-	ADD(listdrivers); 
+	ADD(dumphelp);
+	ADD(listdrivers);
 	ADD(backendonly);	
 	ADD(psArgs);	
 	ADD(psLanguageLevel);
 
 	ADD(drivername);
 	ADD(gsregbase);
-} 
+}
 
 	~PsToEditOptions() {
 		// delete drivername.value; // this crashes under Windows (heap problem) //lint !e605
@@ -708,4 +746,3 @@ private:
 };
 
 #endif
- 

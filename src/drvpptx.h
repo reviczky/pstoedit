@@ -6,7 +6,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -128,7 +128,7 @@ private:
         void get_font_props(const TextInfo & textinfo,
                             RSString * typeface, RSString * panose,
                             bool * isBold, bool * isItalic,
-                            unsigned char * pitchFamily);
+                            unsigned char * pitchFamily) const;
         void eot2texinfo(const string& eotfilename, TextInfo & textinfo);
 
         // Describe a theme color and modifications to it.
@@ -144,18 +144,10 @@ private:
 
         // Map an RGB value to a theme color.
         typedef KeyValuePair<unsigned int, ThemeColor> RGB2Theme;
-#ifndef BUGGYGPP
 		Mapper<RGB2Theme /* , unsigned int, ThemeColor */ > rgb2theme;
-#else
-        Mapper<RGB2Theme, unsigned int, ThemeColor> rgb2theme;
-#endif
 
         // Map a PostScript core font to a Windows name + PANOSE characterization.
-#ifndef BUGGYGPP
         Mapper<FontMapping /*, RSString, RSString*/ > ps2win;
-#else
-		Mapper<FontMapping, RSString, RSString> ps2win;
-#endif
 };
 
 #endif

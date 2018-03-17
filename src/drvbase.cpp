@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -746,7 +746,8 @@ nrOfEntries(-1), numbers(0), offset(0)
 		// now get the numbers
 		// repeat the numbers, if number of entries is odd
 		unsigned int rep = nrOfEntries % 2;	// rep is 1 for odd numbers 0 for even
-		numbers = new float[nrOfEntries * (rep + 1)];
+		size_t len = nrOfEntries * (rep + 1);
+		numbers = new float[len];
 		unsigned int cur = 0;
 #if 1
 		for (unsigned int i = 0; i <= rep; i++) {
@@ -754,6 +755,7 @@ nrOfEntries(-1), numbers(0), offset(0)
 			while ((*pattern) && (*pattern != ']')) {
 				if (*pattern == ' ' && (*(pattern + 1) != ']')) {
 					float f = (float) atof(pattern);
+					assert(cur < len);
 					numbers[cur] = f;
 					// errf << d_numbers[cur] << endl;
 					cur++;
@@ -1475,11 +1477,7 @@ extern "C" DLLEXPORT DescriptionRegister * getglobalRp()
 	return &DescriptionRegister::getInstance();
 }
 
-#ifdef  BUGGYGPP
-Point Point::transform(const float * matrix) const
-#else
 Point Point::transform(const float matrix[6]) const
-#endif
 {
 	const float tx = matrix[0] * x_ + matrix[2] * y_ + matrix[4];
 	const float ty = matrix[1] * x_ + matrix[3] * y_ + matrix[5];

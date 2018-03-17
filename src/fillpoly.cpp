@@ -107,6 +107,7 @@ static inline int octant(const double x, const double y)
          + (y < 0.0 ? 6 : 0);
 }
 
+//lint -e835 -e778 // -0
 static const int octant_winding[9][9] = {
     { -0, -0, -0, -0, -0, -0, -0, -0, -0 }, /* -0: Start or end point at vertex */
     { -0,  0, 00, -2, -1, -3,  2,  1,  3 }, /* 00: On boundary line */

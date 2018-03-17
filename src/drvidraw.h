@@ -6,7 +6,7 @@
    Backend for idraw files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -53,7 +53,9 @@ private:
   const char *rgb2name(float, float, float) const ;// Map RGB --> color name
   void print_header(const char *);    // Output idraw header
   struct idrawcolormap {                            // Map of RGB to color name
-    double red, green, blue;
+    double red;
+    double green;
+    double blue;
     const char *name;
   };
   idrawcolormap color[IDRAW_NUMCOLORS];

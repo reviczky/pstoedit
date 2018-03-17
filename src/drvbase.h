@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -100,11 +100,7 @@ public:
 		return (p1.x_ == p2.x_) && (p1.y_ == p2.y_); //lint !e777
 	}
 #endif
-#ifdef  BUGGYGPP
-	Point transform(const float * matrix) const;
-#else
 	Point transform(const float matrix[6]) const;
-#endif
 
 	friend ostream & operator<<(ostream & out,const Point &p) {
 		return out << "x: " << p.x_ << " y: " << p.y_ ;
@@ -318,7 +314,7 @@ protected:
 		unsigned int savelevel;	
 		SaveRestoreInfo * previous;	
 		SaveRestoreInfo * next;
-		SaveRestoreInfo(SaveRestoreInfo * parent) : clippathlevel(0), previous(parent), next(NIL) 
+		explicit SaveRestoreInfo(SaveRestoreInfo * parent) : clippathlevel(0), previous(parent), next(NIL) 
 		{ 
 			if (parent) {
 				parent->next=this;
@@ -435,7 +431,7 @@ public:
 	void            setCurrentDeviceWidth(const float deviceWidth) 
 			{ currentDeviceWidth = deviceWidth; }
 
-	float           getScale() const { return 1.0f; }
+	static float           getScale() { return 1.0f; }
 
 	inline long l_transX			(float x) const	{
 		return (long)((x + x_offset) + .5);	// rounded long	
@@ -682,7 +678,7 @@ private:
 //lint -esym(1712,DashPattern) // no default ctor
 class DLLEXPORT DashPattern {
 public:
-	DashPattern(const char * patternAsSetDashString);
+	explicit DashPattern(const char * patternAsSetDashString);
 	~DashPattern();
 	const RSString dashString;
 	int nrOfEntries;
@@ -793,7 +789,7 @@ public:
 
 	}
 
-	drawingelement(const Point p[])
+	explicit drawingelement(const Point p[])
 	: basedrawingelement()
 	{
 //	for (unsigned int i = 0 ; i < nr ; i++ ) points[i] = p[i]; 
@@ -1077,7 +1073,7 @@ private:
 	NOCOPYANDASSIGN(DriverDescriptionT<T>)
 };
 
-#if !( (defined (__GNUG__)  && (__GNUC__>=3) && defined (HAVE_STL)) || defined (_MSC_VER) && (_MSC_VER >= 1300) )
+#if !( (defined (__GNUG__)  && (__GNUC__>=3) && defined (HAVE_STL)) || defined (_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1900) )
 // 1300 is MSVC.net (7.0)
 // 1200 is MSVC 6.0
 //G++3.0 comes with a STL lib that includes a definition of min and max

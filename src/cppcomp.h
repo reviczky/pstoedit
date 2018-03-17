@@ -5,7 +5,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,6 +49,7 @@
 	// 1200 - VS 6
 	// 1300 - VS 7 (2002)
 	// 1400 - VS 8 (2005)
+	// 1900 - VS 2015
 
 	// NOTE: If your compiler or installation does not come with
 	// an installation of the STL, just comment out the next line
@@ -60,6 +61,10 @@
 	#define USE_NEWSTRSTREAM
 
 	#define HAVE_AUTOPTR
+
+	#if (_MSC_VER >= 1900) 
+		#define _ALLOW_RTCc_IN_STL
+	#endif
 
 #endif
 

@@ -2,7 +2,7 @@
    poptions.cpp : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@
 USESTD
 #define UNUSEDARG(p)
 bool IntValueExtractor::getvalue(const char *optname, const char *instring,
-								 unsigned int &currentarg, int &result)
+	unsigned int &currentarg, int &result)
 {
-	if (instring) {
+	if (instring && isdigit(instring[0])) {
 		result = atoi(instring);
 		currentarg++;
 		return true;
@@ -134,7 +134,7 @@ bool BoolTrueExtractor::getvalue(const char *UNUSEDARG(optname), const char *UNU
 }
 
 
-#if 0 
+#if 1 
 // debug
 void ProgramOptions::showvalues(ostream & outstr, bool withdescription) const
 {

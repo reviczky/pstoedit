@@ -1,5 +1,5 @@
 #define P2E_MAJORVERSION 3
-#define P2E_MINORVERSION 70
+#define P2E_MINORVERSION 71
 #define P2E_VERSIONSUFFIX  
 
 #define P2E_xstr(s) P2E_str(s)
@@ -10,4 +10,3 @@
 #define __version_h
   static const char version[] = P_PRODUCTVERSION_PS;
 #endif
- 

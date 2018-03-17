@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -95,7 +95,7 @@ public:
 	};
 	virtual ~OptionBase() { membername = 0; }
 	virtual ostream & writevalue(ostream & out) const = 0;
-#if 0
+#if 1
 	void toString(RSString &) const;  
 #endif
 	virtual bool copyvalue(const char *optname, const char *valuestring, unsigned int &currentarg) = 0;
@@ -196,14 +196,14 @@ ostream & OptionT<ValueType, ExtractorType>::writevalue(ostream & out) const {
 
 class DLLEXPORT ProgramOptions {
 public:
-	ProgramOptions(bool expectUnhandled_p = false) : expectUnhandled(expectUnhandled_p), unhandledCounter(0), optcount(0)   { unhandledOptions[0]=0;alloptions[0]=0; };
+	explicit ProgramOptions(bool expectUnhandled_p = false) : expectUnhandled(expectUnhandled_p), unhandledCounter(0), optcount(0)   { unhandledOptions[0]=0;alloptions[0]=0; };
 
 	virtual ~ProgramOptions() {}
 	unsigned int parseoptions(ostream & outstr, unsigned int argc, const char * const*argv) ;
 	// unsigned int sheet: -1 indicates "all"
 	void showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet = -1) const ;
 	void dumpunhandled(ostream & outstr) const ;	
-#if 0
+#if 1
 	void showvalues(ostream & outstr, bool withdescription = true) const ;
 #endif
 	const OptionBase * const * getOptionConstIterator() const { return &alloptions[0]; }
@@ -230,4 +230,3 @@ public:
 };
 
 #endif
- 

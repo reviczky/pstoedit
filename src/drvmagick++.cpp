@@ -2,7 +2,7 @@
    drvMAGICK.cpp : This file is part of pstoedit
    driver for Magick++ API.
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,6 +35,15 @@
 #include I_stdlib
 
 //#include "version.h"
+
+using namespace Magick;
+#if MagickLibVersion  > 0x700
+typedef DrawableStrokeDashArray DrawableDashArrayType;
+typedef std::vector < Magick::Drawable > drawListType;
+#else
+typedef DrawableDashArray DrawableDashArrayType;
+typedef std::list < Magick::Drawable > drawListType;
+#endif
 
 static const bool withdummycontext = false; 
 
@@ -120,14 +129,14 @@ void drvMAGICK::create_vpath(VPathList &vpath)
 		const basedrawingelement & elem = pathElement(n);
 		switch (elem.getType()) {
 		case moveto:{
-				const Point & p = elem.getPoint(0);
+				const ::Point & p = elem.getPoint(0);
 				const Magick::Coordinate coord(p.x_ + x_offset,
 											   currentDeviceHeight - p.y_ + y_offset);
 				vpath.push_back(PathMovetoAbs(coord));
 			}
 			break;
 		case lineto:{
-				const Point & p = elem.getPoint(0);
+				const ::Point & p = elem.getPoint(0);
 				const Magick::Coordinate coord(p.x_ + x_offset,
 											   currentDeviceHeight - p.y_ + y_offset);
 				vpath.push_back(PathLinetoAbs(coord));
@@ -137,9 +146,9 @@ void drvMAGICK::create_vpath(VPathList &vpath)
 			vpath.push_back(PathClosePath());
 			break;
 		case curveto:{
-				const Point & p0 = elem.getPoint(0);
-				const Point & p1 = elem.getPoint(1);
-				const Point & p2 = elem.getPoint(2);
+				const ::Point & p0 = elem.getPoint(0);
+				const ::Point & p1 = elem.getPoint(1);
+				const ::Point & p2 = elem.getPoint(2);
 				vpath.
 					push_back(PathCurvetoAbs
 							  (PathCurvetoArgs
@@ -224,7 +233,7 @@ void drvMAGICK::show_path()
 
 	// Construct drawing list
 #ifndef onedrawlist
-	std::list < Magick::Drawable > drawList;
+	drawListType drawList;
 #endif
 
 	VPathList vpath;
@@ -278,7 +287,7 @@ void drvMAGICK::show_path()
 			dasharray[i] = d_numbers[i];
 		}
 		dasharray[dp.nrOfEntries] = 0;	// mark last element
-		drawList.push_back(DrawableDashArray(dasharray));	// pulls a copy, so we are the owner of dasharray
+		drawList.push_back(DrawableDashArrayType(dasharray));	// pulls a copy, so we are the owner of dasharray
 //??    DrawableDashOffset
 		delete[]dasharray;
 	}

@@ -7,7 +7,7 @@
 
    drvsample.cpp : Backend for TK
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -935,12 +935,10 @@ drvTK::~drvTK()
 
 void drvTK::print_coords()
 {
-	float pc_x;
-	float pc_y;
 	for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
 		const Point & p = pathElement(n).getPoint(0);
-		pc_x = (p.x_ + x_offset) ;
-		pc_y = (currentDeviceHeight - p.y_ + y_offset) ;
+		float pc_x = (p.x_ + x_offset) ;
+		float pc_y = (currentDeviceHeight - p.y_ + y_offset) ;
 		buffer << pc_x;
 		buffer << ' ' << pc_y;
 		if (n != numberOfElementsInPath() - 1) {

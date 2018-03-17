@@ -3,7 +3,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2014 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,10 +47,12 @@
 #define random rand
 #include <process.h>
 
-// work-around - missing on WIndows.
+#if _MSC_VER < 1900
+// work-around - missing on WIndows. before VC2015
 long lroundf(float f) {
         return (long)(floor(f +0.5f));
 }
+#endif
 
 #else
 #include <unistd.h>
@@ -855,7 +857,7 @@ void drvPPTX::close_page()
   struct zip_source * slideContents = zip_source_buffer(outzip, slideContents_c, strlen(slideContents_c), 1);
   ostringstream slideFileName;
   slideFileName << "ppt/slides/slide" << currentPageNumber << ".xml";
-  const char * const slideFileName_c = strdup(slideFileName.str().c_str());  // libzip seems to store a pointer to this.
+  char * const slideFileName_c = strdup(slideFileName.str().c_str());  // libzip seems to store a pointer to this.
   if (zip_add(outzip, slideFileName_c, slideContents) == -1) {
     RSString errmessage("ERROR: Failed to store ");
     errmessage += slideFileName_c ;
@@ -865,6 +867,7 @@ void drvPPTX::close_page()
     errmessage += zip_strerror(outzip) ;
     errmessage += ")" ;
     errorMessage( errmessage.c_str());
+    free(slideFileName_c); // make leak checkers happier
     abort();
   }
 
@@ -913,7 +916,7 @@ unsigned char drvPPTX::panose2pitch  (const unsigned int * panose_vals)
 void drvPPTX::get_font_props(const TextInfo & textinfo,
                              RSString * typeface, RSString * panose,
                              bool * isBold, bool * isItalic,
-                             unsigned char * pitchFamily)
+                             unsigned char * pitchFamily) const
 {
   // Replace PostScript core fonts with Windows fonts.
   RSString currentFontName(textinfo.currentFontName);

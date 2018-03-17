@@ -50,7 +50,7 @@ USESTD
 
 class DLLEXPORT Base64Writer {
 public:
-	Base64Writer( ostream& outf_p) : outf(outf_p), leftbits(0), leftchar(0), column(0), closed(0) {}
+	explicit Base64Writer( ostream& outf_p) : outf(outf_p), leftbits(0), leftchar(0), column(0), closed(0) {}
 	~Base64Writer();
 private:
 	ostream & outf;

@@ -8,7 +8,7 @@ const char * const PS_prologue[] =
 // This file contains some redefinitions of PostScript(TM) operators
 // useful for the conversion of PostScript into a vector format via Ghostscript
 // 
-// Copyright (C) 1993 - 2017 Wolfgang Glunz, wglunz35_AT_pstoedit.net  
+// Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net  
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@ const char * const PS_prologue[] =
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
- " /pstoedit.copyright (Copyright \\(C\\) 1993 - 2014 Wolfgang Glunz) def ",
+ " /pstoedit.copyright (Copyright \\(C\\) 1993 - 2018 Wolfgang Glunz) def ",
  " /pstoedit.image.dotranslate true def ",
  " currentdict /pstoedit.maptoisolatin1 	known not  ",
  " {  ",
@@ -287,13 +287,12 @@ const char * const PS_prologue[] =
  " {  ",
  " revision 353 ge  ",
  " {  ",
- " /NOBIND where ",
+ " /NOBIND where  ",
  " {  ",
  " pop NOBIND  ",
  " } { ",
  " false % no NOBIND found ",
- " }  ",
- " ifelse ",
+ " } ifelse ",
  " /DELAYBIND where  ",
  " {  ",
  " pop DELAYBIND or % or with NOBIND ",
@@ -325,6 +324,7 @@ const char * const PS_prologue[] =
  " /.forcedef /def load def  ",
  " }  ",
  " ifelse ",
+ " /pstoedit.currentglobalvalue false def ",
  " /pstoedit.setglobal { ",
  " systemdict /.setglobal known  ",
  " {  ",
@@ -360,10 +360,14 @@ const char * const PS_prologue[] =
  " bind redef ",
  " }  ",
  " bind def ",
- " pstoedit.currentglobal true pstoedit.setglobal  ",
+ " /pstoedit.currentglobalvalue pstoedit.currentglobal def ",
+ " pstoedit.currentglobal  ",
+ " true pstoedit.setglobal  ",
  " }  ",
  " {  ",
- " pstoedit.currentglobal true pstoedit.setglobal  ",
+ " /pstoedit.currentglobalvalue pstoedit.currentglobal def  ",
+ " pstoedit.currentglobal  ",
+ " true pstoedit.setglobal  ",
  " /soverload  ",
  " {  ",
  " systemdict begin bind def end  ",
@@ -3876,8 +3880,10 @@ const char * const PS_prologue[] =
  " psexit }  ",
  " if ",
  " systemdict readonly pop ",
+ " pstoedit.currentglobalvalue pstoedit.setglobal  ",
  " psexit }  ",
  " { 5211 psentry ",
+ " pstoedit.currentglobalvalue pstoedit.setglobal  ",
  " /NOBIND where  ",
  " {  ",
  " pop NOBIND  ",

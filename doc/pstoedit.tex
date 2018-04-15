@@ -23,8 +23,7 @@
 % \setVersionWord{Version:}  %%% that's the default, no need to set it.
 
 
- 
-\setVersion{3.70 }
+\setVersion{3.71 }
 %\setDate{April 2013}
 %\setVersion{3.62}
 
@@ -78,11 +77,13 @@
 \oOptArg{-pagenumberformat}{~page number format specification}
 \oOpt{-split}
 \oOpt{-v}
+\oOptArg{-vl}{~}
 \oOpt{-usebbfrominput}
 \oOpt{-ssp}
 \oOpt{-sfill}
 \oOptArg{-uchar}{~character}
 \oOpt{-nb}
+\oOpt{-rdb}
 \oOptArg{-page}{~page number}
 \oOptArg{-flat}{~flatness factor}
 \oOpt{-sclip}
@@ -352,52 +353,13 @@ If  the \Opt{-fontmap} option is not specified, \Prog{pstoedit} automatically lo
   \item MS Windows: The same directory where the \Prog{pstoedit} executable is located
 
   \item Unix:\\
-  $<$\emph{The directory where the pstoedit executable is located}$>$\verb+/../lib/+
+  The default installation directory. If it fails, then $<$\emph{The directory where the pstoedit executable is located}$>$\verb+/../lib/+
 
 \end{itemize}
 
 The mpost.fmp in the misc directory of the pstoedit distribution is a sample map file with mappings from over 5000 PostScript font names to their \TeX\ equivalents. This is useful because MetaPost is frequently used with \TeX/\LaTeX\ and those programs do not use standard font names. This file and the MetaPost output format driver are provided by Scott Pakin (\Email{scott+ps2ed\_AT\_pakin.org}).
 Another example is wemf.fmp to be used under Windows. See the misc directory of the pstoedit source distribution.
 After loading the implicit (based on driver name) or explicit (based on the -fontmap option) font map file, a system specific map file is searched and loaded from the installation directory (unix.fmp or windows.fmp). This file can be used to redirect certain fonts to system specific names using the /AliasName notation described above.
-
-
-\end{description}
-\subsection{Debug options}
-\begin{description}
-\item[\oOpt{-dis}]
-Open a display during processing by Ghostscript. Some files only work correctly this way.
-
-
-\item[\oOpt{-q}]
-
-
-
-\item[\oOpt{-nq}]
-no exit from the PostScript interpreter. Normally Ghostscript exits after processing the pstoedit input-file. For debugging it can be useful to avoid this. If you do, you will have to type quit at the \verb+GS>+ prompt to exit from Ghostscript.
-
-
-\item[\oOpt{-v}]
-Switch on verbose mode. Some additional information is shown during processing.
-
-
-\item[\oOpt{-nb}]
-Since version 3.10 \Prog{pstoedit} uses the \texttt{-dDELAYBIND} option when calling Ghostscript. Previously the \texttt{-dNOBIND} option was used instead but that sometimes caused problems if a user's PostScript file overloaded standard PostScript operator with totally new semantic, e.g. lt for lineto instead of the standard meaning of "less than". Using \Opt{-nb} the old style can be activated again in case the \texttt{-dDELAYBIND} gives different results as before. In such a case please also contact the author.
-
-
-\item[\oOpt{-ups}]
-
-
-
-\item[\oOpt{-keep}]
-
-
-
-\item[\oOpt{-debugfonthandling}]
-
-
-
-\item[\oOpt{-gstest}]
-
 
 
 \end{description}
@@ -437,6 +399,53 @@ If the output format does not support curves in the way PostScript does or if th
 \item[\oOpt{-sclip}]
 simulate clipping.
 Most output formats of pstoedit do not have native support for clipping. For that \Prog{pstoedit} offers an option to perform the clipping of the graphics directly without passing the clippath to the output driver. However, this results in curves being replaced by a lot of line segments and thus larger output files. So use this option only if your output looks different from the input due to clipping. In addition, this "simulated clipping" is not exactly the same as defined in PostScript. There might be lines drawn at double size. Also clipping of text is not supported unless you also use the \Opt{-dt} option.
+
+
+\end{description}
+\subsection{Debug options}
+\begin{description}
+\item[\oOpt{-dis}]
+Open a display during processing by Ghostscript. Some files only work correctly this way.
+
+
+\item[\oOpt{-q}]
+
+
+
+\item[\oOpt{-nq}]
+no exit from the PostScript interpreter. Normally Ghostscript exits after processing the pstoedit input-file. For debugging it can be useful to avoid this. If you do, you will have to type quit at the \verb+GS>+ prompt to exit from Ghostscript.
+
+
+\item[\oOpt{-v}]
+Switch on verbose mode. Some additional information is shown during processing.
+
+
+\item[\oOptArg{-vl}{~}]
+Switch on verbose mode with a given level. Some additional information is shown during processing.
+
+
+\item[\oOpt{-nb}]
+Since version 3.10 \Prog{pstoedit} uses the \texttt{-dDELAYBIND} option when calling Ghostscript. Previously the \texttt{-dNOBIND} option was used instead but that sometimes caused problems if a user's PostScript file overloaded standard PostScript operator with totally new semantic, e.g. lt for lineto instead of the standard meaning of "less than". Using \Opt{-nb} the old style can be activated again in case the \texttt{-dDELAYBIND} gives different results as before. In such a case please also contact the author.
+
+
+\item[\oOpt{-rdb}]
+Since version 3.10 \Prog{pstoedit} uses the \texttt{-dDELAYBIND} option when calling Ghostscript. But in version 9.22 of GhostScript, that option is not supported anymore because of security reasons. As a fallback, that version provides the REALLYDELAYBIND option and pstoedit can use this if you supply the \Opt{-rdb} option. Use this with caution as it might open security risks, e.g. a PostScript file injecting some malicious code into PostScript standard operators. However, not using this option can cause some of the PostScript drawings operations to be not seen by pstoedit, hence causing missing artefacts in the output. Later versions of Ghostscript will probably support -dDELAYBIND again. But also in that case the security risk remains. So be careful with what files you process with pstoedit and Ghostscript.
+
+
+\item[\oOpt{-ups}]
+
+
+
+\item[\oOpt{-keep}]
+
+
+
+\item[\oOpt{-debugfonthandling}]
+
+
+
+\item[\oOpt{-gstest}]
+
 
 
 \end{description}
@@ -571,8 +580,8 @@ plotutil format to generate
 
 \end{description}
 %%// end of options
-\subsubsection{magick - MAGICK driver compatible with version 6.9.0 of ImageMagick.}
-This driver uses the C++ API of ImageMagick or GraphicsMagick to finally produce different output formats. The output format is determined automatically by Image-/GraphicsMagick based on the suffix of the output filename. So an output file test.png will force the creation of an image in PNG format. This binary of pstoedit was compiled against version 6.9.0 of ImageMagick.
+\subsubsection{magick - MAGICK driver compatible with version 7.0.7 of ImageMagick.}
+This driver uses the C++ API of ImageMagick or GraphicsMagick to finally produce different output formats. The output format is determined automatically by Image-/GraphicsMagick based on the suffix of the output filename. So an output file test.png will force the creation of an image in PNG format. This binary of pstoedit was compiled against version 7.0.7 of ImageMagick.
 
 No driver specific options
 %%// end of options

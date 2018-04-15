@@ -442,14 +442,17 @@ private:
 #if WITHRDB
 	reallydelaybindversion	(true, "-rdb",noArgument,b_t,"use REALLYDELAYBIND option for gs, instead of the former DELAYBIND which is not supported anymore since gs 9.2x",
 		"Since version 3.10 \\Prog{pstoedit} uses the "
-		"\\texttt{-dDELAYBIND} option when calling Ghostscript. But since version 9.2x of "
+		"\\texttt{-dDELAYBIND} option when calling Ghostscript. But in version 9.22 of "
 		"GhostScript, that option is not supported anymore because of security reasons. " 
-		"As a fallback, newer versions of Ghostscript provide the REALLYDELAYBIND option "
+		"As a fallback, that version provides the REALLYDELAYBIND option "
 		"and pstoedit can use this if you supply the \\Opt{-rdb} option. "
 		"Use this with caution as it might open security risks, e.g. a PostScript file "
 		"injecting some malicious code into PostScript standard operators. " 
 		"However, not using this option can cause some of the PostScript drawings operations "
-		"to be not seen by pstoedit, hence causing missing artefacts in the output.",
+		"to be not seen by pstoedit, hence causing missing artefacts in the output. "
+		"Later versions of Ghostscript will probably support -dDELAYBIND again. "
+		"But also in that case the security risk remains. So be careful with what "
+		"files you process with pstoedit and Ghostscript.",
 		false),	//
 #endif
 	pagetoextract		(true, "-page","page number",g_t,"extract a specific page: 0 means all pages",

@@ -1,5 +1,5 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<!-- Manual page created with latex2man on Thu Jan  1 20:55:13 CET 2015
+<!-- Manual page created with latex2man on So,  1. Apr 2018 20:35:22
 ** Author of latex2man: Juergen.Vollmer@informatik-vollmer.de
 ** NOTE: This file is generated, DO NOT EDIT. -->
 <html>
@@ -9,8 +9,8 @@
 PSTOEDIT 
 </h1>
 <h4 align=center>Dr. Wolfgang Glunz </h4>
-<h4 align=center>01 January 2015</h4>
-<h4 align=center>Version 3.70 </h4>
+<h4 align=center>01 April 2018</h4>
+<h4 align=center>Version 3.71 </h4>
 <tt>pstoedit</tt>
 - a tool converting PostScript and PDF files into various 
 vector graphic formats 
@@ -33,8 +33,8 @@ vector graphic formats
 <ul>
 <li><a href="#section_11">General options </a></li>
 <li><a href="#section_12">Text and font handling related options </a></li>
-<li><a href="#section_13">Debug options </a></li>
-<li><a href="#section_14">Drawing related options </a></li>
+<li><a href="#section_13">Drawing related options </a></li>
+<li><a href="#section_14">Debug options </a></li>
 <li><a href="#section_15">Input and outfile file arguments </a></li>
 </ul>
 <li><a href="#section_16">Available formats and their specific options </a>
@@ -56,7 +56,7 @@ vector graphic formats
 <li><a href="#section_31">plot-pcl - pcl via GNU libplot </a></li>
 <li><a href="#section_32">plot-hpgl - hpgl via GNU libplot </a></li>
 <li><a href="#section_33">plot-tek - tek via GNU libplot </a></li>
-<li><a href="#section_34">magick - MAGICK driver compatible with version 6.9.0 of ImageMagick. </a></li>
+<li><a href="#section_34">magick - MAGICK driver compatible with version 7.0.7 of ImageMagick. </a></li>
 <li><a href="#section_35">swf - SWF driver:  </a></li>
 <li><a href="#section_36">svg - Scalable Vector Graphics </a></li>
 <li><a href="#section_37">xaml - eXtensible Application Markup Language </a></li>
@@ -167,11 +167,13 @@ vector graphic formats
 [<font class="optstyle">-pagenumberformat</font><font class="argstyle">&nbsp;page number format specification</font>]
 [<b>-split</b>]
 [<b>-v</b>]
+[<font class="optstyle">-vl</font><font class="argstyle">&nbsp;</font>]
 [<b>-usebbfrominput</b>]
 [<b>-ssp</b>]
 [<b>-sfill</b>]
 [<font class="optstyle">-uchar</font><font class="argstyle">&nbsp;character</font>]
 [<b>-nb</b>]
+[<b>-rdb</b>]
 [<font class="optstyle">-page</font><font class="argstyle">&nbsp;page number</font>]
 [<font class="optstyle">-flat</font><font class="argstyle">&nbsp;flatness factor</font>]
 [<b>-sclip</b>]
@@ -220,7 +222,7 @@ details.
 <h4><a name="section_6">RELEASE LEVEL</a></h4>
 
 <p>
-This manpage documents release 3.70  of <tt>pstoedit</tt>.
+This manpage documents release 3.71  of <tt>pstoedit</tt>.
 <p>
 <h4><a name="section_7">USE</a></h4>
 
@@ -561,7 +563,7 @@ in the installation directory and uses that file as a default fontmap file if av
 </li>
 <li>Unix:<br>
  
-&lt;<em>The directory where the pstoedit executable is located</em>&gt;
+The default installation directory. If it fails, then &lt;<em>The directory where the pstoedit executable is located</em>&gt;
 <tt>/../lib/</tt> 
 <p>
 </li>
@@ -573,65 +575,7 @@ After loading the implicit (based on driver name) or explicit (based on the -fon
 <p>
 </dd>
 </dl>
-<h4><a name="section_13">Debug options</a></h4>
-
-<dl compact>
-<dt>[<b>-dis</b>]
-</dt>
-<dd> 
-Open a display during processing by Ghostscript. Some files only work correctly this way. 
-<p>
-</dd>
-<dt>[<b>-q</b>]
-</dt>
-<dd> 
-<p>
-</dd>
-<dt>[<b>-nq</b>]
-</dt>
-<dd> 
-no exit from the PostScript interpreter. Normally Ghostscript exits after processing the pstoedit input-file. For debugging it can be useful to avoid this. If you do, you will have to type quit at the <tt>GS&gt;</tt> prompt to exit from Ghostscript. 
-<p>
-</dd>
-<dt>[<b>-v</b>]
-</dt>
-<dd> 
-Switch on verbose mode. Some additional information is shown during processing. 
-<p>
-</dd>
-<dt>[<b>-nb</b>]
-</dt>
-<dd> 
-Since version 3.10 <tt>pstoedit</tt>
-uses the <tt>-dDELAYBIND</tt>
-option when calling Ghostscript. Previously the <tt>-dNOBIND</tt>
-option was used instead but that sometimes caused problems if a user's PostScript file overloaded standard PostScript operator with totally new semantic, e.g. lt for lineto instead of the standard meaning of "less than". Using <b>-nb</b>
-the old style can be activated again in case the <tt>-dDELAYBIND</tt>
-gives different results as before. In such a case please also contact the author. 
-<p>
-</dd>
-<dt>[<b>-ups</b>]
-</dt>
-<dd> 
-<p>
-</dd>
-<dt>[<b>-keep</b>]
-</dt>
-<dd> 
-<p>
-</dd>
-<dt>[<b>-debugfonthandling</b>]
-</dt>
-<dd> 
-<p>
-</dd>
-<dt>[<b>-gstest</b>]
-</dt>
-<dd> 
-<p>
-</dd>
-</dl>
-<h4><a name="section_14">Drawing related options</a></h4>
+<h4><a name="section_13">Drawing related options</a></h4>
 
 <dl compact>
 <dt>[<b>-nc</b>]
@@ -694,6 +638,79 @@ simulate clipping.
 Most output formats of pstoedit do not have native support for clipping. For that <tt>pstoedit</tt>
 offers an option to perform the clipping of the graphics directly without passing the clippath to the output driver. However, this results in curves being replaced by a lot of line segments and thus larger output files. So use this option only if your output looks different from the input due to clipping. In addition, this "simulated clipping" is not exactly the same as defined in PostScript. There might be lines drawn at double size. Also clipping of text is not supported unless you also use the <b>-dt</b>
 option. 
+<p>
+</dd>
+</dl>
+<h4><a name="section_14">Debug options</a></h4>
+
+<dl compact>
+<dt>[<b>-dis</b>]
+</dt>
+<dd> 
+Open a display during processing by Ghostscript. Some files only work correctly this way. 
+<p>
+</dd>
+<dt>[<b>-q</b>]
+</dt>
+<dd> 
+<p>
+</dd>
+<dt>[<b>-nq</b>]
+</dt>
+<dd> 
+no exit from the PostScript interpreter. Normally Ghostscript exits after processing the pstoedit input-file. For debugging it can be useful to avoid this. If you do, you will have to type quit at the <tt>GS&gt;</tt> prompt to exit from Ghostscript. 
+<p>
+</dd>
+<dt>[<b>-v</b>]
+</dt>
+<dd> 
+Switch on verbose mode. Some additional information is shown during processing. 
+<p>
+</dd>
+<dt>[<font class="optstyle">-vl</font><font class="argstyle">&nbsp;</font>]
+</dt>
+<dd> 
+Switch on verbose mode with a given level. Some additional information is shown during processing. 
+<p>
+</dd>
+<dt>[<b>-nb</b>]
+</dt>
+<dd> 
+Since version 3.10 <tt>pstoedit</tt>
+uses the <tt>-dDELAYBIND</tt>
+option when calling Ghostscript. Previously the <tt>-dNOBIND</tt>
+option was used instead but that sometimes caused problems if a user's PostScript file overloaded standard PostScript operator with totally new semantic, e.g. lt for lineto instead of the standard meaning of "less than". Using <b>-nb</b>
+the old style can be activated again in case the <tt>-dDELAYBIND</tt>
+gives different results as before. In such a case please also contact the author. 
+<p>
+</dd>
+<dt>[<b>-rdb</b>]
+</dt>
+<dd> 
+Since version 3.10 <tt>pstoedit</tt>
+uses the <tt>-dDELAYBIND</tt>
+option when calling Ghostscript. But in version 9.22 of GhostScript, that option is not supported anymore because of security reasons. As a fallback, that version provides the REALLYDELAYBIND option and pstoedit can use this if you supply the <b>-rdb</b>
+option. Use this with caution as it might open security risks, e.g. a PostScript file injecting some malicious code into PostScript standard operators. However, not using this option can cause some of the PostScript drawings operations to be not seen by pstoedit, hence causing missing artefacts in the output. Later versions of Ghostscript will probably support -dDELAYBIND again. But also in that case the security risk remains. So be careful with what files you process with pstoedit and Ghostscript. 
+<p>
+</dd>
+<dt>[<b>-ups</b>]
+</dt>
+<dd> 
+<p>
+</dd>
+<dt>[<b>-keep</b>]
+</dt>
+<dd> 
+<p>
+</dd>
+<dt>[<b>-debugfonthandling</b>]
+</dt>
+<dd> 
+<p>
+</dd>
+<dt>[<b>-gstest</b>]
+</dt>
+<dd> 
 <p>
 </dd>
 </dl>
@@ -853,9 +870,9 @@ plotutil format to generate
 <p>
 </dd>
 </dl>
-<h5><a name="section_34">magick - MAGICK driver compatible with version 6.9.0 of ImageMagick.</a></h5>
+<h5><a name="section_34">magick - MAGICK driver compatible with version 7.0.7 of ImageMagick.</a></h5>
 
-This driver uses the C++ API of ImageMagick or GraphicsMagick to finally produce different output formats. The output format is determined automatically by Image-/GraphicsMagick based on the suffix of the output filename. So an output file test.png will force the creation of an image in PNG format. This binary of pstoedit was compiled against version 6.9.0 of ImageMagick. 
+This driver uses the C++ API of ImageMagick or GraphicsMagick to finally produce different output formats. The output format is determined automatically by Image-/GraphicsMagick based on the suffix of the output filename. So an output file test.png will force the creation of an image in PNG format. This binary of pstoedit was compiled against version 7.0.7 of ImageMagick. 
 <p>
 No driver specific options 
 <h5><a name="section_35">swf - SWF driver: </a></h5>

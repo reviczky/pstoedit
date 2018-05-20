@@ -236,8 +236,8 @@ void drvJAVA::show_path()
 }
 
 
-static DriverDescriptionT < drvJAVA > D_java("java1", "java 1 applet source code", "","java", false,	// if backend supports subpathes, else 0
-											 // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvJAVA > D_java("java1", "java 1 applet source code", "","java", false,	// if backend supports subpaths, else 0
+											 // if subpaths are supported, the backend must deal with
 											 // sequences of the following form
 											 // moveto (start of subpath)
 											 // lineto (a line segment)

@@ -372,7 +372,7 @@ checkall:
 
 lexyy.$(OBJEXT): lexyy.cpp drvbase.h drvfuncs.h psimage.h
 drvbase.$(OBJEXT): drvbase.cpp drvbase.h drvfuncs.h psimage.h
-pstoedit.$(OBJEXT): pstoedit.cpp drvbase.h drvfuncs.h psfront.h pstoedit.h pstoedit.ph version.h 
+pstoedit.$(OBJEXT): pstoedit.cpp drvbase.h drvfuncs.h psfront.h pstoedit.h pstoedit.ph
 $(MAIN).$(OBJEXT): $(MAIN).cpp pstoedit.h
 
 drvtgif.$(OBJEXT): drvtgif.cpp drvtgif.h drvbase.h drvfuncs.h psimage.h

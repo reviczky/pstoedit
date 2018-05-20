@@ -26,8 +26,6 @@
 #include <iostream>
 #include <fstream>
 
-// #include "version.h"
-
 // TODO
 //
 // - fix text font selection
@@ -700,8 +698,8 @@ static DriverDescriptionT < drvCAIRO > D_cairo("cairo",  // name
 					       "cairo driver", // short description
 					       "generates compilable c code for rendering with cairo", // long description
 					       "c", // output file suffix
-					       true,	// backend supports subpathes
-					       // if subpathes are supported, the backend must deal with
+					       true,	// backend supports subpaths
+					       // if subpaths are supported, the backend must deal with
 					       // sequences of the following form
 					       // moveto (start of subpath)
 					       // lineto (a line segment)

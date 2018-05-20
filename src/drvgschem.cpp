@@ -73,8 +73,8 @@ void drvGSCHEM::show_path()
 
 
 static DriverDescriptionT < drvGSCHEM > D_gschem("gschem", "gschem format", 
-												 "See also:  \\URL{http://www.geda.seul.org/tools/gschem/}","gschem", false,	// if backend supports subpathes
-												   // if subpathes are supported, the backend must deal with
+												 "See also:  \\URL{http://www.geda.seul.org/tools/gschem/}","gschem", false,	// if backend supports subpaths
+												   // if subpaths are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)
 												   // lineto (a line segment)

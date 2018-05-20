@@ -29,8 +29,7 @@
 #include <cmath>
 
 #include "drvbase.h"
- 
-#include "version.h"
+#include "pstoedit_config.h"
  
 #include I_iomanip
 
@@ -297,6 +296,21 @@ void PSImage::writeEPSImage(ostream & outi) const
 {
 	if (isFileImage) {
 #ifdef HAVE_LIBGD
+// this code looks to be obsolete now. Only driver using png for internal image transfer
+// was drvasy. Changed that to memoryeps - so "isFileImage" should be false then
+// when writeEPSImage is being called from drvasy.
+// wogl: 180513
+#if 1
+		static bool first = true;
+		if (first) {
+			cerr << "Seems like some meant to be dead code for PNG to EPS image file conversion is still needed. "
+				    "Please notify author of pstoedit." << endl;
+			first = false;
+		}
+		assert(false);
+		return;
+
+#else
 		FILE* in = fopen(FileName.c_str(),"rb");
 		if (!in) { 
 			cerr << "Error opening file " <<FileName.c_str() << endl;
@@ -312,7 +326,7 @@ void PSImage::writeEPSImage(ostream & outi) const
 		
 		outi << "%!PS-Adobe-2.0 EPSF-2.0\n";
 		outi << "%%Title: image created by pstoedit\n";
-		outi << "%%Creator: pstoedit version "<< version << endl;
+		outi << "%%Creator: pstoedit version " << PACKAGE_VERSION << endl;
 		outi << "%%BoundingBox: " 
 		     << floor(ll.x_) << " " << floor(ll.y_) << " "
 		     << ceil(ur.x_) << " " << ceil(ur.y_) << endl;
@@ -369,6 +383,7 @@ void PSImage::writeEPSImage(ostream & outi) const
 		
 		gdImageDestroy(im);
 		return;
+#endif
 #else
 		static bool first=true;
 		if(first) {
@@ -383,7 +398,7 @@ void PSImage::writeEPSImage(ostream & outi) const
 	// into a separate *.eps file
 	outi << "%!PS-Adobe-2.0 EPSF-2.0" << endl;
 	outi << "%%Title: image created by pstoedit" << endl;
-	outi << "%%Creator: pstoedit version " << version << endl;
+	outi << "%%Creator: pstoedit version " << PACKAGE_VERSION << endl;
 	outi << "%%BoundingBox: " << floor(ll.x_) << " " << floor(ll.y_) << " "
 	     << ceil(ur.x_) << " " << ceil(ur.y_) << endl;
 	outi << "%%Pages: 1" << endl;

@@ -440,8 +440,8 @@ static DriverDescriptionT<drvPCB1> D_pcb("pcbi","engrave data - insulate/PCB for
 										 "See \\URL{http://home.vr-web.de/\\Tilde hans-juergen-jahn/software/devpcb.html} for more details.",
 										 "dat",
 								
-		false, // backend supports subpathes
-		   // if subpathes are supported, the backend must deal with
+		false, // backend supports subpaths
+		   // if subpaths are supported, the backend must deal with
 		   // sequences of the following form
 		   // moveto (start of subpath)
 		   // lineto (a line segment)

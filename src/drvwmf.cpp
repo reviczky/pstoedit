@@ -1429,8 +1429,8 @@ void drvWMF::show_image(const PSImage & image)
 // Under libemf, a createMetaFile effectively creates an enhMetaFile but that confuses almost all
 // programs which expect to read an WMF with an aldus placeable header
 // 
-static DriverDescriptionT < drvWMF > D_wmf("wmf", "MS Windows Metafile", "","wmf", true,	// backend supports subpathes
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvWMF > D_wmf("wmf", "MS Windows Metafile", "","wmf", true,	// backend supports subpaths
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)
@@ -1452,8 +1452,8 @@ static DriverDescriptionT < drvWMF > D_wmf("wmf", "MS Windows Metafile", "","wmf
 										   );
 #endif
 
-static DriverDescriptionT < drvWMF > D_emf("emf", "Enhanced MS Windows Metafile", "","emf", true,	// backend supports subpathes
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvWMF > D_emf("emf", "Enhanced MS Windows Metafile", "","emf", true,	// backend supports subpaths
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)

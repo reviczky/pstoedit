@@ -32,7 +32,7 @@ struct DriverDescription_S {
 	const char *	explanation;
 	const char *	suffix;
 	const char *	additionalInfo;
-	int		backendSupportsSubPathes;
+	int		backendSupportsSubPaths;
 	int		backendSupportsCurveto;
 	int 		backendSupportsMerging; 
 	int 		backendSupportsText;

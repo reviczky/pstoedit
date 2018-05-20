@@ -9,6 +9,10 @@
 
 <h1 align="left">Changelog for pstoedit</h1>
 
+<h2>New or changed in 3.72:</h2>
+  <ul>
+    <li>include a bunch of Debian patches to mainstream. No functional changes. Thanks Barak Pearlmutter for his help.</li>
+  </ul>
 <h2>New or changed in 3.71:</h2>
   <ul>
     <li>added a -vl option to specify a verbosity level. Using the older -v enables level 1. For more use -vl 2.</li>
@@ -310,7 +314,7 @@
     Russell Lang.</li>
   <li>added a general -help option for each driver to show driver specific options. For
     example -f xfig:-help shows specific options for the fig backend.</li>
-  <li>minor bug fix in CGM backend - some pathes triggered an assertion violation.</li>
+  <li>minor bug fix in CGM backend - some paths triggered an assertion violation.</li>
   <li>several enhancements for the DXF backend. Now it supports the DXF SPLINE element as
     well. Big thanks to Daniel Gehriger <a href="mailto:gehriger_AT_linkcad.com">(gehriger_AT_linkcad.com</a>)
     for his help concerning the DXF format.</li>
@@ -515,7 +519,7 @@
     This is still in an experimenal stage!</li>
   <li>added an option (-nc) to force the replacement of curves with line segments even for
     backends that support curves.</li>
-  <li>fixed a bug with the -flat option not beeing honoured correctly in combination with the
+  <li>fixed a bug with the -flat option not being honoured correctly in combination with the
     new -nc option</li>
   <li>added an option to emulate clipping (-sclip). This however results in larger number of
     points ! Use it only if the missing support for clipping causes problems with your file.</li>
@@ -534,7 +538,7 @@
     gs5.82.</li>
   <li>bux fix in documentation (-fontmap instead of -mapfile).</li>
   <li>added some support for easier retrieval of dash patterns from within backends.</li>
-  <li>extended the check for &quot;mergable&quot; path to include also eofilled pathes and
+  <li>extended the check for &quot;mergable&quot; path to include also eofilled paths and
     made pathsCanBeMerged virtual so it can be overloaded by a specific backend.</li>
   <li>changed again the version of drvbase. This means that all plugins need to be updated
     (just the .dll not the keys). Otherwise you will get an error message.</li>
@@ -560,7 +564,7 @@
   <li>Burkhard Plaum <a href="mailto:(plaum_AT_IPF.Uni-Stuttgart.de">(plaum_AT_IPF.Uni-Stuttgart.de</a>)
     added support for complex filled paths (paths consisting of an arbitraty sequence of
     moveto, lineto and curveto in combination with fill and eofill) to the xfig backend. In
-    future, this will be made available to other backend that don't support such pathes as
+    future, this will be made available to other backend that don't support such paths as
     well. In order to activate this feature you need to specify the -ssp (simulate sub paths)
     option.</li>
   <li>changed again the version of drvbase due to the support for complex paths. This means

@@ -21,13 +21,13 @@
 */
 
 #include "drvtgif.h"
-#include "version.h"
 #include I_fstream
 #include I_stdio
 #include I_stdlib
 
 // for sin and cos
 #include <math.h>
+#include <pstoedit_config.h>
 
 
 static const char *colorstring(float r, float g, float b)
@@ -77,7 +77,7 @@ drvTGIF::~drvTGIF()
 		",0,0,1,16,1,9,1,1,0,0,1,0,1,0,'Courier',0,17,0,0,1,5,0,0,1,1,0,16,1,0,1,"
 		<< currentPageNumber << ",1,0,1056,1497,0,0,2880)." << endl;
 	outf << "unit(\"1 pixel/pixel\")." << endl;
-	outf << "generated_by(\"pstoedit\",0,\"" << version << "\")." << endl;
+	outf << "generated_by(\"pstoedit\",0,\"" << PACKAGE_VERSION << "\")." << endl;
 	// now we can copy the buffer the output
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
@@ -371,8 +371,8 @@ void drvTGIF::show_rectangle(const float llx, const float lly, const float urx, 
 		<< "," << Fill << "," << objectId++ << ",0,0,0,0,0,'1',[" << endl << "])." << endl;
 }
 
-static DriverDescriptionT < drvTGIF > D_tgif("tgif", "Tgif .obj format", "","obj", false,	// if backend supports subpathes, else 0
-											 // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvTGIF > D_tgif("tgif", "Tgif .obj format", "","obj", false,	// if backend supports subpaths, else 0
+											 // if subpaths are supported, the backend must deal with
 											 // sequences of the following form
 											 // moveto (start of subpath)
 											 // lineto (a line segment)

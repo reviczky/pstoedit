@@ -326,7 +326,7 @@ bool drvbase::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) c
 			 && path2.currentLineType == solid && ((path1.currentShowType == fill)
 												   || (path1.currentShowType == eofill))))
 		&& (path1.numberOfElementsInPath == path2.numberOfElementsInPath)) {
-		//errf << "Pathes seem to be mergeable" << endl;
+		//errf << "Paths seem to be mergeable" << endl;
 		for (unsigned int i = 0; i < path1.numberOfElementsInPath; i++) {
 			const basedrawingelement *bd1 = path1.path[i];
 			const basedrawingelement *bd2 = path2.path[i];
@@ -339,11 +339,11 @@ bool drvbase::pathsCanBeMerged(const PathInfo & path1, const PathInfo & path2) c
 				return false;
 		}
 		if (verbose)
-			errf << "Pathes are mergeable" << endl;
+			errf << "Paths are mergeable" << endl;
 		return true;
 	} else {
 		if (verbose)
-			errf << "Pathes are not mergable:" <<
+			errf << "Paths are not mergable:" <<
 				" PI1 st " << (int) path1.currentShowType <<
 				" PI1 lt " << (int) path1.currentLineType <<
 				" PI1 el " << path1.numberOfElementsInPath <<
@@ -881,7 +881,7 @@ unsigned int drvbase::nrOfSubpaths() const
 }
 
 
-void drvbase::dumpRearrangedPathes()
+void drvbase::dumpRearrangedPaths()
 {
 	// Count the subpaths
 	unsigned int numpaths = nrOfSubpaths();
@@ -959,7 +959,7 @@ bool drvbase::close_output_file_and_reopen_in_binary_mode()
 void drvbase::beginClipPath()
 {
 	// now we start a clippath, so we need to dump
-	// all previous pathes
+	// all previous paths
 	flushOutStanding();
 	last_currentPath = currentPath;
 	currentPath = &clippath;
@@ -1031,7 +1031,7 @@ void drvbase::dumpPath(bool doFlushText)
 		// a polygon with two points is drawn as a line
 
 		// PROBLEM ! This resetting has an impact on the subsequent segments
-		// if subpathes are not supported by the backend !!!!
+		// if subpaths are not supported by the backend !!!!
 		currentPath->isPolygon = false;
 		currentPath->currentShowType = drvbase::stroke;
 	}
@@ -1085,8 +1085,8 @@ void drvbase::dumpPath(bool doFlushText)
 	}
 	if (numberOfElementsInPath() > 0) {
 
-		// nothing to do for empty pathes
-		// pathes may be empty due to a merge operation
+		// nothing to do for empty paths
+		// paths may be empty due to a merge operation
 
 		if (verbose) {
 			errf << "working on";
@@ -1136,13 +1136,13 @@ void drvbase::dumpPath(bool doFlushText)
 					show_rectangle(llx, lly, urx, ury);
 				} else {
 					if (globaloptions.simulateSubPaths)
-						dumpRearrangedPathes();
+						dumpRearrangedPaths();
 					else
 						show_or_convert_path();
 				}
 			} else {			/* PolyLine */
 				if (globaloptions.simulateSubPaths)
-					dumpRearrangedPathes();
+					dumpRearrangedPaths();
 				else
 					show_or_convert_path();
 			}
@@ -1491,7 +1491,7 @@ DriverDescription::DriverDescription(	const char *const s_name,
 										const char *const short_expl, 
 										const char *const long_expl, 
 										const char *const suffix_p, 
-										const bool backendSupportsSubPathes_p, 
+										const bool backendSupportsSubPaths_p, 
 										const bool backendSupportsCurveto_p, 
 										const bool backendSupportsMerging_p,	// merge a separate outline and filling of a polygon -> 1. element
 										const bool backendSupportsText_p, 
@@ -1505,7 +1505,7 @@ DriverDescription::DriverDescription(	const char *const s_name,
 	short_explanation(short_expl), 
 	long_explanation(long_expl), 
 	suffix(suffix_p), 
-	backendSupportsSubPathes(backendSupportsSubPathes_p), 
+	backendSupportsSubPaths(backendSupportsSubPaths_p), 
 	backendSupportsCurveto(backendSupportsCurveto_p), 
 	backendSupportsMerging(backendSupportsMerging_p),	// merge a separate outline and filling of a polygon -> 1. element
 	backendSupportsText(backendSupportsText_p), 

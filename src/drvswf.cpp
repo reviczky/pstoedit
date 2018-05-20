@@ -698,8 +698,8 @@ static DriverDescriptionT < drvSWF > D_SWF("swf",	//
 										   "SWF driver: ",	//
 										   "",
 										   "swf",	//
-										   false,	// backend supports subpathes
-										   // if subpathes are supported, the backend must deal with
+										   false,	// backend supports subpaths
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)

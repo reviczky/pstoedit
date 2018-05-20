@@ -2799,7 +2799,7 @@ YY_RULE_SETUP
 				// this is an intermediate moveto
 				// if backend supports subpaths add it
 				// else dump last path and start a new one
-				if (backend->globaloptions.simulateSubPaths || backend->driverdesc.backendSupportsSubPathes) {
+				if (backend->globaloptions.simulateSubPaths || backend->driverdesc.backendSupportsSubPaths) {
 //					Point p(origx,origy);
 					backend->addtopath(new Moveto(origx,origy));  
 				} else {
@@ -2888,7 +2888,7 @@ YY_RULE_SETUP
 				backend->removeFromElementFromPath();
 				// no need to close the path, it's already closed
 			 } /* else */ {
-				if (backend->globaloptions.simulateSubPaths || backend->driverdesc.backendSupportsSubPathes) {
+				if (backend->globaloptions.simulateSubPaths || backend->driverdesc.backendSupportsSubPaths) {
 			 		backend->addtopath(new Closepath(origx,origy)); 
 				} else {
 			 		backend->addtopath(new Lineto(origx,origy)); // pass p as array

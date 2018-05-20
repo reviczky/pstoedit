@@ -75,8 +75,6 @@ long lroundf(float f) {
 
 #endif
 
-// #include "version.h"
-
 /*
   The following are some things to know about the Office Open XML
   (OOXML) DrawingML format (a.k.a. PowerPoint or pptx) that should
@@ -1770,8 +1768,8 @@ D_pptx("pptx",
        "PresentationML (PowerPoint) format",
        "This is the format used internally by Microsoft PowerPoint.  LibreOffice can also read/write PowerPoint files albeit with some lack of functionality.",
        "pptx",
-       true,   // backend supports subpathes
-       // if subpathes are supported, the backend must deal with
+       true,   // backend supports subpaths
+       // if subpaths are supported, the backend must deal with
        // sequences of the following form
        // moveto (start of subpath)
        // lineto (a line segment)

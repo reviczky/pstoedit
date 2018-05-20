@@ -33,15 +33,22 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
 #ifdef __hpux
 // HP-UX does not define getcwd in unistd.h
 extern "C"  char *getcwd(char *, size_t);
 #endif
 
+#elif defined(_WIN32)
+#include <windows.h>
+#include <direct.h>
+#elif defined (__OS2__)
+#define INCL_DOS
+#define INCL_WINWINDOWMGR
+#define INCL_WINSHELLDATA		/* Window Shell functions       */
+#define INCL_WINERRORS
+#include <os2.h>
 #else
-// not Unix like
-
+// not Unix / winwdows like
 #if HAVE_DIRENT_H
 #include <dirent.h>
 #elif HAVE_SYS_NDIR_H
@@ -50,11 +57,7 @@ extern "C"  char *getcwd(char *, size_t);
 #include <sys/dir.h>
 #elif HAVE_NDIR_H
 #include <ndir.h>
-#else
-// last chance
-#include <direct.h>
 #endif
-
 #endif
 
 #ifdef HAVE_MKSTEMP
@@ -63,20 +66,7 @@ extern "C"  char *getcwd(char *, size_t);
 #endif
 
 #include I_stdlib
-
 #include I_string_h
-
-
-#if defined(_WIN32)
-#include <windows.h>
-#elif defined (__OS2__)
-#define INCL_DOS
-#define INCL_WINWINDOWMGR
-#define INCL_WINSHELLDATA		/* Window Shell functions       */
-#define INCL_WINERRORS
-#include <os2.h>
-#endif
-
 
 #if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined (NetBSD) 
 //take this out (we may have backslashes w/ EMX(OS/2)):  || defined(__EMX__)

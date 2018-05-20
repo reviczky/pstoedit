@@ -408,8 +408,8 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 }
 
 
-static DriverDescriptionT < drvJAVA2 > D_java2("java2", "java 2 source code", "","java2", true,	// if backend supports subpathes, else 0
-											   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvJAVA2 > D_java2("java2", "java 2 source code", "","java2", true,	// if backend supports subpaths, else 0
+											   // if subpaths are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)
 											   // lineto (a line segment)

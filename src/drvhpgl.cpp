@@ -509,8 +509,8 @@ void drvHPGL::show_path()
 }
 
 
-static DriverDescriptionT < drvHPGL > D_HPGL("hpgl", "HPGL code", "","hpgl", false,	// backend supports subpathes
-												 // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvHPGL > D_HPGL("hpgl", "HPGL code", "","hpgl", false,	// backend supports subpaths
+												 // if subpaths are supported, the backend must deal with
 												 // sequences of the following form
 												 // moveto (start of subpath)
 												 // lineto (a line segment)
@@ -529,8 +529,8 @@ static DriverDescriptionT < drvHPGL > D_HPGL("hpgl", "HPGL code", "","hpgl", fal
 												 DriverDescription::normalopen, false,	// backend support multiple pages
 												 false /*clipping */ );
 
-static DriverDescriptionT < drvHPGL > D_PCL("pcl", "PCL code", "","pcl", false,	// backend supports subpathes
-												 // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvHPGL > D_PCL("pcl", "PCL code", "","pcl", false,	// backend supports subpaths
+												 // if subpaths are supported, the backend must deal with
 												 // sequences of the following form
 												 // moveto (start of subpath)
 												 // lineto (a line segment)

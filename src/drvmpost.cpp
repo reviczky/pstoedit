@@ -416,8 +416,8 @@ void drvMPOST::show_path()
 	print_coords();
 }
 
-static DriverDescriptionT < drvMPOST > D_mpost("mpost", "MetaPost format", "","mp", true,	// if backend supports subpathes, else 0
-											   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvMPOST > D_mpost("mpost", "MetaPost format", "","mp", true,	// if backend supports subpaths, else 0
+											   // if subpaths are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)
 											   // lineto (a line segment)

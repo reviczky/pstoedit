@@ -306,11 +306,11 @@ typedef KeyValuePair<RSString,RSString> FontMapping ;
 
 
 //lint -esym(1790,Mapper*)
-#ifndef BUGGYGPP
+//#ifndef BUGGYGPP
 class DLLEXPORT FontMapper: public Mapper<FontMapping>
-#else /* BUGGYGPP */
-class DLLEXPORT FontMapper: public Mapper<FontMapping,RSString,RSString>
-#endif /* BUGGYGPP */
+//#else /* BUGGYGPP */
+//class DLLEXPORT FontMapper: public Mapper<FontMapping,RSString,RSString>
+//#endif /* BUGGYGPP */
 {
 public:
   void readMappingTable(ostream & errstream,const char * filename);

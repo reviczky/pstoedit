@@ -36,7 +36,7 @@
 USESTD
 #else
 #if defined (__GNUG__)  && (__GNUC__>=3) 
-/* if we dont define HAVE_STL for g++ > 3.0, then we can use the simple forwards */
+/* if we don't define HAVE_STL for g++ > 3.0, then we can use the simple forwards */
 	#include <iostream.h>
 #else
 	class istream;

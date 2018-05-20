@@ -693,8 +693,8 @@ void drvPDF::show_path()
 	buffer << drawingop << endl;
 }
 
-static DriverDescriptionT < drvPDF > D_pdf("pdf", "Adobe's Portable Document Format", "","pdf", true,	// if backend supports subpathes, else 0
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvPDF > D_pdf("pdf", "Adobe's Portable Document Format", "","pdf", true,	// if backend supports subpaths, else 0
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)

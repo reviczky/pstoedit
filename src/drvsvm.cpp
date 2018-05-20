@@ -1048,7 +1048,7 @@ static DriverDescriptionT < drvSVM > D_svm("svm",
                                            "StarView/OpenOffice.org metafile", 
                                            "StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.0 and above.",
                                            "svm", 
-                                           true,	// backend supports subpathes
+                                           true,	// backend supports subpaths
 										   true,	// backend does support curves
 										   true,	// backend supports elements which are filled and have edges 
 										   true,	// backend supports text

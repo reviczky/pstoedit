@@ -1077,8 +1077,8 @@ void drvTK::show_path()
 }
 
 
-static DriverDescriptionT < drvTK > D_tk("tk", "tk and/or tk applet source code", "","tk", false,	// backend supports subpathes
-										 // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvTK > D_tk("tk", "tk and/or tk applet source code", "","tk", false,	// backend supports subpaths
+										 // if subpaths are supported, the backend must deal with
 										 // sequences of the following form
 										 // moveto (start of subpath)
 										 // lineto (a line segment)

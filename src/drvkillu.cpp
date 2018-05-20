@@ -191,8 +191,8 @@ int drvKontour::cvtColor(float c)
 	return int ((c * 255.0) + 0.5);
 }
 
-static DriverDescriptionT < drvKontour > D_Kontour("kil", ".kil format for Kontour", "","kil", false,	// backend supports subpathes
-															 // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvKontour > D_Kontour("kil", ".kil format for Kontour", "","kil", false,	// backend supports subpaths
+															 // if subpaths are supported, the backend must deal with
 															 // sequences of the following form
 															 // moveto (start of subpath)
 															 // lineto (a line segment)

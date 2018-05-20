@@ -64,8 +64,8 @@ void drvGNUPLOT::show_path()
 }
 
 
-static DriverDescriptionT < drvGNUPLOT > D_gnuplot("gnuplot", "gnuplot format", "","gnuplot", false,	// if backend supports subpathes
-												   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvGNUPLOT > D_gnuplot("gnuplot", "gnuplot format", "","gnuplot", false,	// if backend supports subpaths
+												   // if subpaths are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)
 												   // lineto (a line segment)

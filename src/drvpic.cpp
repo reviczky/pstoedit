@@ -426,8 +426,8 @@ void drvPIC::show_path()
 	print_coords();
 }
 
-static DriverDescriptionT < drvPIC > D_PIC("pic", "PIC format for troff et.al.","", "pic", true,	// backend supports subpathes
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvPIC > D_PIC("pic", "PIC format for troff et.al.","", "pic", true,	// backend supports subpaths
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)

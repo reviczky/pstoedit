@@ -531,7 +531,8 @@ D_asy("asy", "Asymptote Format", "","asy",
       true,	// if backend supports curves, else 0
       false,	// if backend supports elements with fill and edges
       true,	// if backend supports text, else 0
-      DriverDescription::png, // support for PNG file images
+      // DriverDescription::png, // support for PNG file images
+      DriverDescription::memoryeps, // prefer EPS files for images
       DriverDescription::normalopen, true, // supports multiple pages
       true  /*clipping */ 
       );

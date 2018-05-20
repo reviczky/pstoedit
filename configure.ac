@@ -10,17 +10,14 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT(pstoedit,3.71,wglunz35_AT_pstoedit.net)
+AC_INIT([pstoedit],[3.72],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
-AM_INIT_AUTOMAKE(pstoedit,3.71)
-AM_MAINTAINER_MODE
+AM_INIT_AUTOMAKE([foreign subdir-objects -Wall])
+dnl AM_MAINTAINER_MODE
 AC_CONFIG_SRCDIR([src/pstoedit.h])
 AC_CONFIG_SUBDIRS(libEMF-1.0)
 AC_CONFIG_MACRO_DIR([m4])
-dnl libtoolize: Consider adding `AC_CONFIG_MACRO_DIR([m4])' to configure.ac and
-dnl libtoolize: rerunning libtoolize, to keep the correct libtool macros in-tree.
-dnl libtoolize: Consider adding `-I m4' to ACLOCAL_AMFLAGS in Makefile.am.
 
 dnl We need only C++ and no other language
 dnl seems to be broken : AC_LIBTOOL_TAGS([CXX])
@@ -30,14 +27,11 @@ AC_PROG_CC
 AC_PROG_CXX
 AC_PROG_AWK
 AC_PROG_YACC
+m4_ifdef([AM_PROG_AR], [AM_PROG_AR])
 AC_PROG_INSTALL
-dnl there is not need to build the static libs if shared libs are available
-AC_DISABLE_STATIC
+dnl there is no need to build the static libs if shared libs are available
+LT_INIT([disable-static win32-dll dlopen])
 
-dnl yes, we are sure to have clean DLLs under cygwin
-AC_LIBTOOL_WIN32_DLL 
-
-AC_PROG_LIBTOOL
 AC_PROG_MAKE_SET
 
 AC_CONFIG_HEADER(src/pstoedit_config.h)
@@ -93,21 +87,21 @@ dnl legal PACKAGE names are:
 dnl emf, magick, libplot, swf
 
 
-AC_ARG_WITH(emf,
-[  --with-emf  enable/disable emf interface (default: enabled - use --without-emf to disable)],
-with_emf=$withval, with_emf=yes)
-AC_ARG_WITH(magick,
-[  --with-magick  enable/disable magick++ interface (default: enabled - use --without-magick to disable)],
-with_magick=$withval, with_magick=yes)
-AC_ARG_WITH(libplot,
-[  --with-libplot  enable/disable libplot interface (default: enabled - use --without-libplot to disable)],
-with_libplot=$withval, with_libplot=yes)
-AC_ARG_WITH(swf,
-[  --with-swf  enable/disable swf interface (default: enabled - use --without-swf to disable)],
-with_swf=$withval, with_swf=yes)
-AC_ARG_WITH(pptx,
-[  --with-pptx  enable/disable pptx interface (default: enabled - use --without-pptX to disable)],
-with_pptx=$withval, with_pptx=yes)
+AC_ARG_WITH([emf],
+[AS_HELP_STRING([--with-emf],[enable/disable emf interface (default: enabled - use --without-emf to disable)])],
+[with_emf=$withval],[with_emf=yes])
+AC_ARG_WITH([magick],
+[AS_HELP_STRING([--with-magick],[enable/disable magick++ interface (default: enabled - use --without-magick to disable)])],
+[with_magick=$withval],[with_magick=yes])
+AC_ARG_WITH([libplot],
+[AS_HELP_STRING([--with-libplot],[enable/disable libplot interface (default: enabled - use --without-libplot to disable)])],
+[with_libplot=$withval],[with_libplot=yes])
+AC_ARG_WITH([swf],
+[AS_HELP_STRING([--with-swf],[enable/disable swf interface (default: enabled - use --without-swf to disable)])],
+[with_swf=$withval],[with_swf=yes])
+AC_ARG_WITH([pptx],
+[AS_HELP_STRING([--with-pptx],[enable/disable pptx interface (default: enabled - use --without-pptX to disable)])],
+[with_pptx=$withval],[with_pptx=yes])
 
 
 OLD_CPPFLAGS=${CPPFLAGS}
@@ -139,12 +133,10 @@ if test -n "${LIBPLOTTER_LDFLAGS}" && test -n "${LIBPLOTTER_CFLAGS}"; then
    HAVE_LIBPLOTTER=yes
    AC_MSG_CHECKING(for version of "lib plot" )   
    dnl See if we have a 2.3 or newer lib Plot version
-   AC_TRY_COMPILE( [
+   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 		#include <plotter.h>
 	     	typedef int Point; 
-		],[ ],
-		    AC_MSG_RESULT(you seem to have a compatible version ),
-		    [LIBPLOTTER_CFLAGS="$LIBPLOTTER_CFLAGS -DOLD_LIBPLOTTER";   
+		]], [[ ]])],[AC_MSG_RESULT(you seem to have a compatible version )],[LIBPLOTTER_CFLAGS="$LIBPLOTTER_CFLAGS -DOLD_LIBPLOTTER";   
 		    AC_MSG_RESULT(you seem to have an older version - need at least version 2.3)])
 else
    LIBPLOTTER_LDFLAGS=
@@ -166,13 +158,11 @@ CPPFLAGS=${OLD_CPPFLAGS}
 
 
 AC_MSG_CHECKING(for mkstemp)
-AC_TRY_COMPILE( [#include <stdlib.h>
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdlib.h>
 		 char buffer[] = "aaaXXXXXX";
-	 	 int i = mkstemp(buffer); ],[ ],
-               [HAVE_MKSTEMP=yes;
+	 	 int i = mkstemp(buffer); ]], [[ ]])],[HAVE_MKSTEMP=yes;
                 MKSTEMP_CFLAGS="-DHAVE_MKSTEMP"; 
-                AC_MSG_RESULT(you seem to have mkstemp )], 
-               [AC_MSG_RESULT(you do not have mkstemp - so will try using tempnam instead)])
+                AC_MSG_RESULT(you seem to have mkstemp )],[AC_MSG_RESULT(you do not have mkstemp - so will try using tempnam instead)])
 
 AC_SUBST(MKSTEMP_CFLAGS)
 
@@ -217,13 +207,13 @@ LIBZIP_LDFLAGS=
 LIBZIP_CFLAGS=
 
 dnl If zip.h is found, use it.
-AC_ARG_WITH(libzip-lib,
-[  --with-libzip-lib=DIR           look for libzip library in dir (e.g. /usr/local/lib)],
-libzip_lib_dir=$withval, libzip_lib_dir=)
+AC_ARG_WITH([libzip-lib],
+[AS_HELP_STRING([--with-libzip-lib=DIR],[look for libzip library in dir (e.g. /usr/local/lib)])],
+[libzip_lib_dir=$withval],[libzip_lib_dir=])
 
-AC_ARG_WITH(libzip-include,
-[  --with-libzip-include=DIR       look for libzip header in dir (e.g. /usr/local/include/libzip)],
-libzip_include_dir=$withval, libzip_include_dir=)
+AC_ARG_WITH([libzip-include],
+[AS_HELP_STRING([--with-libzip-include=DIR],[look for libzip header in dir (e.g. /usr/local/include/libzip)])],
+[libzip_include_dir=$withval],[libzip_include_dir=])
 
 OLD_LIBS=${LIBS}
 if test -n "${libzip_lib_dir}"; then
@@ -311,14 +301,12 @@ else
 	   dnl See if we have a 1.0.6 or newer version
 	   OLD_CPPFLAGS=${CPPFLAGS}
 	   CPPFLAGS="$CPPFLAGS `Magick++-config --cppflags`"
-	   AC_TRY_COMPILE( [#include <Magick++.h>
+	   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <Magick++.h>
 	            #if MagickLibVersion >= 0x000008
 	 	    int correct;
 	  	    #else
 	  	    old version of GraphicsMagick;
-	  	    #endif ],[ ],
-	  	    MAGICKCORRECTVERSION="YES";AC_MSG_RESULT(you seem to have a compatible version ),
-	  	    [AC_MSG_RESULT(you seem to have an older version - need at least version 1.0.6)])
+	  	    #endif ]], [[ ]])],[MAGICKCORRECTVERSION="YES";AC_MSG_RESULT(you seem to have a compatible version )],[AC_MSG_RESULT(you seem to have an older version - need at least version 1.0.6)])
 	   CPPFLAGS=$OLD_CPPFLAGS
 	   if test -n "${MAGICKCORRECTVERSION}"; then
 	      HAVE_LIBMAGICK=yes
@@ -357,9 +345,9 @@ OLD_CPPFLAGS=
 OLD_LIBS=
 
 
-AC_ARG_WITH(libemf-src,
-[  --with-libemf-src=DIR           look for libEMF src in dir (e.g. /usr/local/lib)],
-libemf_lib_src=$withval, libemf_lib_src=)
+AC_ARG_WITH([libemf-src],
+[AS_HELP_STRING([--with-libemf-src=DIR],[look for libEMF src in dir (e.g. /usr/local/lib)])],
+[libemf_lib_src=$withval],[libemf_lib_src=])
 
 if test -n "${libemf_lib_src}"; then
 dnl use libemf source directly
@@ -372,13 +360,13 @@ AC_SUBST(LIBEMF_CFLAGS)
 else
 AM_CONDITIONAL(USE_EMFBYSOURCE, false )
 
-AC_ARG_WITH(libemf-lib,
-[  --with-libemf-lib=DIR           look for libEMF library in dir (e.g. /usr/local/lib)],
-libemf_lib_dir=$withval, libemf_lib_dir=)
+AC_ARG_WITH([libemf-lib],
+[AS_HELP_STRING([--with-libemf-lib=DIR],[look for libEMF library in dir (e.g. /usr/local/lib)])],
+[libemf_lib_dir=$withval],[libemf_lib_dir=])
 
-AC_ARG_WITH(libemf-include,
-[  --with-libemf-include=DIR       look for libEMF header in dir (e.g. /usr/local/include/libEMF)],
-libemf_include_dir=$withval, libemf_include_dir=)
+AC_ARG_WITH([libemf-include],
+[AS_HELP_STRING([--with-libemf-include=DIR],[look for libEMF header in dir (e.g. /usr/local/include/libEMF)])],
+[libemf_include_dir=$withval],[libemf_include_dir=])
 
 OLD_LIBS=${LIBS}
 if test -n "${libemf_lib_dir}"; then
@@ -400,6 +388,8 @@ if test -n "${libemf_include_dir}"; then
 fi
 AC_CHECK_HEADER(emf.h,
 		[LIBEMF_CFLAGS="-DHAVE_LIBEMF -DOLDLIBEMF"])
+AC_CHECK_HEADER(libemf/emf.h,
+		[LIBEMF_CFLAGS="-DHAVE_LIBEMF"])
 AC_CHECK_HEADER(libEMF/emf.h,
 		[LIBEMF_CFLAGS="-DHAVE_LIBEMF"])
 if test -n "${LIBEMF_CFLAGS}"; then
@@ -439,13 +429,11 @@ dnl OBS: HAVE_LIBPNG=no
 dnl OBS: LIBPNG_CFLAGS=
 dnl OBS: LIBPNG_LDFLAGS=
 dnl OBS: AC_MSG_CHECKING(See if we have libpng and zlib)
-dnl OBS: AC_TRY_COMPILE( [#include <png.h>
-dnl OBS: 	 	 int i = PNG_TRANSFORM_IDENTITY; ],[ ],
-dnl OBS:                [HAVE_LIBPNG=yes;
+dnl OBS: AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <png.h>
+dnl OBS: 	 	 int i = PNG_TRANSFORM_IDENTITY; ]], [[ ]])],[dnl OBS:                HAVE_LIBPNG=yes;
 dnl OBS:                 LIBPNG_CFLAGS="-DHAVE_LIBPNG"; 
 dnl OBS:                 LIBPNG_LDFLAGS="-lpng -lz ";
-dnl OBS:                 AC_MSG_RESULT(you seem to have compatible version of libpng)], 
-dnl OBS:                [AC_MSG_RESULT(you either have no libpng or an old version - 1.0.8 should be ok.)])
+dnl OBS:                 AC_MSG_RESULT(you seem to have compatible version of libpng)],[dnl OBS:                AC_MSG_RESULT(you either have no libpng or an old version - 1.0.8 should be ok.)])
 dnl OBS: AC_SUBST(LIBPNG_LDFLAGS)
 dnl OBS: AC_SUBST(LIBPNG_CFLAGS)
 dnl OBS: AM_CONDITIONAL(HAVE_LIBPNG, test "$HAVE_LIBPNG" = yes)
@@ -456,9 +444,7 @@ dnl
 
 dnl See if we need to define a "bool" type.
 AC_MSG_CHECKING(for built-in "bool" datatype)
-AC_TRY_COMPILE(,[bool testing_bool; testing_bool=true;],
-               [CXXFLAGS="$CXXFLAGS -DINTERNALBOOL"; AC_MSG_RESULT(yes)],
-               [AC_MSG_RESULT(no)])
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[bool testing_bool; testing_bool=true;]])],[CXXFLAGS="$CXXFLAGS -DINTERNALBOOL"; AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 
 dnl Add extra, platform-specific, C++ compiler options.
 AC_MSG_CHECKING(C++ compiler model)
@@ -473,7 +459,7 @@ if test "$GXX" = yes; then
   else
     AC_MSG_RESULT([GNU])
 #   need to disable long long warning here because of ImageMagick using it
-    SPECIAL_CXXFLAGS="-DBUGGYGPP_NOLONGERNEEDED -pedantic -Wall -Wextra -Wuninitialized -Wswitch-default -Wunused -Wshadow -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long"
+    SPECIAL_CXXFLAGS="-Wall -Wextra -Wuninitialized -Wswitch-default -Wunused -Wshadow -Wwrite-strings -Wcast-qual -Wpointer-arith -Wno-long-long"
   fi
 elif test `echo "$CXX" | egrep -c 'xlC$'` -eq 1; then
   AC_MSG_RESULT([AIX xlC])
@@ -496,10 +482,9 @@ else
   AC_MSG_RESULT(unknown)
 fi
 
-AC_ARG_ENABLE(wrapper,
-              [  --enable-wrapper=PROGRAM
-                          Wrap (i.e. prefix) compiler invocations with PROGRAM
-                          (e.g. \"insure\" or \"purify\")],
+AC_ARG_ENABLE([wrapper],
+              [AS_HELP_STRING([--enable-wrapper=PROGRAM],
+                          [Wrap (i.e. prefix) compiler invocations with PROGRAM (e.g. \"insure\" or \"purify\")])],
               [CXX="$enableval $CXX"])
 AC_SUBST(SPECIAL_CXXFLAGS)
 
@@ -520,7 +505,7 @@ AC_CONFIG_FILES([Makefile
 src/Makefile 
 config/Makefile config/pstoedit.pc
 doc/Makefile
-m4/Makefile
+doc/version.tex
 examples/Makefile 
 contrib/Makefile contrib/cairo/Makefile
 contrib/java/Makefile contrib/java/java1/Makefile contrib/java/java2/Makefile 

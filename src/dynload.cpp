@@ -20,6 +20,7 @@
 
 */
 #include "cppcomp.h"
+#include <assert.h>
 #include I_iostream
 
 // we need __linux__ instead of just linux since the latter is not defined when -ansi is used.
@@ -103,8 +104,9 @@ errstream(errstream_p),verbose(verbose_p)
 		const size_t size = strlen(libname_P) + 1; 
 		libname = new char[size];
 		strcpy_s(libname, size, libname_P);
-		if (verbose)
+		if (verbose) {
 			errstream << "creating Dynloader for " << libname << endl;
+		}
 		open(libname);
 	}
 }
@@ -135,7 +137,7 @@ void DynLoader::open(const char *libname_P)
 	if (handle == 0) {
 		const char * const dlerrormessage = dlerror();
 		const char * const dle = dlerrormessage ? dlerrormessage : "NULL";
-		errstream << "Problem during opening " << fulllibname << ":" << dle 
+		errstream << "Problem during opening '" << fulllibname << "' : " << dle 
 			<< endl;
 		delete[]fulllibname;
 		return;

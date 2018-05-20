@@ -33,6 +33,7 @@
 #include <sys/stat.h>
 
 #include "pstoeditoptions.h"
+#include "pstoedit_config.h"
 
 PsToEditOptions& PsToEditOptions::theOptions() // singleton
 {
@@ -45,8 +46,6 @@ PsToEditOptions& PsToEditOptions::theOptions() // singleton
 
 // for the DLL export data types (the description struct)
 #include "pstoedll.h"
-
-#include "version.h"
 
 #include "drvbase.h"
 
@@ -395,7 +394,7 @@ extern "C" DLLEXPORT
 #else
 	const char buildtype [] = "release build";
 #endif
-		errstream << "pstoedit: version " << version << " / DLL interface " <<
+		errstream << "pstoedit: version " << PACKAGE_VERSION << " / DLL interface " <<
 		drvbaseVersion << " (built: " << __DATE__ << " - " << buildtype << " - " << compversion << ")"
 		" : Copyright (C) 1993 - 2018 Wolfgang Glunz\n";
 	}
@@ -420,7 +419,7 @@ extern "C" DLLEXPORT
 		break;
 			}
 	default:{
-		diag << "more than two file arguments " << endl;
+		errstream << "more than two file arguments " << endl;
 		shortusage(diag);
 		return 1;
 			}
@@ -506,7 +505,7 @@ extern "C" DLLEXPORT
 		usage(diag,false,false);
 		const char *gstocall = whichPI(diag, options.verbose(), options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
 		if (gstocall != 0) {
-			diag << "Default interpreter is " << gstocall << endl;
+			errstream << "Default interpreter is " << gstocall << endl;
 		}
 		getglobalRp()->explainformats(diag);
 		return 1;
@@ -589,13 +588,13 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 	if (options.drivername.value.length() == 0) {
 		// try to find driver according to suffix of input file
 		if (!options.nameOfOutputFile) {
-			diag << "No output format specified (-f option) and format could not be deduced from suffix of output file since no output file name was given" << endl;
+			errstream << "No output format specified (-f option) and format could not be deduced from suffix of output file since no output file name was given" << endl;
 			shortusage(diag);
 			return 1;
 		} else {
 			const char * suffixOfInputFile = strrchr(options.nameOfOutputFile,'.');
 			if (!suffixOfInputFile) {
-				diag << "No output format specified (-f option) and format could not be deduced from suffix of output file since no suffix was found" << endl;
+				errstream << "No output format specified (-f option) and format could not be deduced from suffix of output file since no suffix was found" << endl;
 				shortusage(diag);
 				return 1;
 			} else {
@@ -604,7 +603,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					errstream << "No explicit output format specified - using " << suffixDriverDesc->symbolicname << " as derived from suffix of output file" << endl;
 					options.drivername = suffixDriverDesc->symbolicname;
 				} else {
-					diag << "No output format specified (-f option) and format could not be uniquely deduced from suffix " << suffixOfInputFile << " of output file" << endl;
+					errstream << "No output format specified (-f option) and format could not be uniquely deduced from suffix " << suffixOfInputFile << " of output file" << endl;
 					// usage(errstream);
 					getglobalRp()->explainformats(diag); // ,true);
 					return 1;
@@ -623,13 +622,13 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		}
 		const DriverDescription *currentDriverDesc = getglobalRp()->getDriverDescForName(options.drivername.value.c_str());
 		if (currentDriverDesc == 0) {
-			diag << "Unsupported output format " << options.drivername.value.c_str() << endl;
+			errstream << "Unsupported output format " << options.drivername.value.c_str() << endl;
 			getglobalRp()->explainformats(diag);
 			return 1;
 		}
 
 		if ( currentDriverDesc->backendFileOpenType!=DriverDescription::normalopen && !options.nameOfOutputFile ) {
-			diag << "The driver for the selected format cannot write to standard output because it writes binary data" << endl;
+			errstream << "The driver for the selected format cannot write to standard output because it writes binary data" << endl;
 			return 1;
 		}
 
@@ -637,7 +636,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		if (driveroptions && strequal(driveroptions, "-help") ) {
 			ProgramOptions* dummy = currentDriverDesc->createDriverOptions();
 			if (dummy->numberOfOptions() ) {
-				diag << "The driver for this output format supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
+				errstream << "The driver for this output format supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
 				dummy->showhelp(diag,false,false);
 			}
 			delete dummy;
@@ -647,7 +646,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 // TODO:
 			// Check for input file (exists, or stdin) stdout handling
 			if (!options.nameOfInputFile) {
-				diag << "Cannot read from standard input if GS drivers are selected" << endl;
+				errstream << "Cannot read from standard input if GS drivers are selected" << endl;
 				return 1;
 			}
 			// an input file was given as argument
@@ -658,23 +657,23 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			convertBackSlashes(options.nameOfInputFile);
 
 			if (!fileExists(options.nameOfInputFile)) {
-				diag << "Could not open file " << options.nameOfInputFile << " for input" << endl;
+				errstream << "Could not open file " << options.nameOfInputFile << " for input" << endl;
 				return 1;
 			}
 
 			if (!options.nameOfOutputFile) {
-				diag <<
+				errstream <<
 					"Cannot write to standard output if GS drivers are selected" << endl;
 				return 1;
 			}
 
 			if (options.backendonly) {
-				diag << "The -bo option cannot be used if GS drivers are selected " << endl;
+				errstream << "The -bo option cannot be used if GS drivers are selected " << endl;
 				return 1;
 			}
 
 			if (!driveroptions) {
-				diag <<
+				errstream <<
 					"The gs output driver needs a gs-device as argument, e.g. gs:pdfwrite" << endl;
 				return 1;
 			}
@@ -932,7 +931,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				const char *successstring;	// string that indicated success of .pro
 				ofstream inFileStream(gsin.c_str());
 				inFileStream << "/pstoedit.pagetoextract " << options.pagetoextract << " def" << endl;
-				inFileStream << "/pstoedit.versioninfo (" << version << " " << compversion << ") def" << endl;
+				inFileStream << "/pstoedit.versioninfo (" << PACKAGE_VERSION << " " << compversion << ") def" << endl;
 				if (options.nomaptoisolatin1) {
 					inFileStream << "/pstoedit.maptoisolatin1 false def" << endl;
 				}
@@ -1301,7 +1300,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					{
 						// local scope to force delete before delete of driver
 						outputdriver->setdefaultFontName(options.replacementfont.value.c_str());
-						//      if (nosubpaths) ((DriverDescription*) outputdriver->Pdriverdesc)->backendSupportsSubPathes=false;
+						//      if (nosubpaths) ((DriverDescription*) outputdriver->Pdriverdesc)->backendSupportsSubPaths=false;
 //						outputdriver->simulateSubPaths = (bool) options.simulateSubPaths;
 
 						const char * bbfilename = 0;
@@ -1462,7 +1461,7 @@ static DriverDescription_S * getPstoeditDriverInfo_internal(bool withgsdrivers)
 			curR->explanation =  currentDD->short_explanation;
 			curR->suffix =  currentDD->suffix;
 			curR->additionalInfo =  currentDD->additionalInfo();
-			curR->backendSupportsSubPathes = (int) currentDD->backendSupportsSubPathes;
+			curR->backendSupportsSubPaths = (int) currentDD->backendSupportsSubPaths;
 			curR->backendSupportsCurveto = (int) currentDD->backendSupportsCurveto;
 			curR->backendSupportsMerging = (int) currentDD->backendSupportsMerging;
 			curR->backendSupportsText = (int) currentDD->backendSupportsText;

@@ -95,8 +95,8 @@ void drvRPL::show_path()
 	print_coords();
 }
 
-static DriverDescriptionT < drvRPL > D_rpl("rpl", "Real3D Programming Language format","", "rpl", false,	// if backend supports subpathes, else 0
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvRPL > D_rpl("rpl", "Real3D Programming Language format","", "rpl", false,	// if backend supports subpaths, else 0
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)

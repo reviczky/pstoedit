@@ -1622,8 +1622,8 @@ void drvDXF::show_path()
 
 
 
-static DriverDescriptionT < drvDXF > D_dxf("dxf", "CAD exchange format","", "dxf", false,	// if backend supports subpathes, else 0
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvDXF > D_dxf("dxf", "CAD exchange format","", "dxf", false,	// if backend supports subpaths, else 0
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)
@@ -1643,8 +1643,8 @@ static DriverDescriptionT < drvDXF > D_dxf("dxf", "CAD exchange format","", "dxf
 										   false /*clipping */ 
 										   );
 
-static DriverDescriptionT < drvDXF > D_dxf_s("dxf_s", "CAD exchange format with splines","", "dxf", false,	// if backend supports subpathes, else 0
-											 // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvDXF > D_dxf_s("dxf_s", "CAD exchange format with splines","", "dxf", false,	// if backend supports subpaths, else 0
+											 // if subpaths are supported, the backend must deal with
 											 // sequences of the following form
 											 // moveto (start of subpath)
 											 // lineto (a line segment)

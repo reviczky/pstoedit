@@ -286,8 +286,8 @@ void drvMMA::RGBColor(float R, float G, float B)
 	}
 }
 
-static DriverDescriptionT < drvMMA > D_mma("mma", "Mathematica graphics", "","m", true,	// backend supports subpathes
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvMMA > D_mma("mma", "Mathematica graphics", "","m", true,	// backend supports subpaths
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)

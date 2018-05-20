@@ -34,8 +34,6 @@
 #include I_stdio
 #include I_stdlib
 
-//#include "version.h"
-
 using namespace Magick;
 #if MagickLibVersion  > 0x700
 typedef DrawableStrokeDashArray DrawableDashArrayType;
@@ -385,8 +383,8 @@ static DriverDescriptionT < drvMAGICK > D_magick("magick", "MAGICK driver compat
 												 "formats. The output format is determined automatically by Image-/GraphicsMagick based on the suffix "
 												 "of the output filename. So an output file test.png will force the creation of an image in PNG format."
 												 " This binary of pstoedit was compiled against version " MagickLibVersionText " of " MagickPackageName ".",
-												 "...", true,	// backend supports subpathes
-												 // if subpathes are supported, the backend must deal with
+												 "...", true,	// backend supports subpaths
+												 // if subpaths are supported, the backend must deal with
 												 // sequences of the following form
 												 // moveto (start of subpath)
 												 // lineto (a line segment)

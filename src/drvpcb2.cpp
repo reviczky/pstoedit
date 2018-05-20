@@ -287,8 +287,8 @@ void drvPCB2::show_path()
 
 
 static DriverDescriptionT < drvPCB2 > D_pcb("pcb", "pcb format", 
-											"See also: \\URL{http://pcb.sourceforge.net} and \\URL{http://www.penguin.cz/\\Tilde utx/pstoedit-pcb/}","pcb", false,	// if backend supports subpathes
-												   // if subpathes are supported, the backend must deal with
+											"See also: \\URL{http://pcb.sourceforge.net} and \\URL{http://www.penguin.cz/\\Tilde utx/pstoedit-pcb/}","pcb", false,	// if backend supports subpaths
+												   // if subpaths are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)
 												   // lineto (a line segment)

@@ -75,8 +75,8 @@ void drvPCBFILL::show_path()
 
 
 static DriverDescriptionT < drvPCBFILL > D_pcbfill("pcbfill", "pcb format with fills", 
-												   "See also: \\URL{http://pcb.sourceforge.net}","pcbfill", false,	// if backend supports subpathes
-												   // if subpathes are supported, the backend must deal with
+												   "See also: \\URL{http://pcb.sourceforge.net}","pcbfill", false,	// if backend supports subpaths
+												   // if subpaths are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)
 												   // lineto (a line segment)

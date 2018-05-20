@@ -394,8 +394,8 @@ void drvLATEX2E::show_image(const Image &  )
 #endif
 
 // Describe the LaTeX2e backend's capabilities.
-static DriverDescriptionT < drvLATEX2E > D_latex2e("latex2e", "\\LaTeX2e picture format", "","tex", true,	// backend supports subpathes
-												   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvLATEX2E > D_latex2e("latex2e", "\\LaTeX2e picture format", "","tex", true,	// backend supports subpaths
+												   // if subpaths are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)
 												   // lineto (a line segment)

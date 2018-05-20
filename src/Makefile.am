@@ -1,4 +1,4 @@
-EXTRA_DIST=pstoedit.ph makefile.txt
+EXTRA_DIST=pstoedit.ph makefile.txt get_D_and_I_options.sh
 
 if HAVE_PLUGINSRC
 # LIBPLUGINS_ENTRY=libp2edrvplugins.la
@@ -141,8 +141,7 @@ libpstoedit_la_SOURCES =			\
 	subpath.cpp  subpath.h			\
 	pstoedit.cpp				\
 	psfront.h				\
-	genericints.h 				\
-	version.h
+	genericints.h
 
 libpstoedit_la_LIBADD = ${CXX_STD_LIB} ${CXX_RUNTIME_LIB} -ldl -lm
 libpstoedit_la_LDFLAGS = -no-undefined
@@ -176,3 +175,13 @@ clanganalyze:
 	  echo "checking $$f"; \
           clang++ --analyze -Weverything -pedantic `sh ./get_D_and_I_options.sh ${AM_CPPFLAGS}` $$f ; \
         done
+
+clang-tidy_allinone:
+	clang-tidy  -checks='*' ${SOURCES} --  -std=c++11 `sh ./get_D_and_I_options.sh ${AM_CPPFLAGS}`
+
+clang-tidy_single:
+	for f in `ls ${SOURCES} | grep -v \.h | sort -u` ; do \
+          echo "checking $$f"; \
+          clang-tidy  -checks='*' $$f  -- -std=c++11 `sh ./get_D_and_I_options.sh ${AM_CPPFLAGS}` ; \
+        done
+

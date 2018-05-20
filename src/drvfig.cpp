@@ -799,7 +799,7 @@ void drvFIG::show_path()
 {
 	float localLineWidth = currentLineWidth();
 	localLineWidth *= 80.0f/72.0f; // xfig scales width differently - added in 3.50 - wogl
-	// dont know whether this should be synchronized with -usecorrectfontsize option.
+	// don't know whether this should be synchronized with -usecorrectfontsize option.
 
 
 

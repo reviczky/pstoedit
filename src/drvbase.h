@@ -244,7 +244,7 @@ protected:
 #endif
 		bool	 	isPolygon; // whether current path was closed via closepath or not
 		unsigned int	numberOfElementsInPath;
-		unsigned int	subpathoffset; // normally 0, but if subpathes are simulated
+		unsigned int	subpathoffset; // normally 0, but if subpaths are simulated
 									   // then this is set to the begin of the current subpath 
 									   // before show_path is executed
 		float           currentLineWidth;
@@ -310,7 +310,7 @@ protected:
 //lint -esym(1712,SaveRestoreInfo) // no default ctor
 	class DLLEXPORT SaveRestoreInfo {
 	public:
-		unsigned int clippathlevel; // number of clippathes since opening (=save)
+		unsigned int clippathlevel; // number of clippaths since opening (=save)
 		unsigned int savelevel;	
 		SaveRestoreInfo * previous;	
 		SaveRestoreInfo * next;
@@ -533,7 +533,7 @@ public:
 
 	void		flushOutStanding( flushmode_t flushmode = flushall);
 
-	void		dumpRearrangedPathes(); // show the current subpathes after calling rearrange
+	void		dumpRearrangedPaths(); // show the current subpaths after calling rearrange
 
 	unsigned int nrOfSubpaths() const;
 
@@ -727,7 +727,7 @@ const Dtype curveto = 4;
 #else
 enum  Dtype {moveto, lineto, closepath, curveto};
 #endif
-// closepath is only generated if backend supportes subpathes
+// closepath is only generated if backend supportes subpaths
 // curveto   is only generated if backend supportes it
 
 //lint -esym(1769,basedrawingelement)
@@ -949,7 +949,7 @@ public:
 			const char * const short_expl, 
 			const char * const long_expl,
 			const char * const suffix_p, 
-			const bool 	backendSupportsSubPathes_p,
+			const bool 	backendSupportsSubPaths_p,
 			const bool 	backendSupportsCurveto_p,
 			const bool 	backendSupportsMerging_p, // merge a separate outline and filling of a polygon -> 1. element
 			const bool 	backendSupportsText_p,
@@ -984,7 +984,7 @@ public:
 	const char * const long_explanation;
 	const char * const suffix;
 
-	const bool 	backendSupportsSubPathes;
+	const bool 	backendSupportsSubPaths;
 	const bool 	backendSupportsCurveto;
 	const bool 	backendSupportsMerging; // merge a separate outline and filling of a polygon -> 1. element
 	const bool 	backendSupportsText;
@@ -1017,7 +1017,7 @@ public:
 			const char * short_expl_p, 
 			const char * long_expl_p, 
 			const char * suffix_p, 
-			const bool 	backendSupportsSubPathes_p,
+			const bool 	backendSupportsSubPaths_p,
 			const bool 	backendSupportsCurveto_p,
 			const bool 	backendSupportsMerging_p, // merge a separate outline and filling of a polygon -> 1. element
 			const bool 	backendSupportsText_p,
@@ -1032,7 +1032,7 @@ public:
 			short_expl_p,
 			long_expl_p, 
 			suffix_p, 
-			backendSupportsSubPathes_p,
+			backendSupportsSubPaths_p,
 			backendSupportsCurveto_p,
 			backendSupportsMerging_p, 
 			backendSupportsText_p,

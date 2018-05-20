@@ -181,8 +181,8 @@ void drvLWO::show_path()
 }
 
 
-static DriverDescriptionT < drvLWO > D_lwo("lwo", "LightWave 3D object format", "","lwo", false,	// if backend supports subpathes, else 0
-										   // if subpathes are supported, the backend must deal with
+static DriverDescriptionT < drvLWO > D_lwo("lwo", "LightWave 3D object format", "","lwo", false,	// if backend supports subpaths, else 0
+										   // if subpaths are supported, the backend must deal with
 										   // sequences of the following form
 										   // moveto (start of subpath)
 										   // lineto (a line segment)

@@ -31,24 +31,24 @@ class drvVTK : public drvbase {
 public:
 
 	derivedConstructor(drvVTK);
-	~drvVTK(); // Destructor
+	~drvVTK() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		OptionT < int, IntValueExtractor >VTKeoption;
 		DriverOptions(): 
-			VTKeoption(true,"-VTKeoption","integer",0,"just an example",0,99)
+			VTKeoption(true,"-VTKeoption","integer",0,"just an example",nullptr,99)
 		{
 			ADD(VTKeoption);
 		}
 	}*options;
 
 #include "drvfuncs.h"
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo & textInfo);
+	void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
+	void show_text(const TextInfo & textinfo) override;
 
 public:
 
-	virtual void    show_image(const PSImage & imageinfo); 
+	void    show_image(const PSImage & imageinfo) override; 
 
 private:
 	void print_coords();

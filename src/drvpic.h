@@ -29,7 +29,7 @@ class drvPIC : public drvbase {
 
 public:
 	 derivedConstructor(drvPIC);
-	~drvPIC(); // Destructor
+	~drvPIC() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		// OptionT < bool, BoolTrueExtractor > groff;
@@ -42,12 +42,12 @@ public:
 
 		DriverOptions() : 
 			// groff(true,"-groff","",0,"groff mode",0,false),
-			troff_mode(true,"-troff","",0,"troff mode (default is groff)",0,false),
-			landscape(true,"-landscape","",0,"landscape output",0,false),
-			portrait(true,"-portrait","",0,"portrait output",0,false),
-			keepFont(true,"-keepfont","",0,"print unrecognized literally",0,false),
-			textAsText(true,"-text","",0,"try not to make pictures from running text",0,false),
-			debug(true,"-debug","",0,"enable debug output",0,false)
+			troff_mode(true,"-troff","",0,"troff mode (default is groff)",nullptr,false),
+			landscape(true,"-landscape","",0,"landscape output",nullptr,false),
+			portrait(true,"-portrait","",0,"portrait output",nullptr,false),
+			keepFont(true,"-keepfont","",0,"print unrecognized literally",nullptr,false),
+			textAsText(true,"-text","",0,"try not to make pictures from running text",nullptr,false),
+			debug(true,"-debug","",0,"enable debug output",nullptr,false)
 		{
 			// ADD(groff);
 			ADD(troff_mode);
@@ -60,7 +60,7 @@ public:
 	} *options;
 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 	void print_coords();

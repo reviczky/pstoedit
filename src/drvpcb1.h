@@ -37,14 +37,14 @@ public:
 
 	derivedConstructor(drvPCB1);
 	
-	~drvPCB1(); // Destructor
+	~drvPCB1() override; // Destructor
 	class DriverOptions : public ProgramOptions { } *options;
 
 #include "drvfuncs.h"
 
 	void print_coords();
 //	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo & textinfo);
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 	ofstream pcberrf;

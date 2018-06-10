@@ -61,7 +61,7 @@ drvVTK::~drvVTK()
 	ifstream & inbuffer_c = colorFile.asInput();
 	copy_file(inbuffer_c, outf);
 
-	options=0;
+	options=nullptr;
 }
 
 int drvVTK::add_point(const Point & p)

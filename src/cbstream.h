@@ -62,7 +62,7 @@ public:
 protected:
     int sync();
     int overflow(int ch);
-	int underflow(void);
+	int underflow();
 
     // Defining xsputn is an optional optimization.
     // (streamsize was recently added to ANSI C++, not portable yet.)

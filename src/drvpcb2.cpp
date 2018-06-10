@@ -136,7 +136,7 @@ drvPCB2::~drvPCB2()
 		outf << "Layer(10 \"silk\")\n(\n"
 		     << ")\n";
 	}
-	options=0;
+	options=nullptr;
 }
 
 

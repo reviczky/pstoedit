@@ -33,7 +33,7 @@ class drvPPTX : public drvbase {
 public:
 
         derivedConstructor(drvPPTX);
-        ~drvPPTX(); // Destructor
+        ~drvPPTX() override; // Destructor
         class DriverOptions : public ProgramOptions {
         public:
                 OptionT < RSString, RSStringValueExtractor > colortype;
@@ -42,13 +42,13 @@ public:
         DriverOptions():
                 colortype(true, "-colors", "string", 0,
                           "\"original\" to retain original colors (default), \"theme\" to convert randomly to theme colors, or \"theme-lum\" also to vary luminance",
-                          NULL, "original"),
+                          nullptr, "original"),
                   fonttype(true, "-fonts", "string", 0,
                            "use \"windows\" fonts (default), \"native\" fonts, or convert to the \"theme\" font",
-                           NULL, "windows"),
+                           nullptr, "windows"),
                   embeddedfonts(true, "-embed", "string", 0,
                                 "embed fonts, specified as a comma-separated list of EOT-format font files",
-                                NULL, "")
+                                nullptr, "")
                 {
                         ADD(colortype);
                         ADD(fonttype);
@@ -57,12 +57,12 @@ public:
         }*options;
 
 #include "drvfuncs.h"
-        void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-        void show_text(const TextInfo & textInfo);
+        void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
+        void show_text(const TextInfo & textinfo) override;
 
 public:
 
-        virtual void    show_image(const PSImage & imageinfo);
+        void    show_image(const PSImage & imageinfo) override;
 
 private:
         struct zip * outzip;        // pptx file to generate (zip format)
@@ -92,7 +92,7 @@ private:
 				bool * mirrored,
 				float * xscale, float * yscale,
 				float * rotation,
-				float * xtrans, float * ytrans);
+				float * x_trans, float * y_trans);
         void print_connections(const BBox & pathBBox);
         void print_color(int baseIndent, float redF, float greenF, float blueF);
         void print_join();
@@ -136,7 +136,7 @@ private:
         public:
           string name;            // Color name
           unsigned int lum;       // New luminance (thousandths of a %)
-          ThemeColor(string tName="unknown", unsigned int tLum=~0U) :
+          explicit ThemeColor(string tName="unknown", unsigned int tLum=~0U) :
             name(tName),
             lum(tLum)
           {}

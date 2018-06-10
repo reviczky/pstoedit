@@ -40,7 +40,7 @@ drvRPL::~drvRPL()
 {
 	// driver specific deallocations
 	// and writing of trailer to output file
-	options=0;
+	options=nullptr;
 }
 
 void drvRPL::print_coords()

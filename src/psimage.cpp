@@ -232,7 +232,7 @@ unsigned char PSImage::getComponent(unsigned int x, unsigned int y, char numComp
 		return 0;
 	}
 
-	assert(data != 0);
+	assert(data != nullptr);
 	// all data in one row are filled up to by a multiple of 8
 	// see PS manual §4.10.2
 
@@ -545,7 +545,7 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 	outi << "image";
 
 	/* unpack 4 bit rgb data, skipping last nybble on odd-width images */
-	unsigned char *udata = NULL;
+	unsigned char *udata = nullptr;
 	unsigned char *dataptr = data;
 	if (bits == 4) {
 		udata = new unsigned char[nextfreedataitem * 2];

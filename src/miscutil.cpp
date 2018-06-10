@@ -158,7 +158,7 @@ char *tempnam(const char *, const char *pfx)
  static const char * testvar(const char * var) {
 	const char * res = getenv(var);
 	if (res && dirAccessible(res)) return res;
-	else return 0;
+	else return nullptr;
  }
 
 #endif
@@ -166,12 +166,12 @@ char *tempnam(const char *, const char *pfx)
 RSString full_qualified_tempnam(const char *pref)
 {
 #ifdef HAVE_MKSTEMP
-	const char *path = 0;
-	char * filename = 0;
+	const char *path = nullptr;
+	char * filename = nullptr;
 	const char XXXXXX[] = "XXXXXX" ; // needed for mkstemp template
-	(void) ((path = testvar("TEMP"))   == 0L && 
-		(path = testvar("TMP"))    == 0L &&
-		(path = testvar("TMPDIR")) == 0L &&
+	(void) ((path = testvar("TEMP"))   == nullptr && 
+		(path = testvar("TMP"))    == nullptr &&
+		(path = testvar("TMPDIR")) == nullptr &&
 		(path = dirAccessible("/tmp" )  ? "/tmp" : "." )  // last resort current dir
 		);
 	const unsigned int needed = strlen(path) + 1 + strlen(pref) + 1 + strlen(XXXXXX) + 2;
@@ -211,7 +211,7 @@ RSString full_qualified_tempnam(const char *pref)
 	return result;
 #else
 	convertBackSlashes(filename);
-	if ((strchr(filename, '\\') == 0) && (strchr(filename, '/') == 0)) {	// keine Pfadangaben..
+	if ((strchr(filename, '\\') == nullptr) && (strchr(filename, '/') == nullptr)) {	// keine Pfadangaben..
 		char cwd[400];
 		(void) GETCWD(cwd, 400);
 		RSString result = cwd;
@@ -593,7 +593,7 @@ DLLEXPORT RSString getOutputFileNameFromPageNumber(const char * const outputFile
 		return RSString(outputFileTemplate);
 	} else  {
 		const size_t size = strlen(outputFileTemplate) + 30;
-		char * newname = new char[ size ];
+		auto newname = new char[ size ];
 
 		RSString formatting("%");
 		formatting += pagenumberformatOption;
@@ -787,7 +787,7 @@ static void skipws(char *&lineptr)
 
 static char *readword(char *&lineptr)
 {
-	char *result = 0;
+	char *result = nullptr;
 	if (*lineptr == '"') {
 		result = strtok(lineptr, "\"");
 	} else {
@@ -846,7 +846,7 @@ void FontMapper::readMappingTable(ostream & errstream, const char *filename)
 		        if (replacement[0] == '/') {
 				// Map to an existing entry.
 			  	const RSString * prevEntry = getValue(replacement+1);
-				if (prevEntry == NULL)
+				if (prevEntry == nullptr)
 					errstream << "undefined font " <<
 					  replacement+1 <<
 					  " found in line (" << linenr <<
@@ -901,10 +901,10 @@ const char *FontMapper::mapFont(const RSString & fontname) const
 				if (r)
 			        return r->c_str();
 				else 
-					return 0;
+					return nullptr;
 			}
 		}
-		return 0;
+		return nullptr;
     }
 }
 

@@ -66,11 +66,11 @@ public:
   void new_points();
   
   ~sub_path() {
-    delete [] children; children = 0;
-    delete [] path; path = 0;
-    delete [] points; points = 0;
-    delete [] parents; parents = 0;
-	parent = 0;
+    delete [] children; children = nullptr;
+    delete [] path; path = nullptr;
+    delete [] points; points = nullptr;
+    delete [] parents; parents = nullptr;
+	parent = nullptr;
   };
 
   sub_path();
@@ -91,7 +91,7 @@ class sub_path_list
   unsigned int num_paths;     // Number of subpaths
 public:
 
-  sub_path_list() : paths((sub_path*)0), num_paths(0) {}
+  sub_path_list() : paths((sub_path*)nullptr), num_paths(0) {}
   ~sub_path_list()
     {
     if(paths)

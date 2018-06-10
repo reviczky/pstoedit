@@ -29,7 +29,7 @@ class drvGCODE : public drvbase {
 public:
 
 	derivedConstructor(drvGCODE);
-	~drvGCODE(); // Destructor
+	~drvGCODE() override; // Destructor
 
 	class DriverOptions : public ProgramOptions {
 	public:

@@ -32,20 +32,20 @@ public:
 	derivedConstructor(drvTGIF);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ,float theMagnification); // Constructor
 
-	~drvTGIF(); // Destructor
+	~drvTGIF() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 			OptionT < bool, BoolTrueExtractor> 		textAsAttribute; // show text a HREF attribute
 			DriverOptions() :
-				textAsAttribute(true,"-ta",0,0,"text as attribute",0,false)
+				textAsAttribute(true,"-ta",nullptr,0,"text as attribute",nullptr,false)
 			{
 				ADD(textAsAttribute);
 			}
 	} * options;
 
 #include "drvfuncs.h"
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo & textInfo);
+	void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 	void print_coords();

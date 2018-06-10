@@ -43,7 +43,7 @@ constructBase
 drvPCBFILL::~drvPCBFILL()
 {
   outf << ")\n";
-  options=0;
+  options=nullptr;
 }
 
 

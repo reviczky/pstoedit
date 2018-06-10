@@ -43,7 +43,7 @@ drvSAMPL::~drvSAMPL()
 // driver specific deallocations
 // and writing of trailer to output file
 	outf << "Sample trailer \n";
-	options=0;
+	options=nullptr;
 }
 
 void drvSAMPL::print_coords()

@@ -36,7 +36,7 @@ protected:
    
 	derivedConstructor(drvHPGL);
  
-   ~drvHPGL(); // Destructor
+   ~drvHPGL() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		OptionT < bool, BoolTrueExtractor > penplotter ;
@@ -51,10 +51,10 @@ protected:
 
 			// penColors(0), maxPenColors(0)
 		DriverOptions():
-			penplotter(true,"-penplotter",0, 0, "plotter is pen plotter (i.e. no support for specific line widths)", 0,false),
-			pencolorsfromfile(true,"-pencolorsfromfile",0, 0, "read pen colors from file drvhpgl.pencolors in pstoedit's data directory", 0,false),
-			maxPenColors(true,"-pencolors", "number", 0, "maximum number of pen colors to be used by pstoedit (default 0) -" ,0,0),
-			fillinstruction(true,"-filltype", "string", 0, "select fill type e.g. FT 1" ,0,(const char*)"FT1"),
+			penplotter(true,"-penplotter",nullptr, 0, "plotter is pen plotter (i.e. no support for specific line widths)", nullptr,false),
+			pencolorsfromfile(true,"-pencolorsfromfile",nullptr, 0, "read pen colors from file drvhpgl.pencolors in pstoedit's data directory", nullptr,false),
+			maxPenColors(true,"-pencolors", "number", 0, "maximum number of pen colors to be used by pstoedit (default 0) -" ,nullptr,0),
+			fillinstruction(true,"-filltype", "string", 0, "select fill type e.g. FT 1" ,nullptr,(const char*)"FT1"),
 			/*
 			   Fill Type (FT) Command 
 			   ========================================= 
@@ -73,10 +73,10 @@ protected:
 			// FT 4 - cross hatching FT 4[,delta,angle]
 			// FT 10 - shading FT 10,[percentage]
 
-			hpgl2 (true,"-hpgl2" ,0, 0, "Use HPGL/2 instead of HPGL/1",0,false),
-			rot90 (true,"-rot90" ,0, 0, "rotate hpgl by 90 degrees",0,false),
-			rot180(true,"-rot180",0, 0, "rotate hpgl by 180 degrees",0,false),
-			rot270(true,"-rot270",0, 0, "rotate hpgl by 270 degrees",0,false)
+			hpgl2 (true,"-hpgl2" ,nullptr, 0, "Use HPGL/2 instead of HPGL/1",nullptr,false),
+			rot90 (true,"-rot90" ,nullptr, 0, "rotate hpgl by 90 degrees",nullptr,false),
+			rot180(true,"-rot180",nullptr, 0, "rotate hpgl by 180 degrees",nullptr,false),
+			rot270(true,"-rot270",nullptr, 0, "rotate hpgl by 270 degrees",nullptr,false)
 		{
 			ADD( penplotter );
 			ADD( pencolorsfromfile );
@@ -92,7 +92,7 @@ protected:
    #include "drvfuncs.h"
 
       // void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-       void show_text(const TextInfo & textInfo);
+       void show_text(const TextInfo & textinfo) override;
 
    private:
 	   void print_coords();
@@ -110,7 +110,7 @@ protected:
 	   int rotation;
 
    public:
-       static void rot(double & x, double & y, int rotation);
+       static void rot(double & x, double & y, int angle);
 
 	   NOCOPYANDASSIGN(drvHPGL)
    };

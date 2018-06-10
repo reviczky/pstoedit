@@ -76,7 +76,7 @@ static const struct fx {
 	"ZapfChancery-MediumItalic", "ZCMI"}, {
 	"ZapfDingbats", "ZD"}, {
 	"ZapfDingbats-Reverse", "ZDR"}, {
-	0, 0}
+	nullptr, nullptr}
 };
 
 /*
@@ -135,7 +135,7 @@ drvPIC::~drvPIC()
 // driver specific deallocations
 // and writing of trailer to output file
 	outf << ".\\\" PIC end\n";
-	options=0;
+	options=nullptr;
 }
 
 float drvPIC::x_coord(float x, float y) const
@@ -261,7 +261,7 @@ void drvPIC::show_text(const TextInfo & textinfo)
 	const char *fontweight = textinfo.currentFontWeight.c_str();
 	int pointsize = (textinfo.currentFontSize < 2.0) ? 0 : (int) (textinfo.currentFontSize + 1.8);
 	// BUG: point size is strange...
-	const char *tfont = 0;
+	const char *tfont = nullptr;
 
 	const float x = x_coord(textinfo.x, textinfo.y);
 	const float y = y_coord(textinfo.x, textinfo.y);

@@ -52,7 +52,7 @@ public:
 
 	derivedConstructor(drvWMF);		// Constructor
 
-	~drvWMF();						// Destructor
+	~drvWMF() override;						// Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 		OptionT < bool, BoolTrueExtractor> mapToArial;
@@ -64,11 +64,11 @@ public:
 		OptionT < bool, BoolTrueExtractor> OpenOfficeMode ;
 
 		DriverOptions() :
-		mapToArial(true,"-m",0,0,"map to Arial",0,false),
-		emulateNarrowFonts(true,"-nf",0,0,"emulate narrow fonts",0,false),
-		drawBoundingBox(true,"-drawbb",0,0,"draw bounding box",0,false),
-		pruneLineEnds(true,"-p",0,0,"prune line ends",0,false),
-		notforWindows(true,"-nfw",0,0,"not for MS Windows (meaningful under *nix only)",
+		mapToArial(true,"-m",nullptr,0,"map to Arial",nullptr,false),
+		emulateNarrowFonts(true,"-nf",nullptr,0,"emulate narrow fonts",nullptr,false),
+		drawBoundingBox(true,"-drawbb",nullptr,0,"draw bounding box",nullptr,false),
+		pruneLineEnds(true,"-p",nullptr,0,"prune line ends",nullptr,false),
+		notforWindows(true,"-nfw",nullptr,0,"not for MS Windows (meaningful under *nix only)",
 		"Newer versions of MS Windows (2000, XP, Vista, 7, ...) will not accept WMF/EMF files generated when this option is set and the input contains text. "
 		"But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using "
 		"a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice "
@@ -80,8 +80,8 @@ public:
 		"portability and nice to edit but still nice looking text. Again - this option has no meaning when pstoedit "
 		"is executed under MS Windows anyway. In that case the output is portable "
 		"but nevertheless not split and still looks fine.", false),
-		winbb(true,"-winbb",0,0,"let the MS Windows API calculate the Bounding Box (MS Windows only)",0,false),
-		OpenOfficeMode(true,"-OO", 0, 0, "generate OpenOffice compatible EMF file",0,false)
+		winbb(true,"-winbb",nullptr,0,"let the MS Windows API calculate the Bounding Box (MS Windows only)",nullptr,false),
+		OpenOfficeMode(true,"-OO", nullptr, 0, "generate OpenOffice compatible EMF file",nullptr,false)
 
 		{
 			ADD(mapToArial);
@@ -96,10 +96,10 @@ public:
 	} * options;
 
 #include "drvfuncs.h"
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo & textInfo);
+	void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
+	void show_text(const TextInfo & textinfo) override;
 
-	virtual void show_image(const PSImage & imageinfo); 
+	void show_image(const PSImage & imageinfo) override; 
 
 private:
 
@@ -113,7 +113,7 @@ private:
 
 	float scale() const;
 	long transx(float x) const;
-	long transy(float x) const;
+	long transy(float y) const;
 
 	void initMetaDC(HDC hdc);
 

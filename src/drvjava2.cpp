@@ -52,7 +52,7 @@ static const JavaFontDescriptor JavaFonts[] = {	// predefined Fonts
 	{"Times-Italic", "TimesRoman", "Font.ITALIC"},
 	{"Times-BoldItalic", "TimesRoman", "Font.BOLD + Font.ITALIC"},
 	{"ZapfDingbats", "ZapfDingbats", "Font.PLAIN"},
-	{0, 0, 0}
+	{nullptr, nullptr, nullptr}
 };
 
 const unsigned int numberOfFonts = sizeof(JavaFonts) / (sizeof(JavaFontDescriptor)) - 1;
@@ -109,7 +109,7 @@ drvJAVA2::~drvJAVA2()
 	outf << "    super.init();" << endl;
 	outf << "  }" << endl;
 	outf << "}" << endl;
-	options=0;
+	options=nullptr;
 }
 
 
@@ -154,15 +154,13 @@ void drvJAVA2::print_coords()
 		switch (elem.getType()) {
 		case moveto:{
 				const Point & p = elem.getPoint(0);
-				outf << "    currentPath.moveTo(" << (p.x_ +
-													  x_offset) << "f, " <<
+				outf << "    currentPath.moveTo(" << (p.x_ + x_offset) << "f, " <<
 					(currentDeviceHeight - p.y_ + y_offset) << "f);";
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
-				outf << "    currentPath.lineTo(" << (p.x_ +
-													  x_offset) << "f, " <<
+				outf << "    currentPath.lineTo(" << (p.x_ + x_offset) << "f, " <<
 					(currentDeviceHeight - p.y_ + y_offset) << "f);";
 			}
 			break;
@@ -172,14 +170,11 @@ void drvJAVA2::print_coords()
 		case curveto:{
 				outf << "    currentPath.curveTo(";
 				outf << (elem.getPoint(0).x_ +
-						 x_offset) << "f, " << (currentDeviceHeight -
-												elem.getPoint(0).y_ + y_offset) << "f, ";
+						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(0).y_ + y_offset) << "f, ";
 				outf << (elem.getPoint(1).x_ +
-						 x_offset) << "f, " << (currentDeviceHeight -
-												elem.getPoint(1).y_ + y_offset) << "f, ";
+						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(1).y_ + y_offset) << "f, ";
 				outf << (elem.getPoint(2).x_ +
-						 x_offset) << "f, " << (currentDeviceHeight -
-												elem.getPoint(2).y_ + y_offset) << "f);";
+						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(2).y_ + y_offset) << "f);";
 			}
 			break;
 		default:
@@ -337,8 +332,7 @@ void drvJAVA2::show_rectangle(const float llx, const float lly, const float urx,
 		outf << "," << endl;
 		show_dashPattern(outf, dashPattern());
 	}
-	outf << ", new Rectangle2D.Float(" << (llx +
-										   x_offset) << "f, " <<
+	outf << ", new Rectangle2D.Float(" << (llx + x_offset) << "f, " <<
 		(currentDeviceHeight - ury + y_offset) << "f";
 	outf << ", " << (urx - llx) << "f, " << (ury - lly) << "f)));" << endl;
 	numberOfElements++;
@@ -353,9 +347,9 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 	}
 	// write image data to separate file
 	const size_t sizefilename = strlen(outBaseName.c_str()) + 21;
-	char *imgOutFileName = new char[sizefilename];
+	auto imgOutFileName = new char[sizefilename];
 	const size_t sizefullfilename = strlen(outDirName.c_str()) + strlen(outBaseName.c_str()) + 21;
-	char *imgOutFullFileName = new char[sizefullfilename];
+	auto imgOutFullFileName = new char[sizefullfilename];
 
 	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%u.img", outBaseName.c_str(), numberOfImages);
 	sprintf_s(TARGETWITHLEN(imgOutFullFileName,sizefullfilename), "%s%s", outDirName.c_str(), imgOutFileName);
@@ -386,7 +380,7 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 	outf << (currentDeviceHeight - imageinfo.normalizedImageCurrentMatrix[5]) << "f), " << endl;
 	outf << "      \"" << imgOutFileName << "\"));" << endl;
 	FILE *outFile;
-	if ((outFile = fopen(imgOutFileName, "wb")) == 0L) {
+	if ((outFile = fopen(imgOutFileName, "wb")) == nullptr) {
 		errf << "ERROR: cannot open image file " << imgOutFileName << endl;
 		delete[]imgOutFileName;
 		delete[]imgOutFullFileName;

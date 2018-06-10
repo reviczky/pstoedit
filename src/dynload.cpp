@@ -83,11 +83,11 @@ static char *dlerror()
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 
         FORMAT_MESSAGE_FROM_SYSTEM |
         FORMAT_MESSAGE_IGNORE_INSERTS,
-        NULL,
+        nullptr,
         dw,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
         (LPTSTR) &lpMsgBuf,
-        0, NULL );
+        0, nullptr );
 	return (char*)lpMsgBuf; 
 }
 
@@ -97,7 +97,7 @@ static char *dlerror()
 #error "system unsupported so far"
 #endif
 
-DynLoader::DynLoader(const char *libname_P, ostream & errstream_p, int verbose_p):libname(0), handle(0),
+DynLoader::DynLoader(const char *libname_P, ostream & errstream_p, int verbose_p):libname(nullptr), handle(nullptr),
 errstream(errstream_p),verbose(verbose_p)
 {
 	if (libname_P) {
@@ -118,7 +118,7 @@ void DynLoader::open(const char *libname_P)
 		exit(1);
 	}
 	const size_t size = strlen(libname_P) + 1; 
-	char *fulllibname = new char[size];
+	auto fulllibname = new char[size];
 	strcpy_s(fulllibname, size, libname_P);
 	// not needed strcat(fulllibname_P,libsuffix);
 
@@ -134,7 +134,7 @@ void DynLoader::open(const char *libname_P)
 #else
 #error "system unsupported so far"
 #endif
-	if (handle == 0) {
+	if (handle == nullptr) {
 		const char * const dlerrormessage = dlerror();
 		const char * const dle = dlerrormessage ? dlerrormessage : "NULL";
 		errstream << "Problem during opening '" << fulllibname << "' : " << dle 
@@ -188,7 +188,7 @@ void DynLoader::close()
 #else
 #error "system unsupported so far"
 #endif
-		handle = 0;
+		handle = nullptr;
 	}
 }
 
@@ -198,13 +198,13 @@ DynLoader::~DynLoader()
 	if (libname && verbose)
 		errstream << "destroying Dynloader for " << libname << endl;
 	delete[]libname;
-	libname=0;
-	handle=0;
+	libname=nullptr;
+	handle=nullptr;
 }
 
 int DynLoader::knownSymbol(const char *name) const
 {
-	return (getSymbol(name, 0) != 0);
+	return (getSymbol(name, 0) != nullptr);
 }
 
 // a bit of hack since C++ does not support the case of "normal" ptrs to function ptrs.
@@ -217,6 +217,7 @@ union ptrunion {
 
 DynLoader::fptr DynLoader::ptr_to_fptr(void * p) {
 	ptrunion u;
+	//static_assert( sizeof(u.u_ptr) == sizeof(u.u_fptr) );
 	assert( sizeof(u.u_ptr) == sizeof(u.u_fptr) );
 	u.u_ptr = p;
 	return u.u_fptr;
@@ -235,7 +236,7 @@ DynLoader::fptr DynLoader::getSymbol(const char *name, int check) const
 #else
 #error "system unsupported so far"
 #endif
-	if ((rfptr == 0) && check) {
+	if ((rfptr == nullptr) && check) {
 		const char * const dlerrormessage = dlerror();
 		const char * const dle = dlerrormessage ? dlerrormessage : "NULL";
 		errstream << "error during getSymbol for " << name << ":" << dle 
@@ -258,11 +259,11 @@ public:
 	enum { maxPlugins = 100 };
 	PluginVector():curindex(0u) {
 		for (unsigned int i = 0; i < maxPlugins; i++)
-			pluginPtr[i] = 0;
+			pluginPtr[i] = nullptr;
 	} ~PluginVector() {
 		for (unsigned int i = 0; i < maxPlugins; i++) {
 			delete pluginPtr[i];
-			pluginPtr[i] = 0;
+			pluginPtr[i] = nullptr;
 		}
 	}
 	void add(DynLoader * newelem) {
@@ -284,7 +285,7 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 		errstream << "loading plugin: " << filename << endl;
 
 	DriverDescription::currentfilename = filename;
-	DynLoader *dynloader = new DynLoader(filename, errstream, verbose);
+	auto dynloader = new DynLoader(filename, errstream, verbose);
 	if (!dynloader->valid()) {
 		delete dynloader;
 		errstream << "Problem during opening of pstoedit driver plugin: " << filename <<
@@ -312,12 +313,12 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 	if (dynloader->knownSymbol("getglobalRp")) {
 		getglobalRpFuncPtr dyngetglobalRpFunc =
 			(getglobalRpFuncPtr) dynloader->getSymbol("getglobalRp");
-		if (dyngetglobalRpFunc == 0) {
+		if (dyngetglobalRpFunc == nullptr) {
 			errstream << "could not find getglobalRp " << endl;
 			return;
 		}
 		DescriptionRegister *dynglobalRp = dyngetglobalRpFunc();
-		if (dynglobalRp == 0) {
+		if (dynglobalRp == nullptr) {
 			errstream << " didn't find any registered Drivers " << endl;
 		} else if (dynglobalRp != getglobalRp()) {
 //                      globalRp->explainformats(errstream);
@@ -424,7 +425,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 
 void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
-	if (pluginDir != 0) {
+	if (pluginDir != nullptr) {
 		char szExePath[1000];
 		szExePath[0] = '\0';
 		(void) P_GetPathToMyself("pstoedit", szExePath, sizeof(szExePath));

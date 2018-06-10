@@ -39,13 +39,13 @@ constructBase
 
 drvGCODE::~drvGCODE()
 {
-	options=0;
+	options=nullptr;
 }
 
 void drvGCODE::open_page()
 {
 	//date and time of convertion
-	time_t kz = time(NULL);;
+	time_t kz = time(nullptr);;
 	static char sdate[30];
 	sdate[0] = 0;
 	struct tm *ozt = localtime(&kz);

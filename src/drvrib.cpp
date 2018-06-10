@@ -46,7 +46,7 @@ drvRIB::~drvRIB()
 	// driver specific deallocations
 	// and writing of trailer to output file
 	outf << "AttributeEnd" << endl;
-	options=0;
+	options=nullptr;
 }
 
 void drvRIB::print_coords()

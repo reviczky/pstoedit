@@ -531,7 +531,7 @@ void drvSVM::show_text(const TextInfo& textinfo)
         uInt16		fontItalic = 0;	// default: no italics
         uInt16		charSet = 0;	// default: don't know charset
 
-        const char* fontName = NULL;
+        const char* fontName = nullptr;
 
         if (strstr(textinfo.currentFontWeight.c_str(), "Regular"))
             fontWeigth = 4;	// semi light weight
@@ -779,11 +779,11 @@ void drvSVM::show_text(const TextInfo& textinfo)
 }
 
 
-void drvSVM::show_image(const PSImage& image)
+void drvSVM::show_image(const PSImage& imageinfo)
 {
 	// first retrieve bounding box
 	Point lowerLeft, upperRight;
-	image.getBoundingBox(lowerLeft, upperRight);
+	imageinfo.getBoundingBox(lowerLeft, upperRight);
 
 	const Int32 width  = abs(l_transX(upperRight.x_) - 
                              l_transX(lowerLeft.x_));
@@ -795,39 +795,39 @@ void drvSVM::show_image(const PSImage& image)
 	const long int maskScanlineLen = ((((width + 7) & ~7L) >> 3L) + 3) & ~3L;
 
 	// now lets get some mem
-	unsigned char* const output = new unsigned char[scanlineLen * height];
+	auto output = new unsigned char[scanlineLen * height];
 	output[0] = 0; // init for coverity
-	unsigned char* const outputMask = new unsigned char[maskScanlineLen * height];
+	auto outputMask = new unsigned char[maskScanlineLen * height];
 	outputMask[0] = 0; // init for coverity
 
 	// setup inverse transformation matrix
-	const float matrixScale(image.normalizedImageCurrentMatrix[0] *
-							image.normalizedImageCurrentMatrix[3] -
-							image.normalizedImageCurrentMatrix[2] *
-							image.normalizedImageCurrentMatrix[1]);
+	const float matrixScale(imageinfo.normalizedImageCurrentMatrix[0] *
+							imageinfo.normalizedImageCurrentMatrix[3] -
+							imageinfo.normalizedImageCurrentMatrix[2] *
+							imageinfo.normalizedImageCurrentMatrix[1]);
 	const float inverseMatrix[] = {
-		image.normalizedImageCurrentMatrix[3] / matrixScale,
-		-image.normalizedImageCurrentMatrix[1] / matrixScale,
-		-image.normalizedImageCurrentMatrix[2] / matrixScale,
-		image.normalizedImageCurrentMatrix[0] / matrixScale,
-		(image.normalizedImageCurrentMatrix[2] *
-		 image.normalizedImageCurrentMatrix[5] -
-		 image.normalizedImageCurrentMatrix[4] *
-		 image.normalizedImageCurrentMatrix[3]) / matrixScale,
-		(image.normalizedImageCurrentMatrix[4] *
-		 image.normalizedImageCurrentMatrix[1] -
-		 image.normalizedImageCurrentMatrix[0] *
-		 image.normalizedImageCurrentMatrix[5]) / matrixScale
+		imageinfo.normalizedImageCurrentMatrix[3] / matrixScale,
+		-imageinfo.normalizedImageCurrentMatrix[1] / matrixScale,
+		-imageinfo.normalizedImageCurrentMatrix[2] / matrixScale,
+		imageinfo.normalizedImageCurrentMatrix[0] / matrixScale,
+		(imageinfo.normalizedImageCurrentMatrix[2] *
+		 imageinfo.normalizedImageCurrentMatrix[5] -
+		 imageinfo.normalizedImageCurrentMatrix[4] *
+		 imageinfo.normalizedImageCurrentMatrix[3]) / matrixScale,
+		(imageinfo.normalizedImageCurrentMatrix[4] *
+		 imageinfo.normalizedImageCurrentMatrix[1] -
+		 imageinfo.normalizedImageCurrentMatrix[0] *
+		 imageinfo.normalizedImageCurrentMatrix[5]) / matrixScale
 	};
 
     if (Verbose()) 
         errf << "Image matrix: " 
-             << "0: " << image.normalizedImageCurrentMatrix[0] << " "
-             << "1: " << image.normalizedImageCurrentMatrix[1] << " "
-             << "2: " << image.normalizedImageCurrentMatrix[2] << " "
-             << "3: " << image.normalizedImageCurrentMatrix[3] << " "
-             << "4: " << image.normalizedImageCurrentMatrix[4] << " "
-             << "5: " << image.normalizedImageCurrentMatrix[5] << " "
+             << "0: " << imageinfo.normalizedImageCurrentMatrix[0] << " "
+             << "1: " << imageinfo.normalizedImageCurrentMatrix[1] << " "
+             << "2: " << imageinfo.normalizedImageCurrentMatrix[2] << " "
+             << "3: " << imageinfo.normalizedImageCurrentMatrix[3] << " "
+             << "4: " << imageinfo.normalizedImageCurrentMatrix[4] << " "
+             << "5: " << imageinfo.normalizedImageCurrentMatrix[5] << " "
              << endl;
 
     // TODO(F2): interpolate
@@ -849,30 +849,30 @@ void drvSVM::show_image(const PSImage& image)
 			const long int sourceY = (long int) (currPoint.y_ + .5);
 
 			// is the pixel within source bitmap bounds?
-			if (sourceX >= 0L && (unsigned long) sourceX < image.width &&
-				sourceY >= 0L && (unsigned long) sourceY < image.height) {
+			if (sourceX >= 0L && (unsigned long) sourceX < imageinfo.width &&
+				sourceY >= 0L && (unsigned long) sourceY < imageinfo.height) {
 				// okay, fetch source pixel value into 
 				// RGB triplet
 
 				unsigned char r(255), g(255), b(255);
 
 				// how many components?
-				switch (image.ncomp) {
+				switch (imageinfo.ncomp) {
 				case 1:
-					r = g = b = image.getComponent(sourceX, sourceY, 0);
+					r = g = b = imageinfo.getComponent(sourceX, sourceY, 0);
 					break;
 
 				case 3:
-					r = image.getComponent(sourceX, sourceY, 0);
-					g = image.getComponent(sourceX, sourceY, 1);
-					b = image.getComponent(sourceX, sourceY, 2);
+					r = imageinfo.getComponent(sourceX, sourceY, 0);
+					g = imageinfo.getComponent(sourceX, sourceY, 1);
+					b = imageinfo.getComponent(sourceX, sourceY, 2);
 					break;
 
 				case 4: {
-					unsigned char C = image.getComponent(sourceX, sourceY, 0);
-					unsigned char M = image.getComponent(sourceX, sourceY, 1);
-					unsigned char Y = image.getComponent(sourceX, sourceY, 2);
-					unsigned char K = image.getComponent(sourceX, sourceY, 3);
+					unsigned char C = imageinfo.getComponent(sourceX, sourceY, 0);
+					unsigned char M = imageinfo.getComponent(sourceX, sourceY, 1);
+					unsigned char Y = imageinfo.getComponent(sourceX, sourceY, 2);
+					unsigned char K = imageinfo.getComponent(sourceX, sourceY, 3);
 
 					// account for key
 					C += K;

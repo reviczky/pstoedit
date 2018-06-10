@@ -114,8 +114,8 @@ static unsigned int registercolor(float r, float g, float b)
 static void dumpnewcolors(ostream & theoutStream)
 {
 	unsigned int current = defaults;
-	const char *colstring = 0;
-	while ((colstring = colorTable.getColorString(current)) != 0) {
+	const char *colstring = nullptr;
+	while ((colstring = colorTable.getColorString(current)) != nullptr) {
 		theoutStream << "0 " << current << " " << colstring << endl;
 		current++;
 	}
@@ -217,7 +217,7 @@ drvFIG::~drvFIG()
 	// now we can copy the buffer the output
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
-	options=0;
+	options=nullptr;
 }
 
 
@@ -664,7 +664,7 @@ PostScript::special::Fontname
 
 	int FigFontNum = 0;
 	const char * const specialindex = strstr(textinfo.currentFontName.c_str(),"::special::");
-	const bool special = (specialindex != 0);
+	const bool special = (specialindex != nullptr);
 	if (!strncmp(textinfo.currentFontName.c_str(),"LaTeX::",7) ) {
 		// it is a LaTeX Font
 		fontflags = special ? 2 : 0 ; // 0010 or 0000  - LaTeX
@@ -690,8 +690,8 @@ PostScript::special::Fontname
 			if (FigFontNum != -1) {
 				errf << defaultFontName;
 			} else {
-				if (strstr(fontname, "Bold") == 0) {
-					if (strstr(fontname, "Italic") == 0) {
+				if (strstr(fontname, "Bold") == nullptr) {
+					if (strstr(fontname, "Italic") == nullptr) {
 						errf << "Times-Roman";
 						FigFontNum = 0;	// Times-Roman
 					} else {
@@ -699,7 +699,7 @@ PostScript::special::Fontname
 						errf << "Times-Italic";
 					}
 				} else {
-					if (strstr(fontname, "Italic") == 0) {
+					if (strstr(fontname, "Italic") == nullptr) {
 						errf << "Times-Bold";
 						FigFontNum = 2;	// Times-Bold
 					} else {
@@ -956,9 +956,9 @@ void drvFIG::show_image(const PSImage & imageinfo)
 
 	} else {
 	const size_t filenamelen = strlen(outBaseName.c_str()) + 21;
-	char *EPSoutFileName = new char[filenamelen];
+	auto EPSoutFileName = new char[filenamelen];
 	const size_t fullfilenamelen = strlen(outDirName.c_str()) + strlen(outBaseName.c_str()) + 21;
-	char *EPSoutFullFileName = new char[fullfilenamelen];
+	auto EPSoutFullFileName = new char[fullfilenamelen];
 
 	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName.c_str(), imgcount++);
 	sprintf_s(TARGETWITHLEN(EPSoutFullFileName,fullfilenamelen), "%s%s", outDirName.c_str(), EPSoutFileName);

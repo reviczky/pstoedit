@@ -134,7 +134,7 @@ drvNOI::~drvNOI()
 	(void)NoiWriteXML(outFileName.c_str());
 
   hProxyDLL.close();
-  options=0;
+  options=nullptr;
   }
 
 // load the proxy dll and get all the function pointers
@@ -175,7 +175,7 @@ void drvNOI::draw_polyline()
   {
   Point p0, pc;
   Point pf(x_offset, y_offset);
-  double (*points)[2] = new double[numberOfElementsInPath()][2];
+  auto points = new double[numberOfElementsInPath()][2];
   unsigned npoints = 0;
 
   for (unsigned int n = 0; n < numberOfElementsInPath(); n++) 
@@ -236,7 +236,7 @@ void drvNOI::draw_polyline()
 //  with straight-line borders as Allplan Filling objects
 void drvNOI::draw_polygon()
   {
-  double (*points)[2] = new double[numberOfElementsInPath()][2];
+  auto points = new double[numberOfElementsInPath()][2];
   unsigned npoints = 0;
   Point p0, pc;
   bool isFillObject = (currentShowType() == fill);

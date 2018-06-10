@@ -567,8 +567,8 @@ public:
 	const float *	getCurrentFontMatrix() const { return textInfo_.FontMatrix; }
 	void 		setCurrentFontMatrix(const float mat[6]) { for (unsigned short i = 0; i< 6; i++) textInfo_.FontMatrix[i] = mat[i]; }
 
-	// the push*Text methods set the textinfo_ member and then call the 
-	// showOrMergeText(textinfo_) ;
+	// the push*Text methods set the textInfo_ member and then call the 
+	// showOrMergeText(textInfo_) ;
 	void    	pushText(const size_t len,
 				        const char *const thetext,
 					const float x, 
@@ -858,7 +858,9 @@ typedef drawingelement<(unsigned int) 3,curveto> 	Curveto;
 
 // use of static_cast instead of dynamic_cast, because some tools complain about problems then since
 // in theory dynamic_cast could return 0
-#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), options(static_cast<DriverOptions*>(DOptions_ptr))
+// but clang tidy wants dynamic_cast
+// #define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), options(static_cast<DriverOptions*>(DOptions_ptr))
+#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), options(dynamic_cast<DriverOptions*>(DOptions_ptr))
 
 
 class DLLEXPORT DescriptionRegister

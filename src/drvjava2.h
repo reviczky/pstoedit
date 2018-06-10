@@ -33,22 +33,22 @@ public:
 	derivedConstructor(drvJAVA2);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvJAVA2(); // Destructor
+	~drvJAVA2() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 		OptionT < RSString, RSStringValueExtractor> jClassName;
 		DriverOptions():
-			jClassName(true,"java class name","string",0,"name of java class to generate",0,(const char *)"PSJava")
+			jClassName(true,"java class name","string",0,"name of java class to generate",nullptr,(const char *)"PSJava")
 		{
 			ADD(jClassName);
 		}
 	}*options;
 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
+	void show_text(const TextInfo & textinfo) override;
+	void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
 
-	virtual void    show_image(const PSImage & imageinfo);
+	void    show_image(const PSImage & imageinfo) override;
 
 private:
 	void print_coords();

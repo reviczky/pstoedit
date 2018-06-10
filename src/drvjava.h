@@ -31,19 +31,19 @@ class drvJAVA : public drvbase {
 public:
 
 	derivedConstructor(drvJAVA);
-	~drvJAVA(); // Destructor
+	~drvJAVA() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 		OptionT < RSString, RSStringValueExtractor> jClassName;
 		DriverOptions():
-			jClassName(true,"java class name","string",0,"name of java class to generate",0,(const char *)"PSJava")
+			jClassName(true,"java class name","string",0,"name of java class to generate",nullptr,(const char *)"PSJava")
 		{
 			ADD(jClassName);
 		}
 	}*options;
 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 	void print_coords();

@@ -36,7 +36,7 @@ public:
 	derivedConstructor(drvLWO);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvLWO(); // Destructor
+	~drvLWO() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 

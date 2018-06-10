@@ -35,7 +35,7 @@ public:
   derivedConstructor(drvIDRAW);
   //(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-  ~drvIDRAW(); // Destructor
+  ~drvIDRAW() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 
@@ -43,7 +43,7 @@ public:
 		}
 	}*options;
 
-void show_image(const PSImage & imageinfo);
+void show_image(const PSImage & imageinfo) override;
 
 private:
 	void print_coords();
@@ -76,7 +76,7 @@ private:
 
 
 #include "drvfuncs.h"
-	   void show_text(const TextInfo & textInfo);
+	   void show_text(const TextInfo & textinfo) override;
 
 	
 };

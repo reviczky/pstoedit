@@ -638,13 +638,13 @@ drvIDRAW::~drvIDRAW()
 	outf << "showpage\n\n";
 	outf << "%%Trailer\n\n";
 	outf << "end\n";
-	options=0;
+	options=nullptr;
 }
 
 // Return the name of closest matching color
 const char *drvIDRAW::rgb2name(float red, float green, float blue) const
 {
-	const char *name = 0;
+	const char *name = nullptr;
 	double bestquality = 1e+100;	// Arbitrary large number
 
 	// Linear search for a match
@@ -740,7 +740,7 @@ void drvIDRAW::print_coords()
 		else if (pathElement(i).getType() == closepath)
 			closed = true;
 	}
-	const Point **pointlist = new const Point *[pathelts * 3];	// List of points
+	auto pointlist = new const Point *[pathelts * 3];	// List of points
 	 	// Allocate a conservative amount
 	assert(pointlist != NIL);
 	firstpoint = NIL;
@@ -770,7 +770,7 @@ void drvIDRAW::print_coords()
 
 			// ASSUMPTION: Curve is moveto+curveto+curveto+curveto+...
 			// List of points on curve
-			const Point **newpointlist = new const Point *[pathelts * 3000 / pt_per_cp];	// Allocate a conservative amount
+			auto newpointlist = new const Point *[pathelts * 3000 / pt_per_cp];	// Allocate a conservative amount
 			assert(newpointlist != NIL);
 			for (i = 0; i < totalpoints - 3; i += 3) {
 				const float x0 = pointlist[i]->x_;

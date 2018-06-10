@@ -31,24 +31,24 @@ class drvSAMPL : public drvbase {
 public:
 
 	derivedConstructor(drvSAMPL);
-	~drvSAMPL(); // Destructor
+	~drvSAMPL() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		OptionT < int, IntValueExtractor >sampleoption;
 		DriverOptions(): 
-			sampleoption(true,"-sampleoption","integer",0,"just an example",0,99)
+			sampleoption(true,"-sampleoption","integer",0,"just an example",nullptr,99)
 		{
 			ADD(sampleoption);
 		}
 	}*options;
 
 #include "drvfuncs.h"
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo & textInfo);
+	void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
+	void show_text(const TextInfo & textinfo) override;
 
 public:
 
-	virtual void    show_image(const PSImage & imageinfo); 
+	void    show_image(const PSImage & imageinfo) override; 
 
 private:
 	void print_coords();

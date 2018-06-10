@@ -85,7 +85,7 @@ mmaDashing(solid), mmaThickness(0.0), mmaR(0.0), mmaG(0.0), mmaB(0.0), buffer(te
 drvMMA::~drvMMA()
 {
 	outf << "Sequence[]\n}\n";	// Dummy!
-	options=0;
+	options=nullptr;
 }
 
 // Output a point.

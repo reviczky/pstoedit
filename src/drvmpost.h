@@ -42,7 +42,7 @@ public:
 
 	derivedConstructor(drvMPOST);
 
-	~drvMPOST(); // Destructor
+	~drvMPOST() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 
@@ -51,7 +51,7 @@ public:
 	}*options;
 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 	void print_coords();

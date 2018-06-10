@@ -30,7 +30,7 @@
 
 
 drvTEXT::derivedConstructor(drvTEXT):
-constructBase, charpage(0)
+constructBase, charpage(nullptr)
 // , dumptextpieces(false), pageheight(200), pagewidth(120)
 {
 // driver specific initializations
@@ -85,12 +85,12 @@ drvTEXT::~drvTEXT()
 	if (charpage) {
 		for (unsigned int i = 0; i < (unsigned int) options->pageheight; i++) {
 			delete[]charpage[i];
-			charpage[i] = 0;
+			charpage[i] = nullptr;
 		}
 		delete[]charpage;
-		charpage = 0;
+		charpage = nullptr;
 	}
-	options=0;
+	options=nullptr;
 }
 
 void drvTEXT::open_page()
@@ -162,7 +162,7 @@ void drvTEXT::show_text(const TextInfo & textinfo)
 			}
 		}
 		if (!inserted) {
-			Line *newline = new Line;
+			auto newline = new Line;
 			//lint -esym(429,newline) // newline is not freed here, but inserted into the list
 			page.insert(newline);
 			newline->y_max = textinfo.y + 0.1f * textinfo.currentFontSize;

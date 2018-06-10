@@ -42,19 +42,19 @@ public:
 
   derivedConstructor(drvASY);
 
-  ~drvASY(); // Destructor
+  ~drvASY() override; // Destructor
   class DriverOptions : public ProgramOptions {
   public:
     DriverOptions() {}
   }*options;
 
 #include "drvfuncs.h"
-  void show_text(const TextInfo & textInfo);
-  void show_image(const PSImage & imageinfo);
+  void show_text(const TextInfo & textinfo) override;
+  void show_image(const PSImage & imageinfo) override;
   
-  virtual void ClipPath(cliptype);
-  void Save();
-  void Restore();
+  void ClipPath(cliptype) override;
+  void Save() override;
+  void Restore() override;
 
 private:
   void print_coords();

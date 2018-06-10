@@ -81,7 +81,7 @@ drvTGIF::~drvTGIF()
 	// now we can copy the buffer the output
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
-	options=0;
+	options=nullptr;
 }
 
 void drvTGIF::print_coords()
@@ -206,14 +206,10 @@ void drvTGIF::show_text(const TextInfo & textinfo)
 	if (fontSize != 0.0) {
 		const float *CTM = getCurrentFontMatrix();
 
-		if (fabs(CTM[0]*tgifscale - fontSize) < (1.0e-5) &&
+		transformed = !(fabs(CTM[0]*tgifscale - fontSize) < (1.0e-5) &&
 			fabs(CTM[1]) < (1.0e-5) &&
-			fabs(CTM[2]) < (1.0e-5) && fabs(CTM[3]*tgifscale - fontSize) < (1.0e-5)) {
+			fabs(CTM[2]) < (1.0e-5) && fabs(CTM[3]*tgifscale - fontSize) < (1.0e-5)); 
 			// no rotation and no shear
-			transformed = false;
-		} else {
-			transformed = true;
-		}
 	}
 	if (transformed) {
 		buffer << "1,0,[" << endl;

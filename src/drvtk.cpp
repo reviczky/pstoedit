@@ -69,7 +69,7 @@ void drvTK::outputEscapedText(const char *str)
 
 
 drvTK::derivedConstructor(drvTK):
-constructBase, buffer(tempFile.asOutput()), objectId(1),paperinfo(0)
+constructBase, buffer(tempFile.asOutput()), objectId(1),paperinfo(nullptr)
 {
 //  const RSString & l_pagesize = getPageSize();
 
@@ -929,8 +929,8 @@ drvTK::~drvTK()
 	}
 	ifstream & inbuffer = tempFile.asInput();
 	copy_file(inbuffer, outf);
-	options=0;
-	paperinfo=0;
+	options=nullptr;
+	paperinfo=nullptr;
 }
 
 void drvTK::print_coords()

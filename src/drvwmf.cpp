@@ -203,12 +203,14 @@ void drvWMF::initMetaDC(HDC hdc){
 
 }
 
+#define Hnullptr 0
+
 drvWMF::derivedConstructor(drvWMF):
 	constructBase,
 	oldColoredPen(NIL),
 	oldColoredBrush(NIL),
 	enhanced(false),
-	outFile(0L)
+	outFile(nullptr)
 {
  	// some basic inits / could also be done in init list
 	// put here because static analysis tools find a lot of uninitialized usage
@@ -231,13 +233,13 @@ drvWMF::derivedConstructor(drvWMF):
 	penData.lopnStyle = PS_SOLID;	// solid pen
 	penData.lopnWidth = PenWidth;	// width of pen
 	penData.lopnColor = RGB(0, 0, 0);	// color of pen: black
-	coloredPen = 0L;
+	coloredPen = Hnullptr;
 
 	// setup brush for drawing functions
 	brushData.lbStyle = BS_SOLID;	// solid brush
 	brushData.lbColor = RGB(0, 0, 0);	// color of brush (black)
 	brushData.lbHatch = 0L;		// no pattern
-	coloredBrush = 0L;
+	coloredBrush = Hnullptr;
 
 	// set default font
 	if (options->mapToArial) {
@@ -247,8 +249,8 @@ drvWMF::derivedConstructor(drvWMF):
 		const char *const defaultfontname = "System";
 		setCurrentFontName(defaultfontname, false /* is standard font */ );
 	}
-	myFont = 0L;
-	oldFont = 0L;
+	myFont = Hnullptr;
+	oldFont = Hnullptr;
 
 
 	// do some consistency checking
@@ -328,7 +330,7 @@ drvWMF::derivedConstructor(drvWMF):
 			return;
 		}
 
-		if ((outFile = fopen(outFileName.c_str(), "wb")) == 0L) {
+		if ((outFile = fopen(outFileName.c_str(), "wb")) == nullptr) {
 			errf << "ERROR: cannot open final metafile " << outFileName << endl;
 			ctorOK = false;
 			return;
@@ -350,12 +352,12 @@ static void writeErrorCause(const char * mess)
 	LPVOID lpMsgBuf; 
 	(void)FormatMessage( 
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 
-		NULL, 
+		nullptr, 
 		ec, 
 		MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT), 
 		(LPTSTR) &lpMsgBuf,	
 		0,	
-		NULL	
+		nullptr	
 	);	
 	cerr << "Error Code for "  << mess << " ec: " << ec << " " << (char*) lpMsgBuf << endl; 
 	LocalFree( lpMsgBuf ); 
@@ -432,7 +434,7 @@ drvWMF::~drvWMF()
 	if (myFont) {
 		SelectObject(metaDC, oldFont);
 		DeleteObject(myFont);
-		myFont = 0L;
+		myFont = Hnullptr;
 	}
 	// close and destroy metafile
 	if (enhanced) {
@@ -512,8 +514,8 @@ drvWMF::~drvWMF()
 		WORD checksum;
 	
 
-		if ((inFile = fopen(tempName.c_str(), "rb")) != 0L) {
-			if (outFile != 0L) {
+		if ((inFile = fopen(tempName.c_str(), "rb")) != nullptr) {
+			if (outFile != nullptr) {
 				// setup header
 				pHd.key = LittleEndian_Dword32(PLACEABLEKEY);
 				pHd.hmf = LittleEndian_Word(0);
@@ -562,9 +564,9 @@ drvWMF::~drvWMF()
 
 	// delete desktop DC (might need it above)
 	ReleaseDC(GetDesktopWindow(), desktopDC);
-	desktopDC=0;
-	options=0;
-	metaDC=0;
+	desktopDC=Hnullptr;
+	options=nullptr;
+	metaDC=Hnullptr;
 }
 
 
@@ -607,7 +609,7 @@ void drvWMF::setDrawAttr()
 	if (coloredPen) {
 		SelectObject(metaDC, oldColoredPen);
 		DeleteObject(coloredPen);
-		coloredPen = 0L;
+		coloredPen = Hnullptr;
 	}
 
 	coloredPen = CreatePenIndirect(&penData);
@@ -620,7 +622,7 @@ void drvWMF::setDrawAttr()
 	if (coloredBrush) {
 		SelectObject(metaDC, oldColoredBrush);
 		DeleteObject(coloredBrush);
-		coloredBrush = 0L;
+		coloredBrush = Hnullptr;
 	}
 
 	coloredBrush = CreateBrushIndirect(&brushData);
@@ -754,7 +756,7 @@ int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int
 	if (myFont) {
 		SelectObject(metaDC, oldFont);
 		DeleteObject(myFont);
-		myFont = 0L;
+		myFont = Hnullptr;
 	}
 
 	myFont = CreateFontIndirect(&theFontRec);
@@ -774,15 +776,15 @@ void drvWMF::drawPoly(polyType type)
 	const unsigned int numOfElements = numberOfElementsInPath();
 	// get us twice the number of elements in path,
 	// as maybe every subpath is closed and consists of ONE point!
-	POINT *aptlPoints = new POINT[2 * numOfElements];
-	if (aptlPoints == 0) {
+	auto aptlPoints = new POINT[2 * numOfElements];
+	if (aptlPoints == nullptr) {
 		errf << "ERROR: Cannot allocate memory for point-array" << endl;
 		return;
 	}
 	// get us twice the number of elements in path,
 	// as maybe every subpath is closed and consists of ONE point!
-	int *aptlNumPts = new int[2 * numOfElements];
-	if (aptlNumPts == 0) {
+	auto aptlNumPts = new int[2 * numOfElements];
+	if (aptlNumPts == nullptr) {
 		errf << "ERROR: Cannot allocate memory for pointNum-array" << endl;
 		delete [] aptlPoints;
 		return;
@@ -1128,7 +1130,7 @@ void drvWMF::show_text(const TextInfo & textinfo)
 		const long textdistance = (long) pythagoras((double)(x1-x2), (double)(y1-y2));
 		const int letterspace = (textLen > 1) ? (textdistance / (textLen-1)) : 0 ;
 		// if there is just one char in the text, then the inter letter spacing is 0 anyway
-		int * pxDistance = new int[textLen];
+		auto pxDistance = new int[textLen];
 		for (unsigned int letter = 0; letter < textLen; letter++) {
 			pxDistance[letter] = letterspace;
 		}
@@ -1241,11 +1243,11 @@ void drvWMF::show_rectangle(const float llx, const float lly, const float urx, c
 }
 
 
-void drvWMF::show_image(const PSImage & image)
+void drvWMF::show_image(const PSImage & imageinfo)
 {
 	// first retrieve bounding box
 	Point lowerLeft, upperRight;
-	image.getBoundingBox(lowerLeft, upperRight);
+	imageinfo.getBoundingBox(lowerLeft, upperRight);
 
 	// not only bounding box must account for scale,
 	// but also transformation matrix!
@@ -1260,7 +1262,7 @@ void drvWMF::show_image(const PSImage & image)
 	const long height = abs(i_transY(upperRight.y_) - i_transY(lowerLeft.y_));
 
 	if (Verbose()) {
-		errf << "image.Width:" << image.width << " image.Height: " << image.height << endl;
+		errf << "image.Width:" << imageinfo.width << " image.Height: " << imageinfo.height << endl;
 		errf << "Width:" << width << " Height: " << height << endl;
 	}
 	// calculate bounding box
@@ -1298,7 +1300,7 @@ void drvWMF::show_image(const PSImage & image)
 	const long scanlineLen = ((width * 3) + 3) & ~3L;
 
 	// now lets get some mem
-	unsigned char *const output = new unsigned char[scanlineLen * height];
+	auto output = new unsigned char[scanlineLen * height];
 
 	for (long i = 0; i < scanlineLen * height; i++)
 		output[i] = 255;		// default is background (white)    
@@ -1308,23 +1310,23 @@ void drvWMF::show_image(const PSImage & image)
 		return;
 	}
 	// setup inverse transformation matrix (scaled, too!)
-	const float matrixScale(image.normalizedImageCurrentMatrix[0] *
-							image.normalizedImageCurrentMatrix[3] -
-							image.normalizedImageCurrentMatrix[2] *
-							image.normalizedImageCurrentMatrix[1]);
+	const float matrixScale(imageinfo.normalizedImageCurrentMatrix[0] *
+							imageinfo.normalizedImageCurrentMatrix[3] -
+							imageinfo.normalizedImageCurrentMatrix[2] *
+							imageinfo.normalizedImageCurrentMatrix[1]);
 	const float inverseMatrix[] = {
-		image.normalizedImageCurrentMatrix[3] / matrixScale / getScale(),
-		-image.normalizedImageCurrentMatrix[1] / matrixScale / getScale(),
-		-image.normalizedImageCurrentMatrix[2] / matrixScale / getScale(),
-		image.normalizedImageCurrentMatrix[0] / matrixScale / getScale(),
-		(image.normalizedImageCurrentMatrix[2] *
-		 image.normalizedImageCurrentMatrix[5] -
-		 image.normalizedImageCurrentMatrix[4] *
-		 image.normalizedImageCurrentMatrix[3]) / matrixScale,
-		(image.normalizedImageCurrentMatrix[4] *
-		 image.normalizedImageCurrentMatrix[1] -
-		 image.normalizedImageCurrentMatrix[0] *
-		 image.normalizedImageCurrentMatrix[5]) / matrixScale
+		imageinfo.normalizedImageCurrentMatrix[3] / matrixScale / getScale(),
+		-imageinfo.normalizedImageCurrentMatrix[1] / matrixScale / getScale(),
+		-imageinfo.normalizedImageCurrentMatrix[2] / matrixScale / getScale(),
+		imageinfo.normalizedImageCurrentMatrix[0] / matrixScale / getScale(),
+		(imageinfo.normalizedImageCurrentMatrix[2] *
+		 imageinfo.normalizedImageCurrentMatrix[5] -
+		 imageinfo.normalizedImageCurrentMatrix[4] *
+		 imageinfo.normalizedImageCurrentMatrix[3]) / matrixScale,
+		(imageinfo.normalizedImageCurrentMatrix[4] *
+		 imageinfo.normalizedImageCurrentMatrix[1] -
+		 imageinfo.normalizedImageCurrentMatrix[0] *
+		 imageinfo.normalizedImageCurrentMatrix[5]) / matrixScale
 	};
 
 	// now transform image
@@ -1344,30 +1346,30 @@ void drvWMF::show_image(const PSImage & image)
 			const long sourceY = (long) (currPoint.y_ + .5);
 
 			// is the pixel out of bounds? If yes, no further processing necessary
-			if (sourceX >= 0L && (unsigned long) sourceX < image.width &&
-				sourceY >= 0L && (unsigned long) sourceY < image.height) {
+			if (sourceX >= 0L && (unsigned long) sourceX < imageinfo.width &&
+				sourceY >= 0L && (unsigned long) sourceY < imageinfo.height) {
 				// okay, fetch source pixel value into 
 				// RGB triplet
 
 				unsigned char r(255), g(255), b(255), C, M, Y, K;
 
 				// how many components?
-				switch (image.ncomp) {
+				switch (imageinfo.ncomp) {
 				case 1:
-					r = g = b = image.getComponent(sourceX, sourceY, 0);
+					r = g = b = imageinfo.getComponent(sourceX, sourceY, 0);
 					break;
 
 				case 3:
-					r = image.getComponent(sourceX, sourceY, 0);
-					g = image.getComponent(sourceX, sourceY, 1);
-					b = image.getComponent(sourceX, sourceY, 2);
+					r = imageinfo.getComponent(sourceX, sourceY, 0);
+					g = imageinfo.getComponent(sourceX, sourceY, 1);
+					b = imageinfo.getComponent(sourceX, sourceY, 2);
 					break;
 
 				case 4:
-					C = image.getComponent(sourceX, sourceY, 0);
-					M = image.getComponent(sourceX, sourceY, 1);
-					Y = image.getComponent(sourceX, sourceY, 2);
-					K = image.getComponent(sourceX, sourceY, 3);
+					C = imageinfo.getComponent(sourceX, sourceY, 0);
+					M = imageinfo.getComponent(sourceX, sourceY, 1);
+					Y = imageinfo.getComponent(sourceX, sourceY, 2);
+					K = imageinfo.getComponent(sourceX, sourceY, 3);
 
 					// account for key
 					C += K;

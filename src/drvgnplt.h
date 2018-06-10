@@ -32,7 +32,7 @@ public:
 	derivedConstructor(drvGNUPLOT);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvGNUPLOT(); // Destructor
+	~drvGNUPLOT() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 

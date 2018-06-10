@@ -82,11 +82,11 @@ sub_path::sub_path()
 	num_outside = 0;
 
 	// pointers
-	children = 0;
-	path = 0;
-	points = 0;
-	parents = 0;
-	parent = 0;
+	children = nullptr;
+	path = nullptr;
+	points = nullptr;
+	parents = nullptr;
+	parent = nullptr;
 
 	llx = FLT_MAX;
 	lly = FLT_MAX;
@@ -282,7 +282,7 @@ bool sub_path::point_inside(const Point & p) const
 
 		crossings++;
 	}
-	return (crossings & 1) ? true : false;
+	return (crossings & 1);
 }
 
 
@@ -320,7 +320,7 @@ void sub_path_list::find_parents()
 	// Find the parent of each subpath 
 
 	unsigned int i, j;
-	sub_path *parent = 0;
+	sub_path *parent = nullptr;
 
 	// Calculate for each path the number of paths 
 	// outside
@@ -344,7 +344,7 @@ void sub_path_list::find_parents()
 
 	for (i = 0; i < num_paths; i++) {
 		if (!(paths[i].num_outside & 1)) {
-			paths[i].parent = (sub_path *) 0;
+			paths[i].parent = (sub_path *) nullptr;
 			paths[i].children = new sub_path *[num_paths - 1];
 		}
 	}
@@ -455,8 +455,8 @@ void drvbase::PathInfo::rearrange()
 //	cerr << " numberOfElementsInPath on input " << numberOfElementsInPath << endl;
 	//  write(*this);
 	sub_path_list list;
-	sub_path *child  = (sub_path *) 0;
-	sub_path *parent = (sub_path *) 0;
+	sub_path *child  = (sub_path *) nullptr;
+	sub_path *parent = (sub_path *) nullptr;
 	//  cerr << "Reading subpaths" << endl;
 	list.read(*this);			// Read the list from this
 	//  cerr << "Searching for parents" << endl;

@@ -31,7 +31,7 @@ public:
 	derivedConstructor(drvPCBFILL);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvPCBFILL(); // Destructor
+	~drvPCBFILL() override; // Destructor
 
 	class DriverOptions : public ProgramOptions {
 	public:

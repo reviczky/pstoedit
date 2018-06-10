@@ -31,7 +31,7 @@ public:
 	derivedConstructor(drvGSCHEM);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvGSCHEM(); // Destructor
+	~drvGSCHEM() override; // Destructor
 
 	class DriverOptions : public ProgramOptions {
 	public:

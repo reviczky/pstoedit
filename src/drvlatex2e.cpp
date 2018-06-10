@@ -46,7 +46,7 @@ drvLATEX2E::derivedConstructor(drvLATEX2E):constructBase, buffer(tempFile.asOutp
 // Destructor
 drvLATEX2E::~drvLATEX2E()
 {
-	options=0;
+	options=nullptr;
 }
 
 struct Point2e {

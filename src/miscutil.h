@@ -325,7 +325,7 @@ public:
 DLLEXPORT RSString getRegistryValue(ostream& errstream, const char * typekey, const char * key);
 DLLEXPORT unsigned long P_GetPathToMyself(const char *name, char * returnbuffer, unsigned long buflen);
 DLLEXPORT size_t searchinpath(const char* EnvPath,const char* name, char *returnbuffer,unsigned long buflen);
-DLLEXPORT void errorMessage(const char * text); // display an error message (cerr or msgbox)
+DLLEXPORT void errorMessage(const char * errortext); // display an error message (cerr or msgbox)
 DLLEXPORT void copy_file(istream& infile,ostream& outfile) ;
 DLLEXPORT RSString getOutputFileNameFromPageNumber(const char * const outputFileTemplate, const RSString & pagenumberformatOption, unsigned int pagenumber);
 

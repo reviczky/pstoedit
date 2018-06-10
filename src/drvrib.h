@@ -36,7 +36,7 @@ class drvRIB : public drvbase {
 public:
 
 	derivedConstructor(drvRIB);
-	~drvRIB(); 
+	~drvRIB() override; 
 	
 	class DriverOptions : public ProgramOptions {
 	public:

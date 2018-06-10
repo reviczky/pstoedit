@@ -38,7 +38,7 @@ public:
 
 	derivedConstructor(drvTK);
 
-	~drvTK(); // Destructor
+	~drvTK() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 
@@ -47,9 +47,9 @@ public:
 		OptionT < RSString, RSStringValueExtractor> tagNames;
 
 		DriverOptions() :
-			swapHW(true,"-R",0,0,"swap HW",0,false),
-			noImPress(true,"-I",0,0,"no impress",0,false),
-			tagNames(true,"-n","string",0,"tagnames",0,"")
+			swapHW(true,"-R",nullptr,0,"swap HW",nullptr,false),
+			noImPress(true,"-I",nullptr,0,"no impress",nullptr,false),
+			tagNames(true,"-n","string",0,"tagnames",nullptr,"")
 		{
 			ADD(swapHW);
 			ADD(noImPress);
@@ -59,7 +59,7 @@ public:
 	} * options;
 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 	void print_coords();
@@ -69,7 +69,7 @@ private:
 	const struct PaperInfo * paperinfo;
 
 	void			canvasCreate();
-	void			outputEscapedText(const char* string);
+	void			outputEscapedText(const char* str);
 
 
 };

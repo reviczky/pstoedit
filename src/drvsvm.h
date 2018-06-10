@@ -38,7 +38,7 @@ public:
 
     // lifetime
 	derivedConstructor(drvSVM);		// macrofied Constructor
-	~drvSVM();
+	~drvSVM() override;
 
 	class DriverOptions : public ProgramOptions { 
 	public:
@@ -46,8 +46,8 @@ public:
 		OptionT < bool, BoolTrueExtractor> emulateNarrowFonts;
 
 		DriverOptions() :
-		mapToArial(true,"-m",0,0,"map to Arial",0,false),
-		emulateNarrowFonts(true,"-nf",0,0,"emulate narrow fonts",0,false)
+		mapToArial(true,"-m",nullptr,0,"map to Arial",nullptr,false),
+		emulateNarrowFonts(true,"-nf",nullptr,0,"emulate narrow fonts",nullptr,false)
 		{
 			ADD(mapToArial);
 			ADD(emulateNarrowFonts);
@@ -58,12 +58,12 @@ public:
     // overriding virtual base class methods
     // -------------------------------------
 
-	virtual void ClipPath(cliptype clipmode);
-	virtual void Save();
-	virtual void Restore();
+	void ClipPath(cliptype clipmode) override;
+	void Save() override;
+	void Restore() override;
 
-	virtual void show_image(const PSImage & imageinfo); 
-	virtual bool driverOK() const { return isDriverOk; }
+	void show_image(const PSImage & imageinfo) override; 
+	bool driverOK() const override { return isDriverOk; }
  
 	typedef GenericInts::Int<32>::signedtype   Int32;
 	typedef GenericInts::Int<32>::unsignedtype uInt32;
@@ -76,7 +76,7 @@ public:
     // -----------------------------------------------------------------
 #include "drvfuncs.h"
 
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 

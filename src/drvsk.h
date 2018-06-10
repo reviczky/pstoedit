@@ -33,7 +33,7 @@ public:
 
     derivedConstructor(drvSK);
 
-    ~drvSK();
+    ~drvSK() override;
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 
@@ -43,12 +43,12 @@ public:
 
 #include "drvfuncs.h"
 	// void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
-    virtual void    show_image(const PSImage & imageinfo);
+    void    show_image(const PSImage & imageinfo) override;
 
  protected:
-    virtual bool pathsCanBeMerged(const PathInfo &, const PathInfo &) const;
+    bool pathsCanBeMerged(const PathInfo &, const PathInfo &) const override;
 
  private:
 	void print_coords();

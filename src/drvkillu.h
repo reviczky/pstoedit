@@ -29,7 +29,7 @@
 class drvKontour : public drvbase {
 public:
    derivedConstructor(drvKontour);
-  ~drvKontour (); // Destructor
+  ~drvKontour () override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 
@@ -41,8 +41,8 @@ private:
   static int cvtColor (float c);
 
 #include "drvfuncs.h"
-  void show_text(const TextInfo & textInfo);
-  void show_rectangle(const float llx, const float lly, const float urx, const float ury);
+  void show_text(const TextInfo & textinfo) override;
+  void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
 private:
 	void print_coords();
 };

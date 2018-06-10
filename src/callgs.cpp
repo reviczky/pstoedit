@@ -117,14 +117,14 @@ static int callgsEXE(int argc, const char * const argv[])
 	cerr << "running-win command line: " << commandline << endl;
 
 	BOOL status = CreateProcess(
-              NULL, // Application Name 
+              nullptr, // Application Name 
               (LPSTR)commandline.c_str(),
-              NULL, // Process attributes (NULL == Default)
-              NULL, // Thread-Attributes (Default)
+              nullptr, // Process attributes (NULL == Default)
+              nullptr, // Thread-Attributes (Default)
               FALSE, // InheritHandles
               CREATE_NEW_PROCESS_GROUP, // CreationFlags
-              NULL, // Environment (NULL: same as calling-process)
-              NULL, // Current Directory (NULL: same as calling process)
+              nullptr, // Environment (NULL: same as calling-process)
+              nullptr, // Current Directory (NULL: same as calling process)
               (LPSTARTUPINFO)(&MyStartupInfo), // Windows-state at Startup
  				  // window of calling process gets minimized + and shown disabled
              (LPPROCESS_INFORMATION)(&MyProcessInformation)
@@ -170,7 +170,7 @@ int callgs(int argc, const char * const argv[]) {
 
 	int result = false;
 	// check the first arg in the command line whether it contains gsdll32.dll
-	if ((strstr(argv[0],"gsdll32.dll") != NULL) || (strstr(argv[0],"gsdll64.dll") != NULL)) {
+	if ((strstr(argv[0],"gsdll32.dll") != nullptr) || (strstr(argv[0],"gsdll64.dll") != nullptr)) {
 #ifdef WITHDLLSUPPORT
 		 result = callgsDLL(argc, (char **) argv);
 #else
@@ -304,13 +304,13 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 #else
 	static const char *const defaultgs = "";
 #endif
-	const char *gstocall = NULL;
+	const char *gstocall = nullptr;
 
 	// for debugging verbose = true; 
 	if (verbose)
 			errstream << endl << "Looking up where to find the PostScript interpreter." << endl;
 
-	if ((gsToUse != 0) && !strequal(gsToUse,"") ) {
+	if ((gsToUse != nullptr) && !strequal(gsToUse,"") ) {
 		if (verbose) {
 			errstream << " an explicit path was given - using : " << gsToUse << endl;
 		}
@@ -381,7 +381,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 						"Fatal: don't know which interpreter to call. " <<
 						"Either enter gstocall into the registry " <<
 						"or compile again with -DDEFAULTGS=..." << endl;
-					gstocall = 0;
+					gstocall = nullptr;
 				}
 			}
 		}
@@ -453,7 +453,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 #else							//UNIX
 	unused(&gsregbase);
 	gstocall = getenv("GS");
-	if (gstocall == 0) {
+	if (gstocall == nullptr) {
 		if (verbose)
 			errstream << "GS not set, trying registry for common/gstocall" << endl;
 		RSString gstocallfromregistry = getRegistryValue(errstream, "common", "gstocall");
@@ -475,7 +475,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 					errstream <<
 						"Fatal: don't know which interpreter to call. " <<
 						"Either setenv GS or compile again with -DDEFAULTGS=..." << endl;
-					gstocall = 0;
+					gstocall = nullptr;
 				}
 			}
 		}
@@ -493,7 +493,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 #if defined(_WIN32)
 static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int   buflen   )
 {
-	const char *PIOptions = 0;
+	const char *PIOptions = nullptr;
 	if (verbose)
 		errstream << "didn't find value in registry, trying gsview32.ini" << endl;
 	// try gsview32.ini
@@ -593,7 +593,7 @@ static const char * const lookupplace = "pstoedit.ini";
 static const char *getOSspecificOptions(int verbose, ostream & errstream, char *buffer, unsigned int buflen)
 {
 	unused(&verbose); unused(&errstream); unused(buffer); unused(&buflen);
-	return 0;
+	return nullptr;
 }
 static const char * const lookupplace = "registry";
 #endif
@@ -640,17 +640,17 @@ const char *defaultPIoptions(ostream & errstream, int verbose)
 
 		PIOptions = getOSspecificOptions(verbose, errstream, buffer,sizeof(buffer) );
 
-		if (PIOptions == NULL) {	//3.
+		if (PIOptions == nullptr) {	//3.
 			if (verbose)
 				errstream << "still not found an entry - now trying GS_LIB env var." << endl;
 			PIOptions = getenv("GS_LIB");
-			if (PIOptions == NULL) {	//4.
+			if (PIOptions == nullptr) {	//4.
 				if (verbose) errstream << "GS_LIB not set" << endl;
 				if (strlen(defaultPIOptions) > 0) {
 					PIOptions = defaultPIOptions;
 					if (verbose) errstream << "nothing found so far, trying default: " << defaultPIOptions<< endl;
 				} else {
-					PIOptions = 0;
+					PIOptions = nullptr;
 				}
 			} else { 
 				if (verbose)

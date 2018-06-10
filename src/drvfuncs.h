@@ -23,13 +23,13 @@
 private: // yes these are private, library users should use the public interface
 	 // provided via drvbase
 
-	void open_page();
+	void open_page() override;
 
-	void close_page();
+	void close_page() override;
 
-	void show_path(); 
+	void show_path() override; 
 
-//	void show_text(const TextInfo & textInfo);
+//	void show_text(const TextInfo & textinfo);
 
 //	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
 

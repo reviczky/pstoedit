@@ -176,7 +176,7 @@ unsigned int ProgramOptions::parseoptions(ostream & outstr, unsigned int argc,
 			const char *optid = alloptions[j]->flag;
 			if (strcmp(optid, argv[i]) == 0) {
 				//debug outstr << " found arg:" << i << " " << argv[i] << endl;
-				const char *nextarg = (i < argc) ? argv[i + 1] : (const char *) 0;
+				const char *nextarg = (i < argc) ? argv[i + 1] : (const char *) nullptr;
 				if (!alloptions[j]->copyvalue(argv[i], nextarg, i)) {
 					outstr << "Error in option " << argv[i] << endl;
 				}
@@ -306,5 +306,5 @@ void ProgramOptions::add(OptionBase * op, const char *const membername_p)
 {
 	alloptions[optcount] = op;
 	op->membername = membername_p;
-	alloptions[++optcount] = 0;
+	alloptions[++optcount] = nullptr;
 }

@@ -513,7 +513,7 @@ outzip(NIL)
   slidef << fixed << setprecision(0);
 
   // Seed the random-number generator.
-  srandom((unsigned int) time(NULL)*getpid());
+  srandom((unsigned int) time(nullptr)*getpid());
 
   // Create a zip archive for holding PresentationML data.
   create_pptx();
@@ -534,12 +534,12 @@ drvPPTX::~drvPPTX()
   // Embed fonts in the PPTX file if asked to do so.
   if (!eotlist.empty()) {
     unsigned int fontNum = 1;
-    for (set<string>::iterator iter = eotlist.begin();
+    for (auto iter = eotlist.begin();
          iter != eotlist.end();
          ++iter) {
       const char * const eotFileName = iter->c_str();
       struct zip_source *font_file = zip_source_file(outzip, eotFileName, 0, -1);
-      if (font_file == NULL) {
+      if (font_file == nullptr) {
 	    RSString errmessage("ERROR: Failed to embed font file ");
 	    errmessage += eotFileName ;
 	    errmessage += " (" ;
@@ -587,7 +587,7 @@ drvPPTX::~drvPPTX()
   if (!eotlist.empty()) {
     unsigned int rId = totalNumberOfPages() + 3;
     xml_presentation_xml << "  <p:embeddedFontLst>\n";
-    for (set<string>::iterator iter = eotlist.begin();
+    for (auto iter = eotlist.begin();
          iter != eotlist.end();
          ++iter) {
       // Get information about the font.
@@ -650,7 +650,7 @@ drvPPTX::~drvPPTX()
   if (!eotlist.empty()) {
     unsigned int fontNum = 1;
     unsigned int rId = totalNumberOfPages() + 3;
-    for (set<string>::iterator iter = eotlist.begin();
+    for (auto iter = eotlist.begin();
          iter != eotlist.end();
          ++iter) {
       xml_presentation_xml_rels << "  <Relationship Id=\"rId" << rId
@@ -706,7 +706,7 @@ void drvPPTX::create_pptx_file(const char * relname, const char * contents)
 {
   // Convert the file contents into a data source.
   struct zip_source * file_source = zip_source_buffer(outzip, strdup(contents), strlen(contents), 1);
-  if (file_source == NULL) {
+  if (file_source == nullptr) {
     RSString errmessage("ERROR: Failed to create data for ");
     errmessage += relname ;
     errmessage += " (" ;
@@ -737,7 +737,7 @@ void drvPPTX::create_pptx()
   unlink(outFileName.c_str());
   int ziperr;
   outzip = zip_open(outFileName.c_str(), ZIP_CREATE, &ziperr);
-  if (outzip == NULL) {
+  if (outzip == nullptr) {
     char reason[101];
     zip_error_to_str(reason, 100, ziperr, errno);
 	RSString errmessage("ERROR: Failed to create ");
@@ -920,7 +920,7 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
   RSString currentFontName(textinfo.currentFontName);
   if (font_type == F_WINDOWS) {
     const RSString * winFont = ps2win.getValue(currentFontName);
-    if (winFont != NULL)
+    if (winFont != nullptr)
       currentFontName = *winFont;
   }
 
@@ -1036,7 +1036,7 @@ void drvPPTX::eot2texinfo(const string& eotfilename, TextInfo & textinfo)
   eotfile.ignore(4+4+4+4+4+2);              // Checksum adjustment, reserved 1-4, padding
   eotfile.read((char *)charvals, 2);        // Family-name length
   unsigned short namesize = charvals[1]<<8 | charvals[0];
-  char *familyname = new char[namesize];
+  auto familyname = new char[namesize];
   eotfile.read(familyname, namesize);       // Family name
   for (unsigned short i = 0; i < namesize/2; i++)
     // Cheesy conversion from Unicode to ASCII
@@ -1054,7 +1054,7 @@ void drvPPTX::eot2texinfo(const string& eotfilename, TextInfo & textinfo)
   eotfile.ignore(2);                        // Padding
   eotfile.read((char *)charvals, 2);        // Full-name length
   namesize = charvals[1]<<8 | charvals[0];
-  char *fullname = new char[namesize];
+  auto fullname = new char[namesize];
   eotfile.read(fullname, namesize);         // Full name
   for (unsigned short i = 0; i < namesize/2; i++)
     // Cheesy conversion from Unicode to ASCII
@@ -1319,7 +1319,7 @@ Point drvPPTX::pathCentroid()
 {
   // We start by finding a cycle of knots.
   unsigned int numElts = numberOfElementsInPath();
-  Point * allKnots = new Point[numElts + 1];
+  auto allKnots = new Point[numElts + 1];
   unsigned int numKnots = 0;
   unsigned int movetos = 0;
   for (unsigned int n = 0; n < numElts; n++) {
@@ -1434,7 +1434,7 @@ void drvPPTX::print_color(int baseIndent, float redF, float greenF, float blueF)
       // Randomly select a theme color, but remember it for next time.
       const ThemeColor * colorInfo = rgb2theme.getValue(rgb);
       ThemeColor newColorInfo; 
-      if (colorInfo == NULL) {
+      if (colorInfo == nullptr) {
         // This is the first time we've seen this RGB color.
         static const char *colorList[] = {
           "dk2", "lt2", "accent1", "accent2", "accent3",
@@ -1739,7 +1739,7 @@ void drvPPTX::show_image(const PSImage & imageinfo)
 
   // Embed the image in the PPTX file.
   struct zip_source *img_file = zip_source_file(outzip, imageinfo.FileName.c_str(), 0, -1);
-  if (img_file == NULL) {
+  if (img_file == nullptr) {
     RSString errmessage("ERROR: Failed to embed image file ");
     errmessage += imageinfo.FileName;
     errmessage += " (";

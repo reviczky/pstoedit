@@ -115,7 +115,7 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 		const size_t matchlen = strlen(matchstring);
 		const size_t bufferlen = matchlen + 1;
 		// allocate buffer for reading begin of lines
-		char *buffer = new char[bufferlen];
+		auto buffer = new char[bufferlen];
 
 
 		while ((void) inFile.get(buffer, bufferlen, '\n'),
@@ -161,8 +161,8 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 class drvNOBACKEND : public drvbase {	// not really needed - just as template argument
 public:
 	derivedConstructor(drvNOBACKEND);	// Constructor
-	~drvNOBACKEND() {
-		options=0;
+	~drvNOBACKEND() override {
+		options=nullptr;
 	} // Destructor
 
 	class DriverOptions : public ProgramOptions {
@@ -172,21 +172,21 @@ public:
 		}
 	}*options;
 
-	bool withbackend() const {
+	bool withbackend() const override {
 		return false;
 	}
 private:						// yes these are private, library users should use the public interface
 	// provided via drvbase
-	void open_page() {
+	void open_page() override {
 	}
-	void close_page() {
+	void close_page() override {
 	}
-	void show_text(const TextInfo & /* textInfo */ ) {
+	void show_text(const TextInfo & /* textInfo */ ) override {
 	}
-	void show_path() {
+	void show_path() override {
 	}
 	void show_rectangle(const float /* llx */ , const float /* lly */ , const float /* urx */ ,
-						const float /* ury */ ) {
+						const float /* ury */ ) override {
 	}
 };
 // *INDENT-ON*
@@ -277,8 +277,8 @@ static void loadpstoeditplugins(const char *progname, ostream & errstream, bool 
 	  szExePath[0] = '\0';
 	  const unsigned long r = P_GetPathToMyself(progname, szExePath, sizeof(szExePath));
 	  if (verbose)  errstream << "pstoedit : path to myself:" << progname << " " << r << " " << szExePath<< endl;
-	  char *p = 0;
-	  if (r && (p = strrchr(szExePath, directoryDelimiter)) != 0) {
+	  char *p = nullptr;
+	  if (r && (p = strrchr(szExePath, directoryDelimiter)) != nullptr) {
 		*p = '\0';
 		loadPlugInDrivers(szExePath, errstream,verbose);
 	  }
@@ -463,11 +463,11 @@ extern "C" DLLEXPORT
 	//
 	if (options.nameOfInputFile && strequal(options.nameOfInputFile, "-")) {
 		delete[]options.nameOfInputFile;
-		options.nameOfInputFile = 0;
+		options.nameOfInputFile = nullptr;
 	}
 	if (options.nameOfOutputFile && strequal(options.nameOfOutputFile, "-")) {
 		delete[]options.nameOfOutputFile;
-		options.nameOfOutputFile = 0;
+		options.nameOfOutputFile = nullptr;
 	}
 
 #ifndef UPPVERSION
@@ -477,7 +477,7 @@ extern "C" DLLEXPORT
 	}
 #endif
 
-	if ((pushinsPtr != 0) && (pushinsPtr != getglobalRp())) {
+	if ((pushinsPtr != nullptr) && (pushinsPtr != getglobalRp())) {
 		getglobalRp()->mergeRegister(errstream, *pushinsPtr, "push-ins");
 	}
 
@@ -504,7 +504,7 @@ extern "C" DLLEXPORT
 	if (options.showdrvhelp) {
 		usage(diag,false,false);
 		const char *gstocall = whichPI(diag, options.verbose(), options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
-		if (gstocall != 0) {
+		if (gstocall != nullptr) {
 			errstream << "Default interpreter is " << gstocall << endl;
 		}
 		getglobalRp()->explainformats(diag);
@@ -513,7 +513,7 @@ extern "C" DLLEXPORT
 
 	if (options.justgstest) {
 		const char *gstocall = whichPI(errstream, options.verbose(), options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
-		if (gstocall == 0) {
+		if (gstocall == nullptr) {
 			return 3;
 		}
 		Argv commandline;
@@ -621,7 +621,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			driveroptions++;
 		}
 		const DriverDescription *currentDriverDesc = getglobalRp()->getDriverDescForName(options.drivername.value.c_str());
-		if (currentDriverDesc == 0) {
+		if (currentDriverDesc == nullptr) {
 			errstream << "Unsupported output format " << options.drivername.value.c_str() << endl;
 			getglobalRp()->explainformats(diag);
 			return 1;
@@ -683,7 +683,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			// TODO check for overflow
 //          commandline[0]= '\0';
 			const char *gstocall = whichPI(errstream, options.verbose(), options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
-			if (gstocall == 0) {
+			if (gstocall == nullptr) {
 				return 3;
 			}
 			commandline.addarg(gstocall);
@@ -746,10 +746,10 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			} else {
 				options.nameOfInputFile = cppstrdup(stdinFileName);
 			}
-			ostream *outputFilePtr = 0;
+			ostream *outputFilePtr = nullptr;
 			ofstream outFile;
-			drvbase *outputdriver = 0;
-			char *nameOfOutputFilewithoutpercentD = 0;
+			drvbase *outputdriver = nullptr;
+			char *nameOfOutputFilewithoutpercentD = nullptr;
 
 			{
 				// setup pstoeditHome directory
@@ -760,7 +760,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					errstream << "path to myself: " << szExePath << endl;
 				}
 				char *p;
-				if (r && (p = strrchr(szExePath, directoryDelimiter)) != 0) {
+				if (r && (p = strrchr(szExePath, directoryDelimiter)) != nullptr) {
 					*p = '\0';
 					drvbase::pstoeditHomeDir() = RSString(szExePath);
 				} else {
@@ -834,7 +834,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 														 *outputFilePtr,
 														 errstream,
 														 options.nameOfInputFile,
-														 0,
+														 nullptr,
 														 options);
 				}
 			}
@@ -1115,7 +1115,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					inFileStream << "/pstoedit.delaybindversion  true def" << endl;
 				}
 				delete[]nameOfOutputFilewithoutpercentD;
-				if (outputdriver && (outputdriver->knownFontNames() != 0)) {
+				if (outputdriver && (outputdriver->knownFontNames() != nullptr)) {
 					const char *const *fnames = outputdriver->knownFontNames();
 					unsigned int size = 0;
 					while (*fnames) {
@@ -1169,7 +1169,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				Argv commandline;
 				const char *gstocall = whichPI(errstream, options.verbose(),
 				  options.gsregbase.value.c_str(),options.GSToUse.value.c_str());
-				if (gstocall == 0) {
+				if (gstocall == nullptr) {
 					return 3;
 				}
 				commandline.addarg(gstocall);
@@ -1303,7 +1303,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 						//      if (nosubpaths) ((DriverDescription*) outputdriver->Pdriverdesc)->backendSupportsSubPaths=false;
 //						outputdriver->simulateSubPaths = (bool) options.simulateSubPaths;
 
-						const char * bbfilename = 0;
+						const char * bbfilename = nullptr;
 						if (options.useBBfrominput) {
 							// read BB from original input file
 							bbfilename = options.nameOfInputFile;
@@ -1409,7 +1409,7 @@ extern "C" DLLEXPORT
 //
 // the following functions provide the interface for gsview
 //
-static const char *givenPI = 0;
+static const char *givenPI = nullptr;
 static const char *returngivenPI(ostream & errstream, int verbose, const char *gsregbase, const char * GSToUse)
 {
 	unused(&errstream);
@@ -1427,11 +1427,11 @@ extern "C" DLLEXPORT
 		errorMessage("wrong version of pstoedit");
 		return -1;
 	}
-	if (psinterpreter != 0) { // gsview uses 0 here
+	if (psinterpreter != nullptr) { // gsview uses 0 here
 		givenPI = psinterpreter;
-		return pstoedit(argc, argv, cerr, callgs, returngivenPI, 0);
+		return pstoedit(argc, argv, cerr, callgs, returngivenPI, nullptr);
 	} else {
-		return pstoedit(argc, argv, cerr, callgs, whichPI, 0);
+		return pstoedit(argc, argv, cerr, callgs, whichPI, nullptr);
 	}
 }
 
@@ -1439,7 +1439,7 @@ static DriverDescription_S * getPstoeditDriverInfo_internal(bool withgsdrivers)
 {
 	if (!versioncheckOK) {
 		errorMessage("wrong version of pstoedit");
-		return 0;
+		return nullptr;
 	}
 #ifndef UPPVERSION
 // not needed for importps
@@ -1471,7 +1471,7 @@ static DriverDescription_S * getPstoeditDriverInfo_internal(bool withgsdrivers)
 		}
 		dd++;
 	}
-	curR++->symbolicname = 0;	// indicator for end
+	curR++->symbolicname = nullptr;	// indicator for end
 
 	return result;
 }
@@ -1521,7 +1521,7 @@ extern "C" DLLEXPORT void setPstoeditOutputFunction(void *cbData, write_callback
 		return;
 	}
 
-	static callbackBuffer cbBuffer(0, 0);// default /dev/null
+	static callbackBuffer cbBuffer(nullptr, nullptr);// default /dev/null
 
 	set_gs_write_callback(cbFunction);	// for the gswin.DLL
 	(void) cbBuffer.set_callback(cbData, cbFunction);

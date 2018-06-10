@@ -36,24 +36,24 @@ public:
 
 	derivedConstructor(drvMMA);
 
-	~drvMMA(); // Destructor
+	~drvMMA() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 		OptionT < bool, BoolTrueExtractor> eofillFills;
 		DriverOptions() :
-			eofillFills(true,"-eofillfills","",0,"Filling is used for eofill (default is not to fill)",0,false)
+			eofillFills(true,"-eofillfills","",0,"Filling is used for eofill (default is not to fill)",nullptr,false)
 		{
 			ADD(eofillFills);
 		}
 	}*options;
 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
  private:
 	void print_coords();
 	void RGBColor(float R, float G, float B);
-	void draw_path(bool close, Point firstpoint, bool fill);
+	void draw_path(bool close, Point firstpoint, bool filled);
 	// eofill approximation
 
 	// Graphics attributes

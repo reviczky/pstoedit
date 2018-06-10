@@ -47,7 +47,7 @@ drvCFDG::derivedConstructor(drvCFDG): constructBase
 
 drvCFDG::~drvCFDG()
 {
-	options=0;
+	options=nullptr;
 }
 
 // Each page produces a different path

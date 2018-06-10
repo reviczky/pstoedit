@@ -50,7 +50,7 @@ class drvNOI: public drvbase
   {
   public:
 	derivedConstructor(drvNOI);
-	~drvNOI();
+	~drvNOI() override;
 	class DriverOptions: public ProgramOptions 
 	  {	
 	  public:
@@ -58,18 +58,18 @@ class drvNOI: public drvbase
 		OptionT <int, IntValueExtractor> BezierSplitLevel;
 		DriverOptions(): 
 		  ResourceFile(true, RESOURCE_FILE_OPTION, "string", 0, 
-			RESOURCE_FILE_DESCR, 0, (const char*) ""),
+			RESOURCE_FILE_DESCR, nullptr, (const char*) ""),
 		  BezierSplitLevel(true, BEZIER_SPLIT_LEVEL_OPTION, "number", 0, 
-			BEZIER_SPLIT_LEVEL_DESCR, 0, DEFAULT_BEZIER_SPLIT_LEVEL)
+			BEZIER_SPLIT_LEVEL_DESCR, nullptr, DEFAULT_BEZIER_SPLIT_LEVEL)
 		  { 
 		  ADD (ResourceFile); 
 		  ADD (BezierSplitLevel); 
 		  }
 		} *options;	
 	
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo &textInfo);
-	virtual void show_image(const PSImage &imageinfo);
+	void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
+	void show_text(const TextInfo &textinfo) override;
+	void show_image(const PSImage &imageinfo) override;
 	// void translate(Point &p, float x, float y);
   private:
 	int imgcount;

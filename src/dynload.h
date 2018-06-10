@@ -32,13 +32,13 @@ public:
 	typedef void (*fptr)(); // any signature possible, but is has to be a function pointer.
 							// the new standard does not allow to mix normal and function pointers.
 	static fptr ptr_to_fptr(void *); // need a function since C++ does not allow a simple cast.
-	DynLoader(const char * libname_P = 0, std::ostream & errstream_p = std::cerr, int verbose_p = 0);
+	explicit DynLoader(const char * libname_P = nullptr, std::ostream & errstream_p = std::cerr, int verbose_p = 0);
 	~DynLoader();
-	void open(const char * libname);
+	void open(const char * libname_P);
 	void close();
 	fptr getSymbol(const char * name, int check = 1) const;
 	int  knownSymbol(const char * name) const;
-	int  valid() const { return handle != 0; }
+	int  valid() const { return handle != nullptr; }
 	const void * gethandle() const { return handle; }
 private:
 	char * libname;
@@ -51,7 +51,6 @@ private:
 
 #ifdef HAVE_STL
 #include <iosfwd>
-using namespace std;
 #else
 class ostream;
 #endif

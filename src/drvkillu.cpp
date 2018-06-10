@@ -52,7 +52,7 @@ drvKontour::~drvKontour()
 	// driver specific deallocations
 	// and writing of trailer to output file
 	outf << "</killustrator>\n";
-	options=0;
+	options=nullptr;
 }
 
 void drvKontour::print_coords()

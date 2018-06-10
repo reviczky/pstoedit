@@ -46,7 +46,7 @@ static const JavaFontDesc JavaFonts[] = {	// predefined Fonts
 	{"Times-Italic", "TimesRoman", "Font.ITALIC"},
 	{"Times-BoldItalic", "TimesRoman", "Font.BOLD + Font.ITALIC"},
 	{"ZapfDingbats", "ZapfDingbats", "Font.PLAIN"},
-	{0, 0, 0}
+	{nullptr, nullptr, nullptr}
 };
 
 const unsigned int numberOfFonts = sizeof(JavaFonts) / (sizeof(JavaFontDesc)) - 1;
@@ -102,7 +102,7 @@ drvJAVA::~drvJAVA()
 	outf << "    	return " << currentPageNumber << ';' << endl;
 	outf << "    }" << endl;
 	outf << "}" << endl;
-	options=0;
+	options=nullptr;
 }
 
 void drvJAVA::print_coords()

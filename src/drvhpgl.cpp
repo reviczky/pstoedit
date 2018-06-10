@@ -78,7 +78,7 @@ constructBase,
 	prevColor(0),
 	maxPen(0),
 	currentPen(0),
-	penColors(0)
+	penColors(nullptr)
 
 	//  End DA hpgl color addition
 {

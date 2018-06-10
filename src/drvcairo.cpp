@@ -541,11 +541,11 @@ void drvCAIRO::show_rectangle(const float llx, const float lly, const float urx,
   show_path();
 }
 
-void drvCAIRO::show_image(const PSImage & image)
+void drvCAIRO::show_image(const PSImage & imageinfo)
 {
   // first retrieve bounding box
   Point lowerLeft, upperRight;
-  image.getBoundingBox(lowerLeft, upperRight);
+  imageinfo.getBoundingBox(lowerLeft, upperRight);
   
   // not only bounding box must account for scale,
   // but also transformation matrix!
@@ -560,7 +560,7 @@ void drvCAIRO::show_image(const PSImage & image)
   const long height = abs(i_transY(upperRight.y_) - i_transY(lowerLeft.y_));
   
   if (Verbose()) {
-    errf << "image.Width:" << image.width << " image.Height: " << image.height << endl;
+    errf << "image.Width:" << imageinfo.width << " image.Height: " << imageinfo.height << endl;
     errf << "Width:" << width << " Height: " << height << endl;
   }
   
@@ -594,7 +594,7 @@ void drvCAIRO::show_image(const PSImage & image)
   const long scanlineLen = ((width * 3) + 3) & ~3L;
 
   // now lets get some mem
-  unsigned char *const output = new unsigned char[scanlineLen * height];
+  auto output = new unsigned char[scanlineLen * height];
 
   for (long i = 0; i < scanlineLen * height; i++)
     output[i] = 255;		// default is background (white)    
@@ -604,23 +604,23 @@ void drvCAIRO::show_image(const PSImage & image)
     return;
   }
   // setup inverse transformation matrix (scaled, too!)
-  const float matrixScale(image.normalizedImageCurrentMatrix[0] *
-			  image.normalizedImageCurrentMatrix[3] -
-			  image.normalizedImageCurrentMatrix[2] *
-			  image.normalizedImageCurrentMatrix[1]);
+  const float matrixScale(imageinfo.normalizedImageCurrentMatrix[0] *
+			  imageinfo.normalizedImageCurrentMatrix[3] -
+			  imageinfo.normalizedImageCurrentMatrix[2] *
+			  imageinfo.normalizedImageCurrentMatrix[1]);
   const float inverseMatrix[] = {
-    image.normalizedImageCurrentMatrix[3] / matrixScale / getScale(),
-    -image.normalizedImageCurrentMatrix[1] / matrixScale / getScale(),
-    -image.normalizedImageCurrentMatrix[2] / matrixScale / getScale(),
-    image.normalizedImageCurrentMatrix[0] / matrixScale / getScale(),
-    (image.normalizedImageCurrentMatrix[2] *
-     image.normalizedImageCurrentMatrix[5] -
-     image.normalizedImageCurrentMatrix[4] *
-     image.normalizedImageCurrentMatrix[3]) / matrixScale,
-    (image.normalizedImageCurrentMatrix[4] *
-     image.normalizedImageCurrentMatrix[1] -
-     image.normalizedImageCurrentMatrix[0] *
-     image.normalizedImageCurrentMatrix[5]) / matrixScale
+    imageinfo.normalizedImageCurrentMatrix[3] / matrixScale / getScale(),
+    -imageinfo.normalizedImageCurrentMatrix[1] / matrixScale / getScale(),
+    -imageinfo.normalizedImageCurrentMatrix[2] / matrixScale / getScale(),
+    imageinfo.normalizedImageCurrentMatrix[0] / matrixScale / getScale(),
+    (imageinfo.normalizedImageCurrentMatrix[2] *
+     imageinfo.normalizedImageCurrentMatrix[5] -
+     imageinfo.normalizedImageCurrentMatrix[4] *
+     imageinfo.normalizedImageCurrentMatrix[3]) / matrixScale,
+    (imageinfo.normalizedImageCurrentMatrix[4] *
+     imageinfo.normalizedImageCurrentMatrix[1] -
+     imageinfo.normalizedImageCurrentMatrix[0] *
+     imageinfo.normalizedImageCurrentMatrix[5]) / matrixScale
   };
 
   // now transform image
@@ -640,30 +640,30 @@ void drvCAIRO::show_image(const PSImage & image)
       const long sourceY = (long) (currPoint.y_ + .5);
       
       // is the pixel out of bounds? If yes, no further processing necessary
-      if (sourceX >= 0L && (unsigned long) sourceX < image.width &&
-	  sourceY >= 0L && (unsigned long) sourceY < image.height) {
+      if (sourceX >= 0L && (unsigned long) sourceX < imageinfo.width &&
+	  sourceY >= 0L && (unsigned long) sourceY < imageinfo.height) {
 	// okay, fetch source pixel value into 
 	// RGB triplet
 	
 	unsigned char r(255), g(255), b(255), c, m, y, k;
 	
 	// how many components?
-	switch (image.ncomp) {
+	switch (imageinfo.ncomp) {
 	case 1:
-	  r = g = b = image.getComponent(sourceX, sourceY, 0);
+	  r = g = b = imageinfo.getComponent(sourceX, sourceY, 0);
 	  break;
 	  
 	case 3:
-	  r = image.getComponent(sourceX, sourceY, 0);
-	  g = image.getComponent(sourceX, sourceY, 1);
-	  b = image.getComponent(sourceX, sourceY, 2);
+	  r = imageinfo.getComponent(sourceX, sourceY, 0);
+	  g = imageinfo.getComponent(sourceX, sourceY, 1);
+	  b = imageinfo.getComponent(sourceX, sourceY, 2);
 	  break;
 	  
 	case 4:
-	  c = image.getComponent(sourceX, sourceY, 0);
-	  m = image.getComponent(sourceX, sourceY, 1);
-	  y = image.getComponent(sourceX, sourceY, 2);
-	  k = image.getComponent(sourceX, sourceY, 3);
+	  c = imageinfo.getComponent(sourceX, sourceY, 0);
+	  m = imageinfo.getComponent(sourceX, sourceY, 1);
+	  y = imageinfo.getComponent(sourceX, sourceY, 2);
+	  k = imageinfo.getComponent(sourceX, sourceY, 3);
 	  
 	  // account for key
 	  c += k;

@@ -76,7 +76,7 @@ drvASY::derivedConstructor(drvASY):
 // Destructor -- Tell Asymptote to end the file
 drvASY::~drvASY()
 {
-	options=0;
+	options=nullptr;
 }
 
 void drvASY::save()

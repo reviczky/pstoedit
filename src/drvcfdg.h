@@ -32,7 +32,7 @@ public:
 
 	derivedConstructor(drvCFDG);
 
-	~drvCFDG(); // Destructor
+	~drvCFDG() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 

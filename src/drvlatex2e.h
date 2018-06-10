@@ -48,13 +48,13 @@ public:
   derivedConstructor(drvLATEX2E);
   //(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-  ~drvLATEX2E(); // Destructor
+  ~drvLATEX2E() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 		OptionT < bool, BoolTrueExtractor> integersonly;
 
 		DriverOptions():
-			integersonly(true,"-integers","",0,"round all coordinates to the nearest integer",0,false)
+			integersonly(true,"-integers","",0,"round all coordinates to the nearest integer",nullptr,false)
 		{
 			ADD(integersonly);
 		}
@@ -62,8 +62,8 @@ public:
 	}*options;
 
 #include "drvfuncs.h"
-  void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-  void show_text(const TextInfo & textInfo);
+  void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
+  void show_text(const TextInfo & textinfo) override;
 
 //not supported yet  virtual void show_image(const Image & imageinfo); 
 

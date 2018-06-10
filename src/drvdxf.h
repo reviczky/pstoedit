@@ -31,7 +31,7 @@ public:
         derivedConstructor(drvDXF);
 	// (const char * driveroptions_P,ostream & theoutStream ,ostream & theerrStream ); // Constructor
 
-        ~drvDXF(); // Destructor
+        ~drvDXF() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		OptionT < bool, BoolTrueExtractor > polyaslines ;
@@ -49,20 +49,20 @@ public:
 		OptionT < RSString, RSStringValueExtractor > layernegativfilter;
 
 		DriverOptions():
-			polyaslines(true,"-polyaslines",0,0,"use LINE instead of POLYLINE in DXF",0,false),
-			mm(true,"-mm",0,0,"use mm coordinates instead of points in DXF (mm=pt/72*25.4)",0,false),
-			colorsToLayers(true,"-ctl",0,0,"map colors to layers",0,false),
-			splineaspolyline(true,"-splineaspolyline",0,0,"approximate splines with PolyLines (only for -f dxf_s)",0,false),
-			splineasnurb(true,"-splineasnurb",0,0,"experimental (only for -f dxf_s)",0,false),
-			splineasbspline(true,"-splineasbspline",0,0,"experimental (only for -f dxf_s)",0,false),
-			splineassinglespline(true,"-splineassinglespline",0,0,"experimental (only for -f dxf_s)",0,false),
-			splineasmultispline(true,"-splineasmultispline",0,0,"experimental (only for -f dxf_s)",0,false),
-			splineasbezier(true,"-splineasbezier",0,0,"use Bezier splines in DXF format (only for -f dxf_s)",0,false),
+			polyaslines(true,"-polyaslines",nullptr,0,"use LINE instead of POLYLINE in DXF",nullptr,false),
+			mm(true,"-mm",nullptr,0,"use mm coordinates instead of points in DXF (mm=pt/72*25.4)",nullptr,false),
+			colorsToLayers(true,"-ctl",nullptr,0,"map colors to layers",nullptr,false),
+			splineaspolyline(true,"-splineaspolyline",nullptr,0,"approximate splines with PolyLines (only for -f dxf_s)",nullptr,false),
+			splineasnurb(true,"-splineasnurb",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineasbspline(true,"-splineasbspline",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineassinglespline(true,"-splineassinglespline",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineasmultispline(true,"-splineasmultispline",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineasbezier(true,"-splineasbezier",nullptr,0,"use Bezier splines in DXF format (only for -f dxf_s)",nullptr,false),
 			splineprecision(true,"-splineprecision","number",0,
-				"number of samples to take from spline curve when doing approximation with -splineaspolyline or -splineasmultispline - should be >=2 (default 5)",0,5 ),
-			dumplayernames(true,"-dumplayernames",0,0,"dump all layer names found to standard output",0,false),
-			layerpositivfilter(true,"-layers","string",0,"layers to be shown (comma separated list of layer names, no space)",0,(const char *)""),
-			layernegativfilter(true,"-layerfilter","string",0,"layers to be hidden (comma separated list of layer names, no space)",0,(const char *)"")
+				"number of samples to take from spline curve when doing approximation with -splineaspolyline or -splineasmultispline - should be >=2 (default 5)",nullptr,5 ),
+			dumplayernames(true,"-dumplayernames",nullptr,0,"dump all layer names found to standard output",nullptr,false),
+			layerpositivfilter(true,"-layers","string",0,"layers to be shown (comma separated list of layer names, no space)",nullptr,(const char *)""),
+			layernegativfilter(true,"-layerfilter","string",0,"layers to be hidden (comma separated list of layer names, no space)",nullptr,(const char *)"")
 
 		{
 			ADD(polyaslines);
@@ -83,7 +83,7 @@ public:
 
 private:
 		void drawVertex(const Point & p, bool withlinewidth, int val70 = 0);
-		void drawLine(const Point & start,const Point & end);
+                void drawLine(const Point & start_p, const Point & end_p);
 		void curvetoAsOneSpline(const basedrawingelement & elem, const Point & currentpoint);
 		void curvetoAsMultiSpline(const basedrawingelement & elem, const Point & currentpoint);
 		void curvetoAsPolyLine(const basedrawingelement & elem, const Point & currentpoint);
@@ -92,7 +92,7 @@ private:
 		void curvetoAsBezier(const basedrawingelement & elem, const Point & currentpoint);
 		void writeHandle(ostream & outs) ;
 		void writeLayer(float r, float g, float b,const RSString& colorName) ;
-		void writelayerentry(ostream & outf, unsigned int color, const char * layername);
+		void writelayerentry(ostream & outs, unsigned int color, const char * layername);
 		bool wantedLayer(float r, float g, float b,const RSString& colorName)  ; // layer shall be written
 		RSString calculateLayerString(float r, float g, float b,const RSString& colorName) ;
 		
@@ -120,7 +120,7 @@ private:
 
 #include "drvfuncs.h"
 
-		void show_text(const TextInfo & textInfo);
+		void show_text(const TextInfo & textinfo) override;
 
 
 		NOCOPYANDASSIGN(drvDXF)

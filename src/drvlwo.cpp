@@ -31,13 +31,13 @@
 
 struct LWO_POLY {
 public:
-	LWO_POLY(): next(0), r(0), g(0), b(0), num(0L), x(0), y(0) {} 
+	LWO_POLY(): next(nullptr), r(0), g(0), b(0), num(0L), x(nullptr), y(nullptr) {} 
 	~LWO_POLY() {
 		delete[]x;
-		x = 0;
+		x = nullptr;
 		delete[]y;
-		y = 0;
-		next=0;
+		y = nullptr;
+		next=nullptr;
 	}
 	LWO_POLY *next;
 	unsigned char r, g, b;
@@ -54,7 +54,7 @@ constructBase
 	// driver specific initializations
 	// and writing of header to output file
 	total_vertices = 0;
-	polys = 0;
+	polys = nullptr;
 	total_polys = 0;
 
 	//    float           scale;
@@ -110,13 +110,13 @@ drvLWO::~drvLWO()
 		pnext = p->next;
 		delete p;
 	}
-	polys=0;
-	options=0;
+	polys=nullptr;
+	options=nullptr;
 }
 
 void drvLWO::print_coords()
 {
-	LWO_POLY *p = new LWO_POLY;
+	auto p = new LWO_POLY;
 	p->r = (unsigned char) (255.0 * currentR());
 	p->g = (unsigned char) (255.0 * currentG());
 	p->b = (unsigned char) (255.0 * currentB());

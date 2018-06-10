@@ -90,7 +90,7 @@ constructBase,
 drvMPOST::~drvMPOST()
 {
 	outf << "end" << endl;
-	options=0;
+	options=nullptr;
 }
 
 

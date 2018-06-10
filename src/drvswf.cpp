@@ -153,12 +153,12 @@ void drvSWF::print_coords()
 		return;
 
 
-	SWFShape *s = new SWFShape;
+	auto s = new SWFShape;
 
 	if (options->trace) {
 		static int pathid = 0;
 		printf("if ( %d < pathlimit) {\n" "SWFShape * s = new SWFShape;\n", pathid++);
-		//printf("t->addString( \"path#%d\",NULL);\n", pathid);
+		//printf("t->addString( \"path#%d\",nullptr);\n", pathid);
 		//printf("SWFDisplayItem *  dt = movie->add(t);   dt->move( 200,%d);\n", pathid);
 	}
 
@@ -524,13 +524,13 @@ void drvSWF::show_text(const TextInfo & textinfo)
 	// if the fontnames ends with .fdb, then the file is read, otherwise browser fonts are used.
 
 	//as long as SWF is not const correct SWFFont *f = new SWFFont(fontfilename.c_str());
-	SWFFont *f = new SWFFont(const_cast<char *>(fontfilename.c_str()));
-	if ((f == NULL) || (f->font == NULL)) {
+	auto f = new SWFFont(const_cast<char *>(fontfilename.c_str()));
+	if ((f == nullptr) || (f->font == nullptr)) {
 		errf << "Loading font " << fontfilename.c_str() << " failed !" << endl;
 		return;
 	}
 
-	SWFText *t = new SWFText;
+	auto t = new SWFText;
 	t->setFont(f);
 
 	// t->moveTo(20 *(textinfo.x + x_offset), 20*(currentDeviceHeight - textinfo.y + y_offset));
@@ -540,14 +540,14 @@ void drvSWF::show_text(const TextInfo & textinfo)
 	t->setColor((unsigned char) (255.0 * textinfo.currentR),
 				(unsigned char) (255.0 * textinfo.currentG),
 				(unsigned char) (255.0 * textinfo.currentB), 0xff);
-	t->addString(textinfo.thetext.c_str(), NULL);
+	t->addString(textinfo.thetext.c_str(), nullptr);
 	// t->setSpacing( 0.5);
 
 /*
   t->setXY( -1, 480);
   t->setHeight( 480);
   t->setSpacing( 1.0);
-  t->addString( ( char*) "blargghghgghghgh", NULL);
+  t->addString( ( char*) "blargghghgghghgh", nullptr);
 */
 
 	SWFDisplayItem *d = movie->add(t);
@@ -622,7 +622,7 @@ void drvSWF::show_image(const PSImage & imageinfo)
 
 #if ( defined(USE_PNG) && USE_PNG )
 		// from 0.3 on ming may support png directly
-		SWFBitmap *bm = new SWFBitmap(imageinfo.FileName.c_str());
+		auto bm = new SWFBitmap(imageinfo.FileName.c_str());
 #else
 		unsigned int len = strlen(imageinfo.FileName.c_str());
 		char *outfile = cppstrdup(imageinfo.FileName.c_str());
@@ -635,7 +635,7 @@ void drvSWF::show_image(const PSImage & imageinfo)
 #endif
 		(void) remove(imageinfo.FileName.c_str());
 
-		SWFShape *s = new SWFShape;
+		auto s = new SWFShape;
 		SWFFill *swffill = s->addBitmapFill(bm, SWFFILL_TILED_BITMAP);
 		s->setRightFill(swffill);
 

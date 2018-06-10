@@ -33,7 +33,7 @@ public:
 	derivedConstructor(drvTEXT);
 	// (const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvTEXT(); // Destructor
+	~drvTEXT() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 		OptionT < int, IntValueExtractor >pageheight;
@@ -41,9 +41,9 @@ public:
 		OptionT < bool, BoolTrueExtractor> dumptextpieces;
 
 		DriverOptions() :
-			pageheight(true,"-height", "number",0, "page height in terms of characters",0,200),
-			pagewidth(true,"-width", "number",0, "page width in terms of characters",0,150),
-			dumptextpieces(true,"-dump", 0, 0,"dump text pieces",0,false)
+			pageheight(true,"-height", "number",0, "page height in terms of characters",nullptr,200),
+			pagewidth(true,"-width", "number",0, "page width in terms of characters",nullptr,150),
+			dumptextpieces(true,"-dump", nullptr, 0,"dump text pieces",nullptr,false)
 		{
 			ADD(pageheight);
 			ADD(pagewidth);
@@ -77,9 +77,9 @@ public:
 
 #include "drvfuncs.h"
 
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
-	virtual void    show_image(const PSImage & imageinfo); 
+	void    show_image(const PSImage & imageinfo) override; 
 
 	LinePtrList page; 
 

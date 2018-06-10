@@ -66,7 +66,7 @@ static const char *PDFFonts[] = {	// predefined Fonts (see page 64 PDF Ref. Manu
 	"Times-Italic",
 	"Times-BoldItalic",
 	"ZapfDingbats",
-	0
+	nullptr
 };
 
 const unsigned int numberOfFonts = sizeof(PDFFonts) / (sizeof(char *)) - 1;
@@ -417,7 +417,7 @@ drvPDF::~drvPDF()
 
 	unsigned int infoobject = newobject();
 	outf << "<<" << endl;
-	time_t t = time(0);
+	time_t t = time(nullptr);
 	struct tm *localt = localtime(&t);
 	if (localt) {
 	   outf << "/CreationDate (D:"
@@ -459,8 +459,8 @@ drvPDF::~drvPDF()
 	outf << "startxref" << endl;
 	outf << xrefbegin << endl;
 	outf << "%%EOF" << endl;
-	options=0;
-	encodingName=0;
+	options=nullptr;
+	encodingName=nullptr;
 }
 
 void drvPDF::print_coords()
@@ -653,8 +653,8 @@ void drvPDF::show_path()
 {
 	// add_to_page(); // is done in drvbase !! 
 	endtext();					// close text if open
-	const char *setrgbcolor = 0;
-	const char *drawingop = 0;
+	const char *setrgbcolor = nullptr;
+	const char *drawingop = nullptr;
 	switch (currentShowType()) {
 	case drvbase::stroke:
 		// it's a stroke

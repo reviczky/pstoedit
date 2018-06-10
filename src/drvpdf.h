@@ -31,14 +31,14 @@ class drvPDF : public drvbase {
 public:
 
 	derivedConstructor(drvPDF);
-	~drvPDF(); // Destructor
+	~drvPDF() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 
 		{
 		}
 	}*options;
-	virtual const char * const *    knownFontNames() const ;
+	const char * const *    knownFontNames() const override ;
 private:
 	unsigned int newobject();
 	void endobject();
@@ -58,7 +58,7 @@ private:
 private:
 
 	void print_coords();
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 };
 #endif

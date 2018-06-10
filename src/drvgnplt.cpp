@@ -39,7 +39,7 @@ constructBase
 
 drvGNUPLOT::~drvGNUPLOT()
 {
-	options=0;
+	options=nullptr;
 }
 
 

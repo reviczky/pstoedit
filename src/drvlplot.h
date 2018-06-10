@@ -33,13 +33,13 @@ class drvplot : public drvbase
 {
  public:
   derivedConstructor (drvplot);	// ctor
-  ~drvplot();			// dtor
+  ~drvplot() override;			// dtor
 	class DriverOptions : public ProgramOptions {
 	public:
 		OptionT < RSString, RSStringValueExtractor> type;
 		DriverOptions():
 			ProgramOptions(true), // expect unhandled options
-			type(true,"-plotformat","string",0,"plotutil format to generate",0,(const char *)"meta")
+			type(true,"-plotformat","string",0,"plotutil format to generate",nullptr,(const char *)"meta")
 	// pagesize(true,"-pagesize","string",0,"page size, e.g. a4",0,)
 		{
 			ADD(type);
@@ -49,9 +49,9 @@ class drvplot : public drvbase
   
 #include "drvfuncs.h"
 
-	virtual void show_image (const PSImage& imageinfo); 
-	void show_text(const TextInfo & textInfo);
-	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
+	void show_image (const PSImage& imageinfo) override; 
+	void show_text(const TextInfo & textinfo) override;
+	void show_rectangle(const float llx, const float lly, const float urx, const float ury) override;
   
 private:
 	void print_coords();
@@ -59,8 +59,8 @@ private:
 	bool physical_page;		// can map PS onto a page of specified size?
 	int page_type;		// if so, one of PAGE_{ANSI_A,ISO_A4...}
 
-	void set_line_style (void);
-	void set_filling_and_edging_style (void);
+	void set_line_style ();
+	void set_filling_and_edging_style ();
    
 	NOCOPYANDASSIGN(drvplot)
 };

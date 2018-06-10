@@ -45,7 +45,7 @@ static void splitFullFileName(const char *const fullName,
 		return;
 
 	char *fullName_T = cppstrdup(fullName);
-	char *baseName_T = 0;
+	char *baseName_T = nullptr;
 
 #if defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) 
 	// coverity[uninit_use_in_call]
@@ -94,7 +94,7 @@ DOptions_ptr(driverdesc_p.createDriverOptions()),
 errf(theerrStream),
 inFileName(nameOfInputFile_p ? nameOfInputFile_p : ""),
 outFileName(nameOfOutputFile_p ? nameOfOutputFile_p : ""), 
-outDirName(""), outBaseName(""), d_argc(0), d_argv(0), globaloptions(globaloptions_p),
+outDirName(""), outBaseName(""), d_argc(0), d_argv(nullptr), globaloptions(globaloptions_p),
 	// set some common defaults
 currentDeviceHeight(792.0f ),  // US Letter
 currentDeviceWidth(612.0f ),   // US Letter
@@ -102,11 +102,11 @@ x_offset(0.0f),
 y_offset(0.0f),
 currentPageNumber(0),
 domerge(false),
-defaultFontName(0),
+defaultFontName(nullptr),
 ctorOK(true),
-saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driveroptions(0),
+saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driveroptions(nullptr),
 	// default for PI1 and PI2 and clippath
-	currentPath(0), last_currentPath(0), outputPath(0), lastPath(0)
+	currentPath(nullptr), last_currentPath(nullptr), outputPath(nullptr), lastPath(nullptr)
 	// default for textInfo_ and lasttextInfo_
 {
 
@@ -141,7 +141,7 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driv
 			d_argv[d_argc] = cppstrdup(driverargs.argv[a]);
 			d_argc++;
 		}
-		d_argv[d_argc] = 0;
+		d_argv[d_argc] = nullptr;
 #else
 		driveroptions = cppstrdup(driveroptions_p);
 		//C_istrstream optstream(driveroptions, strlen(driveroptions));
@@ -226,13 +226,13 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driv
 
 drvbase::~drvbase()
 {
-	currentPath = 0;
-	lastPath = 0;
-	outputPath = 0;
+	currentPath = nullptr;
+	lastPath = nullptr;
+	outputPath = nullptr;
 	if (d_argv) {
 		for (unsigned int i = 0; i < d_argc; i++) {
 			delete[](d_argv[i]);
-			d_argv[i] = 0;
+			d_argv[i] = nullptr;
 		}
 		delete[]d_argv;
 		d_argv = NIL;
@@ -257,7 +257,7 @@ drvbase::~drvbase()
 			delete currentSaveLevel->next;
 		}
 	}
-	currentSaveLevel = 0;
+	currentSaveLevel = nullptr;
 	defaultFontName = NIL;
 	last_currentPath = NIL;
 }
@@ -727,7 +727,7 @@ void drvbase::add_to_page()
 
 DashPattern::DashPattern(const char
 						 *patternAsSetDashString):dashString(patternAsSetDashString),
-nrOfEntries(-1), numbers(0), offset(0)
+nrOfEntries(-1), numbers(nullptr), offset(0)
 {
 	const char *pattern = patternAsSetDashString;
 	// first count number of ' ' in pattern to determine number of entries
@@ -795,7 +795,7 @@ nrOfEntries(-1), numbers(0), offset(0)
 DashPattern::~DashPattern()
 {
 	delete[]numbers;
-	numbers = 0;
+	numbers = nullptr;
 	nrOfEntries = 0;
 }
 
@@ -866,7 +866,7 @@ void drvbase::dumpImage()
 	show_image(imageInfo);
 	delete[]imageInfo.data;
 	imageInfo.nextfreedataitem = 0;
-	imageInfo.data = 0;
+	imageInfo.data = nullptr;
 }
 
 unsigned int drvbase::nrOfSubpaths() const
@@ -1253,14 +1253,14 @@ numberOfDefaultColors_(numberOfDefaultColors), makeColorName_(makeColorName)
 {
 //dbg   cerr << " Constructing a color table with " << numberOfDefaultColors << " default colors" << endl;
 	for (unsigned int i = 0; i < maxcolors; i++)
-		newColors[i] = 0;
+		newColors[i] = nullptr;
 //dbg   cerr << 1/(1/numberOfDefaultColors) << endl;
 }
 
 ColorTable::~ColorTable()
 {
 	unsigned int current = 0;
-	while (newColors[current] != 0) {
+	while (newColors[current] != nullptr) {
 		delete[] newColors[current];
 		newColors[current] = NIL;
 		current++;
@@ -1282,7 +1282,7 @@ unsigned int ColorTable::getColorIndex(float r, float g, float b)
 	}
 // look in new colors
 	unsigned int j ;
-	for (j = 0; ((j < maxcolors) && (newColors[j] != 0)); j++) {
+	for (j = 0; ((j < maxcolors) && (newColors[j] != nullptr)); j++) {
 		if (strcmp(cmp, newColors[j]) == 0) {
 			return j + numberOfDefaultColors_;
 		}
@@ -1322,7 +1322,7 @@ bool ColorTable::isKnownColor(float r, float g, float b) const
 		}
 	}
 	// look in new colors
-	for (unsigned int j = 0; ((j < maxcolors) && (newColors[j] != 0)); j++) {
+	for (unsigned int j = 0; ((j < maxcolors) && (newColors[j] != nullptr)); j++) {
 		if (strcmp(cmp, newColors[j]) == 0) {
 			return true;		// j+numberOfDefaultColors_;
 		}
@@ -1342,24 +1342,24 @@ const char *  ColorTable::getColorString(unsigned int index) const
 const DriverDescription *DescriptionRegister:: getDriverDescForName(const char *drivername) const
 {
 	unsigned int i = 0;
-	while (rp[i] != 0) {
+	while (rp[i] != nullptr) {
 		if ((strcmp(drivername, rp[i]->symbolicname) == 0)) {
 			return rp[i];
 		}
 		i++;
 	}
-	return 0;
+	return nullptr;
 }
 
 const DriverDescription *DescriptionRegister:: getDriverDescForSuffix(const char *suffix) const
 {
 	unsigned int i = 0;
-	const DriverDescription * founditem = 0; 
-	while (rp[i] != 0) {
+	const DriverDescription * founditem = nullptr; 
+	while (rp[i] != nullptr) {
 		if ((STRICMP(suffix, rp[i]->suffix) == 0)) {
 			if (founditem) {
 				// already found an entry for this suffix - so it is not unique -> return 0
-				return 0;
+				return nullptr;
 			} else {
 				founditem = rp[i]; // first chance - but loop throug all items
 			}
@@ -1372,7 +1372,7 @@ const DriverDescription *DescriptionRegister:: getDriverDescForSuffix(const char
 void DescriptionRegister::listdrivers(ostream &out) const
 {
 	unsigned int i = 0;
-	while (rp[i] != 0) {
+	while (rp[i] != nullptr) {
 		out << rp[i]->symbolicname << ",";
 		out << rp[i]->suffix << ",";
 		out << rp[i]->short_explanation << "," << rp[i]->additionalInfo();
@@ -1388,7 +1388,7 @@ void DescriptionRegister::explainformats(ostream & out, bool withdetails) const
 		out << "Available formats :\n";
 	}
 	unsigned int i = 0;
-	while (rp[i] != 0) {
+	while (rp[i] != nullptr) {
 		if (withdetails) {
 			out << "\\subsubsection{" << rp[i]->symbolicname << " - " << rp[i]->short_explanation <<"}" << endl;
 			if (strlen(rp[i]->long_explanation)>0) { out << rp[i]->long_explanation << endl << endl; }
@@ -1426,7 +1426,7 @@ void DescriptionRegister::explainformats(ostream & out, bool withdetails) const
 	}
 }
 void DescriptionRegister::mergeRegister(ostream & out,
-										const DescriptionRegister & src, const char *filename)
+                                        const DescriptionRegister & src, const char *filename)
 {
 	int i = 0;
 	while (src.rp[i]) {
@@ -1470,7 +1470,7 @@ void DescriptionRegister::registerDriver(DriverDescription * xp)
 }
 
 // int Rinit::ref = 0;
-DLLEXPORT DescriptionRegister *globalRp = 0; 
+DLLEXPORT DescriptionRegister *globalRp = nullptr; 
 
 extern "C" DLLEXPORT DescriptionRegister * getglobalRp()
 {
@@ -1523,7 +1523,7 @@ DriverDescription::DriverDescription(	const char *const s_name,
 }
 
 const char * DriverDescription::additionalInfo() const {
-	return ((checkfunc != 0) ? (checkfunc()? "" : "(license key needed, see pstoedit manual)") : "");
+	return ((checkfunc != nullptr) ? (checkfunc()? "" : "(license key needed, see pstoedit manual)") : "");
 }
 
 #if 0

@@ -51,7 +51,7 @@ drvSK::derivedConstructor(drvSK)
 
 drvSK::~drvSK()
 {
-	options=0;
+	options=nullptr;
 }
 
 void drvSK::print_coords()
@@ -167,21 +167,21 @@ static void save_string(ostream & outf, size_t len, const char *str)
 	outf << '"';
 }
 
-void drvSK::show_text(const TextInfo & info)
+void drvSK::show_text(const TextInfo & textinfo)
 {
 	save_solid_fill(outf, fillR(), fillG(), fillB());
-	outf << "Fn(\"" << info.currentFontName.c_str() << "\")\n";
-	outf << "Fs(" << info.currentFontSize << ")\n";
+	outf << "Fn(\"" << textinfo.currentFontName.c_str() << "\")\n";
+	outf << "Fs(" << textinfo.currentFontSize << ")\n";
 	outf << "txt(";
-	save_string(outf, info.thetext.length(), info.thetext.c_str());
+	save_string(outf, textinfo.thetext.length(), textinfo.thetext.c_str());
 	outf << ",(";
-	if (info.currentFontAngle) {
-		double angle = info.currentFontAngle * PI / 180.0;
+	if (textinfo.currentFontAngle) {
+		double angle = textinfo.currentFontAngle * PI / 180.0;
 		double c = cos(angle);
 		double s = sin(angle);
 		outf << c << "," << s << "," << -s << "," << c << ",";
 	}
-	outf << info.x << ", " << info.y << "))\n";
+	outf << textinfo.x << ", " << textinfo.y << "))\n";
 }
 
 void drvSK::show_path()

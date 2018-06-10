@@ -41,21 +41,21 @@ public:
 	PSFrontEnd(ostream & outfile_p, 
 			ostream & errstream,
 			PsToEditOptions & globaloptions_p,
-			const char * infilename_p = 0,
-			const char * outfilename_p = 0, 
-			const DriverDescription * driverDesc = 0, 
-			const char * driveroptions_p = 0,
+			const char * infilename_p = nullptr,
+			const char * outfilename_p = nullptr, 
+			const DriverDescription * driverDesc_p = nullptr, 
+			const char * driveroptions_p = nullptr,
 			const bool splitpages_p = false, 
-			drvbase * backend_p = 0);
+			drvbase * backend_p = nullptr);
 	~PSFrontEnd();
 
-	void 		run(bool merge);	// do the conversion
+	void 		run(bool mergelines);	// do the conversion
 
 	unsigned int readBBoxes(BBox * bboxes);
 
 private:
 
-	void            addNumber(float value); // add a number to the current path
+	void            addNumber(float a_number); // add a number to the current path
 
 	float           pop(); // pops and returns last value on stack
 

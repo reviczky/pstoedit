@@ -34,7 +34,7 @@
 #endif
 #include <Magick++.h>
 
-using namespace std;
+//avoid using namespace std;
 
 
 class drvMAGICK : public drvbase {
@@ -43,7 +43,7 @@ public:
 
 	derivedConstructor(drvMAGICK);
 
-	~drvMAGICK(); // Destructor
+	~drvMAGICK() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		DriverOptions() 
@@ -53,11 +53,11 @@ public:
 
 #include "drvfuncs.h"
 //	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 public:
 
-	virtual void    show_image(const PSImage & imageinfo); 
+	void    show_image(const PSImage & imageinfo) override; 
 
 private:
 	void create_vpath(Magick::VPathList & vpath);

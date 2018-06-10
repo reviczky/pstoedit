@@ -40,7 +40,7 @@ constructBase
 
 drvGSCHEM::~drvGSCHEM()
 {
-	options=0;
+	options=nullptr;
 }
 
 

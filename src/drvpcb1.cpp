@@ -52,7 +52,7 @@ drvPCB1::derivedConstructor(drvPCB1):
 	drill_data=false;	
 	drill_fixed=true;
 	drill_diameter=0.0f;
-	if (env!=NULL)
+	if (env!=nullptr)
 	{
 	   if (0!=strcmp(env,"no"))
 	   {
@@ -72,7 +72,7 @@ drvPCB1::~drvPCB1() {
 // and writing of trailer to output file
 	pcberrf << "Sample trailer \n";
 	pcberrf.close();
-	options=0;
+	options=nullptr;
 }
 
 void drvPCB1::print_coords()
@@ -233,10 +233,7 @@ static Lpoint toLpoint(const Point& p)
 
 static bool isEqual(long a, long b, long tol)
 {
-   if (abs ((int)(a-b)) <= tol)
-      return true;
-   else
-      return false;   
+   return (abs ((int)(a-b)) <= tol);
 }
  
 bool drvPCB1::lineOut()

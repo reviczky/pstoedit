@@ -32,7 +32,7 @@ public:
 	derivedConstructor(drvFIG);
 	//(const char * driveroptions_P, ostream & theoutStream, ostream & theerrStream, const char* outPath_P, const char* outName_P); // Constructor
 
-	~drvFIG(); // Destructor
+	~drvFIG() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
 		OptionT < int, IntValueExtractor > startdepth ; 
@@ -43,10 +43,10 @@ public:
 
 		DriverOptions():
 
-			startdepth(true,"-startdepth","number",0,"set the initial depth (default 999)",0,999),
-			metric(true,"-metric","",0,"switch to centimeter display (default inches)",0,false),
-			use_correct_font_size(true,"-usecorrectfontsize",0,0,"do not scale fonts for xfig. Use this if you also use this option with xfig",0,false),
-			depth_in_inches(true,"-depth","number",0,"set the page depth in inches (default 11)",0,11)
+			startdepth(true,"-startdepth","number",0,"set the initial depth (default 999)",nullptr,999),
+			metric(true,"-metric","",0,"switch to centimeter display (default inches)",nullptr,false),
+			use_correct_font_size(true,"-usecorrectfontsize",nullptr,0,"do not scale fonts for xfig. Use this if you also use this option with xfig",nullptr,false),
+			depth_in_inches(true,"-depth","number",0,"set the page depth in inches (default 11)",nullptr,11)
 		{
 			ADD(startdepth);
 			ADD(metric);
@@ -65,7 +65,7 @@ private:
 //	bool	  use_correct_font_size; // if xfig is used in -use_correct_font_size mode as well
 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 	unsigned int nrOfCurvetos() const;
 	void print_polyline_coords();
@@ -83,7 +83,7 @@ private:
    int glo_bbox_flag ,loc_bbox_flag ;
 
 public:
-   void show_image(const PSImage & imageinfo);
+   void show_image(const PSImage & imageinfo) override;
 };
 #endif
 

@@ -213,7 +213,7 @@ public:
 
 
   protected:
-	void add(OptionBase * op, const char * const membername) ;
+	void add(OptionBase * op, const char * const membername_p) ;
 
   public:
 	bool expectUnhandled; // whether to expect unhandled arguments

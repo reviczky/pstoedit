@@ -33,23 +33,23 @@ public:
 	derivedConstructor(drvSWF);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvSWF(); // Destructor
+	~drvSWF() override; // Destructor
 	class DriverOptions : public ProgramOptions { 
 	public:
 		OptionT < bool, BoolTrueExtractor > cubic;
 		OptionT < bool, BoolTrueExtractor > trace;
 		DriverOptions():
-			cubic(true,"-cubic",0,0,"cubic ???",0,false),
-			trace(true,"-trace",0,0,"trace ???",0,false)
+			cubic(true,"-cubic",nullptr,0,"cubic ???",nullptr,false),
+			trace(true,"-trace",nullptr,0,"trace ???",nullptr,false)
 		{
 			ADD(cubic);
 			ADD(trace);
 		}
 	}*options;
 
-	virtual void show_image(const PSImage & imageinfo); 
+	void show_image(const PSImage & imageinfo) override; 
 #include "drvfuncs.h"
-	void show_text(const TextInfo & textInfo);
+	void show_text(const TextInfo & textinfo) override;
 
 private:
 	void print_coords();

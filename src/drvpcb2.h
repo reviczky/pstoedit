@@ -33,7 +33,7 @@ public:
 	derivedConstructor(drvPCB2);
 	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
 
-	~drvPCB2(); // Destructor
+	~drvPCB2() override; // Destructor
 
 	class DriverOptions : public ProgramOptions {
 	public:
@@ -46,13 +46,13 @@ public:
 		OptionT < bool, BoolTrueExtractor > forcepoly;
 
 		DriverOptions():
-		grid(true,"-grid",0,0,"attempt to snap relevant output to grid (mils) and put failed objects to a different layer",0,0),
-		snapdist(true,"-snapdist",0,0,"grid snap distance ratio (0 < snapdist <= 0.5, default 0.1)",0,0.1),
-		tshiftx(true,"-tshiftx",0,0,"additional x shift measured in target units (mils)",0,0),
-		tshifty(true,"-tshifty",0,0,"additional y shift measured in target units (mils)",0,0),
-		mm(true,"-mm",0,0,"switch to metric units (mm)",0,false),
-		stdnames(true,"-stdnames",0,0,"use standard layer names instead of descriptive names",0,false),
-		forcepoly(true,"-forcepoly",0,0,"force all objects to be interpreted as polygons",0,false)
+		grid(true,"-grid",nullptr,0,"attempt to snap relevant output to grid (mils) and put failed objects to a different layer",nullptr,0),
+		snapdist(true,"-snapdist",nullptr,0,"grid snap distance ratio (0 < snapdist <= 0.5, default 0.1)",nullptr,0.1),
+		tshiftx(true,"-tshiftx",nullptr,0,"additional x shift measured in target units (mils)",nullptr,0),
+		tshifty(true,"-tshifty",nullptr,0,"additional y shift measured in target units (mils)",nullptr,0),
+		mm(true,"-mm",nullptr,0,"switch to metric units (mm)",nullptr,false),
+		stdnames(true,"-stdnames",nullptr,0,"use standard layer names instead of descriptive names",nullptr,false),
+		forcepoly(true,"-forcepoly",nullptr,0,"force all objects to be interpreted as polygons",nullptr,false)
 		{
 			ADD(grid);
 			ADD(snapdist);
@@ -72,7 +72,7 @@ private:
 	int pcbScale_y(const Point & p) const;
 	static int pcbScale(const double & f) ;
 	void try_grid_snap(int value, bool & success) const;
-	static int _grid_snap (int value, double grid) ;
+	static int _grid_snap (int value, double grid_p) ;
 	int grid_snap(int value, bool success) const;
 	void gen_preamble();
 

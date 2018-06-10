@@ -328,7 +328,7 @@ static void do_fill(const HPGL_Pt2 point[],
                     const int      nzfill)
 {
     const long  ny = (long)my_round(ymax - ymin);
-    double     *intersect = new double[points];
+    auto intersect = new double[points];
    // intersect = (double*) malloc((size_t)points * sizeof intersect[0]);
 
     if (!intersect)
@@ -395,7 +395,7 @@ static void strokedfill(const HPGL_Pt polygon[],
     else
         return;
 
-    HPGL_Pt2 *poly = new HPGL_Pt2[numpoints + 1]; // (HPGL_Pt2*) malloc((size_t)(numpoints + 1) * sizeof poly[0]);
+    auto poly = new HPGL_Pt2[numpoints + 1]; // (HPGL_Pt2*) malloc((size_t)(numpoints + 1) * sizeof poly[0]);
     if (!poly)
         return;
 
@@ -492,7 +492,7 @@ void drvbase::simulate_fill() {
 	/// moveto == lineto for fill ??
 
  backend = this;
- HPGL_Pt * polygon = new HPGL_Pt[numberOfElementsInPath()];
+ auto  polygon = new HPGL_Pt[numberOfElementsInPath()];
  int p_i = 0;
  for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
       const basedrawingelement & elem = pathElement(n);

@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -208,8 +208,8 @@ void drvJAVA2::show_text(const TextInfo & textinfo)
 		}
 	}
 	outf << "\"," << endl;
-	outf << "      " << (textinfo.x +
-						 x_offset) << "f, " << (currentDeviceHeight - textinfo.y + y_offset) << "f";
+	outf << "      " << (textinfo.x() +
+						 x_offset) << "f, " << (currentDeviceHeight - textinfo.y() + y_offset) << "f";
 #ifdef PASSFONTNAME
 	const char *javaFname = JavaFonts[javaFontNumber].javaname;
 	const char *javaFstyle = JavaFonts[javaFontNumber].javastyle;

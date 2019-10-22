@@ -5,7 +5,7 @@
    drvtext.h : This file is part of pstoedit
    Class declaration for a text oriented output driver 
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,7 @@ public:
 	class XSorter {
 	public:
 		static bool compare(const drvbase::TextInfo & t1, const drvbase::TextInfo & t2) {
-			return t1.x > t2.x;
+			return t1.x() > t2.x();
 		}
 	};
 	class Line {

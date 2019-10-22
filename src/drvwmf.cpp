@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2018 Wolfgang Glunz
+   Copyright (C) 1998 - 2019 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -1062,13 +1062,13 @@ void drvWMF::show_text(const TextInfo & textinfo)
 	if (fontchanged())
 		(void)fetchFont(textinfo, textHeight, textAngle);
 
-	const long x1 = transx(textinfo.x);
-	const long y1 = transy(textinfo.y);
+	const long x1 = transx(textinfo.x());
+	const long y1 = transy(textinfo.y());
 
-	const long x2 = transx(textinfo.x_end);
-	const long y2 = transy(textinfo.y_end);
+	const long x2 = transx(textinfo.x_end());
+	const long y2 = transy(textinfo.y_end());
 
-	if (Verbose()) cout << "placing text : " << textinfo.thetext << " at " << textinfo.x << "," << textinfo.y<< " in EMF coords: " << x1 << "," << y1 << endl;
+	if (Verbose()) cout << "placing text : " << textinfo.thetext << " at " << textinfo.x() << "," << textinfo.y() << " in EMF coords: " << x1 << "," << y1 << endl;
 	// calculate bounding box
 	//
 	// NOTE: cannot do that exactly (with ascent and descent height),

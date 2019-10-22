@@ -30,11 +30,14 @@
 
 #include I_stdio
 #include I_string_h
+#ifdef OS_WIN32_WCE
+#include "WinCEAdapter.h"
+#else
 #include <fcntl.h>
+#endif
+
 #include <io.h>
-
 #include "iapi.h"
-
 
 typedef int (GSDLLCALLPTR gs_write_callback_funcptr) (void * cb_data, const char* text, int length); // length needs to be int because of gs api
 
@@ -120,7 +123,11 @@ gs_load_dll(const char * szDllName)
 {
 
 	// long version;
-    hmodule = LoadLibrary(szDllName);
+#ifdef OS_WIN32_WCE
+	hmodule = LoadLibrary(LPSTRtoLPWSTR(szDllName).c_str());
+#else
+	hmodule = LoadLibrary(szDllName);
+#endif
     if (hmodule < (HINSTANCE)HINSTANCE_ERROR) {
 		/* fprintf(stderr,"loading  %s failed\n", szDllName); */
 		return false;
@@ -145,21 +152,20 @@ gs_load_dll(const char * szDllName)
     }
 #endif
 
-
     /* continue loading other functions */
-    if ( (new_instance = (PFN_gsapi_new_instance) 	GetProcAddress(hmodule, "gsapi_new_instance")) == NULL)
+    if ( (new_instance = (PFN_gsapi_new_instance) 	GetProcAddress(hmodule, TEXT("gsapi_new_instance"))) == NULL)
 		{ writemessage("could not load gsapi_new_instance\n");  gs_load_dll_cleanup(); return false; }
-    if ( (delete_instance = (PFN_gsapi_delete_instance) 	GetProcAddress(hmodule, "gsapi_delete_instance")) == NULL)
+    if ( (delete_instance = (PFN_gsapi_delete_instance) 	GetProcAddress(hmodule, TEXT("gsapi_delete_instance"))) == NULL)
 		{ writemessage("could not load gsapi_delete_instance\n");  gs_load_dll_cleanup();  return false;}
-    if ( (set_stdio = (PFN_gsapi_set_stdio) 	GetProcAddress(hmodule, "gsapi_set_stdio")) == NULL)
+    if ( (set_stdio = (PFN_gsapi_set_stdio) 	GetProcAddress(hmodule, TEXT("gsapi_set_stdio"))) == NULL)
 		{ writemessage("could not load gsapi_set_stdio\n");  gs_load_dll_cleanup();  return false;}
-    if ( (init_with_args = (PFN_gsapi_init_with_args) 	GetProcAddress(hmodule, "gsapi_init_with_args")) == NULL)
+    if ( (init_with_args = (PFN_gsapi_init_with_args) 	GetProcAddress(hmodule, TEXT("gsapi_init_with_args"))) == NULL)
 		{ writemessage("could not load gsapi_init_with_args\n");  gs_load_dll_cleanup(); return false;}
-    if ( (run_string = (PFN_gsapi_run_string) 	GetProcAddress(hmodule, "gsapi_run_string")) == NULL)
+    if ( (run_string = (PFN_gsapi_run_string) 	GetProcAddress(hmodule, TEXT("gsapi_run_string"))) == NULL)
 		{ writemessage("could not load gsapi_run_string\n");  gs_load_dll_cleanup(); return false;}
-    if ( (run_file = (PFN_gsapi_run_file) 	GetProcAddress(hmodule, "gsapi_run_file")) == NULL)
+    if ( (run_file = (PFN_gsapi_run_file) 	GetProcAddress(hmodule, TEXT("gsapi_run_file"))) == NULL)
 		{ writemessage("could not load gsapi_run_file\n");  gs_load_dll_cleanup(); return false;}
- 	if ( (exit = (PFN_gsapi_exit) 	GetProcAddress(hmodule, "gsapi_exit")) == NULL)
+ 	if ( (exit = (PFN_gsapi_exit) 	GetProcAddress(hmodule, TEXT("gsapi_exit"))) == NULL)
 		{ writemessage("could not load gsapi_exit\n");  gs_load_dll_cleanup(); return false;}
  
     return true;
@@ -195,7 +201,18 @@ callgsDLL(int argc, char *argv[])
 {
 
 	GSDLL gsapi;
+#ifndef OS_WIN32_WCE
+	/*
+	This change is done to avoid a console popup appearing in WindowsCE
+	1. We get the console popup only in WindowsCE, and not in Windows 32/64
+	2. CreateProcess with CREATE_NO_WINDOW returns error=87(i.e "Invalid parameter") in WindowsCE, because CREATE_NO_WINDOW is not supported in WindowsCE
+	3. Also tried with CreateProcess() with STARTUPINFOW::wShowWindow=SW_HIDE, this does not hide the console window.
+	4. In Windows CE, when there is FILENO(stdin), it opens a console. This works fine in Windows x86/x64.
+	   Tested by commenting this code, all functionality seems to be working fine.
+	*/
+
     (void) SETMODE(FILENO(stdin), O_BINARY);
+#endif
 
 	// const char szDllName[] = "gsdll32.dll";
 	const char * const szDllName = argv[0]; // 

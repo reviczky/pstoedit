@@ -2,7 +2,7 @@
    drvPDF.cpp : This file is part of pstoedit
    Backend for PDF(TM) format
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -417,6 +417,10 @@ drvPDF::~drvPDF()
 
 	unsigned int infoobject = newobject();
 	outf << "<<" << endl;
+// Comments by Rohan
+// This is a hack
+// Since Windows CE does not support, I am just putting a dummy date(i.e "01/01/18 09:00:00")
+#ifndef OS_WIN32_WCE
 	time_t t = time(nullptr);
 	struct tm *localt = localtime(&t);
 	if (localt) {
@@ -428,6 +432,15 @@ drvPDF::~drvPDF()
 		<< setw(2) << setfill('0') << localt->tm_min
 		<< setw(2) << setfill('0') << localt->tm_sec << ")" << endl;
 	}
+#else
+	   outf << "/CreationDate (D:"
+		<< setw(4) << 2018
+		<< setw(2) << setfill('0') << 1
+		<< setw(2) << setfill('0') << 1
+		<< setw(2) << setfill('0') << 9
+		<< setw(2) << setfill('0') << 0
+		<< setw(2) << setfill('0') << 0 << ")" << endl;
+#endif
 	outf << "/Producer (pstoedit by wglunz35_AT_pstoedit.net)" << endl;
 	outf << ">>" << endl;
 	endobject();
@@ -619,12 +632,12 @@ void drvPDF::show_text(const TextInfo & textinfo)
 //    buffer.width(0); // to force minimal width
 //    buffer.unsetf(ios::showpoint);
 
-	adjustbbox(textinfo.x + x_offset, textinfo.y + y_offset);
+	adjustbbox(textinfo.x() + x_offset, textinfo.y() + y_offset);
 	buffer << RND3(Sx * cosphi) << " "
 		<< RND3(Sx * sinphi) << " "
 		<< RND3(-Sy * sinphi) << " "
 		<< RND3(Sy * cosphi) << " "
-		<< RND3(textinfo.x + x_offset) << " " << RND3(textinfo.y + y_offset) << " Tm" << endl;
+		<< RND3(textinfo.x() + x_offset) << " " << RND3(textinfo.y() + y_offset) << " Tm" << endl;
 	buffer << RND3(textinfo.currentR) << " " << RND3(textinfo.
 													 currentG) << " " <<
 		RND3(textinfo.currentB) << " rg" << endl;

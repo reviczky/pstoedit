@@ -38,6 +38,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "wgsver.h"
+#include "cppcomp.h"
 
 /* Ghostscript may be known in the Windows Registry by
  * the following names.
@@ -71,12 +72,20 @@ static int get_gs_versions_product(int *pver, int offset,
 	else
 	  sprintf_s(TARGETWITHLEN(key,256) ,"Software\\%s", gs_productfamily);
 
+#ifdef OS_WIN32_WCE
+	long regtestresult = RegOpenKeyEx(hkeyroot, LPSTRtoLPWSTR(key).c_str(), 0, KEY_READ|regopenflags , &hkey);
+#else
 	long regtestresult = RegOpenKeyExA(hkeyroot, key, 0, KEY_READ|regopenflags , &hkey);
+#endif
     if (regtestresult == ERROR_SUCCESS) {
 	/* Now enumerate the keys 
 		fprintf(stdout," return code for \"%s\" is %d\n", key, regtestresult);*/
 	cbData = sizeof(key) / sizeof(char);
+#ifdef OS_WIN32_WCE
+	while (RegEnumKeyEx(hkey, n, (LPWSTR)LPSTRtoLPWSTR(key).c_str(), &cbData, NULL, NULL, NULL, NULL) == ERROR_SUCCESS) { 
+#else
 	while (RegEnumKeyA(hkey, n, key, cbData) == ERROR_SUCCESS) {
+#endif
 	    n++;
 	    ver = 0;
 	    p = key;
@@ -167,14 +176,21 @@ gp_getenv_registry(HKEY hkeyroot, REGSAM regopenflags, const char *key, const ch
 	/*
 	fprintf(stdout,"checking key %s %s\n",key,name);
 	*/
-
-    if (RegOpenKeyExA(hkeyroot, key, 0, KEY_READ |  regopenflags , &hkey)	== ERROR_SUCCESS) {
+#ifdef OS_WIN32_WCE
+	if (RegOpenKeyEx(hkeyroot, LPSTRtoLPWSTR(key).c_str(), 0, KEY_READ |  regopenflags , &hkey)	== ERROR_SUCCESS) {
+#else
+	if (RegOpenKeyExA(hkeyroot, key, 0, KEY_READ |  regopenflags , &hkey)	== ERROR_SUCCESS) {
+#endif
 	keytype = REG_SZ;
 	cbData = *plen;
 	if (bptr == (BYTE *)NULL)
 	    bptr = &b;	/* Registry API won't return ERROR_MORE_DATA */
 			/* if ptr is NULL */
+#ifdef OS_WIN32_WCE
+	rc = RegQueryValueEx(hkey, LPSTRtoLPWSTR((char *)name).c_str(), 0, &keytype, bptr, &cbData);
+#else
 	rc = RegQueryValueExA(hkey, (char *)name, 0, &keytype, bptr, &cbData);
+#endif
 	(void)RegCloseKey(hkey);
 	if (rc == ERROR_SUCCESS) {
 	    *plen = cbData;

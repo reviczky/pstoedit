@@ -2,7 +2,7 @@
    cmdmain.cpp : This file is part of pstoedit
    main program for command line usage
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -23,6 +23,11 @@
 #include "pstoedit.h"
 
 #include I_iostream
+
+#ifdef OS_WIN32_WCE
+#include "WinCEAdapter.h"
+#endif
+
 
 int main(int argc, const char *const argv[])
 {

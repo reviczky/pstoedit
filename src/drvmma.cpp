@@ -5,7 +5,7 @@
    $Id: drvmma.cpp,v 1.5 2003/03/15 16:25:46 manfred Exp $
    Based on drvSAMPL.cpp
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net,
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net,
                              Manfred Thole, manfred_AT_thole.org
 
     This program is free software; you can redistribute it and/or modify
@@ -221,7 +221,7 @@ void drvMMA::show_text(const TextInfo & textinfo)
 		outf << *c;
 	}
 	outf << "\", ";
-	outf << "{" << textinfo.x << ", " << textinfo.y << "}, ";
+	outf << "{" << textinfo.x() << ", " << textinfo.y() << "}, ";
 	outf << "{" << offRe << ", " << offIm << "}, ";
 	outf << "{" << dirRe << ", " << dirIm << "}, \n";
 	outf << "TextStyle -> {";

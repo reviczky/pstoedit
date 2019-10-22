@@ -7,7 +7,7 @@
 
    drvsample.cpp : Backend for TK
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1006,8 +1006,8 @@ void drvTK::show_text(const TextInfo & textinfo)
 	actualFontSize = int ((textinfo.currentFontSize / .95) * 10);
 
 	buffer << "set i [$Global(CurrentCanvas) create text "
-		<< textinfo.x + x_offset
-		<< " " << (currentDeviceHeight - textinfo.y + y_offset + actualFontSize / 7.2);
+		<< textinfo.x() + x_offset
+		<< " " << (currentDeviceHeight - textinfo.y() + y_offset + actualFontSize / 7.2);
 
 
 	buffer << " -text \"";

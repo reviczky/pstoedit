@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -195,6 +195,7 @@ public:
 	OptionT < bool, BoolTrueExtractor > keepinternalfiles ;//= false;
 	OptionT < bool, BoolTrueExtractor > fontdebug ;//= false;
 	OptionT < bool, BoolTrueExtractor > justgstest ;//= false;
+	OptionT < bool, BoolTrueExtractor > fake_date_and_version;//= false;
 	OptionT < bool, BoolTrueExtractor > pscover ;//= false;
 	OptionT < bool, BoolTrueExtractor > nofontreplacement ;//= false;
 	OptionT < bool, BoolTrueExtractor > passglyphnames;
@@ -507,6 +508,9 @@ private:
 	justgstest			(true, "-gstest",noArgument,b_t,"perform a basic test of the interworking with Ghostscript",
 		UseDefaultDoku,
 		false),
+	fake_date_and_version(true, "-fakedateandversion", noArgument, b_t, "Just for regression testing - uses a constant date and version string.",
+		UseDefaultDoku,
+		false),
 	pscover				(true, "-pscover",noArgument,h_t,"perform coverage statistics about the pstoedit PostScript proloque - for debug and test only",
 		UseDefaultDoku,
 		false),
@@ -711,6 +715,7 @@ private:
 	ADD(fontdebug);
 	ADD(justgstest);
 	ADD(pscover);
+	ADD(fake_date_and_version);
 	ADD(nofontreplacement);
 	ADD(passglyphnames);
 	ADD(useoldnormalization);

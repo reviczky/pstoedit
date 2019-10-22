@@ -613,7 +613,7 @@ alldoc : pstoedit.1 pstoedit.htm pstoedit.pdf
 @DOCS_TRUE@	$P -docushort | grep -v "DLL interface" > $@
 
 @DOCS_TRUE@driverhelp.tex: $P
-@DOCS_TRUE@	$P -dumphelp | grep -v "DLL interface" | sed -e 's/_/\\_/' -e 's/>=/$>=$ /' > $@
+@DOCS_TRUE@	$P -dumphelp | grep -v "DLL interface" | sed -e 's/_/\\_/g' -e 's/>=/$>=$ /g' > $@
 
 @DOCS_TRUE@pstoedit.dvi : $(latex_src)
 @DOCS_TRUE@	$(LATEX) $<

@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -125,6 +125,12 @@ void DynLoader::open(const char *libname_P)
 #if defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 	int loadmode = RTLD_LAZY;	// RTLD_NOW
 	handle = dlopen(fulllibname, loadmode);
+#elif OS_WIN32_WCE
+		if (sizeof(void*) != sizeof(HMODULE)) {
+		errstream << "type of handle in dynload.cpp seems to be wrong" << endl;
+		return;
+	}
+	handle = WINLOADLIB(LPSTRtoLPWSTR(fulllibname).c_str());
 #elif defined(_WIN32)
 	if (sizeof(void*) != sizeof(HMODULE)) {
 		errstream << "type of handle in dynload.cpp seems to be wrong" << endl;
@@ -231,6 +237,8 @@ DynLoader::fptr DynLoader::getSymbol(const char *name, int check) const
 	//
 #if defined(__linux) || defined(__linux__) || defined(__CYGWIN__) || defined(__FreeBSD__) || defined(__hpux) || defined(__sparc) || defined(__OS2__) || defined(_AIX) || (defined (HAVE_DLFCN_H) && (HAVE_DLFCN_H==1 ) )
 	DynLoader::fptr rfptr = ptr_to_fptr(dlsym(handle, name));	//lint !e611 //: Suspicious cast
+#elif defined(OS_WIN32_WCE)
+	DynLoader::fptr rfptr = ptr_to_fptr(GetProcAddress((HINSTANCE) handle, LPSTRtoLPWSTR(name).c_str()));	//lint !e611 //: Suspicious cast
 #elif defined(_WIN32)
 	DynLoader::fptr rfptr = ptr_to_fptr(GetProcAddress((HINSTANCE) handle, name));	//lint !e611 //: Suspicious cast
 #else
@@ -437,7 +445,11 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 		char *searchpattern = new char[size];
 		strcpy_s(searchpattern, size, pluginDir);
 		strcat_s(searchpattern, size, pattern);
+#ifdef OS_WIN32_WCE
+		HANDLE findHandle = FindFirstFile(LPSTRtoLPWSTR(searchpattern).c_str(), &finddata);
+#else
 		HANDLE findHandle = FindFirstFile(searchpattern, &finddata);
+#endif
 		if (findHandle == INVALID_HANDLE_VALUE) {
 			if (verbose)
 				errstream << "Could not open plug-in directory (" << pluginDir
@@ -447,19 +459,36 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 			while (more) {
 				// check for suffix being really .dll because FindFirstFile also matches
 				// files such as e.g. .dllx
+#ifdef OS_WIN32_WCE
+				const size_t len = strlen(LPWSTRtoLPSTR(finddata.cFileName).c_str());
+#else
 				const size_t len = strlen(finddata.cFileName);
+#endif
 				// -4 means go back the length of ".dll"
+#ifdef OS_WIN32_WCE
+				if (STRICMP(LPWSTRtoLPSTR(&finddata.cFileName[len - 4]).c_str(), ".dll") == 0) {
+#else
 				if (STRICMP(&finddata.cFileName[len - 4], ".dll") == 0) {
+#endif
 					// cout << &finddata.cFileName[len -4 ] << endl;
 					const size_t size_2 = strlen(pluginDir) + len + 3; 
 					char *fullname = new char[size_2];
 					strcpy_s(fullname, size_2, pluginDir);
 					strcat_s(fullname, size_2, "\\");
+#ifdef OS_WIN32_WCE
+					strcat_s(fullname, size_2, LPWSTRtoLPSTR(finddata.cFileName).c_str());
+#else
 					strcat_s(fullname, size_2, finddata.cFileName);
+#endif
+
 //              errstream << "szExePath " << szExePath << endl;
 
 					if ((STRICMP(fullname, szExePath) != 0)
+#ifdef OS_WIN32_WCE
+						&& (STRICMP(LPWSTRtoLPSTR(finddata.cFileName).c_str(), "pstoedit.dll") != 0)) {
+#else
 						&& (STRICMP(finddata.cFileName, "pstoedit.dll") != 0)) {
+#endif
 						// avoid loading dll itself again
 						//                 errstream << "loading " << fullname << endl;
 						loadaPlugin(fullname, errstream, verbose);

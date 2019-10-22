@@ -3,7 +3,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1157,7 +1157,7 @@ void drvPPTX::show_text(const TextInfo & textinfo)
 
   // Compute the unrotated text width and height.
   float text_width =                                 // Unrotated width
-    pythagoras(textinfo.x_end - textinfo.x, textinfo.y_end - textinfo.y);
+    pythagoras(textinfo.x_end() - textinfo.x(), textinfo.y_end() - textinfo.y());
   float text_height = textinfo.currentFontSize;      // Unrotated height
 
   // Determine if the text is flipped horizontally.  We don't test for
@@ -1171,8 +1171,8 @@ void drvPPTX::show_text(const TextInfo & textinfo)
     angle = -angle;
 
   // Compute the upper-left corner of the rotated text.
-  Point text_pivot(textinfo.x, textinfo.y);   // Unrotated lower left
-  Point text_ul(textinfo.x, textinfo.y + text_height);   // Unrotated upper left
+  Point text_pivot(textinfo.x(), textinfo.y());   // Unrotated lower left
+  Point text_ul(textinfo.x(), textinfo.y() + text_height);   // Unrotated upper left
   Point text_c = text_pivot + Point(text_width/2.0f, text_height/2.0f);   // Unrotated center
   if (flipH) {
     text_ul.x_ -= text_width;

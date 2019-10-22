@@ -181,7 +181,7 @@ void drvSK::show_text(const TextInfo & textinfo)
 		double s = sin(angle);
 		outf << c << "," << s << "," << -s << "," << c << ",";
 	}
-	outf << textinfo.x << ", " << textinfo.y << "))\n";
+	outf << textinfo.x() << ", " << textinfo.y() << "))\n";
 }
 
 void drvSK::show_path()

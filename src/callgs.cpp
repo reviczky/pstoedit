@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to Ghostscript
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -118,7 +118,11 @@ static int callgsEXE(int argc, const char * const argv[])
 
 	BOOL status = CreateProcess(
               nullptr, // Application Name 
-              (LPSTR)commandline.c_str(),
+#ifdef OS_WIN32_WCE
+              LPSTRtoLPWSTR((LPSTR)commandline.c_str()).c_str(),
+#else
+			  (LPSTR)commandline.c_str(),
+#endif
               nullptr, // Process attributes (NULL == Default)
               nullptr, // Thread-Attributes (Default)
               FALSE, // InheritHandles

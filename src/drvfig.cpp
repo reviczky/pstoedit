@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -729,23 +729,23 @@ PostScript::special::Fontname
 	const float PSLength = PSHeight * strlen(textinfo.thetext.c_str());
 // Calculate BBox
 	if (textinfo.currentFontAngle == 0) {
-		addtobbox(Point(textinfo.x, textinfo.y));
-		addtobbox(Point((textinfo.x + PSLength), (textinfo.y + PSHeight)));
+		addtobbox(textinfo.p);
+		addtobbox(Point((textinfo.x() + PSLength), (textinfo.y() + PSHeight)));
 	} else if (textinfo.currentFontAngle == 90) {
-		addtobbox(Point(textinfo.x, textinfo.y));
-		addtobbox(Point((textinfo.x - PSHeight), (textinfo.y + PSLength)));
+		addtobbox(textinfo.p);
+		addtobbox(Point((textinfo.x() - PSHeight), (textinfo.y() + PSLength)));
 	} else if (textinfo.currentFontAngle == 180) {
-		addtobbox(Point(textinfo.x, textinfo.y));
-		addtobbox(Point((textinfo.x - PSLength), (textinfo.y - PSHeight)));
+		addtobbox(textinfo.p);
+		addtobbox(Point((textinfo.x() - PSLength), (textinfo.y() - PSHeight)));
 	} else if (textinfo.currentFontAngle == 270) {
-		addtobbox(Point(textinfo.x, textinfo.y));
-		addtobbox(Point((textinfo.x + PSHeight), (textinfo.y - PSLength)));
+		addtobbox(textinfo.p);
+		addtobbox(Point((textinfo.x() + PSHeight), (textinfo.y() - PSLength)));
 	} else {
 // To simplify this, a box of width 2*PSLength centered on textinfo.(x,y) used
-		addtobbox(Point((textinfo.x - PSLength), (textinfo.y + PSLength)));
-		addtobbox(Point((textinfo.x + PSLength), (textinfo.y + PSLength)));
-		addtobbox(Point((textinfo.x - PSLength), (textinfo.y - PSLength)));
-		addtobbox(Point((textinfo.x + PSLength), (textinfo.y - PSLength)));
+		addtobbox(Point((textinfo.x() - PSLength), (textinfo.y() + PSLength)));
+		addtobbox(Point((textinfo.x() + PSLength), (textinfo.y() + PSLength)));
+		addtobbox(Point((textinfo.x() - PSLength), (textinfo.y() - PSLength)));
+		addtobbox(Point((textinfo.x() + PSLength), (textinfo.y() - PSLength)));
 	}
 	buffer << "# text\n";
 	new_depth();
@@ -763,8 +763,8 @@ PostScript::special::Fontname
 		<< " " << fontflags << " "  
 		<< FigHeight << " "
 		<< FigLength << " "
-		<< (int) (PntFig * textinfo.x + 0.5f) << " "
-		<< (int) (y_offset - (PntFig * textinfo.y) + 0.5f) << " " << textinfo.thetext.c_str() << "\\001\n";
+		<< (int) (PntFig * textinfo.x() + 0.5f) << " "
+		<< (int) (y_offset - (PntFig * textinfo.y()) + 0.5f) << " " << textinfo.thetext.c_str() << "\\001\n";
 }
 
 void drvFIG::bbox_path()
@@ -1005,7 +1005,7 @@ void drvFIG::show_image(const PSImage & imageinfo)
 
 static const char * const additionalDoku = 
 "The xfig format driver supports special fontnames, which may be produced by using a fontmap file. "
-"The following types of names are supported :BREAK"
+"The following types of names are supported:\\\\"
 "\n\\begin{verbatim}\n"
 "General notation:\n"
 "\"PostScript Font Name\" ((LaTeX|PostScript|empty)(::special)::)XFigFontName\n"
@@ -1022,14 +1022,14 @@ static const char * const additionalDoku =
 "Please note that the fontname has to be among those supported by xfig. "
 "See - \\URL{http://www.xfig.org/userman/fig-format.html} for a list of legal font names";
 
-static DriverDescriptionT < drvFIG > D_fig( "fig", ".fig format for xfig",  additionalDoku,"fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images
+static DriverDescriptionT < drvFIG > D_fig( "fig", ".fig format for xfig", additionalDoku, "fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images
 										   DriverDescription::normalopen,
 										   false, false /*clipping */ );
 
-static DriverDescriptionT < drvFIG > D_xfig("xfig", ".fig format for xfig", "See fig format for more details.","fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images
+static DriverDescriptionT < drvFIG > D_xfig("xfig", ".fig format for xfig", "", "fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images
 											DriverDescription::normalopen,
 											false, false /*clipping */ );
-static DriverDescriptionT < drvFIG > D_tfig("tfig", ".fig format for xfig", "Test only","fig", false, true, true, true, 
+static DriverDescriptionT < drvFIG > D_tfig("tfig", ".fig format for xfig - test only version", "", "fig", false, true, true, true, 
 											DriverDescription::png,	
 											DriverDescription::normalopen,
 											false, false /*clipping */ );

@@ -2,7 +2,7 @@
    drvkillu.cpp : This file is part of pstoedit
    Implementation of Kontour output driver.
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 1998,1999 Kai-Uwe Sattler, kus_AT_iti.cs.uni-magdeburg.de
 
    This program is free software; you can redistribute it and/or modify
@@ -108,7 +108,7 @@ void drvKontour::show_text(const TextInfo & textinfo)
 	outf << "<text matrix=\""
 		<< cosa << " " << sina << " 0 "
 		<< -sina << " " << cosa << " 0 "
-		<< textinfo.x << " " << currentDeviceHeight - textinfo.y << " 1"
+		<< textinfo.x() << " " << currentDeviceHeight - textinfo.y() << " 1"
 		<< "\""
 		<< " strokecolor=\""
 		<< cvtColor(textinfo.currentR) << " "

@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,9 @@
 #include I_string_h
 
 #include <assert.h>
+#ifndef OS_WIN32_WCE
 #include <sys/stat.h>
+#endif
 
 #include "pstoeditoptions.h"
 #include "pstoedit_config.h"
@@ -396,7 +398,7 @@ extern "C" DLLEXPORT
 #endif
 		errstream << "pstoedit: version " << PACKAGE_VERSION << " / DLL interface " <<
 		drvbaseVersion << " (built: " << __DATE__ << " - " << buildtype << " - " << compversion << ")"
-		" : Copyright (C) 1993 - 2018 Wolfgang Glunz\n";
+		" : Copyright (C) 1993 - 2019 Wolfgang Glunz\n";
 	}
 
 	//  handling of derived parameters
@@ -612,9 +614,11 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		}
 	}
 	// from here on options.drivername is != 0
+	assert(options.drivername.value.length());
+
 	{
 		RSString driveroptionscopy (options.drivername.value);
-		char *driveroptions = strchr((char*)driveroptionscopy.c_str(), ':'); //lint !e1773
+		char *driveroptions = strchr(const_cast<char*>(driveroptionscopy.c_str()), ':'); //lint !e1773
 		if (driveroptions) {
 			*driveroptions = '\0';	// replace : with 0 to separate drivername
 			options.drivername = driveroptionscopy;
@@ -1108,6 +1112,14 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				} else {
 					inFileStream << "/pstoedit.quitprog { } def" << endl;
 				}
+				if (options.useBBfrominput) {
+					inFileStream << "/pstoedit.useBBfrominput true def" << endl;
+				}
+				if (options.fake_date_and_version) {
+					// for regression testing
+					// to be extended also for time/date
+					drvbase::set_VersionString("9.99");
+				}
 				if (options.nobindversion) {
 					inFileStream << "/pstoedit.delaybindversion  false def" << endl;
 				} else {
@@ -1323,21 +1335,28 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 									  options.nameOfInputFile,
 									  options.nameOfOutputFile,
 									  currentDriverDesc, driveroptions, options.splitpages, outputdriver);
-						if (options.verbose())
-							errstream << "now reading BoundingBoxes from file " << bbfilename << endl;
-						/* outputdriver-> */ drvbase::totalNumberOfPages() =
-						fe.readBBoxes( /* outputdriver-> */ drvbase::bboxes());
+					//	if (options.verbose())
+					//		errstream << "now reading BoundingBoxes from file " << bbfilename << endl;
+						/* outputdriver-> */ 
+						int pagesfound= fe.readBBoxes( /* outputdriver-> */ drvbase::bboxes());
 						fclose(yyin);
+						if (options.useBBfrominput && !pagesfound) {
+							// in case we did not find a BB in input, e.g. when reading binary PDF,
+							// then we use the BB from interpreter output.
+							// In case of PDF, we dumped the BB there anyway.
+							bbfilename = gsout.c_str();
+							yyin = fopen(bbfilename, "rb");
+							pagesfound = fe.readBBoxes( /* outputdriver-> */ drvbase::bboxes());
+							fclose(yyin);
+						}
+						drvbase::totalNumberOfPages() = pagesfound;
 						if (options.verbose()) {
-							errstream << " got " <<	drvbase::totalNumberOfPages() << " page(s)" << endl;
+							errstream << " got " <<	drvbase::totalNumberOfPages() << " page(s) from " << bbfilename << endl;
 							for (unsigned int i = 0;  i < drvbase::totalNumberOfPages(); i++) {
 								errstream <<  drvbase::bboxes()[i].ll << " " <<  drvbase::bboxes()[i].ur << endl;
 							}
-						}
-
-						if (options.verbose())
 							errstream << "now postprocessing the interpreter output" << endl;
-
+						}
 						yyin = fopen(gsout.c_str(), "rb");
 						fe.run(options.mergelines);
 						// now we can close it in any case - since we took a copy

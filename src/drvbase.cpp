@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,7 @@
 */
 
 #include "drvbase.h"
+#include "pstoedit_config.h"
 
 #include I_stdlib
 #include I_iostream
@@ -264,6 +265,14 @@ drvbase::~drvbase()
 
 const RSString & drvbase::getPageSize() const { return globaloptions.outputPageSize(); }
 
+static const char * version_string = PACKAGE_VERSION;
+const char * drvbase::VersionString() {
+	return version_string;
+}
+void drvbase::set_VersionString(const char * v) {
+	version_string = v;
+}
+
 const BBox & drvbase::getCurrentBBox() const
 {
 	if ( verbose )
@@ -398,8 +407,8 @@ bool drvbase::textCanBeMerged(const TextInfo & text1, const TextInfo & text2) co
 			 && (text1.currentG  == text2.currentG)
 			 && (text1.currentB  == text2.currentB)
 
-			 && (fabs(text1.x - text2.x_end) < text1.currentFontSize / 10)
-			 && (fabs(text1.y - text2.y_end) < text1.currentFontSize / 10)
+			 && (fabs(text1.x() - text2.x_end()) < text1.currentFontSize / 10)
+			 && (fabs(text1.y() - text2.y_end()) < text1.currentFontSize / 10)
 
 			);
 
@@ -513,8 +522,7 @@ void drvbase::showOrMergeText()
 			mergedTextInfo.thetext += textInfo_.thetext;
 			static const RSString space(" ");
 			(mergedTextInfo.glyphnames += space ) += textInfo_.glyphnames;
-			mergedTextInfo.x_end = textInfo_.x_end;
-			mergedTextInfo.y_end = textInfo_.y_end;
+			mergedTextInfo.p_end = textInfo_.p_end;
 		} else {
 			// cannot be merged, so dump text collected so far and place the new
 			// one in the buffer for later
@@ -538,8 +546,7 @@ void drvbase::showOrMergeText()
 
 void drvbase::pushText(const size_t len, const char *const thetext, const float x, const float y, const char * const glyphnames)
 {
-		textInfo_.x = x;
-		textInfo_.y = y;
+		textInfo_.p = Point(x,y);
 		textInfo_.thetext.assign(thetext, len);
 		textInfo_.glyphnames.assign(glyphnames ? glyphnames:"");
 		textInfo_.currentFontUnmappedName = textInfo_.currentFontName;
@@ -601,8 +608,7 @@ void drvbase::setCurrentWidthParams(const float ax,
 	textInfo_.ay = ay;
 	textInfo_.Char = Char;
 	textInfo_.cx = cx;
-	textInfo_.x_end = x_end;
-	textInfo_.y_end = y_end;
+	textInfo_.p_end = Point(x_end, y_end);
 	textInfo_.cy = cy;
 }
 
@@ -839,8 +845,8 @@ void drvbase::guess_linetype()
 				&& (d_numbers[5] == 0.0f)) {
 				curtype = drvbase::solid;	// if off is 0 -> solid
 			} else if ((d_numbers[0] < 2.0f) ||
-                                   (d_numbers[2] < 2.0f) || 
-                                   (d_numbers[4] < 2.0f)) {
+                       (d_numbers[2] < 2.0f) || 
+                       (d_numbers[4] < 2.0f)) {
 				curtype = drvbase::dashdotdot;
 			} else {
 				curtype = drvbase::dashed;
@@ -854,8 +860,10 @@ void drvbase::guess_linetype()
 		// no entry
 		curtype = drvbase::solid;
 	}
-//   errf << "linetype from " << dashPattern() << " is " << curtype << endl;
 	setCurrentLineType(curtype);
+	if (verbose) {
+		errf << "linetype guessed from '" << dashPattern() << "' is "  << getLineTypeName() << "(" << curtype << ")" << endl;
+	}
 }
 
 void drvbase::dumpImage()
@@ -1361,7 +1369,7 @@ const DriverDescription *DescriptionRegister:: getDriverDescForSuffix(const char
 				// already found an entry for this suffix - so it is not unique -> return 0
 				return nullptr;
 			} else {
-				founditem = rp[i]; // first chance - but loop throug all items
+				founditem = rp[i]; // first match - but loop through all items
 			}
 		}
 		i++;
@@ -1387,42 +1395,87 @@ void DescriptionRegister::explainformats(ostream & out, bool withdetails) const
 	} else {
 		out << "Available formats :\n";
 	}
-	unsigned int i = 0;
-	while (rp[i] != nullptr) {
-		if (withdetails) {
-			out << "\\subsubsection{" << rp[i]->symbolicname << " - " << rp[i]->short_explanation <<"}" << endl;
-			if (strlen(rp[i]->long_explanation)>0) { out << rp[i]->long_explanation << endl << endl; }
+	for (unsigned int i = 0; rp[i]; i++) {
+		if (rp[i]->variants() > 1) {
+			if (rp[i] == rp[i]->variant(0)) {
+				ProgramOptions* options = rp[i]->createDriverOptions();
+				// first variant - dump all variants.
+				RSString groupname("Format group: ");
+				for (size_t v = 0; rp[i]->variant(v); v++) {
+					groupname += rp[i]->variant(v)->symbolicname;
+					groupname += " ";
+				}
+				if (withdetails) {
+					out << "\\subsubsection{" << groupname << "}" << endl;
+					out << "This group consists of the following variants:" << endl;
+					out << "\\begin{description}" << endl;
+					for (size_t v = 0; rp[i]->variant(v); v++) {
+						const DriverDescription * d = rp[i]->variant(v);
+						out << "\\item[" << d->symbolicname << ":] " << d->short_explanation << "." << endl;
+					if (v > 0 && strlen(rp[i]->variant(v)->long_explanation) > 0) { out << "WOGL " << rp[i]->variant(v)->long_explanation << endl << endl; }
+						
+					}
+					out << "\\end{description}" << endl;
+					// long explanation is attached only to first instance
+					if (strlen(rp[i]->long_explanation) > 0) { out << rp[i]->long_explanation << endl << endl; }
+
+					options->showhelp(out, withdetails, withdetails);
+					out << "%%// end of options" << endl;
+				} else {
+				  out << groupname << "\t(" << rp[i]->filename << ")" << endl;
+			 	  for (size_t v = 0; rp[i]->variant(v); v++) {
+					  const DriverDescription * d = rp[i]->variant(v);
+					  out << '\t' << d->symbolicname << ":\t";
+					  if (strlen(d->symbolicname) < 7) {
+						  out << '\t';
+					  }
+					  out << "\t." << d->suffix << ":\t";
+					  out << d->short_explanation << " " << d->additionalInfo();
+					  if (d->checkfunc) {
+						  if (!(d->checkfunc())) {
+							  out << " (no valid key found)";
+						  }
+					  }
+					  out << endl;
+				  }
+				  if (options->numberOfOptions()) {
+					  out << "This group supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
+				  }
+				  options->showhelp(out, withdetails, withdetails);
+				  out << "-------------------------------------------" << endl;
+				}
+				delete options;
+			} 	
 		} else {
-			out << '\t' << rp[i]->symbolicname << ":\t";
-			if (strlen(rp[i]->symbolicname) < 7) {
-				out << '\t';
+			ProgramOptions* options = rp[i]->createDriverOptions();
+			if (withdetails) {
+				out << "\\subsubsection{" << rp[i]->symbolicname << " - " << rp[i]->short_explanation << "}" << endl;
+				if (strlen(rp[i]->long_explanation) > 0) { out << rp[i]->long_explanation << endl << endl; }
+				options->showhelp(out, withdetails, withdetails);		
+				out << "%%// end of options" << endl;
+			} else {
+				out << '\t' << rp[i]->symbolicname << ":\t";
+				if (strlen(rp[i]->symbolicname) < 7) {
+					out << '\t';
+				}
+				out << "\t." << rp[i]->suffix << ":\t";
+				out << rp[i]->short_explanation << " " << rp[i]->additionalInfo();
+
+				if (rp[i]->checkfunc) {
+					if (!(rp[i]->checkfunc())) {
+						out << " (no valid key found)";
+					}
+				}
+				out << "\t(" << rp[i]->filename << ")" << endl;
+				if (options->numberOfOptions()) {
+					out << "This format supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
+				}
+
+				options->showhelp(out, withdetails, withdetails);
+				out << "-------------------------------------------" << endl;
 			}
-			out << "\t." << rp[i]->suffix << ":\t";
-			out << rp[i]->short_explanation << " " << rp[i]->additionalInfo();
+			delete options;
 		}
-
-		if (!withdetails && rp[i]->checkfunc) {
-			if (!(rp[i]->checkfunc())) {
-				out << " (no valid key found)";
-			}
-		}
-
-		if (!withdetails) out << "\t(" << rp[i]->filename << ")" << endl;
-
-		ProgramOptions* dummy = rp[i]->createDriverOptions();
-		if (!withdetails && dummy->numberOfOptions() ) {
-			out << "This driver supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
-		}
-		dummy->showhelp(out,withdetails,withdetails);
-		delete dummy;
-		
-		if (withdetails) {
-			out << "%%// end of options" << endl;
-		} else {
-			out << "-------------------------------------------" << endl;
-		}
-	
-		i++;
 	}
 }
 void DescriptionRegister::mergeRegister(ostream & out,

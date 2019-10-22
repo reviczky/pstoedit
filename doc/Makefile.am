@@ -34,7 +34,7 @@ generalhelpshort.tex: $P
 	$P -docushort | grep -v "DLL interface" > $@
 
 driverhelp.tex: $P
-	$P -dumphelp | grep -v "DLL interface" | sed -e 's/_/\\_/' -e 's/>=/$>=$ /' > $@
+	$P -dumphelp | grep -v "DLL interface" | sed -e 's/_/\\_/g' -e 's/>=/$>=$ /g' > $@
 
 latex_src = pstoedit.tex version.tex generalhelplong.tex generalhelpshort.tex driverhelp.tex
 latex2man_src = $(latex_src) pstoedit.trans

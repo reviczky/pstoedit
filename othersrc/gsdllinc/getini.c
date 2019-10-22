@@ -24,6 +24,10 @@
 #ifndef _WIN32
 #include <dirent.h>
 #endif
+#include <windows.h>
+#include <iostream>
+using namespace std;
+#include <assert.h>
 
 static void getini(int verbose,ostream & errstream, char* szIniFile,const char *INIFILEname,DWORD sizeofIniFile)
 {
@@ -54,20 +58,25 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 	    DWORD cbData;
 	    DWORD fa;
 	    /* Find the user profile directory */
-	    rc = RegOpenKeyEx(HKEY_CURRENT_USER, "Software\\Microsoft\\Windows\\CurrentVersion\\ProfileReconciliation", 0, KEY_READ, &hkey);
+		rc = RegOpenKeyEx(HKEY_CURRENT_USER, TEXT("Software\\Microsoft\\Windows\\CurrentVersion\\ProfileReconciliation"), 0, KEY_READ, &hkey);
 	    if (rc == ERROR_SUCCESS) {
 			cbData = sizeofIniFile - strlen(INIFILEname);
 //			cbData = sizeof(szIniFile)-sizeof(INIFILEname);
 //			cout << "cbdata" << (int) cbData << endl;
 			keytype =  REG_SZ;
-			rc = RegQueryValueEx(hkey, "ProfileDirectory", 0, &keytype, (LPBYTE)szIniFile, &cbData);
+			rc = RegQueryValueEx(hkey, TEXT("ProfileDirectory"), 0, &keytype, (LPBYTE)szIniFile, &cbData);
 			(void)RegCloseKey(hkey);
 	    }
 	    if (rc == ERROR_SUCCESS) {
 			if (verbose) { 
 				errstream << "Found ProfileDirectory ! " << endl;
 			}
+#ifdef OS_WIN32_WCE
+			fa = GetFileAttributes(LPSTRtoLPWSTR(szIniFile).c_str());
+#else
 			fa = GetFileAttributes(szIniFile);
+#endif
+
 			if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
 			  strcat_s(szIniFile,sizeofIniFile, "\\");
 			else
@@ -91,7 +100,11 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 			if ((*p == '\\') || (*p == '/'))
 			   *p = '\0';
 		/* check if USERPROFILE contains a directory name */
+#ifdef OS_WIN32_WCE
+			fa = GetFileAttributes(LPSTRtoLPWSTR(szIniFile).c_str());
+#else
 			fa = GetFileAttributes(szIniFile);
+#endif
 			if ((fa != 0xffffffff) && (fa & FILE_ATTRIBUTE_DIRECTORY))
 				strcat_s(szIniFile,sizeofIniFile, "\\");
 			else

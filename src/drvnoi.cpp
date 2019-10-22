@@ -357,8 +357,8 @@ void drvNOI::show_text(const TextInfo &textinfo)
   (void)NoiSetFont(textinfo.currentFontName.c_str(), textinfo.currentFontFullName.c_str(), 
     atof(textinfo.currentFontWeight.c_str()), textinfo.currentFontSize);
   
-  (void)NoiDrawText(textinfo.thetext.c_str(), textinfo.x + pf.x_, textinfo.y + pf.y_, 
-	textinfo.x_end - textinfo.x + pf.x_, textinfo.y_end - textinfo.y + pf.y_, 
+  (void)NoiDrawText(textinfo.thetext.c_str(), textinfo.x() + pf.x_, textinfo.y() + pf.y_, 
+	textinfo.x_end() - textinfo.x() + pf.x_, textinfo.y_end() - textinfo.y() + pf.y_, 
 	textinfo.currentFontAngle);
   }
 

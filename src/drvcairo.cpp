@@ -1,6 +1,6 @@
 /*
   drvcairo.cpp : This file is part of pstoedit
-  Copyright (C) 2009 - 2018 Dan McMahill dan_AT_mcmahill_DOT_net
+  Copyright (C) 2009 - 2019 Dan McMahill dan_AT_mcmahill_DOT_net
 
   This driver used drvSAMPL.cpp as a reference.
   
@@ -264,8 +264,8 @@ void drvCAIRO::close_page()
 void drvCAIRO::show_text(const TextInfo & textinfo)
 {
   outf << "  /*" << endl;
-  outf << "   * " << "X " << textinfo.x << " Y " << textinfo.y << endl;
-  outf << "   * " << "X_END " << textinfo.x_end << " Y_END " << textinfo.y_end << endl;
+  outf << "   * " << "X " << textinfo.x() << " Y " << textinfo.y() << endl;
+  outf << "   * " << "X_END " << textinfo.x_end() << " Y_END " << textinfo.y_end() << endl;
   outf << "   * " << "currentFontName: " << textinfo.currentFontName.c_str() << endl;
   outf << "   * " << "is_non_standard_font: " << textinfo.is_non_standard_font << endl;
   outf << "   * " << "currentFontFamilyName: " << textinfo.currentFontFamilyName.c_str() << endl;
@@ -402,8 +402,8 @@ void drvCAIRO::show_text(const TextInfo & textinfo)
 
   outf << "    cairo_set_matrix (cr, &save_matrix);" << endl;
   outf << "    cairo_restore (cr);" << endl;
-  outf << "    cairo_move_to (cr, " << textinfo.x_end + x_offset 
-       << ", " << -1*textinfo.y_end + y_offset << ");" << endl;
+  outf << "    cairo_move_to (cr, " << textinfo.x_end() + x_offset 
+       << ", " << -1*textinfo.y_end() + y_offset << ");" << endl;
   outf << "  }" << endl;
   outf << endl;
 
@@ -510,7 +510,7 @@ void drvCAIRO::show_path()
     outf << "  cairo_set_fill_rule (cr, CAIRO_FILL_RULE_EVEN_ODD);" << endl;
     evenoddmode = true;
     /* no break */
-
+    // fall through
   case drvbase::fill:
 	  
     outf << "  cairo_set_source_rgb (cr, " << fillR() << "," << fillG() << "," << fillB() << ");" << endl;

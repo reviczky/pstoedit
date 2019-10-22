@@ -2,7 +2,7 @@
    drvMAGICK.cpp : This file is part of pstoedit
    driver for Magick++ API.
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -212,7 +212,7 @@ are translation.
 //      drawList.push_back( DrawableAngle(textinfo.currentFontAngle/6.29) );
 		drawList.
 			push_back(DrawableTranslation
-					  (textinfo.x + x_offset, currentDeviceHeight - textinfo.y + y_offset));
+					  (textinfo.x() + x_offset, currentDeviceHeight - textinfo.y() + y_offset));
 		drawList.push_back(DrawableRotation(360.0 - textinfo.currentFontAngle));
 #endif
 		drawList.push_back(DrawableText(0, 0, textinfo.thetext.c_str()));

@@ -7,33 +7,28 @@ static const char  dxf14acadheader_prelayer1 [] =
 "$ACADVER\n"
 "  1\n"
 "AC1014\n"
-"  9\n"
-"$EXTMIN\n"
-" 10\n"
-"70.16401489310567\n"
-" 20\n"
-"112.369642808922\n"
-" 30\n"
-"0.0\n"
-"  9\n"
-"$EXTMAX\n"
-" 10\n"
-"277.0834797641999\n"
-" 20\n"
-"227.1366601424358\n"
-" 30\n"
-"0.0\n"
+
+#if 1
 "  9\n"
 "$HANDSEED\n"
 "  5\n"
-"56\n"
-"  9\n";
+"22\n" 
+#endif
+// Tricky. Should be "on the safe side", i.e. larger than any "  5" entry used in file
+// but that would need to defer the dumping of this until we know all entities.
+// On the other hand - there is indication that autocad ignore this value
+// https://ezdxf.readthedocs.io/en/latest/dxfinternals/handles.html
+// so setting it to a value of a not used handle. 
+// TrueView complains about this value being to small and suggests a correction
+// but still accepts the file
+;
 
 // in between here comes the MEASUREMENT entry - but that depends on the command line options (-mm)
 
 static const char  dxf14acadheader_prelayer2 [] =
 "  0\n"
 "ENDSEC\n"
+
 "  0\n"
 "SECTION\n"
 "  2\n"
@@ -73,9 +68,9 @@ static const char  dxf14acadheader_prelayer2 [] =
 " 21\n"
 "1.0\n"
 " 12\n"
-"209.9999999999999\n"
+"210\n"
 " 22\n"
-"148.4999999999999\n"
+"148.5\n"
 " 13\n"
 "0.0\n"
 " 23\n"
@@ -188,6 +183,7 @@ static const char  dxf14acadheader_prelayer2 [] =
 "     0\n"
 " 40\n"
 "0.0\n"
+
 "  0\n"
 "LTYPE\n"
 "  5\n"
@@ -209,9 +205,663 @@ static const char  dxf14acadheader_prelayer2 [] =
 " 73\n"
 "     0\n"
 " 40\n"
+"0.0\n";
+
+//  solid=0, dashed, dotted, dashdot, dashdotdot
+/*
+solid		CONTINUOUS: Solid
+dashed		DASHED: Dashed __ __ __ __ __ __ __ __ __ __ __ __ __ _
+dashdot		DASHDOT: Dash dot __ . __ . __ . __ . __ . __ . __ . __
+dotted		DOT: Dot .  .  .  .  .  .  .  .  .  .  .  .  .  .  .  .
+dashdotdot	DIVIDE: Divide __ . . __ . . __ . . __ . . __ . . __
+
+not supported styles:
+DIVIDEX2: Divide (2x) ____  . .  ____  . .  ____  . .  ____
+DIVIDE2: Divide (.5) _ . _ . _ . _ . _ . _ . _ . _
+CENTER: Center ____ _ ____ _ ____ _ ____ _ ____ _ ____
+CENTERX2: Center (2x) ________  __  ________  __  ________
+CENTER2: Center (.5x) ____ _ ____ _ ____ _ ____ _ ____
+DASHEDX2: Dashed (2x) ____  ____  ____  ____  ____  ____
+DASHED2:Dashed (.5x) _ _ _ _ _ _ _ _ _ _ _ _ _ _
+PHANTOM: Phantom ______  __  __  ______  __  __  ______
+PHANTOMX2: Phantom (2x)____________    ____    ____    ____________
+PHANTOM2: Phantom (.5x) ___ _ _ ___ _ _ ___ _ _ ___ _ _ ___
+DASHDOTX2: Dash dot (2x) ____  .  ____  .  ____  .  ____
+DASHDOT2: Dash dot (.5x) _ . _ . _ . _ . _ . _ . _ . _
+DOTX2: Dot (2x) .    .    .    .    .    .    .    .
+DOT2: Dot (.5) . . . . . . . . . . . . . . . . . . .
+*/
+
+
+class DXF_LineType {
+public:
+	explicit DXF_LineType(const char * const name,
+		const char * const description,
+		const std::initializer_list<double>& pattern) :
+		m_name(name),
+		m_description(description),
+		m_pattern(pattern)
+	{}
+	friend ostream & operator << (ostream & out, const DXF_LineType & lt) {
+
+		double length = 0.0;
+		for (auto l : lt.m_pattern) length += abs(l);
+		
+		out <<
+			"  0\n"
+			"LTYPE\n";
+		write_DXF_handle(out, DXF_LineType::handle);
+			//"  5\n"
+			//<< DXF_LineType::handle << endl <<
+			//		"131\n"
+		out <<
+			"100\n"
+			"AcDbSymbolTableRecord\n"
+			"100\n"
+			"AcDbLinetypeTableRecord\n"
+			"  2\n"
+			<< lt.m_name << endl <<
+			//	"DOT\n"
+			" 70\n" // flags
+			"0\n"
+			"  3\n" 
+			<< lt.m_description << endl <<
+			//	"Dot . . . . . . . . . . . . . . . . . . . . . .\n"
+			" 72\n" // always 65
+			"65\n"
+			" 73\n" // number of "49" entries below
+			<< lt.m_pattern.size() << endl <<
+			" 40\n" // overall length
+			<< length * DXF_LineType::scalefactor << endl;
+	
+		
+		for (auto l : lt.m_pattern) {
+			out << " 49\n" << l * DXF_LineType::scalefactor << endl <<
+				" 74\n" // no complex line segment
+				"0\n";
+		}
+		
+		DXF_LineType::handle++;
+		return out;
+	}
+	static double scalefactor;
+	static int handle;
+private:
+	
+	const char * const m_name;
+	const char * const m_description;
+	const std::vector<double> m_pattern;
+};
+double DXF_LineType::scalefactor = 1.0;
+int DXF_LineType::handle = 0xF0; // starting handle
+
+constexpr double inch = 72.0; // 1 inch = 72 postscript points
+constexpr double linedash = 0.2 * inch;
+constexpr double linespace = -0.1 * inch; // neg means space
+constexpr double dot = 0.0;
+
+static const DXF_LineType dxf_dotted(
+    "DOT",
+    "Dot . . . . . . . . . . . . . . . . . . . . . .",
+    {dot, linespace} 
+);
+
+static const DXF_LineType dxf_dashed(
+	"DASHED",
+	"Dashed __ __ __ __ __ __ __ __ __ __ __ __ __ _",
+	{linedash, linespace }
+);
+
+static const DXF_LineType dxf_dashdot(
+	"DASHDOT",
+	"Dash dot __ . __ . __ . __ . __ . __ . __ . __",
+	{linedash, linespace, dot, linespace }
+);
+
+static const DXF_LineType dxf_dashdotdot(
+	"DIVIDE",
+	"Divide ____ ..____ ..____ ..____ ..____",
+	{linedash,linespace, dot, linespace, dot, linespace }
+);
+
+/*
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"132\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DOT2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Dot (.5x) .....................................\n"
+" 72\n"
+"65\n"
+" 73\n"
+"2\n"
+" 40\n"
+"3.1749999999999998\n"
+" 49\n"
 "0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"133\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DOTX2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Dot (2x) .  .  .  .  .  .  .  .  .  .  .  .  .\n"
+" 72\n"
+"65\n"
+" 73\n"
+"2\n"
+" 40\n"
+"12.6999999999999993\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+*/
+
+/*
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"135\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DASHED2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Dashed (.5x) _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _\n"
+" 72\n"
+"65\n"
+" 73\n"
+"2\n"
+" 40\n"
+"9.5250000000000004\n"
+" 49\n"
+"6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"136\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DASHEDX2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Dashed (2x) ____  ____  ____  ____  ____  ___\n"
+" 72\n"
+"65\n"
+" 73\n"
+"2\n"
+" 40\n"
+"38.1000000000000014\n"
+" 49\n"
+"25.3999999999999986\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+*/
+
+/*
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"138\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DASHDOT2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Dash dot (.5x) _._._._._._._._._._._._._._._.\n"
+" 72\n"
+"65\n"
+" 73\n"
+"4\n"
+" 40\n"
+"12.6999999999999993\n"
+" 49\n"
+"6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"139\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DASHDOTX2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Dash dot (2x) ____  .  ____  .  ____  .  ___\n"
+" 72\n"
+"65\n"
+" 73\n"
+"4\n"
+" 40\n"
+"50.7999999999999972\n"
+" 49\n"
+"25.3999999999999986\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+*/
+
+/*
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"13B\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DIVIDE2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Divide (.5x) __..__..__..__..__..__..__..__.._\n"
+" 72\n"
+"65\n"
+" 73\n"
+"6\n"
+" 40\n"
+"15.875\n"
+" 49\n"
+"6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"13C\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"DIVIDEX2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Divide (2x) ________  .  .  ________  .  .  _\n"
+" 72\n"
+"65\n"
+" 73\n"
+"6\n"
+" 40\n"
+"63.5\n"
+" 49\n"
+"25.3999999999999986\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"13D\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"CENTER\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Center ____ _ ____ _ ____ _ ____ _ ____ _ ____\n"
+" 72\n"
+"65\n"
+" 73\n"
+"4\n"
+" 40\n"
+"50.7999999999999972\n"
+" 49\n"
+"31.75\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-6.3499999999999996\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"13E\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"CENTER2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Center (.5x) ___ _ ___ _ ___ _ ___ _ ___ _ ___\n"
+" 72\n"
+"65\n"
+" 73\n"
+"4\n"
+" 40\n"
+"28.5749999999999993\n"
+" 49\n"
+"19.0500000000000007\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+" 49\n"
+"3.1749999999999998\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"13F\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"CENTERX2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Center (2x) ________  __  ________  __  _____\n"
+" 72\n"
+"65\n"
+" 73\n"
+"4\n"
+" 40\n"
+"101.5999999999999943\n"
+" 49\n"
+"63.5\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"140\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"BORDER\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Border __ __ . __ __ . __ __ . __ __ . __ __ .\n"
+" 72\n"
+"65\n"
+" 73\n"
+"6\n"
+" 40\n"
+"44.4500000000000028\n"
+" 49\n"
+"12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-6.3499999999999996\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"141\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"BORDER2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Border (.5x) __.__.__.__.__.__.__.__.__.__.__.\n"
+" 72\n"
+"65\n"
+" 73\n"
+"6\n"
+" 40\n"
+"22.2250000000000014\n"
+" 49\n"
+"6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+" 49\n"
+"6.3499999999999996\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-3.1749999999999998\n"
+" 74\n"
+"0\n"
+
+"  0\n"
+"LTYPE\n"
+"  5\n"
+"142\n"
+"100\n"
+"AcDbSymbolTableRecord\n"
+"100\n"
+"AcDbLinetypeTableRecord\n"
+"  2\n"
+"BORDERX2\n"
+" 70\n"
+"0\n"
+"  3\n"
+"Border (2x) ____  ____  .  ____  ____  .  ___\n"
+" 72\n"
+"65\n"
+" 73\n"
+"6\n"
+" 40\n"
+"88.9000000000000057\n"
+" 49\n"
+"25.3999999999999986\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"25.3999999999999986\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+" 49\n"
+"0.0\n"
+" 74\n"
+"0\n"
+" 49\n"
+"-12.6999999999999993\n"
+" 74\n"
+"0\n"
+*/
+
+static const char dxf14_line_type_tab_trailer_and_begin_of_layer_tab[]  =
 "  0\n"
 "ENDTAB\n"
+// begin layer tab
 "  0\n"
 "TABLE\n"
 "  2\n"
@@ -225,7 +875,7 @@ static const char  dxf14acadheader_prelayer2 [] =
 " 70\n" ;
 // "   5000\n"  // number of layers 
 
-static const char layer0def[] =
+static const char dxf14layer0def[] =
 // begin layer "0"
 "  0\n"
 "LAYER\n"

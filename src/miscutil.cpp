@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2018  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2019  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -21,6 +21,10 @@
 */
 #include "miscutil.h"
 
+#ifdef OS_WIN32_WCE
+#include "WinCEAdapter.h"
+#endif
+
 #include I_stdio
 
 // #ifdef _MSC_VER
@@ -37,7 +41,8 @@
 // HP-UX does not define getcwd in unistd.h
 extern "C"  char *getcwd(char *, size_t);
 #endif
-
+#elif defined(OS_WIN32_WCE)
+#include <windows.h>
 #elif defined(_WIN32)
 #include <windows.h>
 #include <direct.h>
@@ -241,12 +246,18 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 {
 	HKEY subkey;
 	static RSString emptyString("");
+
 	const long ret = RegOpenKeyEx(hKey,	// HKEY_LOCAL_MACHINE, //HKEY hKey,
+#ifdef OS_WIN32_WCE
+								  LPSTRtoLPWSTR(subkeyn).c_str(),	// LPCSTR lpSubKey,
+#else
 								  subkeyn,	// LPCSTR lpSubKey,
+#endif
 								  0L,	// DWORD ulOptions,
 								  KEY_READ,	// REGSAM samDesired,
 								  &subkey	//PHKEY phkResult
-		);
+								  );
+
 	if (ret != ERROR_SUCCESS) {
 		if (regdebug) cerr << "RegOpenKeyEx :" <<subkeyn << ":" << key << ": failed with error code " << ret << endl;
 		return emptyString;
@@ -256,13 +267,19 @@ RSString tryregistry(HKEY hKey, LPCSTR subkeyn, LPCSTR key)
 		BYTE value[maxvaluelength];
 		DWORD bufsize = maxvaluelength;
 		DWORD valuetype;
+
 		const long retv = RegQueryValueEx(subkey,	// HKEY_LOCAL_MACHINE, //HKEY hKey,
+#ifdef OS_WIN32_WCE
+										  LPSTRtoLPWSTR(key).c_str(),	// "SOFTWARE\\wglunz\\pstoedit\\plugindir", //LPCSTR lpValueName,
+#else
 										  key,	// "SOFTWARE\\wglunz\\pstoedit\\plugindir", //LPCSTR lpValueName,
+#endif
 										  NIL,	// LPDWORD lpReserved,
 										  &valuetype,	// LPDWORD lpType,
 										  value,	// LPBYTE lpData,
 										  &bufsize	// LPDWORD lpcbData
 			);
+
 		(void) RegCloseKey(subkey);
 		if (retv != ERROR_SUCCESS) {
 			if (regdebug)  cerr << "RegQueryValueEx :" <<subkeyn << ":" << key << ": failed with error code " << retv << endl;
@@ -549,7 +566,13 @@ size_t searchinpath(const char *EnvPath, const char *name,
 
 unsigned long P_GetPathToMyself(const char *name, char *returnbuffer, unsigned long buflen)
 {
-#if defined(_WIN32)
+#if defined (OS_WIN32_WCE)
+	wchar_t wszReturnBuffer[MAX_PATH] = L"";
+	unsigned long ulReturn =  GetModuleFileName(GetModuleHandle(LPSTRtoLPWSTR(name).c_str()), wszReturnBuffer, MAX_PATH);
+	wszReturnBuffer[MAX_PATH-1] = L'\0';
+	BSS_UTI_WCharToAscii(wszReturnBuffer, returnbuffer, buflen);
+	return ulReturn;
+#elif defined(_WIN32)
 	return GetModuleFileName(GetModuleHandle(name), returnbuffer, buflen);
 #elif defined (__OS2__)
 	PTIB pptib;

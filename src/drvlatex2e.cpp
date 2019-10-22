@@ -3,7 +3,7 @@
    Backend for Latex2E files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2018	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
+   Copyright (C) 1993 - 2019	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
 							Scott Pakin, <scott+ps2ed_AT_pakin.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -262,7 +262,7 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 		buffer << "  \\color[rgb]{" << prevR << ',' << prevG << ',' << prevB << '}' << endl;
 	}
 	// Scale the starting point and update the bounding box.
-	Point textpoint(textinfo.x, textinfo.y);
+	Point textpoint(textinfo.p);
 	scalepoint(textpoint);
 	updatebbox(textpoint);
 
@@ -323,8 +323,7 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 		buffer << '}';
 
 	// Scale the ending point and update the bounding box.
-	currentpoint.x_ = textinfo.x_end;
-	currentpoint.y_ = textinfo.y_end;
+	currentpoint = textinfo.p_end;
 	scalepoint(currentpoint);
 	updatebbox(currentpoint);
 

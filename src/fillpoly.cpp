@@ -9,7 +9,7 @@
 
 #define PSTOEDIT 1
 #ifdef PSTOEDIT
-#include <drvbase.h>
+#include "drvbase.h"
 enum action_type { MOVE_TO, DRAW_TO };
 static drvbase* backend; // avoid making all the local functions members.
 static void Pen_action_to_tmpfile(action_type a, const struct HPGL_Pt2* p, int scale_flag);

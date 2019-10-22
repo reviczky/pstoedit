@@ -2,7 +2,7 @@
    poptions.cpp : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,11 @@
 #include I_stdlib
 #include I_strstream
 
-#include <miscutil.h>
+#include "miscutil.h"
+
+#ifdef OS_WIN32_WCE
+#include "WinCEAdapter.h"
+#endif
 
 USESTD
 #define UNUSEDARG(p)
@@ -220,6 +224,7 @@ static void TeXescapedOutput(ostream & outstr, const char *const st)
 void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet) const
 {
 	if (optcount && forTeX && withdescription) {
+		outstr << "The following format specific options are available:" << endl;
 		outstr << "\\begin{description}" << endl;
 	}
 	const char *const terminator = withdescription ? "]" : "";
@@ -284,7 +289,7 @@ void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescriptio
 			outstr << "\\end{description}" << endl;
 		} else {
 			// this happens only in the context of driver options
-			outstr << "No driver specific options" << endl;
+			outstr << "No format specific options" << endl;
 		}
 	}
 

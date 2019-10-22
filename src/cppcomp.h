@@ -5,7 +5,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -34,9 +34,6 @@
 	#define DLLEXPORT
 #endif
 
-
-
-
 #ifdef _AIX
 	#define _unix
 #endif
@@ -50,6 +47,11 @@
 	// 1300 - VS 7 (2002)
 	// 1400 - VS 8 (2005)
 	// 1900 - VS 2015
+
+        // Visual Studio 2008 does not have nullptr
+        #if (_MSC_VER <= 1400)
+          #define nullptr NULL
+        #endif
 
 	// NOTE: If your compiler or installation does not come with
 	// an installation of the STL, just comment out the next line
@@ -193,18 +195,12 @@
 #endif
 //}
 
-// if (defined (_MSC_VER) && _MSC_VER >= 1100) || defined (LINT) || defined (__COVERITY__)
-#if 1
+
 #define NOCOPYANDASSIGN(classname) \
 	private: \
-		classname(const classname&); \
-		const classname & operator=(const classname&);
-#else
-/* nothing - GNU has problems with this anyway. But, it does not harm. 
-   During compilation with VC++ potential misusages of the 
-   forbidden methods will be detected */
-	#define NOCOPYANDASSIGN(classname) 
-#endif
+		classname(const classname&) = delete; \
+		const classname & operator=(const classname&) = delete;
+
 
 
 // rcw2: work round case insensitivity in RiscOS

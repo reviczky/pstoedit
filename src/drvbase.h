@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,6 +39,9 @@
 #include "cppcomp.h"
 #endif
 
+#ifdef OS_WIN32_WCE
+#include "WinCEAdapter.h"
+#endif
 
 #include I_fstream
 #include I_stdio
@@ -85,6 +88,8 @@ public:
 	Point() : x_(0.0f), y_(0.0f) {}; // for arrays
 	float x_;
 	float y_;
+	float x() const { return x_; }
+	float y() const { return y_; }
 	bool operator==(const Point & p2) const { 
 		return (x_ == p2.x_) && (y_ == p2.y_); //lint !e777
 	}
@@ -155,11 +160,13 @@ public:
 	enum cliptype { clip , eoclip };
 	enum linetype { solid=0, dashed, dotted, dashdot, dashdotdot }; // corresponding to the CGM patterns
 	struct DLLEXPORT TextInfo {
-		float 		x;
-		float		y;
+		Point       p;
+		float x() const { return p.x(); }
+		float y() const { return p.y(); }
 		float		FontMatrix[6];
-		float 		x_end; // pen coordinates after show in PostScript
-		float		y_end; // 
+		Point 		p_end; // pen coordinates after show in PostScript
+		float x_end() const { return p_end.x(); }
+		float y_end() const { return p_end.y(); }
 		RSString 	thetext;
 		RSString	glyphnames;
 		bool		is_non_standard_font;
@@ -196,10 +203,8 @@ public:
 					( currentB == cmp.currentB ); //lint !e777 // testing floats for ==
 		}
 		TextInfo() :
-			x(0.0f),
-			y(0.0f),
-			x_end(0.0f),
-			y_end(0.0f),
+			p(0.0f, 0.0f),
+			p_end(0.0f, 0.0f),
 //			thetext(0),  // use standard ctor
 			is_non_standard_font(false),
 			currentFontSize(10.0f),
@@ -215,7 +220,7 @@ public:
 			ay(0.0f), 
 			mappedtoIsoLatin1(true), 
 			remappedfont(false) {
-				for (int i = 0; i < 6 ; i++ ) FontMatrix[i] = 0.0f;
+			for (int i = 0; i < 6; i++) { FontMatrix[i] = 0.0f; }
 			}
 		~TextInfo() { }
 	private:
@@ -394,7 +399,7 @@ public:
 	// = CONSTRUCTION, DESTRUCTION AND COPYING
 
 	drvbase(
-		const char * driverOptions_p,
+		const char * driveroptions_p,
 		ostream & theoutStream,
 		ostream & theerrStream,		
 		const char* nameOfInputFile_p,
@@ -408,7 +413,7 @@ public:
         // These functions are not backend specific and should not have to be
         // changed for new backends
 
-	void		startup(bool merge);
+	void		startup(bool mergelines);
 
 	virtual void finalize(); 
 	// needed because base destructor will be called after derived destructor
@@ -418,6 +423,9 @@ public:
 	// in the context of the main program which causes memory problems
 	// under windows since the plugins are NOT and extension DLL
 	//
+
+	static const char * VersionString();
+	static void set_VersionString(const char * v);
 
 	void		setdefaultFontName(const char * n) {defaultFontName = n;}
 
@@ -503,6 +511,13 @@ public:
 
 	void            setCurrentLineType(const linetype how) 
 			{ currentPath->currentLineType = how; }
+
+	const char * getLineTypeName() const {
+		static const char * lineTypeNames[] = {
+			"solid", "dashed", "dotted", "dashdot", "dashdotdot"
+		};
+		return lineTypeNames[currentPath->currentLineType];
+	}
 
 	void            setCurrentLineWidth(const float linewidth) 
 			{ currentPath->currentLineWidth = linewidth; }
@@ -748,7 +763,7 @@ public:
 	// of memory needs to be done by the same dll which did the allocation.
 	// this is not simply achieved if plugins are loaded as DLL.
 	virtual void deleteyourself() { delete this; } 
-	virtual ~basedrawingelement() {}
+	virtual ~basedrawingelement() = default;
 private:
 //	const unsigned int size;
 };
@@ -977,6 +992,9 @@ public:
 			 ) const = 0;
 	virtual ProgramOptions * createDriverOptions() const = 0;
 
+	virtual size_t variants() const = 0;
+	virtual const DriverDescription * variant(size_t index) const = 0;
+
 	virtual unsigned int getdrvbaseVersion() const { return 0; } // this is only needed for the driverless backends (ps/dump/gs)
 
 	const char * additionalInfo() const;
@@ -1010,6 +1028,15 @@ public:
 };
 
 class DescriptionRegister;
+
+#if 0
+template <class T>
+class woglvector : public std::vector<T> {
+public:
+	woglvector() { cout << "created " << this << endl << flush; }
+	~woglvector() { cout << "deleted " << this << endl << flush; }
+};
+#endif
 
 //lint -esym(1712,DriverDescription*) // no default ctor
 template <class T>
@@ -1045,7 +1072,9 @@ public:
 			nativedriver_p,
 			checkfunc_p
 			)
-		{}
+	{
+	    instances().push_back(this);
+	}
 	virtual drvbase * CreateBackend (
 			const char * const driveroptions_P,
 		    ostream & theoutStream, 
@@ -1065,15 +1094,36 @@ public:
 		return new typename T::DriverOptions;
 	}
 
-
-//	virtual void DeleteBackend(drvbase * & ptr) const { delete (T*) ptr; ptr = 0; }
+	//	virtual void DeleteBackend(drvbase * & ptr) const { delete (T*) ptr; ptr = 0; }
 	virtual unsigned int getdrvbaseVersion() const { return drvbaseVersion; }
 
+	static std::vector<const DriverDescriptionT<T> *> & instances() {
+	    static std::vector<const DriverDescriptionT<T> *> the_instances;
+	    return the_instances;
+	}
+
+	virtual size_t variants() const {
+		return instances().size();
+	}
+
+	virtual const DriverDescription* variant(size_t index) const {
+		if (index < instances().size()) {
+			return instances()[index];
+		} else {
+			return nullptr;
+		}
+	}
+
 private: 
-	// typedef DriverDescriptionT<T> SHORTNAME;
-	// NOCOPYANDASSIGN(SHORTNAME)
+
 	NOCOPYANDASSIGN(DriverDescriptionT<T>)
 };
+
+#if 0
+template <class T>
+//std::vector<const DriverDescriptionT<T> *> DriverDescriptionT<T>::instances;
+woglvector<const DriverDescriptionT<T> *> DriverDescriptionT<T>::instances;
+#endif
 
 #if !( (defined (__GNUG__)  && (__GNUC__>=3) && defined (HAVE_STL)) || defined (_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1900) )
 // 1300 is MSVC.net (7.0)

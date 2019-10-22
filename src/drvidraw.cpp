@@ -4,7 +4,7 @@
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -970,8 +970,8 @@ void drvIDRAW::show_text(const TextInfo & textinfo)
 	const float yoffset = textinfo.currentFontSize * (float) cos(angle);
 	outf << "[ " << cos(angle) << ' ' << sin(angle) << ' ';
 	outf << -sin(angle) << ' ' << cos(angle) << ' ';
-	outf << (unsigned int) (0.5 + xoffset + textinfo.x / IDRAW_SCALING) << ' ';
-	outf << (unsigned int) (0.5 + yoffset + textinfo.y / IDRAW_SCALING);
+	outf << (unsigned int) (0.5 + xoffset + textinfo.x() / IDRAW_SCALING) << ' ';
+	outf << (unsigned int) (0.5 + yoffset + textinfo.y() / IDRAW_SCALING);
 	outf << " ] concat" << endl;
 	outf << "%I" << endl;
 	outf << "[" << endl;

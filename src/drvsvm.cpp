@@ -398,7 +398,7 @@ void drvSVM::show_path()
             }
         }
 
-        // FALLTHROUGH intended
+        // fall through
 		case lineto:
         {
             const Point& p( elem.getPoint(0) );
@@ -757,9 +757,9 @@ void drvSVM::show_text(const TextInfo& textinfo)
                  (uInt16)META_TEXT_ACTION);
         fakeVersionCompat(outf, 1, 0);
         writePod(outf, 
-                 (uInt32)l_transX(textinfo.x));
+                 (uInt32)l_transX(textinfo.x()));
         writePod(outf, 
-                 (uInt32)l_transY(textinfo.y));
+                 (uInt32)l_transY(textinfo.y()));
 
         const size_t textLen = strlen(textinfo.thetext.c_str());
         writePod(outf,

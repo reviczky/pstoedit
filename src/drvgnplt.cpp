@@ -3,7 +3,7 @@
    simple backend for GNUplot format.
    Contributed by: Carsten Hammer (chammer_AT_hermes.hrz.uni-bielefeld.de)
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify

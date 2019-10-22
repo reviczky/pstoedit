@@ -263,8 +263,8 @@ void drvPIC::show_text(const TextInfo & textinfo)
 	// BUG: point size is strange...
 	const char *tfont = nullptr;
 
-	const float x = x_coord(textinfo.x, textinfo.y);
-	const float y = y_coord(textinfo.x, textinfo.y);
+	const float x = x_coord(textinfo.x(), textinfo.y());
+	const float y = y_coord(textinfo.x(), textinfo.y());
 
 	// const unsigned int fontstringlen=80;
 	static RSString selected_font;	// Could / should these be class members (wogl? ? ?) 

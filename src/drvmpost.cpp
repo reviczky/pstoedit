@@ -3,7 +3,7 @@
    Backend for MetaPost files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_geocities.com
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_geocities.com
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ constructBase,
 	outf << "% Converted from PostScript(TM) to MetaPost by pstoedit\n"
 		<<
 		"% MetaPost backend contributed by Scott Pakin <scott+ps2ed_AT_pakin.org>\n"
-		<< "% pstoedit is Copyright (C) 1993 - 2018 Wolfgang Glunz" <<
+		<< "% pstoedit is Copyright (C) 1993 - 2019 Wolfgang Glunz" <<
 		" <wglunz35_AT_pstoedit.net>\n\n";
 
 	/*
@@ -304,7 +304,7 @@ void drvMPOST::show_text(const TextInfo & textinfo)
 		prevFontAngle = textinfo.currentFontAngle;
 
 	// Output the text using macros defined in the constructor
-	outf << "showtext ((" << textinfo.x << ',' << textinfo.y << "), " << prevFontAngle << ", \"";
+	outf << "showtext ((" << textinfo.x() << ',' << textinfo.y() << "), " << prevFontAngle << ", \"";
 	for (const char *c = textinfo.thetext.c_str(); *c; c++)
 		if (*c == '"')
 			outf << "\" & char(34) & \"";

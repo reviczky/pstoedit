@@ -5,7 +5,7 @@
    drvDXF.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,8 +29,7 @@ class drvDXF : public drvbase {
 public:
 
         derivedConstructor(drvDXF);
-	// (const char * driveroptions_P,ostream & theoutStream ,ostream & theerrStream ); // Constructor
-
+	
         ~drvDXF() override; // Destructor
 	class DriverOptions : public ProgramOptions {
 	public:
@@ -83,7 +82,7 @@ public:
 
 private:
 		void drawVertex(const Point & p, bool withlinewidth, int val70 = 0);
-                void drawLine(const Point & start_p, const Point & end_p);
+        void drawLine(const Point & start_p, const Point & end_p);
 		void curvetoAsOneSpline(const basedrawingelement & elem, const Point & currentpoint);
 		void curvetoAsMultiSpline(const basedrawingelement & elem, const Point & currentpoint);
 		void curvetoAsPolyLine(const basedrawingelement & elem, const Point & currentpoint);
@@ -95,22 +94,15 @@ private:
 		void writelayerentry(ostream & outs, unsigned int color, const char * layername);
 		bool wantedLayer(float r, float g, float b,const RSString& colorName)  ; // layer shall be written
 		RSString calculateLayerString(float r, float g, float b,const RSString& colorName) ;
+		void writeColorAndStyle();
 		
-		
-		void printPoint(const Point & p, unsigned short add );
+		void printPoint(ostream & out, const Point & p, unsigned short offset );
 		void writesplinetype(const unsigned short stype);
 
 		enum dxfsplinetype {aspolyline, assinglespline, asmultispline, asnurb, asbspline, asbezier} splinemode;
-//       	int polyaslines; // dump polygons as lines
-// 		bool mm; //wether to use mm instead of points
+		
 		bool formatis14 ; // whether to use acad 14 format
-//		unsigned int splineprecision;
 
-//		bool colorsToLayers;
-		const char * header_prelayer1;
-		const char * header_prelayer2;
-		const char * header_postlayer;
-		const char * trailer;
 		class DXFLayers * layers;
 		long handleint;
 		double scalefactor; 
@@ -122,12 +114,8 @@ private:
 
 		void show_text(const TextInfo & textinfo) override;
 
-
 		NOCOPYANDASSIGN(drvDXF)
-
 };
-
-
 
 #endif
 

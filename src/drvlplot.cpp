@@ -768,7 +768,7 @@ drvplot::derivedConstructor(drvplot):constructBase
 
 	if (strcmp(driverdesc.symbolicname, "gmfa") == 0) {
 		const char t[] = "yes";
-		(void)Plotter::parampl("META_PORTABLE", (void *) t);
+		(void)Plotter::parampl("META_PORTABLE", const_cast<char *>(t));
 		portable_metafile = true;	// won't need to reopen outf in binary mode
 	}
 
@@ -901,7 +901,7 @@ drvplot::derivedConstructor(drvplot):constructBase
 			if (Verbose()) {
 				errf << "adding Plotter parameter " << remaining_argv[i] << ":" << remaining_argv[i + 1] << endl;
 			}
-			(void)Plotter::parampl(remaining_argv[i], (void*)remaining_argv[i + 1]);
+			(void)Plotter::parampl(remaining_argv[i], const_cast<char*>(remaining_argv[i + 1]));
 			i++;
 		}
 	}
@@ -1151,7 +1151,7 @@ void drvplot::show_text(const TextInfo & textinfo)
 		(void)plotter->fconcat(sinv * (double) matrix[0],
 						 sinv * (double) matrix[1],
 						 sinv * (double) matrix[2],
-						 sinv * (double) matrix[3], textinfo.x + x_offset, textinfo.y + y_offset);
+						 sinv * (double) matrix[3], textinfo.x() + x_offset, textinfo.y() + y_offset);
 		(void)plotter->fmove(0.0, 0.0);
 		(void)plotter->label(textinfo.thetext.c_str());
 		(void)plotter->restorestate();
@@ -1260,7 +1260,7 @@ void drvplot::show_rectangle(const float llx, const float lly, const float urx, 
 	(void)plotter->fbox(llx, lly, urx, ury);
 }
 
-void drvplot::show_image(const PSImage& imageinfo)
+void drvplot::show_image(const PSImage& /*imageinfo*/)
 {
 	// not implemented
 }

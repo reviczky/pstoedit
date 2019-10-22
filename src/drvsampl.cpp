@@ -2,7 +2,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -101,8 +101,8 @@ void drvSAMPL::close_page()
 void drvSAMPL::show_text(const TextInfo & textinfo)
 {
 	outf << "Text String : " << textinfo.thetext.c_str() << endl;
-	outf << '\t' << "X " << textinfo.x << " Y " << textinfo.y << endl;
-	outf << '\t' << "X_END " << textinfo.x_end << " Y_END " << textinfo.y_end << endl;
+	outf << '\t' << "X " << textinfo.x() << " Y " << textinfo.y() << endl;
+	outf << '\t' << "X_END " << textinfo.x_end() << " Y_END " << textinfo.y_end() << endl;
 	outf << '\t' << "currentFontName: " << textinfo.currentFontName.c_str() << endl;
 	outf << '\t' << "is_non_standard_font: " << textinfo.is_non_standard_font << endl;
 	outf << '\t' << "currentFontFamilyName: " << textinfo.currentFontFamilyName.c_str() << endl;
@@ -256,7 +256,7 @@ void drvSAMPL::show_image(const PSImage & imageinfo)
 	}
 }
 
-static DriverDescriptionT < drvSAMPL > D_sampl("sample", "sample driver: if you do not want to see this, uncomment the corresponding line in makefile and make again", "this is a long description for the sample driver","sam", true,	// backend supports subpaths
+static DriverDescriptionT < drvSAMPL > D_sampl("sample", "sample driver: if you do not want to see this, uncomment the corresponding line in makefile and make again", "This is a long description for the sample driver","sam", true,	// backend supports subpaths
 											   // if subpaths are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)

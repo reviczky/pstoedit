@@ -3,7 +3,7 @@
    Skeleton for the implementation of text based backends
    for example this could be extended towards an HTML backend.
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -103,10 +103,10 @@ void drvTEXT::close_page()
 {
 	if (options->dumptextpieces) {
 		outf << "Closing page: " << (currentPageNumber) << endl;
-		size_t nroflines = page.size();
+		const size_t nroflines = page.size();
 		for (unsigned int i = 0; i < nroflines; i++) {
-			Line *lineptr = page[i];
-			size_t nrofpieces = lineptr->textpieces.size();
+			const Line * const lineptr = page[i];
+			const size_t nrofpieces = lineptr->textpieces.size();
 			outf << "***********************************************" << endl;
 			for (unsigned int j = 0; j < nrofpieces; j++) {
 				const TextInfo & textinfo = lineptr->textpieces[j];
@@ -151,7 +151,7 @@ void drvTEXT::show_text(const TextInfo & textinfo)
 	if (options->dumptextpieces) {
 		// check which line this piece of text fits in.
 		//
-		size_t nroflines = page.size();
+		const size_t nroflines = page.size();
 		bool inserted = false;
 		for (unsigned int i = 0; i < nroflines; i++) {
 			if ((textinfo.y() <= page[i]->y_max)

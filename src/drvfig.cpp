@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,6 +54,7 @@
 #include I_string_h
 #include I_iostream
 #include I_iomanip
+#include <memory>
 
 
 static const float PntFig = 1200.0f / 72.0f;
@@ -126,7 +127,7 @@ drvFIG::derivedConstructor(drvFIG):
 constructBase,
 buffer(tempFile.asOutput()),
 imgcount(1),
-format(32),
+//format(32),
 //startdepth(999),
 //use_correct_font_size(false),
 glob_min_x(0), glob_max_x(0), glob_min_y(0), glob_max_y(0),
@@ -309,7 +310,7 @@ void drvFIG::print_polyline_coords()
 {
 	int j = 0;
 	//  const Point & p;
-	unsigned int last = numberOfElementsInPath() - 1;
+	const unsigned int last = numberOfElementsInPath() - 1;
 	for (unsigned int n = 0; n <= last; n++) {
 		const basedrawingelement & elem = pathElement(n);
 		if (j == 0) {
@@ -354,7 +355,7 @@ void drvFIG::print_spline_coords1()
 // IJMP - need curr_point
 	Point P1;
 	int j = 0;
-	unsigned int last = numberOfElementsInPath() - 1;
+	const unsigned int last = numberOfElementsInPath() - 1;
 	for (unsigned int n = 0; n <= last; n++) {
 		if (j == 0) {
 			buffer << "\t";
@@ -431,9 +432,9 @@ void drvFIG::print_spline_coords2()
 {
 	int j = 0;
 	Point lastp;
-	int maxj = 8;
+	const int maxj = 8;
 
-	unsigned int last = numberOfElementsInPath() - 1;
+	const unsigned int last = numberOfElementsInPath() - 1;
 	for (unsigned int n = 0; n <= last; n++) {
 		const basedrawingelement & elem = pathElement(n);
 		switch (elem.getType()) {
@@ -933,8 +934,8 @@ void drvFIG::show_image(const PSImage & imageinfo)
 // Calculate BBox
 	addtobbox(ll);
 	addtobbox(ur);
-	Point fig_ur(PntFig * ur.x_, y_offset - PntFig * ll.y_);
-	Point fig_ll(PntFig * ll.x_, y_offset - PntFig * ur.y_);
+	const Point fig_ur(PntFig * ur.x_, y_offset - PntFig * ll.y_);
+	const Point fig_ll(PntFig * ll.x_, y_offset - PntFig * ur.y_);
 
 	// first output link to an external *.eps file into *.fig file
 	buffer << "# image\n";
@@ -956,15 +957,15 @@ void drvFIG::show_image(const PSImage & imageinfo)
 
 	} else {
 	const size_t filenamelen = strlen(outBaseName.c_str()) + 21;
-	auto EPSoutFileName = new char[filenamelen];
+	std::unique_ptr<char[]> EPSoutFileName (new char[filenamelen]);
 	const size_t fullfilenamelen = strlen(outDirName.c_str()) + strlen(outBaseName.c_str()) + 21;
-	auto EPSoutFullFileName = new char[fullfilenamelen];
+	std::unique_ptr<char[]> EPSoutFullFileName (new char[fullfilenamelen]);
 
-	sprintf_s(TARGETWITHLEN(EPSoutFileName,filenamelen), "%s%02d.eps", outBaseName.c_str(), imgcount++);
-	sprintf_s(TARGETWITHLEN(EPSoutFullFileName,fullfilenamelen), "%s%s", outDirName.c_str(), EPSoutFileName);
-	ofstream outi(EPSoutFullFileName);
+	sprintf_s(TARGETWITHLEN(EPSoutFileName.get(),filenamelen), "%s%02d.eps", outBaseName.c_str(), imgcount++);
+	sprintf_s(TARGETWITHLEN(EPSoutFullFileName.get(),fullfilenamelen), "%s%s", outDirName.c_str(), EPSoutFileName.get());
+	ofstream outi(EPSoutFullFileName.get());
 	if (!outi) {
-		errf << "Could not open file " << EPSoutFullFileName << " for output";
+		errf << "Could not open file " << EPSoutFullFileName.get() << " for output";
 		exit(1);
 	}
 	// remember, we have to flip the image from PostScript coord to fig coords
@@ -973,8 +974,8 @@ void drvFIG::show_image(const PSImage & imageinfo)
 // Calculate BBox
 	addtobbox(ll);
 	addtobbox(ur);
-	Point fig_ur(PntFig * ur.x_, y_offset - PntFig * ll.y_);
-	Point fig_ll(PntFig * ll.x_, y_offset - PntFig * ur.y_);
+	const Point fig_ur(PntFig * ur.x_, y_offset - PntFig * ll.y_);
+	const Point fig_ll(PntFig * ll.x_, y_offset - PntFig * ur.y_);
 
 	// first output link to an external *.eps file into *.fig file
 	buffer << "# image\n";
@@ -983,7 +984,7 @@ void drvFIG::show_image(const PSImage & imageinfo)
 	if (objectId)
 		objectId--;				// don't let it get < 0
 	buffer << objectId << " 0 -1 0.000 0 0 -1 0 0 5\n";
-	buffer << "\t0 " << EPSoutFileName << "\n";
+	buffer << "\t0 " << EPSoutFileName.get() << "\n";
 
 	buffer << "\t" << (int) fig_ll.x_ << " " << (int) fig_ll.y_ << " "
 		<< (int) fig_ur.x_ << " " << (int) fig_ll.y_ << " "
@@ -997,8 +998,6 @@ void drvFIG::show_image(const PSImage & imageinfo)
 	imageinfo.writeEPSImage(outi);
 	outi.close();
 
-	delete[]EPSoutFullFileName;
-	delete[]EPSoutFileName;
 	}
 }
 

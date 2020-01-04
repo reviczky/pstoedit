@@ -1,7 +1,7 @@
 .\" *********************************** start of \input{version.tex}
 .\" *********************************** end of \input{version.tex}
 '\" t
-.\" Manual page created with latex2man on So,  2. Jun 2019 20:10:28
+.\" Manual page created with latex2man on Thu Jan  2 15:42:00 CET 2020
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -12,7 +12,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "02 June 2019" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "02 January 2020" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -26,7 +26,7 @@ vector graphic formats
 .PP
 pstoedit
 [\fB\-v \-help\fP]
-BREAK 
+.br
 .PP
 pstoedit
 .\" *********************************** start of \input{generalhelpshort.tex}
@@ -111,7 +111,7 @@ details.
 .PP
 .SS RELEASE LEVEL
 .PP
-This manpage documents release 3.74 of pstoedit\&.
+This manpage documents release 3.75 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -345,10 +345,13 @@ option but then it strongly depends on the application reading the generated fil
 .PP
 .TP
 [\fB\-fontmap\fP\fI name of font map file for pstoedit\fP]
- The font map is a simple text file containing lines in the following format:BREAK 
+ The font map is a simple text file containing lines in the following format:
+.br
 .PP
-document_font_name target_font_nameBREAK 
-Lines beginning with % are considerd comments.BREAK 
+document_font_name target_font_name
+.br 
+Lines beginning with % are considerd comments.
+.br
 For font names with spaces use the "font name with spaces" notation. 
 .PP
 If a target_font_name starts with /, it is regarded as alias to a former entry. 
@@ -372,7 +375,8 @@ MS Windows: The same directory where the pstoedit executable is located
 .RE
 .TP
 .B *
-Unix:BREAK 
+Unix:
+.br 
 The default installation directory. If it fails, then <\fIThe directory where the pstoedit executable is located\fP>
 /../lib/ 
 .RS
@@ -511,7 +515,7 @@ enclosed within double\-quote characters, thus:
 .PP
 To see which options are supported by a specific format, type: 
 \fBpstoedit \-f format:\-help\fP
-BREAK 
+.br
 .PP
 The following description of the different formats supported by pstoedit is extracted from the source code of the individual drivers. 
 .PP

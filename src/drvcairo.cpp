@@ -1,6 +1,6 @@
 /*
   drvcairo.cpp : This file is part of pstoedit
-  Copyright (C) 2009 - 2019 Dan McMahill dan_AT_mcmahill_DOT_net
+  Copyright (C) 2009 - 2020 Dan McMahill dan_AT_mcmahill_DOT_net
 
   This driver used drvSAMPL.cpp as a reference.
   
@@ -25,6 +25,7 @@
 #include I_stdlib
 #include <iostream>
 #include <fstream>
+#include <memory>
 
 // TODO
 //
@@ -62,7 +63,7 @@
 
 drvCAIRO::derivedConstructor(drvCAIRO):
   //(const char * driveroptions_p,ostream & theoutStream,ostream & theerrStream): // Constructor
-  constructBase, imgcount(0)
+  constructBase //, imgcount(0)
 {
   ofstream outh;
 
@@ -594,7 +595,7 @@ void drvCAIRO::show_image(const PSImage & imageinfo)
   const long scanlineLen = ((width * 3) + 3) & ~3L;
 
   // now lets get some mem
-  auto output = new unsigned char[scanlineLen * height];
+  std::unique_ptr<unsigned char[]> output (new unsigned char[scanlineLen * height]);
 
   for (long i = 0; i < scanlineLen * height; i++)
     output[i] = 255;		// default is background (white)    
@@ -690,8 +691,6 @@ void drvCAIRO::show_image(const PSImage & imageinfo)
       }
     }
   }
-  
-  delete[]output;
 }
 
 static DriverDescriptionT < drvCAIRO > D_cairo("cairo",  // name

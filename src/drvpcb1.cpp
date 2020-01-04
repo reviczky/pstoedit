@@ -2,7 +2,7 @@
    drvPCB1.cpp : Hans-Jürgen Jahn    (Version 1.0  10.08.02)
    this code is derived from drvSAMPL.cpp, see text below
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -24,6 +24,7 @@
 #include I_fstream
 #include I_stdio
 #include I_stdlib
+#include <algorithm>
 
 
 //output unit is mil
@@ -249,7 +250,7 @@ bool drvPCB1::lineOut()
    // first item "moveto", followed by at least one "lineto"
 
    char id;
-   long width= long(currentLineWidth());
+   const long width= long(currentLineWidth());
    if ( width==0 )
       id='L';
    else
@@ -258,7 +259,7 @@ bool drvPCB1::lineOut()
    if ( currentShowType()!=drvbase::stroke )
       return false;
       
-   int nreip=numberOfElementsInPath();
+   const int nreip=numberOfElementsInPath();
    if (nreip<2)
       return false;
    if ( pathElement(0).getType()!=moveto )
@@ -302,7 +303,7 @@ bool drvPCB1::filledRectangleOut()
    if ( currentShowType()!=drvbase::fill )
       return false;
       
-   int nreip=numberOfElementsInPath();
+   const int nreip=numberOfElementsInPath();
    if (nreip!=5)
       return false;
    if ( pathElement(0).getType()!=moveto )
@@ -321,7 +322,7 @@ bool drvPCB1::filledRectangleOut()
    {
       if (pathElement(4).getType()!=lineto)
          return false;
-      Lpoint xp=toLpoint(pathElement(4).getPoint(0));
+      const Lpoint xp=toLpoint(pathElement(4).getPoint(0));
       if ( !isEqual(xp.x,p[0].x,1) || !isEqual(xp.y,p[0].y,1) )
          return false;
    }
@@ -334,10 +335,10 @@ bool drvPCB1::filledRectangleOut()
    mx=p[0];
    for (i=1; i<4; i++)
    {
-      mn.x=min(mn.x,p[i].x);
-      mn.y=min(mn.y,p[i].y);
-      mx.x=max(mx.x,p[i].x);
-      mx.y=max(mx.y,p[i].y);
+      mn.x=std::min(mn.x,p[i].x);
+      mn.y=std::min(mn.y,p[i].y);
+      mx.x=std::max(mx.x,p[i].x);
+      mx.y=std::max(mx.y,p[i].y);
    }
 
    for (i=0; i<4; i++)
@@ -378,7 +379,7 @@ bool drvPCB1::filledCircleOut()
    if ( currentShowType()!=drvbase::fill )
       return false;
       
-   int nreip=numberOfElementsInPath();
+   const int nreip=numberOfElementsInPath();
    if (nreip!=5)
       return false;
    if ( pathElement(0).getType()!=moveto )
@@ -401,10 +402,10 @@ bool drvPCB1::filledCircleOut()
    mx=p[0];
    for (i=1; i<4; i++)
    {
-      mn.x=min(mn.x,p[i].x);
-      mn.y=min(mn.y,p[i].y);
-      mx.x=max(mx.x,p[i].x);
-      mx.y=max(mx.y,p[i].y);
+      mn.x=std::min(mn.x,p[i].x);
+      mn.y=std::min(mn.y,p[i].y);
+      mx.x=std::max(mx.x,p[i].x);
+      mx.y=std::max(mx.y,p[i].y);
    }
 
    Lpoint m; 

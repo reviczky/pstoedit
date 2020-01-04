@@ -73,9 +73,9 @@ static int get_gs_versions_product(int *pver, int offset,
 	  sprintf_s(TARGETWITHLEN(key,256) ,"Software\\%s", gs_productfamily);
 
 #ifdef OS_WIN32_WCE
-	long regtestresult = RegOpenKeyEx(hkeyroot, LPSTRtoLPWSTR(key).c_str(), 0, KEY_READ|regopenflags , &hkey);
+	const long regtestresult = RegOpenKeyEx(hkeyroot, LPSTRtoLPWSTR(key).c_str(), 0, KEY_READ|regopenflags , &hkey);
 #else
-	long regtestresult = RegOpenKeyExA(hkeyroot, key, 0, KEY_READ|regopenflags , &hkey);
+	const long regtestresult = RegOpenKeyExA(hkeyroot, key, 0, KEY_READ|regopenflags , &hkey);
 #endif
     if (regtestresult == ERROR_SUCCESS) {
 	/* Now enumerate the keys 
@@ -221,13 +221,15 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
     char key[256];
     char dotversion[16];
     int length;
-    DWORD version = GetVersion();
-
+#if 0
+	const DWORD version = GetVersion();
+	// hope we do not need this anymore
     if (((HIWORD(version) & 0x8000) != 0)
 	  && ((HIWORD(version) & 0x4000) == 0)) {
 	/* Win32s */
 	return FALSE;
     }
+#endif
 
 
     sprintf_s(TARGETWITHLEN(dotversion,16), "%d.%02d", 
@@ -275,47 +277,58 @@ BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len,
 BOOL
 find_gs(char *gspath, int len, int minver, BOOL bDLL, const char *gsregbase)
 {
-    int count;
-    int *ver;
-    int gsver;
-    char buf[256];
-    char *p;
-    int i;
-
-    DWORD version = GetVersion();
-    if ( ((HIWORD(version) & 0x8000)!=0) && ((HIWORD(version) & 0x4000)==0) )
-	return FALSE;  // win32s
-
-    count = 1;
+#if 0
+	// win32s no longer supported
+    const DWORD version = GetVersion();
+	if (((HIWORD(version) & 0x8000) != 0) && ((HIWORD(version) & 0x4000) == 0)) {
+	  return FALSE;  // win32s
+	}
+#endif
+	
+    int count = 1;
     (void)get_gs_versions(&count, gsregbase);
-    if (count < 1)
+	if (count < 1) {
 	  return FALSE;
-
-    ver = (int *)malloc((count+1)*sizeof(int));
-    if (ver == (int *)NULL)
-	return FALSE;
+	}
+	
+	int* ver = new int[count + 1]; // (int *)malloc((count + 1) * sizeof(int));
+	if (!ver) {
+	    return FALSE;
+	}
+	
     ver[0] = count+1;
     if (!get_gs_versions(ver, gsregbase)) {
-	free(ver);
-	return FALSE;
+		delete[] ver; // free(ver);
+	    return FALSE;
     }
-    gsver = 0;
-    for (i=1; i<=ver[0]; i++) {
-	if (ver[i] > gsver)
-	    gsver = ver[i];
-    }
-    free(ver);
-    if (gsver < minver)	// minimum version (e.g. for gsprint)
-	return FALSE;
     
-    if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf), gsregbase))
-	return FALSE;
-
+	int maxversion = 10000000;
+	const char * gsvmax = getenv("GS_V_MAX");
+	if (gsvmax) {
+		maxversion = atoi(gsvmax);
+	}
+	int gsver = 0;
+	// find latest/max version
+    for (int i=1; i<=ver[0]; i++) {
+		if ((ver[i] > gsver) && (ver[i] <= maxversion)) {
+			gsver = ver[i];
+	    }
+    }
+	delete[] ver; // free(ver);
+    if (gsver < minver) {	// minimum version (e.g. for gsprint)
+		return FALSE;
+	}
+    
+	char buf[1000];
+	if (!get_gs_string(gsver, "GS_DLL", buf, sizeof(buf), gsregbase)) {
+		 return FALSE;
+	}
+	
     if (bDLL) {
 		strncpy_s(gspath, len, buf, len-1);
 		return TRUE;
 	} else {
-		p = strrchr(buf, '\\');
+		char * p = strrchr(buf, '\\');
 		if (p) {
 			p++;
 			*p = 0;
@@ -341,31 +354,34 @@ find_gs(char *gspath, int len, int minver, BOOL bDLL, const char *gsregbase)
 /* This is an example of how you can use the above functions */
 int ENTRYPOINT
 {
-    BOOL flag;
     int ver[10];
-    int i;
     char buf[256];
 
-    if (find_gs(buf, sizeof(buf), 550, TRUE, gsregbase))
-	fprintf(stderr,"Latest GS DLL is %s\n", buf);
-    if (find_gs(buf, sizeof(buf), 550, FALSE, gsregbase))
-	fprintf(stderr,"Latest GS EXE is %s\n", buf);
+	if (find_gs(buf, sizeof(buf), 550, TRUE, gsregbase)) {
+		fprintf(stderr, "Latest GS DLL is %s\n", buf);
+	}
+	
+	if (find_gs(buf, sizeof(buf), 550, FALSE, gsregbase)) {
+		fprintf(stderr, "Latest GS EXE is %s\n", buf);
+	}
 
     ver[0] = sizeof(ver) / sizeof(int);
-    flag = get_gs_versions(ver, gsregbase);
+    const BOOL flag = get_gs_versions(ver, gsregbase);
     fprintf(stderr,"Versions: %d\n", ver[0]);
 
     if (flag == FALSE) {
-	fprintf(stderr,"get_gs_versions failed, need %d\n", ver[0]);
-	return 1;
+	  fprintf(stderr,"get_gs_versions failed, need %d\n", ver[0]);
+	  return 1;
     }
 
-    for (i=1; i <= ver[0]; i++) {
-	fprintf(stderr," %d\n", ver[i]);
-	if (get_gs_string(ver[i], "GS_DLL", buf, sizeof(buf), gsregbase))
-	    fprintf(stderr,"   GS_DLL=%s\n", buf);
-	if (get_gs_string(ver[i], "GS_LIB", buf, sizeof(buf), gsregbase))
-	    fprintf(stderr,"   GS_LIB=%s\n", buf);
+    for (int i=1; i <= ver[0]; i++) {
+	  fprintf(stderr," %d\n", ver[i]);
+	  if (get_gs_string(ver[i], "GS_DLL", buf, sizeof(buf), gsregbase)) {
+		fprintf(stderr,"   GS_DLL=%s\n", buf);
+	  }
+	  if (get_gs_string(ver[i], "GS_LIB", buf, sizeof(buf), gsregbase)) {
+		fprintf(stderr,"   GS_LIB=%s\n", buf);
+	  }
     }
     return 0;
 }

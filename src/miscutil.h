@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -64,7 +64,7 @@ inline char * cppstrndup(const char * const src, const size_t length, const size
 {
 	const size_t lp1 = length+1;
 	char * const ret = new char[lp1 + addon];
-	for (unsigned int i = 0 ; i < lp1; i++)
+	for (size_t i = 0 ; i < lp1; i++)
 	{
 			ret[i] = src[i];
 	}
@@ -190,17 +190,18 @@ inline bool string_contains(const RSString & s, const RSString & substr) { retur
 inline bool strequal(const char * const s1, const char * const s2) { return (strcmp(s1,s2) == 0);}
 
 class Argv {
-	enum { maxargs=1000 };
+	static constexpr unsigned int maxargs = 1000;
 public:
-	unsigned int argc;
+	unsigned int argc = 0;
 // #define USE_RSSTRING 1
 #ifdef USE_RSSTRING
 	RSString argv[maxargs];
 #else
-	char * argv[maxargs];
+	char* argv[maxargs] = { nullptr };
 #endif
 
-	Argv() : argc(0) { for (unsigned int i = 0; i< (unsigned) maxargs; i++)  { argv[i] = 0; } }
+//obsolete	Argv() : argc(0) { for (unsigned int i = 0; i < (unsigned) maxargs; i++)  { argv[i] = nullptr; } }
+	Argv() = default;
 	~Argv() { clear(); }
 
 	void addarg(const char * const arg) { 
@@ -231,9 +232,8 @@ public:
 	void clear() {
 #ifdef USE_RSSTRING
 #else
-		for (unsigned int i = 0; i< (unsigned) argc &&  i< (unsigned) maxargs ; i++) {
-
-			delete [] argv[i] ; argv[i]= 0; 
+		for (unsigned int i = 0; (i < argc) &&  (i < maxargs); i++) {
+			delete [] argv[i] ; argv[i]= nullptr; 
 		}
 #endif
 		argc = 0;
@@ -246,15 +246,15 @@ DLLEXPORT ostream & operator <<(ostream & out, const Argv & a);
 
 DLLEXPORT bool fileExists (const char * filename);
 DLLEXPORT RSString full_qualified_tempnam(const char * pref);
-DLLEXPORT void convertBackSlashes(char* string);
+DLLEXPORT void convertBackSlashes(char* fileName);
 
 
 template <class T> 
 class DLLEXPORT Mapper {
 public:
-	Mapper() : firstEntry(0) {};
+	Mapper() : firstEntry(nullptr) {};
 	virtual ~Mapper() {
-		while (firstEntry != 0) {
+		while (firstEntry != nullptr) {
 			T * nextEntry = firstEntry->nextEntry;
 			delete firstEntry;
 			firstEntry=nextEntry;

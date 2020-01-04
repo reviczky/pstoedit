@@ -5,7 +5,7 @@
    drvFIG.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -60,7 +60,7 @@ private:
 	TempFile  tempFile;
 	ofstream  &buffer;
 	int	      imgcount;
-	int	      format; // either 31 or something else
+	//int	      format; // either 31 or something else
 //	int	      startdepth; // Start depth for objectID (range 0 - 999)
 //	bool	  use_correct_font_size; // if xfig is used in -use_correct_font_size mode as well
 

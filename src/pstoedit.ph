@@ -8,7 +8,7 @@ const char * const PS_prologue[] =
 // This file contains some redefinitions of PostScript(TM) operators
 // useful for the conversion of PostScript into a vector format via Ghostscript
 // 
-// Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net  
+// Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net  
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -24,7 +24,18 @@ const char * const PS_prologue[] =
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
- " /pstoedit.copyright (Copyright \\(C\\) 1993 - 2018 Wolfgang Glunz) def ",
+ " /pstoedit.copyright (Copyright \\(C\\) 1993 - 2020 Wolfgang Glunz) def ",
+ " systemdict /.addcontrolpath known { ",
+ " /PermitFileReading pstoedit.inputfilename  .addcontrolpath ",
+ " /PermitFileWriting pstoedit.targetoutputfile .addcontrolpath ",
+ " /PermitFileWriting pstoedit.nameOfOutputFilewithoutpercentD (*) concatstrings .addcontrolpath ",
+ " /PermitFileWriting pstoedit.outputfilename .addcontrolpath ",
+ " /PermitFileWriting (pscover.txt) .addcontrolpath ",
+ " currentdict /pstoedit.nameOfIncludeFile known { 	 ",
+ " /PermitFileReading pstoedit.nameOfIncludeFile .addcontrolpath  ",
+ " } if ",
+ " .setsafe ",
+ " } if ",
  " /pstoedit.image.dotranslate true def ",
  " currentdict /pstoedit.maptoisolatin1 	known not  ",
  " {  ",
@@ -3278,10 +3289,14 @@ const char * const PS_prologue[] =
  " (nach pstoedit.image.imageproc ) pstack pop ",
  " psexit }  ",
  " if ",
+ " false { ",
  " 0 .endpage  ",
  " .doneshowpage  ",
  " 1 true .outputpage  ",
  " pop ",
+ " } { ",
+ " -showpage ",
+ " } ifelse ",
  " pstoedit.image.saveobject2 -restore ",
  " pstoedit.image.saveobject1 -restore ",
  " (1) pstoedit.writesaverestore copy pop ",
@@ -4135,5 +4150,5 @@ const char * const PS_prologue[] =
  " def ",
  " psexit }  ",
  " if ",
-0
+nullptr
 };

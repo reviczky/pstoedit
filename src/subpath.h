@@ -92,11 +92,9 @@ class sub_path_list
 public:
 
   sub_path_list() : paths((sub_path*)nullptr), num_paths(0) {}
-  ~sub_path_list()
-    {
-    if(paths)
+  ~sub_path_list() {    
       delete [] paths;
-    }
+  }
   void find_parents();
   void read(const drvbase::PathInfo &);
   void new_points();

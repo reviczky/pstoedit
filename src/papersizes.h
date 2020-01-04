@@ -104,7 +104,7 @@ const PaperInfo paperformats[] = {
 	{ p_in, (double)4.5* mm_per_inch,	(double)10.375* mm_per_inch,	4.5,	10.375,	"Size 11 envelope"},
 	{ p_in, (double)4.75* mm_per_inch,	(double)11* mm_per_inch,	4.75,	11,	"Size 12 envelope"},
 	{ p_in, (double)5* mm_per_inch,	(double)11.5* mm_per_inch,	5,	11.5,	"Size 14 envelope"},
-{ p_in, 0, 0, 0, 0, 0 }
+{ p_in, 0, 0, 0, 0, nullptr }
 
 };
 
@@ -115,7 +115,7 @@ static const PaperInfo* getPaperInfo(const char * pname) {
 		pi++;
 	}
 	cerr << "could not find paper info for page size " << pname << endl;
-	return 0;
+	return nullptr;
 }
 
 

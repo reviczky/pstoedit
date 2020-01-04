@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,6 +33,9 @@
 #ifndef OS_WIN32_WCE
 #include <sys/stat.h>
 #endif
+
+#include <memory>
+#include <stddef.h>
 
 #include "pstoeditoptions.h"
 #include "pstoedit_config.h"
@@ -117,10 +120,9 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 		const size_t matchlen = strlen(matchstring);
 		const size_t bufferlen = matchlen + 1;
 		// allocate buffer for reading begin of lines
-		auto buffer = new char[bufferlen];
-
-
-		while ((void) inFile.get(buffer, bufferlen, '\n'),
+		// old form auto buffer = new char[bufferlen];
+		auto buffer = std::vector<char>(bufferlen);
+		while ((void) inFile.get(buffer.data(), bufferlen, '\n'),
 			   // debug            errstream << " read in grep :`" << buffer << "'" << inFile.gcount() << " " << matchlen << " eof:"<< inFile.eof() << endl,
 			   !inFile.eof() /* && !inFile.fail() */ ) {
 // debug                errstream << " read in grep :`" << buffer << "'" << inFile.gcount() << " " << matchlen << endl;
@@ -147,14 +149,14 @@ static int grep(const char *const matchstring, const char *const filename, ostre
 			} else
 #endif
 
-			if ((inFile_gcountresult>0) && ((size_t)inFile_gcountresult == matchlen) && strequal(buffer, matchstring) ) {
-				delete[]buffer;
+			if ((inFile_gcountresult>0) && ((size_t)inFile_gcountresult == matchlen) && strequal(buffer.data(), matchstring) ) {
+			//old	delete[]buffer;
 				return 0;
 			}
 			if (inFile.peek() == '\n')
 				(void) inFile.ignore();
 		}
-		delete[]buffer;
+		//old delete[]buffer;
 	}
 	return 1;					// fail
 }
@@ -398,7 +400,7 @@ extern "C" DLLEXPORT
 #endif
 		errstream << "pstoedit: version " << PACKAGE_VERSION << " / DLL interface " <<
 		drvbaseVersion << " (built: " << __DATE__ << " - " << buildtype << " - " << compversion << ")"
-		" : Copyright (C) 1993 - 2019 Wolfgang Glunz\n";
+		" : Copyright (C) 1993 - 2020 Wolfgang Glunz\n";
 	}
 
 	//  handling of derived parameters
@@ -558,6 +560,7 @@ extern "C" DLLEXPORT
 		} else {
 			commandline.addarg("-dNODISPLAY");
 		}
+		commandline.addarg("-dDELAYSAFER");
 		commandline.addarg("-dNOEPS"); // otherwise EPSF files create implicit showpages and a save/restore pair which disturbs the setPageSize handling
 // from the gs (8.0) news:
 /*
@@ -763,7 +766,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				if (r && options.verbose()) {
 					errstream << "path to myself: " << szExePath << endl;
 				}
-				char *p;
+				char *p = nullptr;
 				if (r && (p = strrchr(szExePath, directoryDelimiter)) != nullptr) {
 					*p = '\0';
 					drvbase::pstoeditHomeDir() = RSString(szExePath);
@@ -932,7 +935,6 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				gsresult = 0;	// gs was skipped, so there is no problem
 			} else {
 				RSString gsin = full_qualified_tempnam("psin");
-				const char *successstring;	// string that indicated success of .pro
 				ofstream inFileStream(gsin.c_str());
 				inFileStream << "/pstoedit.pagetoextract " << options.pagetoextract << " def" << endl;
 				inFileStream << "/pstoedit.versioninfo (" << PACKAGE_VERSION << " " << compversion << ") def" << endl;
@@ -1117,8 +1119,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				}
 				if (options.fake_date_and_version) {
 					// for regression testing
-					// to be extended also for time/date
-					drvbase::set_VersionString("9.99");
+					drvbase::use_fake_version_and_date = true;
 				}
 				if (options.nobindversion) {
 					inFileStream << "/pstoedit.delaybindversion  false def" << endl;
@@ -1144,6 +1145,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					}
 					inFileStream << "end" << endl;
 				}
+				const char* successstring = nullptr;	// string that indicated success of .pro
 				if (strequal(options.drivername.value.c_str(), "ps2ai")) {
 					successstring = "%EOF";	// This is written by the ps2ai.ps
 					// showpage in ps2ai does quit !!!
@@ -1244,6 +1246,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 						commandline.addarg("-dNODISPLAY");
 					}
 				}
+				commandline.addarg("-dDELAYSAFER");
 				commandline.addarg("-dNOEPS"); // otherwise EPSF files create implicit showpages and a save/restore pair which disturbs the setPageSize handling
 
 				//layer commandline.addarg("-dDEBUG");
@@ -1258,7 +1261,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				gsinfilename += gsin ;
 				gsinfilename += RSString("\"");
 #else
-				RSString gsinfilename = gsin;
+				const RSString gsinfilename = gsin;
 #endif
 				if (strequal(options.drivername.value.c_str(), "ps2ai")) {
 					// ps2ai needs special headers
@@ -1322,12 +1325,13 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 						} else {
 							bbfilename = gsout.c_str();
 						}
-
-						yyin = fopen(bbfilename, "rb");	// ios::binary | ios::nocreate
-						if (!yyin) {
-								errstream << "Error opening file " << bbfilename << endl;
-								return 1;
+						const auto err_bb = fopen_s(&yyin, bbfilename, "rb"); 
+								// ios::binary | ios::nocreate
+						if (err_bb) {
+						    errstream << "Error opening file " << bbfilename << endl;
+						    return 1;
 						}
+						assert(yyin);
 
 						PSFrontEnd fe(outFile,
 									  errstream,
@@ -1345,19 +1349,29 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 							// then we use the BB from interpreter output.
 							// In case of PDF, we dumped the BB there anyway.
 							bbfilename = gsout.c_str();
-							yyin = fopen(bbfilename, "rb");
+							const auto err_bb2 = fopen_s(&yyin, bbfilename, "rb");
+							if (err_bb2) {
+								errstream << "Error opening file " << bbfilename << endl;
+								return 1;
+							}
+							assert(yyin);
 							pagesfound = fe.readBBoxes( /* outputdriver-> */ drvbase::bboxes());
 							fclose(yyin);
 						}
 						drvbase::totalNumberOfPages() = pagesfound;
 						if (options.verbose()) {
 							errstream << " got " <<	drvbase::totalNumberOfPages() << " page(s) from " << bbfilename << endl;
-							for (unsigned int i = 0;  i < drvbase::totalNumberOfPages(); i++) {
+							for (size_t i = 0;  i < drvbase::totalNumberOfPages(); i++) {
 								errstream <<  drvbase::bboxes()[i].ll << " " <<  drvbase::bboxes()[i].ur << endl;
 							}
 							errstream << "now postprocessing the interpreter output" << endl;
 						}
-						yyin = fopen(gsout.c_str(), "rb");
+						const auto err_gs = fopen_s(&yyin, gsout.c_str(), "rb");
+						if (err_gs) {
+							errstream << "Error opening file " << gsout.c_str() << endl;
+							return 1;
+						}
+						assert(yyin);
 						fe.run(options.mergelines);
 						// now we can close it in any case - since we took a copy
 						fclose(yyin);
@@ -1465,10 +1479,10 @@ static DriverDescription_S * getPstoeditDriverInfo_internal(bool withgsdrivers)
 	loadpstoeditplugins("pstoedit", cerr, false );
 #endif
 
-	const int dCount = getglobalRp()->nrOfDescriptions();
+	const size_t dCount = (size_t) getglobalRp()->nrOfDescriptions() + 1;
 	/* use malloc to be compatible with C */
 	DriverDescription_S *result =
-		static_cast<DriverDescription_S *>( malloc((dCount + 1) * sizeof(DriverDescription_S)));
+		static_cast<DriverDescription_S *>( malloc(dCount * sizeof(DriverDescription_S)));
 	DriverDescription_S *curR = result;
 	assert(curR);
 	const DriverDescription *const *dd = getglobalRp()->rp;

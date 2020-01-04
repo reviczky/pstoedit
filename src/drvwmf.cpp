@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2019 Wolfgang Glunz
+   Copyright (C) 1998 - 2020 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -30,6 +30,7 @@
 #include I_stdlib
 
 #include <math.h>
+#include <algorithm>
 
 #ifndef M_PI
 #define M_PI		3.14159265358979323846
@@ -65,12 +66,12 @@ DWORD32 LittleEndian_Dword32(DWORD32 dw)
 }
 
 #else
-WORD LittleEndian_Word(WORD w)
+constexpr WORD LittleEndian_Word(WORD w)
 {
 	return w;
 }
 
-DWORD32 LittleEndian_Dword32(DWORD32 dw)
+constexpr DWORD32 LittleEndian_Dword32(DWORD32 dw)
 {
 	return dw;
 }
@@ -158,18 +159,18 @@ void drvWMF::initMetaDC(HDC hdc){
 #ifdef OLDCODE
 // temporary - testing
 			// set bounding box
-//          SetWindowOrgEx(hdc, minX, minY, NIL);
-			SetWindowOrgEx(hdc, minX, maxY, NIL);
+//          SetWindowOrgEx(hdc, minX, minY, nullptr);
+			SetWindowOrgEx(hdc, minX, maxY, nullptr);
 
-//			SetViewportOrgEx(hdc, 0, 0, NIL);
+//			SetViewportOrgEx(hdc, 0, 0, nullptr);
 
-			SetWindowExtEx(hdc, maxX - minX, maxY - minY, NIL);
-			SetViewportExtEx(hdc, maxX - minX, maxY - minY, NIL);
+			SetWindowExtEx(hdc, maxX - minX, maxY - minY, nullptr);
+			SetViewportExtEx(hdc, maxX - minX, maxY - minY, nullptr);
 //          SetViewportExtEx(hdc,
 //                           (long)((float)(maxX - minX) * (float)GetDeviceCaps(desktopDC,HORZRES) / 
 //                                  (float)GetDeviceCaps(desktopDC,HORZSIZE) + .5),
 //                           (long)((float)(maxY - minY) * (float)GetDeviceCaps(desktopDC,VERTRES) /
-//                                  (float)GetDeviceCaps(desktopDC,VERTSIZE) + .5), NIL);
+//                                  (float)GetDeviceCaps(desktopDC,VERTSIZE) + .5), nullptr);
 
 #else
 		
@@ -207,8 +208,8 @@ void drvWMF::initMetaDC(HDC hdc){
 
 drvWMF::derivedConstructor(drvWMF):
 	constructBase,
-	oldColoredPen(NIL),
-	oldColoredBrush(NIL),
+	oldColoredPen(Hnullptr),
+	oldColoredBrush(Hnullptr),
 	enhanced(false),
 	outFile(nullptr)
 {
@@ -252,9 +253,9 @@ drvWMF::derivedConstructor(drvWMF):
 	myFont = Hnullptr;
 	oldFont = Hnullptr;
 
-
+	constexpr bool size_check = (sizeof(PLACEABLEHEADER) == PLACEABLESIZE) || (sizeof(PLACEABLEHEADER) == (PLACEABLESIZE + 2));
 	// do some consistency checking
-	if (! ( (sizeof(PLACEABLEHEADER) == PLACEABLESIZE) || (sizeof(PLACEABLEHEADER) == (PLACEABLESIZE+2)) ) ) {
+	if (!size_check) {
 		errf <<
 			"WARNING: structure size mismatch. Please contact author. Expecting :"
 			<< PLACEABLESIZE << " found " << sizeof(PLACEABLEHEADER) << endl;
@@ -274,7 +275,7 @@ drvWMF::derivedConstructor(drvWMF):
 	if (options->OpenOfficeMode) {
 		desktopDC = GetDC(GetDesktopWindow());
 	} else {
-		desktopDC = NIL;
+		desktopDC = 0;
 	}
 
 	// which output format?
@@ -301,12 +302,12 @@ drvWMF::derivedConstructor(drvWMF):
 		// if -nb is set, then narrowbox = false , -nb means no bounding box 
 		if (options->winbb) {
 			if (Verbose()) errf << " Windows will calculate BB " << endl;
-			metaDC = CreateEnhMetaFile(desktopDC, NIL, NIL, NIL);
+			metaDC = CreateEnhMetaFile(desktopDC, nullptr, nullptr, nullptr);
 		} else {
 	// under non Windows systems we cannot use PlayEnhMetafile
 			if (Verbose()) errf << " not creating with bounding box " << endl;
 			// metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), &bbox , description);
-			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), NIL, description);
+			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), nullptr, description);
 		}
 
 		if (!metaDC) {
@@ -329,8 +330,8 @@ drvWMF::derivedConstructor(drvWMF):
 			ctorOK = false;
 			return;
 		}
-
-		if ((outFile = fopen(outFileName.c_str(), "wb")) == nullptr) {
+		const auto outFile_err = fopen_s(&outFile, outFileName.c_str(), "wb");
+		if (outFile_err) {
 			errf << "ERROR: cannot open final metafile " << outFileName << endl;
 			ctorOK = false;
 			return;
@@ -348,7 +349,7 @@ drvWMF::derivedConstructor(drvWMF):
 #ifdef _WIN32
 static void writeErrorCause(const char * mess)  
 {
-	DWORD ec = GetLastError(); 
+	const DWORD ec = GetLastError(); 
 	LPVOID lpMsgBuf; 
 	(void)FormatMessage( 
 		FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM, 
@@ -369,7 +370,7 @@ static inline void writeErrorCause(const char * )  {}
 const int WMF_short_max = 32767;
 const int WMF_short_min = -32768;
 
-static short int_to_WMFRange(int i) {
+static constexpr short int_to_WMFRange(int i) {
 	return i <  WMF_short_min
 		     ? WMF_short_min
 			 : ((i > WMF_short_max)
@@ -476,7 +477,7 @@ drvWMF::~drvWMF()
 			if (Verbose()) cout << "creating final metafile" << endl;
 			// cout << "creating with bounding box 2: " << minX << "," << minY<< "," << maxX<< "," << maxY << endl;
 			// don't need a BB here - Windows will calculate it by itself (that is the whole purpose of the later replay)
-			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), NIL, description);
+			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), nullptr, description);
 			initMetaDC(metaDC);
 		}
 		if (metaDC) {
@@ -510,11 +511,10 @@ drvWMF::~drvWMF()
 		// add placeable header to standard metafile
 
 		PLACEABLEHEADER pHd;
-		FILE *inFile;
+		FILE *inFile = nullptr;
 		WORD checksum;
-	
-
-		if ((inFile = fopen(tempName.c_str(), "rb")) != nullptr) {
+		const auto inFile_err = fopen_s(&inFile, tempName.c_str(), "rb");
+		if (!inFile_err) {
 			if (outFile != nullptr) {
 				// setup header
 				pHd.key = LittleEndian_Dword32(PLACEABLEKEY);
@@ -542,7 +542,7 @@ drvWMF::~drvWMF()
 				do {
 					const int BUFSIZE = 1024;
 					char buf[BUFSIZE];
-					size_t read = fread(buf, 1, BUFSIZE, inFile);
+					const size_t read = fread(buf, 1, BUFSIZE, inFile);
 
 					if (read > 0) {
 						if (fwrite(buf, 1, read, outFile) != read) {
@@ -717,10 +717,10 @@ int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int
 		strstr(textinfo.currentFontFullName.c_str(), "Black"))
 		theFontRec.lfWeight = FW_BOLD;	// other values don't work
 
-	if ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL) ||
-		(strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL) ||
-		(strstr(textinfo.currentFontFullName.c_str(), "Italic") != NIL) ||
-		(strstr(textinfo.currentFontFullName.c_str(), "Oblique") != NIL)) {
+	if ((strstr(textinfo.currentFontName.c_str(), "Italic") != nullptr) ||
+		(strstr(textinfo.currentFontName.c_str(), "Oblique") != nullptr) ||
+		(strstr(textinfo.currentFontFullName.c_str(), "Italic") != nullptr) ||
+		(strstr(textinfo.currentFontFullName.c_str(), "Oblique") != nullptr)) {
 		theFontRec.lfItalic = TRUE;
 	} else {
 		theFontRec.lfItalic = 0;
@@ -733,11 +733,11 @@ int drvWMF::fetchFont(const TextInfo & textinfo, short int textHeight, short int
 	theFontRec.lfQuality = PROOF_QUALITY;
 	theFontRec.lfPitchAndFamily = VARIABLE_PITCH | FF_DONTCARE;	// let every font be possible
 
-	if ((strstr(textinfo.currentFontFullName.c_str(), "Symbol") != NIL) ||
-		(strstr(textinfo.currentFontFullName.c_str(), "symbol") != NIL)) {
+	if ((strstr(textinfo.currentFontFullName.c_str(), "Symbol") != nullptr) ||
+		(strstr(textinfo.currentFontFullName.c_str(), "symbol") != nullptr)) {
 		theFontRec.lfCharSet = SYMBOL_CHARSET;
 		strcpy_s(theFontRec.lfFaceName, LF_FACESIZE, "symbol");
-	} else if ((strstr(textinfo.currentFontFamilyName.c_str(), "Computer Modern") != NIL) ) {
+	} else if ((strstr(textinfo.currentFontFamilyName.c_str(), "Computer Modern") != nullptr) ) {
 		// special handling for TeX Fonts - fix supplied by James F. O'Brien (job at cs.berkeley.edu)
         theFontRec.lfWeight = FW_NORMAL;
   	    theFontRec.lfItalic = 0;
@@ -841,7 +841,7 @@ void drvWMF::drawPoly(polyType type)
 		switch (elem.getType()) {
 		case moveto:
 			if (type == TYPE_LINES) {
-				if (!MoveToEx(metaDC, aptlPoints[p].x, aptlPoints[p].y, NIL)) {
+				if (!MoveToEx(metaDC, aptlPoints[p].x, aptlPoints[p].y, nullptr)) {
 					errf << "ERROR: MoveTo: " << aptlPoints[p].x << "," << aptlPoints[p].y << endl;
 				}
 			} else {
@@ -868,7 +868,7 @@ void drvWMF::drawPoly(polyType type)
 					numOfPolies++;
 				} else if (numOfPts == 2) {
 					// we have a line here, so draw it!
-					if (!MoveToEx(metaDC, aptlPoints[p - 2].x, aptlPoints[p - 2].y, NIL)) {
+					if (!MoveToEx(metaDC, aptlPoints[p - 2].x, aptlPoints[p - 2].y, nullptr)) {
 						errf << "ERROR: MoveTo: " << aptlPoints[p -
 																2].
 							x << "," << aptlPoints[p - 2].y << endl;
@@ -975,7 +975,7 @@ void drvWMF::drawPoly(polyType type)
 			numOfPolies++;
 		} else if (numOfPts == 2) {
 			// we have a line here, so draw it!
-			if (!MoveToEx(metaDC, aptlPoints[p - 2].x, aptlPoints[p - 2].y, NIL)) {
+			if (!MoveToEx(metaDC, aptlPoints[p - 2].x, aptlPoints[p - 2].y, nullptr)) {
 				errf << "ERROR: MoveTo: " << aptlPoints[p -
 														2].x << "," << aptlPoints[p - 2].y << endl;
 			}
@@ -994,7 +994,7 @@ void drvWMF::drawPoly(polyType type)
 			}
 
 			if (!PolyPolygon(metaDC, aptlPoints, aptlNumPts, numOfPolies)) {
-				DWORD ec = GetLastError();
+				const DWORD ec = GetLastError();
 				errf << "ERROR: Polygon could not be drawn: (" << ec << ")" << endl;
 				errf << "Number of Points: " << p << endl;
 				for (unsigned int i = 0; i < p; i++) {
@@ -1079,10 +1079,10 @@ void drvWMF::show_text(const TextInfo & textinfo)
 	const int yOff = abs((int)
 						 (cos(textinfo.currentFontAngle * M_PI / 180) * textHeight + .5));
 
-	const int xMin = (int) min(x1 - xOff, x2 - xOff);
-	const int xMax = (int) max(x1 + xOff, x2 + xOff);
-	const int yMin = (int) min(y1 - yOff, y2 - yOff);
-	const int yMax = (int) max(y1 + yOff, y2 + yOff);
+	const int xMin = (int) std::min(x1 - xOff, x2 - xOff);
+	const int xMax = (int) std::max(x1 + xOff, x2 + xOff);
+	const int yMin = (int) std::min(y1 - yOff, y2 - yOff);
+	const int yMax = (int) std::max(y1 + yOff, y2 + yOff);
 
 	if (minStatus) {
 		if (xMin < minX)
@@ -1201,10 +1201,10 @@ void drvWMF::show_rectangle(const float llx, const float lly, const float urx, c
 
 	// calculate bounding box
 	//
-	const int xMin = (int) min(localRect.left, localRect.right);
-	const int xMax = (int) max(localRect.left, localRect.right);
-	const int yMin = (int) min(localRect.top, localRect.bottom);
-	const int yMax = (int) max(localRect.top, localRect.bottom);
+	const int xMin = (int) std::min(localRect.left, localRect.right);
+	const int xMax = (int) std::max(localRect.left, localRect.right);
+	const int yMin = (int) std::min(localRect.top, localRect.bottom);
+	const int yMax = (int) std::max(localRect.top, localRect.bottom);
 
 	if (minStatus) {
 		if (xMin < minX)
@@ -1267,10 +1267,10 @@ void drvWMF::show_image(const PSImage & imageinfo)
 	}
 	// calculate bounding box
 	//
-	const int xMin = (int) min(transx(upperRight.x_), transx(lowerLeft.x_));
-	const int xMax = (int) max(transx(upperRight.x_), transx(lowerLeft.x_));
-	const int yMin = (int) min(transy(upperRight.y_), transy(lowerLeft.y_));
-	const int yMax = (int) max(transy(upperRight.y_), transy(lowerLeft.y_));
+	const int xMin = (int) std::min(transx(upperRight.x_), transx(lowerLeft.x_));
+	const int xMax = (int) std::max(transx(upperRight.x_), transx(lowerLeft.x_));
+	const int yMin = (int) std::min(transy(upperRight.y_), transy(lowerLeft.y_));
+	const int yMax = (int) std::max(transy(upperRight.y_), transy(lowerLeft.y_));
 
 	if (minStatus) {
 		if (xMin < minX)

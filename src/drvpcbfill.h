@@ -5,7 +5,7 @@
    drvPCBFILL.h : This file is part of pstoedit
    Contributed / Copyright 2004 by: Mark Rages 
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

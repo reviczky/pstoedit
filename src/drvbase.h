@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,6 +47,7 @@
 #include I_stdio
 #include I_stdlib
 #include I_string_h
+#include I_iostream
 USESTD
 
 #ifndef assert
@@ -62,7 +63,7 @@ USESTD
 #endif
 
 // for compatibility checking
-static const unsigned int drvbaseVersion = 108;
+static constexpr unsigned int drvbaseVersion = 108;
 // 101 introduced the driverOK function
 // 102 introduced the font optimization (lasttextinfo_)
 // 103 introduced the -ssp support and the virtual pathscanbemerged
@@ -72,7 +73,7 @@ static const unsigned int drvbaseVersion = 108;
 // 107 new driver descriptions -- added info about clipping
 // 108 new driver descriptions -- added info about driver options
 
-const unsigned int  maxPages     = 10000;   // maximum number of pages - needed for the array of bounding boxes
+constexpr unsigned int  maxPages     = 10000;   // maximum number of pages - needed for the array of bounding boxes
 #if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
  // we can use std::vector
 #else
@@ -107,7 +108,7 @@ public:
 #endif
 	Point transform(const float matrix[6]) const;
 
-	friend ostream & operator<<(ostream & out,const Point &p) {
+	friend ostream & operator<<(ostream & out, const Point &p) {
 		return out << "x: " << p.x_ << " y: " << p.y_ ;
 	}
 
@@ -130,6 +131,8 @@ public:
 #include "psimage.h"
 
 static const char emptyDashPattern[] =  "[ ] 0.0";
+
+constexpr int char_code_of_space = 32;
 
 class basedrawingelement; // forward
 class DriverDescription ; // forward
@@ -204,6 +207,7 @@ public:
 		}
 		TextInfo() :
 			p(0.0f, 0.0f),
+			FontMatrix(),
 			p_end(0.0f, 0.0f),
 //			thetext(0),  // use standard ctor
 			is_non_standard_font(false),
@@ -215,18 +219,18 @@ public:
 			colorName(""),
 			cx(0.0f),
 			cy(0.0f),
-			Char(32), // 32 means space
+			Char(char_code_of_space), 
 			ax(0.0f),
 			ay(0.0f), 
 			mappedtoIsoLatin1(true), 
 			remappedfont(false) {
-			for (int i = 0; i < 6; i++) { FontMatrix[i] = 0.0f; }
+			  // obsolete with new C++ - already done in init
+			  for (int i = 0; i < 6; i++) { FontMatrix[i] = 0.0f; }
 			}
 		~TextInfo() { }
-	private:
-		// declared but not defined
-		// const TextInfo & operator = (const TextInfo &); // default is ok
-		// TextInfo(const TextInfo &); // default is ok
+
+        TextInfo(const TextInfo&) = default;
+		TextInfo& operator=(const TextInfo&) = default;
 	};
 
 private:
@@ -319,7 +323,7 @@ protected:
 		unsigned int savelevel;	
 		SaveRestoreInfo * previous;	
 		SaveRestoreInfo * next;
-		explicit SaveRestoreInfo(SaveRestoreInfo * parent) : clippathlevel(0), previous(parent), next(NIL) 
+		explicit SaveRestoreInfo(SaveRestoreInfo * parent) : clippathlevel(0), previous(parent), next(nullptr) 
 		{ 
 			if (parent) {
 				parent->next=this;
@@ -424,8 +428,10 @@ public:
 	// under windows since the plugins are NOT and extension DLL
 	//
 
+	static bool use_fake_version_and_date; // for regression testing only
 	static const char * VersionString();
 	static void set_VersionString(const char * v);
+	static RSString DateString();
 
 	void		setdefaultFontName(const char * n) {defaultFontName = n;}
 
@@ -442,19 +448,19 @@ public:
 	static float           getScale() { return 1.0f; }
 
 	inline long l_transX			(float x) const	{
-		return (long)((x + x_offset) + .5);	// rounded long	
+		return static_cast <long>((x + x_offset) + 0.5f);	// rounded long	
 	}
 
 	inline long l_transY			(float y) const {
-		return (long)((-1.0f*y + y_offset) + .5);	// rounded long, mirrored
+		return static_cast <long>((-1.0f*y + y_offset) + 0.5f);	// rounded long, mirrored
 	}
 
 	inline int i_transX			(float x) const	{
-		return (int)((x + x_offset) + .5);	// rounded int	
+		return static_cast <int>((x + x_offset) + 0.5f);	// rounded int	
 	}
 
 	inline int i_transY			(float y) const {
-		return (int)((-1.0f*y + y_offset) + .5);	// rounded int, mirrored
+		return static_cast <int>((-1.0f*y + y_offset) + 0.5f);	// rounded int, mirrored
 	}
 
 	inline float f_transX			(float x) const	{
@@ -588,12 +594,12 @@ public:
 				        const char *const thetext,
 					const float x, 
 					const float y,
-					const char * const glyphnames=0);
+					const char * const glyphnames=nullptr);
 
 	void		pushHEXText(const char *const thetext, 
 					const float x, 
 					const float y,
-					const char * const glyphnames=0);
+					const char * const glyphnames=nullptr);
 
 	void		flushTextBuffer(bool useMergeBuffer); // flushes text from the text (merge) buffer 
 	void		showOrMergeText();
@@ -603,7 +609,7 @@ public:
 	// If a backend only deals with a special set of font names
 	// the following function must return a 0 terminated list
 	// of font names.
-	virtual const char * const * 	knownFontNames() const { return 0; }
+	virtual const char * const * 	knownFontNames() const { return nullptr; }
 
 	// The next functions are virtual with a default empty implementation
 
@@ -752,7 +758,8 @@ class DLLEXPORT basedrawingelement
 {
 public:
 	// default ctor sufficient since no members anyway
-//	basedrawingelement(unsigned int size_p) /*: size(size_p) */ {}
+	basedrawingelement() = default;	
+	virtual ~basedrawingelement() = default;
 	virtual const Point &getPoint(unsigned int i) const = 0;
 	virtual Dtype getType() const = 0;
 	friend ostream & operator<<(ostream & out, const basedrawingelement &elem);
@@ -763,16 +770,14 @@ public:
 	// of memory needs to be done by the same dll which did the allocation.
 	// this is not simply achieved if plugins are loaded as DLL.
 	virtual void deleteyourself() { delete this; } 
-	virtual ~basedrawingelement() = default;
-private:
-//	const unsigned int size;
+	NOCOPYANDASSIGN(basedrawingelement)
 };
 
 
 inline void copyPoints(unsigned int nr, const Point src[], Point target[])
 {
 // needed because CenterLine cannot inline for loops
-	for (unsigned int i = 0 ; i < nr ; i++ ) target[i] = src[i]; 
+	for (size_t i = 0 ; i < nr ; i++ ) target[i] = src[i]; 
 }
 
 template <unsigned int nr, Dtype curtype>
@@ -831,15 +836,16 @@ public:
 #endif
 		return points[i]; 
 	}
-	virtual Dtype getType() const 		     { return (Dtype) curtype; }
+	virtual Dtype getType() const 		     { return static_cast <Dtype>(curtype); }
 						// This cast (Dtype) is necessary
 						// to eliminate a compiler warning
 						// from the SparcCompiler 4.1.
 						// although curtype is of type Dtype
 	virtual unsigned int getNrOfPoints() const { return nr; }
 private:
-	Point points[(nr > 0) ? nr : (unsigned int)1]; //lint !e62 //Incompatible types (basic) for operator ':'
-	const drawingelement<nr,curtype> &  operator=( const drawingelement<nr,curtype> & rhs ); // not implemented
+	Point points[(nr > 0) ? nr : static_cast <unsigned int>(1)]; //lint !e62 //Incompatible types (basic) for operator ':'
+	drawingelement() = delete;
+	const drawingelement<nr, curtype>& operator=(const drawingelement<nr, curtype>& rhs) = delete;
 };
 
 
@@ -882,9 +888,9 @@ class DLLEXPORT DescriptionRegister
 {
 	enum {maxelems = 100 };
 public:
-	DescriptionRegister() :ind(0) { 
-		for (int i = 0; i < maxelems; i++) rp[i] = 0; 
-	//	cout << " R constructed " << (void *) this << endl;
+	DescriptionRegister() :rp(), ind(0) { 
+		// obsolete with new C++ - already done in init
+		for (int i = 0; i < maxelems; i++) rp[i] = nullptr; 
 	}
 #if 0
 	// removed - since otherwise one gets a runtime error when the .so is unloaded 
@@ -940,14 +946,15 @@ typedef bool (*checkfuncptr)(void);
 class drvbase;
 
 struct OptionDescription {
-	OptionDescription(const char * n = 0, const char * p = 0, const char * d = 0) :Name(n), Parameter(p), Description(d) {}
-	const char * const Name;
-	const char * const Parameter;   // e.g. "String" or "numeric", or 0 (implicitly a boolean option then (no argument)
-	const char * const Description; // 
+	OptionDescription(const char * n, const char * p, const char * d) :Name(n), Parameter(p), Description(d) {}
+	const char * const Name = nullptr;
+	const char * const Parameter = nullptr;   // e.g. "String" or "numeric", or 0 (implicitly a boolean option then (no argument)
+	const char * const Description = nullptr; // 
 private:
-//	OptionDescription(const OptionDescription&);
-	const OptionDescription& operator=(const OptionDescription&);
 // no special copy ctor, assignment op or dtor needed since this class is NOT owner of the (static) strings.
+	OptionDescription() = delete;
+	OptionDescription(const OptionDescription&) = delete;
+	const OptionDescription& operator=(const OptionDescription&) = delete;
 };
 
 // An Array of OptionDescription is delimited by an element where Name is 0
@@ -977,10 +984,10 @@ public:
 			const bool	nativedriver_p = true,
 			checkfuncptr checkfunc_p = 0);
 	virtual ~DriverDescription() {
-		//		symbolicname = NIL; // these are const
-		//		explanation= NIL;
-		//		suffix= NIL;
-		//		additionalInfo= NIL;
+		//		symbolicname = nullptr; // these are const
+		//		explanation= nullptr;
+		//		suffix= nullptr;
+		//		additionalInfo= nullptr;
 	} //lint !e1540
 
 	virtual drvbase * CreateBackend (const char * const driveroptions_P,
@@ -1138,6 +1145,8 @@ woglvector<const DriverDescriptionT<T> *> DriverDescriptionT<T>::instances;
 #undef max
 #endif
 
+#if 0
+// should come from algorithm now
 #ifndef min
 template <class T>
 inline T min(T x, T y)
@@ -1152,6 +1161,7 @@ inline T max(T x, T y)
 {
 	return (x>y) ? x:y;
 }
+#endif
 #endif
 
 #endif

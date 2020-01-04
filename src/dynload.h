@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,8 +29,14 @@
 class DLLEXPORT DynLoader 
 {
 public:
+#if defined (_WIN64)
+	typedef long long(*fptr)(); // typedef FARPROC fptr;
+#elif defined (_WIN32)
+	typedef int (*fptr)(); // typedef FARPROC fptr;
+#else
 	typedef void (*fptr)(); // any signature possible, but is has to be a function pointer.
 							// the new standard does not allow to mix normal and function pointers.
+#endif
 	static fptr ptr_to_fptr(void *); // need a function since C++ does not allow a simple cast.
 	explicit DynLoader(const char * libname_P = nullptr, std::ostream & errstream_p = std::cerr, int verbose_p = 0);
 	~DynLoader();

@@ -72,7 +72,7 @@ class drvNOI: public drvbase
 	void show_image(const PSImage &imageinfo) override;
 	// void translate(Point &p, float x, float y);
   private:
-	int imgcount;
+	// int imgcount; // not used
 	
     DynLoader hProxyDLL;               // Handle to DLL
 	void LoadNOIProxy();

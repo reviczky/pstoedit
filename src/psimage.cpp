@@ -1,7 +1,7 @@
 /*
    psimage.cpp : This file is part of pstoedit.
   
-   Copyright (C) 1997- 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1997- 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
    Support for Image::writeIdrawImage by Scott Johnston
 
@@ -27,11 +27,17 @@
 #endif
 
 #include <cmath>
+#include <algorithm>
 
 #include "drvbase.h"
 #include "pstoedit_config.h"
  
 #include I_iomanip
+
+using std::dec;
+using std::setw;
+using std::setfill;
+using std::hex;
 
 #if 0
 //{ should be obsolete - since now PNG images are written directly by Ghostscript
@@ -76,13 +82,13 @@ void PSImage::writePNGImage(const char *FileNameP, const char *source,
 	png_infop info_ptr = png_create_info_struct(png_ptr);
 	if (!info_ptr) {
 		cerr << "error in png_create_info_struct " << endl;
-		png_destroy_write_struct(&png_ptr, NIL);
+		png_destroy_write_struct(&png_ptr, nullptr);
 		return;
 	}
 
 	if (setjmp(png_jmpbuf(png_ptr))) {
 		cerr << "error in libpng " << endl;
-		png_destroy_write_struct(&png_ptr, NIL);
+		png_destroy_write_struct(&png_ptr, nullptr);
 		return;
 	}
 
@@ -193,7 +199,7 @@ void PSImage::writePNGImage(const char *FileNameP, const char *source,
 
 	png_set_rows(png_ptr, info_ptr, row_pointers);
 
-	png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, NIL);
+	png_write_png(png_ptr, info_ptr, PNG_TRANSFORM_IDENTITY, nullptr);
 
 // free memory  !!!!!!!!!!!!!!!!
 
@@ -276,19 +282,19 @@ void PSImage::calculateBoundingBox()
 //  }
 	// calculate image bounding box in device space
 	const int border = 0;		// subtract 1 or 0;
-	Point P1(0.0f, 0.0f);
-	Point P1T = P1.transform(normalizedImageCurrentMatrix);
-	Point P2((float) (width - border), (float) (height - border));
-	Point P2T = P2.transform(normalizedImageCurrentMatrix);
-	Point P3(0.0f, (float) (height - border));
-	Point P3T = P3.transform(normalizedImageCurrentMatrix);
-	Point P4((float) (width - border), 0.0f);
-	Point P4T = P4.transform(normalizedImageCurrentMatrix);
+	const Point P1(0.0f, 0.0f);
+	const Point P1T = P1.transform(normalizedImageCurrentMatrix);
+	const Point P2((float) (width - border), (float) (height - border));
+	const Point P2T = P2.transform(normalizedImageCurrentMatrix);
+	const Point P3(0.0f, (float) (height - border));
+	const Point P3T = P3.transform(normalizedImageCurrentMatrix);
+	const Point P4((float) (width - border), 0.0f);
+	const Point P4T = P4.transform(normalizedImageCurrentMatrix);
 
-	ur.x_ = max(max(P1T.x_, P2T.x_), max(P3T.x_, P4T.x_));
-	ur.y_ = max(max(P1T.y_, P2T.y_), max(P3T.y_, P4T.y_));
-	ll.x_ = min(min(P1T.x_, P2T.x_), min(P3T.x_, P4T.x_));
-	ll.y_ = min(min(P1T.y_, P2T.y_), min(P3T.y_, P4T.y_));
+	ur.x_ = std::max(std::max(P1T.x_, P2T.x_), std::max(P3T.x_, P4T.x_));
+	ur.y_ = std::max(std::max(P1T.y_, P2T.y_), std::max(P3T.y_, P4T.y_));
+	ll.x_ = std::min(std::min(P1T.x_, P2T.x_), std::min(P3T.x_, P4T.x_));
+	ll.y_ = std::min(std::min(P1T.y_, P2T.y_), std::min(P3T.y_, P4T.y_));
 }
 
 
@@ -416,7 +422,7 @@ void PSImage::writeEPSImage(ostream & outi) const
 	outi << "] concat" << endl << endl;
 
 	switch (type) {
-	case colorimage:
+	case ImageType::colorimage:
 		outi << "/str1 1 string def" << endl << endl;
 		outi << "% display color image" << endl;
 		outi << width << " " << height << " " << bits << " % width, height, bits/component" << endl;
@@ -434,9 +440,9 @@ void PSImage::writeEPSImage(ostream & outi) const
 			outi << setfill(' ') << dec; // reset
 		}
 		break;
-	case imagemask:
+	case ImageType::imagemask:
 		// just treat it as a normal image for the moment
-	case normalimage:
+	case ImageType::normalimage:
 		outi << "/str1 1 string def" << endl << endl;
 		outi << "% display normal image" << endl;
 		outi << width << " " << height << " " << bits << " % width, height, bits/component" << endl;
@@ -490,14 +496,14 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 
 	/* compute the scaled, transformed center and subtract it out. */
 	int mat00 = 0, mat01 = 1, mat10 = 2, mat11 = 3, mat20 = 4, mat21 = 5;
-	float centerx = width / 2.0f;
-	float centery = height / 2.0f;
-	float ncx = centerx * scaledMatrix[mat00] + centery * scaledMatrix[mat10] + scaledMatrix[mat20];
-	float ncy = centerx * scaledMatrix[mat01] + centery * scaledMatrix[mat11] + scaledMatrix[mat21];
+	const float centerx = width / 2.0f;
+	const float centery = height / 2.0f;
+	const float ncx = centerx * scaledMatrix[mat00] + centery * scaledMatrix[mat10] + scaledMatrix[mat20];
+	const float ncy = centerx * scaledMatrix[mat01] + centery * scaledMatrix[mat11] + scaledMatrix[mat21];
 	finalMatrix[4] -= ncx;
 	finalMatrix[5] -= ncy;
 
-	float verticalInvertingMatrix[6] = { 1, 0, 0, -1, 0, 0 };
+	const float verticalInvertingMatrix[6] = { 1, 0, 0, -1, 0, 0 };
 	float tmp =
 		finalMatrix[mat00] * verticalInvertingMatrix[mat01] +
 		finalMatrix[mat01] * verticalInvertingMatrix[mat11];
@@ -595,7 +601,7 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 			outi << endl << "%I ";
 			for (unsigned int col = 0; col < width; col++) {
 				unsigned int grayval;
-				if (type == colorimage) {
+				if (type == ImageType::colorimage) {
 					grayval = (unsigned int)
 						(.299 * dataptr[cur]
 						 + .587 * dataptr[cur+1]
@@ -615,7 +621,7 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 		for (unsigned int row = 0; row < height; row++) {
 			outi << endl << "%I ";
 			for (unsigned int col = 0; col < width; col++) {
-				if (type == colorimage) {
+				if (type == ImageType::colorimage) {
 					outi << setw(2) << setfill('0') << hex << (unsigned int) dataptr[cur++] << dec;
 					outi << setw(2) << setfill('0') << hex << (unsigned int) dataptr[cur++] << dec;
 					outi << setw(2) << setfill('0') << hex << (unsigned int) dataptr[cur++] << dec;

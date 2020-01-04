@@ -620,16 +620,16 @@ void drvSVM::show_text(const TextInfo& textinfo)
             strstr(textinfo.currentFontFullName.c_str(), "Black"))
             fontWeigth = 10;	// black
 
-        if ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL) ||
-            (strstr(textinfo.currentFontFullName.c_str(), "Italic") != NIL))
+        if ((strstr(textinfo.currentFontName.c_str(), "Italic") != nullptr) ||
+            (strstr(textinfo.currentFontFullName.c_str(), "Italic") != nullptr))
             fontItalic = 2; // normal italics
 
-        if ((strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL) ||
-            (strstr(textinfo.currentFontFullName.c_str(), "Oblique") != NIL))
+        if ((strstr(textinfo.currentFontName.c_str(), "Oblique") != nullptr) ||
+            (strstr(textinfo.currentFontFullName.c_str(), "Oblique") != nullptr))
             fontItalic = 1; // oblique italics
 
-        if ((strstr(textinfo.currentFontFullName.c_str(), "Symbol") != NIL) ||
-            (strstr(textinfo.currentFontFullName.c_str(), "symbol") != NIL)) {
+        if ((strstr(textinfo.currentFontFullName.c_str(), "Symbol") != nullptr) ||
+            (strstr(textinfo.currentFontFullName.c_str(), "symbol") != nullptr)) {
             charSet = 10; // symbol charset
             fontName = symbolName;
         } else {
@@ -872,7 +872,7 @@ void drvSVM::show_image(const PSImage& imageinfo)
 					unsigned char C = imageinfo.getComponent(sourceX, sourceY, 0);
 					unsigned char M = imageinfo.getComponent(sourceX, sourceY, 1);
 					unsigned char Y = imageinfo.getComponent(sourceX, sourceY, 2);
-					unsigned char K = imageinfo.getComponent(sourceX, sourceY, 3);
+					const unsigned char K = imageinfo.getComponent(sourceX, sourceY, 3);
 
 					// account for key
 					C += K;

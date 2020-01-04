@@ -154,14 +154,14 @@ static void save_string(ostream & outf, size_t len, const char *str)
 {
 	outf << '"';
 	while (len-->0) {
-		int c = *str++ & 0xFF;
+		const int c = *str++ & 0xFF;
 		if (c >= 0 && c <= 127 && isprint(c)) {
 			if (c == '"')
 				outf << '\\';
 			outf << char (c);
 		} else {
-			outf << '\\' << oct << setw(3) << setfill('0') << c;
-			outf << dec << setfill(' '); // reset to std
+			outf << '\\' << std::oct << std::setw(3) << std::setfill('0') << c;
+			outf << std::dec << std::setfill(' '); // reset to std
 		}
 	}
 	outf << '"';
@@ -176,9 +176,9 @@ void drvSK::show_text(const TextInfo & textinfo)
 	save_string(outf, textinfo.thetext.length(), textinfo.thetext.c_str());
 	outf << ",(";
 	if (textinfo.currentFontAngle) {
-		double angle = textinfo.currentFontAngle * PI / 180.0;
-		double c = cos(angle);
-		double s = sin(angle);
+		const double angle = textinfo.currentFontAngle * PI / 180.0;
+		const double c = cos(angle);
+		const double s = sin(angle);
 		outf << c << "," << s << "," << -s << "," << c << ",";
 	}
 	outf << textinfo.x() << ", " << textinfo.y() << "))\n";
@@ -279,7 +279,7 @@ void drvSK::show_image(const PSImage & imageinfo)
 	C_ostrstream ppm;
 
 	switch (imageinfo.type) {
-	case colorimage:
+	case ImageType::colorimage:
 		if (imageinfo.ncomp != 3 || imageinfo.bits != 8) {
 			cerr << "color images must have 8 bits/component " "and 3 components\n";
 			cerr << "(image has " << imageinfo.ncomp << " with "
@@ -289,7 +289,7 @@ void drvSK::show_image(const PSImage & imageinfo)
 		ppm << "P6\n";
 		break;
 
-	case normalimage:
+	case ImageType::normalimage:
 		if (imageinfo.bits != 8) {
 			cerr << "gray images must have 8 bits/component ";
 			cerr << "(image has " << imageinfo.bits << " bits/component)\n";
@@ -297,7 +297,7 @@ void drvSK::show_image(const PSImage & imageinfo)
 		}
 		ppm << "P5\n";
 		break;
-	case imagemask:
+	case ImageType::imagemask:
 		ppm << "P4\n";
 		break;
 	default:
@@ -305,19 +305,19 @@ void drvSK::show_image(const PSImage & imageinfo)
 	}
 
 	ppm << imageinfo.width << " " << imageinfo.height << '\n';
-	if (imageinfo.type != imagemask) {
+	if (imageinfo.type != ImageType::imagemask) {
 		// bug according to Jeff Dairiki ppm << imageinfo.bits << '\n';
 		ppm << ((1 << imageinfo.bits) -1)  << '\n';
 	}
 
-	int imageid = getid();
+	const int imageid = getid();
 	outf << "bm(" << imageid << ")\n";
 
 	{
 	Base64Writer base64writer(outf);
 
 #ifdef  USE_NEWSTRSTREAM
-	string temp = ppm.str();
+	std::string temp = ppm.str();
 	// basic_string<char, std::char_traits<char>, std::allocator<char> >	 temp = ppm.str();
 	const unsigned char * ppmdata = (const unsigned char*) temp.data();
 	(void)base64writer.write_base64( ppmdata, temp.size());

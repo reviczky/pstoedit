@@ -6,7 +6,7 @@
    Backend for MetaPost files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,14 +56,14 @@ public:
 private:
 	void print_coords();
 	// Previous values of graphics state variables
- 	string prevFontName;
+    std::string prevFontName;
 	float prevR, prevG, prevB;
  	float prevFontAngle;
  	float prevFontSize;
 	float prevLineWidth;
 	unsigned int prevLineCap;
 	unsigned int prevLineJoin;
-	string prevDashPattern;
+    std::string prevDashPattern;
 
 	// Set to true if we're filling, false if we're stroking
 	bool fillmode;

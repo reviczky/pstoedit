@@ -10,7 +10,7 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT([pstoedit],[3.74],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
+AC_INIT([pstoedit],[3.75],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([foreign subdir-objects info-in-builddir -Wall])
@@ -24,6 +24,12 @@ dnl seems to be broken : AC_LIBTOOL_TAGS([CXX])
 dnl Check for various programs the Makefile needs.
 AC_PROG_CC
 AC_PROG_CXX
+
+AC_MSG_CHECKING(for g++ std)
+AC_COMPILE_IFELSE([AC_LANG_SOURCE([[ constexpr int ce = 10; int * p = nullptr; ]])],
+               [AC_MSG_RESULT(you seem to have suitable version of g++)],
+               [AC_MSG_ERROR([your version of g++ seems to be too old.])])
+
 AC_PROG_AWK
 AC_PROG_YACC
 AM_PROG_AR
@@ -48,7 +54,6 @@ AC_CHECK_PROGS([GS],[gs],[false])
 AS_IF([test x"${GS}" = xfalse],[AC_MSG_ERROR([** Cannot find ghostscript.  If it is already installed, Check PATH.])])
 
 PKG_PROG_PKG_CONFIG
-
 
 AC_C_BIGENDIAN([CPPFLAGS="$CPPFLAGS -D_BIG_ENDIAN"], [CPPFLAGS="$CPPFLAGS -D_LITTLE_ENDIAN"])
 
@@ -77,8 +82,6 @@ dnl some optional packages - default is to check automatically
 dnl but the check can be disabled using --without-PACKAGE
 dnl legal PACKAGE names are:
 dnl emf, magick, libplot, swf
-
-
 
 # When doc regeneration is enabled, these are needed:
 AC_CHECK_PROGS([PDFLATEX],[pdflatex],[false])

@@ -65,9 +65,10 @@ public:
 
 private:
 	// declared but not defined
-	Base64Writer(const Base64Writer&);
-	Base64Writer();
-	const Base64Writer& operator=(const Base64Writer&);
+	NOCOPYANDASSIGN(Base64Writer)
+	//Base64Writer(const Base64Writer&);
+	Base64Writer() = delete;
+	//const Base64Writer& operator=(const Base64Writer&);
 };
 
 #endif

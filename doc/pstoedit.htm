@@ -1,7 +1,7 @@
 <!-- *********************************** start of \input{version.tex} -->
 <!-- *********************************** end of \input{version.tex} -->
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">
-<!-- Manual page created with latex2man on So,  2. Jun 2019 20:10:33
+<!-- Manual page created with latex2man on Thu Jan  2 15:41:59 CET 2020
 ** Author of latex2man: Juergen.Vollmer@informatik-vollmer.de
 ** NOTE: This file is generated, DO NOT EDIT. -->
 <html>
@@ -11,8 +11,8 @@
 PSTOEDIT 
 </h1>
 <h4 align=center>Dr. Wolfgang Glunz </h4>
-<h4 align=center>02 June 2019</h4>
-<h4 align=center>Version 3.74</h4>
+<h4 align=center>02 January 2020</h4>
+<h4 align=center>Version 3.75</h4>
 <tt>pstoedit</tt>
 - a tool converting PostScript and PDF files into various 
 vector graphic formats 
@@ -108,7 +108,7 @@ vector graphic formats
 <p>
 <tt>pstoedit</tt>
 [<b>-v -help</b>]
-BREAK 
+<br>
 <p>
 <tt>pstoedit</tt>
 <!-- *********************************** start of \input{generalhelpshort.tex} -->
@@ -196,7 +196,7 @@ details.
 <h4><a name="section_6">RELEASE LEVEL</a></h4>
 
 <p>
-This manpage documents release 3.74 of <tt>pstoedit</tt>.
+This manpage documents release 3.75 of <tt>pstoedit</tt>.
 <p>
 <h4><a name="section_7">USE</a></h4>
 
@@ -515,10 +515,13 @@ Just use this option in case the new heuristic introduced in 3.5 does not produc
 <dt>[<font class="optstyle">-fontmap</font><font class="argstyle">&nbsp;name of font map file for pstoedit</font>]
 </dt>
 <dd> 
-The font map is a simple text file containing lines in the following format:BREAK 
+The font map is a simple text file containing lines in the following format:<br>
+
 <p>
-<tt>document_font_name target_font_name</tt>BREAK 
-Lines beginning with <tt>%</tt> are considerd comments.BREAK 
+<tt>document_font_name target_font_name</tt><br>
+ 
+Lines beginning with <tt>%</tt> are considerd comments.<br>
+
 For font names with spaces use the <tt>"font name with spaces"</tt> notation. 
 <p>
 If a target_font_name starts with /, it is regarded as alias to a former entry. 
@@ -535,7 +538,8 @@ in the installation directory and uses that file as a default fontmap file if av
 <li>MS Windows: The same directory where the <tt>pstoedit</tt> executable is located
 <p>
 </li>
-<li>Unix:BREAK 
+<li>Unix:<br>
+ 
 The default installation directory. If it fails, then &lt;<em>The directory where the pstoedit executable is located</em>&gt;
 <tt>/../lib/</tt> 
 <p>
@@ -719,7 +723,7 @@ enclosed within double-quote characters, thus:
 <p>
 To see which options are supported by a specific format, type: 
 <strong>pstoedit -f format:-help</strong>
-BREAK 
+<br>
 <p>
 The following description of the different formats supported by pstoedit is extracted from the source code of the individual drivers. 
 <p>

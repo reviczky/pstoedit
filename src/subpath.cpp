@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2019  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1999 - 2020  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -204,7 +204,7 @@ void sub_path::new_points()
 
 // calculate a 2 x 2 determinant
 
-static inline double ddet(const double a11, const double a12, const double a21, const double a22)
+static constexpr double ddet(const double a11, const double a12, const double a21, const double a22)
 {
 	return a11 * a22 - a21 * a12;
 }
@@ -226,7 +226,7 @@ bool sub_path::point_inside(const Point & p) const
 	// Burkhard: Bugfix 
 
 	for (unsigned int i = 0; i < num_points; i++) {
-		unsigned int j = (i == num_points - 1) ? 0 : i + 1;
+		const unsigned int j = (i == num_points - 1) ? 0 : i + 1;
 		const double x3 = points[i].x_;
 		const double y3 = points[i].y_;
 		const double x4 = points[j].x_;
@@ -396,8 +396,8 @@ void sub_path_list::read(const drvbase::PathInfo & path_info)
 }
 
 
-static float get_min_distance( basedrawingelement * const * p1,
-							   basedrawingelement * const * p2,
+static float get_min_distance( const basedrawingelement * const * p1,
+							   const basedrawingelement * const * p2,
 							  unsigned int size1,
 							  unsigned int size2, unsigned int &index1, unsigned int &index2)
 {

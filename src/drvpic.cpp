@@ -259,7 +259,7 @@ void drvPIC::show_text(const TextInfo & textinfo)
 {
 	const char *fontname = textinfo.currentFontName.c_str();
 	const char *fontweight = textinfo.currentFontWeight.c_str();
-	int pointsize = (textinfo.currentFontSize < 2.0) ? 0 : (int) (textinfo.currentFontSize + 1.8);
+	const int pointsize = (textinfo.currentFontSize < 2.0) ? 0 : (int) (textinfo.currentFontSize + 1.8);
 	// BUG: point size is strange...
 	const char *tfont = nullptr;
 

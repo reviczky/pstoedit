@@ -3,7 +3,7 @@
 /*
    psimage.h : This file is part of pstoedit.
   
-   Copyright (C) 1997 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1997 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #endif
 #include "miscutil.h"
 
-enum ImageType { colorimage, normalimage, imagemask }; 
+enum class ImageType { colorimage, normalimage, imagemask }; 
 	// maybe do subclassing later
 
 class DLLEXPORT PSImage
@@ -45,13 +45,15 @@ public:
 	bool isFileImage; // true for PNG file images (Q: is this orthogonal to ImageType ? - I guess yes)
 	RSString FileName; // for PNG file images
 
-	PSImage(): type(colorimage),height(0),width(0),bits(0),ncomp(0),
-		polarity(true),data(0),nextfreedataitem(0),isFileImage(false),FileName("") 
+	PSImage(): type(ImageType::colorimage),height(0),width(0),bits(0),ncomp(0), imageMatrix(), normalizedImageCurrentMatrix(),
+		polarity(true),data(nullptr),nextfreedataitem(0),isFileImage(false),FileName("") 
 		{ 
-			for (int i = 0; i < 6 ; i++) 
+			for (int i = 0; i < 6; i++) {
+				// obsolete with new C++ - already done in init
 				imageMatrix[i] = normalizedImageCurrentMatrix[i] = 0.0f;
+			}	
 		}
-	~PSImage() { delete [] data; data = 0; nextfreedataitem = 0;}
+	~PSImage() { delete [] data; data = nullptr; nextfreedataitem = 0;}
 	void writeEPSImage(ostream & outi) const;
 	void writeIdrawImage(ostream & outi, float scalefactor) const;
 //obsolete	void writePNGImage(const char * pngFileName, const char * source, const char * title, const char * generator) const;

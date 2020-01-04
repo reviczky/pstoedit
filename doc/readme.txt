@@ -1,5 +1,5 @@
 PSTOEDIT 
-Copyright (C) 1993 - 2015 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 pstoedit converts PostScript(TM) and PDF files to other vector graphic
 formats so that they can be edited graphically. See pstoedit.htm or
@@ -31,7 +31,7 @@ My home address is:
 
 Compiling pstoedit:
 -------------------
-You need a C++ compiler, e.g., g++ (newer than 3.0) to compile pstoedit.
+You need a C++ compiler, e.g., g++ (newer than 6.0) to compile pstoedit.
 
 It is recommended to have libplotter installed. Then you
 get a lot of additional formats for free.

@@ -4,7 +4,7 @@
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -95,7 +95,7 @@ void drvPCB2::gen_preamble(){
 //	outf << "PCB[\"\" 600000 500000]\n\n";
 	if (options->grid != 0.0) {
 		outf << "Grid[";
-		outf << fixed << setprecision(6) << grid;
+		outf << std::fixed << std::setprecision(6) << grid;
 		outf << " 0 0 1]\n\n";
 	} else {
 		outf << "Grid[1000.000000 0 0 0]\n\n";
@@ -185,8 +185,8 @@ void drvPCB2::show_path()
 			       << "\t(\n";
 			{for (unsigned int n = 0; n < numberofvalidelements; n++) {
 				const Point & p = pathElement(n).getPoint(0);
-				int x = grid_snap (pcbScale_x(p), round_success),
-				    y = grid_snap (pcbScale_y(p), round_success);
+				const int x = grid_snap (pcbScale_x(p), round_success);
+				const int y = grid_snap (pcbScale_y(p), round_success);
 				*layer << "\t\t[" << x << " " << y << "]\n";
 			}}
 			*layer << "\t)\n";

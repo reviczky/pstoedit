@@ -5,7 +5,7 @@
    drvPDF.h : This file is part of pstoedit
    Backend for PDF format 
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -45,7 +45,7 @@ private:
 	void starttext();
 	void endtext();
 	void adjustbbox(float x, float y);
-	streampos startPosition[maxobjects];
+	std::streampos startPosition[maxobjects];
 	unsigned int currentobject;
 	unsigned int pagenr;
 	bool 	inTextMode;

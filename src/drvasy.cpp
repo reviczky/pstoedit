@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_geocities.com
+  Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -51,6 +51,9 @@
 // Constructor -- Initialize variables and take other per-document actions
 
 
+using std::ostringstream;
+using std::string;
+
 drvASY::derivedConstructor(drvASY):
   constructBase,
   // Initialize member variables
@@ -70,7 +73,7 @@ drvASY::derivedConstructor(drvASY):
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2019 Wolfgang Glunz"
+       << "// pstoedit is Copyright (C) 1993 - 2020 Wolfgang Glunz"
        << " <wglunz35_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
@@ -126,9 +129,9 @@ void drvASY::print_coords()
 	  if(firstpoint) {
 	    firstpoint=false;
 	    // ignore a spurious moveto
-	    unsigned int next=n+1;
+	    const unsigned int next=n+1;
 	    if(next == numberOfElementsInPath()) break;
-	    Dtype nexttype=pathElement(next).getType();
+	    const Dtype nexttype=pathElement(next).getType();
 	    if(nexttype == moveto || nexttype == closepath) break;
 	  }
 	} else {
@@ -334,14 +337,14 @@ void drvASY::show_text(const TextInfo & textinfo)
   restore();
   
   // Change fonts
-  string thisFontName(textinfo.currentFontName.c_str());
-  string thisFontWeight(textinfo.currentFontWeight.c_str());
+  std::string thisFontName(textinfo.currentFontName.c_str());
+  std::string thisFontWeight(textinfo.currentFontWeight.c_str());
 
   const double ps2tex=72.27/72.0;
     
   if (thisFontName != prevFontName || thisFontWeight != prevFontWeight) {
     if(textinfo.is_non_standard_font) {
-      size_t n = thisFontName.length();
+      const size_t n = thisFontName.length();
       for(size_t i=0; i < n; i++) thisFontName[i] = (char) tolower(thisFontName[i]);
       outf << "textpen += font(\"" << thisFontName << "\"";
       if(textinfo.currentFontSize > 0) 
@@ -492,7 +495,7 @@ void drvASY::show_path()
     p=currentDashPattern.find(']');
     if(p < string::npos) {
       currentDashPattern[p]='\"';
-      size_t n=currentDashPattern.length();
+      const size_t n=currentDashPattern.length();
       p++;
       if(p < n)
 		(void)currentDashPattern.erase(p,n-p);

@@ -1502,7 +1502,7 @@ char *yytext;
    Simple parser to parse the intermediate flat PostScript and call the backend
    output routines.
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1542,6 +1542,7 @@ static char   *start_of_text;
 static char   *end_of_text;
 static float  number;
 
+#define YY_NO_INPUT
 #define YY_SKIP_YYWRAP
 static int yywrap() { return 1;}
 
@@ -1563,7 +1564,7 @@ static void cleanyytext() {
 }
 
 static inline int toInt(const float f) { 
-	return (f > 0.0f) ? (int)(f+0.5f) : (int)(f-0.5f);
+	return (f > 0.0f) ? static_cast<int>(f+0.5f) : static_cast<int>(f-0.5f);
 }
 
 static inline float minf(float f1, float f2) { return (f1<f2) ? f1:f2; }
@@ -2232,7 +2233,7 @@ grestore %}
 					pstack();
 				}
 				backend->imageInfo.isFileImage = false ;
-				backend->imageInfo.type = colorimage;
+				backend->imageInfo.type = ImageType::colorimage;
 				// ncomp will be written later
 				// bits will be written later
 				backend->imageInfo.polarity = true; 
@@ -2249,7 +2250,7 @@ YY_RULE_SETUP
 					pstack();
 				}
 				backend->imageInfo.isFileImage = true ;
-				backend->imageInfo.type = normalimage;
+				backend->imageInfo.type = ImageType::normalimage;
 				backend->imageInfo.ncomp = 1;
 				// bits will be written later
 				backend->imageInfo.polarity = true; 
@@ -2266,7 +2267,7 @@ YY_RULE_SETUP
 					pstack();
 				}
 				backend->imageInfo.isFileImage = false ;
-				backend->imageInfo.type = normalimage;
+				backend->imageInfo.type = ImageType::normalimage;
 				backend->imageInfo.ncomp = 1;
 				// bits will be written later
 				backend->imageInfo.polarity = true; 
@@ -2283,7 +2284,7 @@ YY_RULE_SETUP
 					pstack();
 				}
 				backend->imageInfo.isFileImage = false ;
-				backend->imageInfo.type = imagemask;
+				backend->imageInfo.type = ImageType::imagemask;
 				backend->imageInfo.ncomp = 1;
 				// polarity will be written later
 				backend->imageInfo.bits = 1;
@@ -2328,7 +2329,7 @@ YY_RULE_SETUP
 					cerr << "handling " << yytext ;
 					pstack();
 				}
-				backend->imageInfo.polarity = toInt(popUnScaled()) > 0.5 ;  // convert from float to bool
+				backend->imageInfo.polarity = popUnScaled() > 0.5f;  // convert from float to bool
 			}
 	YY_BREAK
 case 33:
@@ -2418,7 +2419,7 @@ YY_RULE_SETUP
 //cerr << "handling DC " << DC++ << endl;
 //cerr << "handling " << yytext ;
 //cerr << "strlen " << strlen(yytext) << endl ;
-				unsigned int size = backend->imageInfo.height * ((backend->imageInfo.ncomp * backend->imageInfo.width  * backend->imageInfo.bits + 7 ) / 8);
+				const unsigned int size = backend->imageInfo.height * ((backend->imageInfo.ncomp * backend->imageInfo.width  * backend->imageInfo.bits + 7 ) / 8);
 				if (backend->imageInfo.data == 0) {
 // cerr << " allocating " << size << " for image data " << endl;
 					backend->imageInfo.data = new unsigned char[size];
@@ -2826,13 +2827,13 @@ case 62:
 YY_RULE_SETUP
 {
 				lineNumber++;
-			float y = pop();
-			float x = pop();
+			const float y = pop();
+			const float x = pop();
 //			Point p(x,y);
 			backend->addtopath(new Lineto(x,y)); 
 			currentpoint = Point(x,y);
 
-			Point op(origx,origy);
+			const Point op(origx,origy);
 			backend->setIsPolygon(currentpoint == op); // dynamically track potential polygons
 			}
 	YY_BREAK
@@ -2845,8 +2846,8 @@ YY_RULE_SETUP
 			Point p[3];
 			for (unsigned int i = 3; i > 0; i--) { 
 				// !!! i = 2 to i>= 0 does not work for unsigned
-				float y = pop();
-				float x = pop();
+				const float y = pop();
+				const float x = pop();
 				p[i-1] = Point(x,y);
 			}
 
@@ -2869,7 +2870,7 @@ YY_RULE_SETUP
 //				return(1);			
 			}
 			currentpoint = Point(p[2].x_,p[2].y_);
-			Point op(origx,origy);
+			const Point op(origx,origy);
 			backend->setIsPolygon(currentpoint == op); // dynamically track potential polygons
 
 			}
@@ -2879,7 +2880,7 @@ case 64:
 YY_RULE_SETUP
 {
 				lineNumber++;
-			 Point startPoint(origx,origy);
+			 const Point startPoint(origx,origy);
 			 const basedrawingelement & lastelem = backend->pathElement(backend->numberOfElementsInPath() -1 );
 			// check for last == first. Then no additional
 			// lineto is needed. and isPolygon can be set to true

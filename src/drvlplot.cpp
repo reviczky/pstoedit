@@ -151,6 +151,7 @@
 #include I_fstream
 #include I_stdio
 #include I_stdlib
+#include <memory>
 
 // #include "papersizes.h"  // not yet done - remove of local page size related code and replace it with the one from papersizes.h
 
@@ -302,7 +303,7 @@ public:
 	int filltype(int level);
 	int fline(double x0, double y0, double x1, double y1);
 	int flinedash(int n, const double *dashes, double offset);
-	int flinewidth(double size);
+	int flinewidth(double new_line_width);
 	int fmove(double x, double y);
 	int fontname(const char *s);
 	int fspace(double x0, double y0, double x1, double y1);
@@ -368,7 +369,9 @@ typedef Plotter MetaPlotter;
 // define the fake Plotter (i.e. MetaPlotter) class
 
 // a helper function (libplot only allows printable ISO characters in labels)
-#define GOOD_ISO(c) (((c >= 0x20) && (c <= 0x7E)) || ((c >= 0xA0) && (c <= 0xFF)))
+static inline bool GOOD_ISO(unsigned char c) {
+	return ((((c) >= 0x20) && ((c) <= 0x7E)) || (((c) >= 0xA0) && ((c) <= 0xFF)));
+}
 bool clean_iso_string(unsigned char *s)
 {
 	bool was_clean = true;
@@ -443,7 +446,7 @@ inline void Plotter::emit_byte(int c)
 inline void Plotter::emit_string(const char *s)
 {
 	bool has_newline;
-	char *t = NIL;				// keep compiler happy
+	char *t = nullptr;				// keep compiler happy
 	char *nl;
 	const char *u;
 
@@ -893,7 +896,7 @@ drvplot::derivedConstructor(drvplot):constructBase
 		const unsigned int remaining = DOptions_ptr->parseoptions(errf,d_argc,d_argv);
 		if (Verbose()) { errf << "remaining options " << remaining << endl; }
 		const char * * remaining_argv = DOptions_ptr->unhandledOptions;
-		for (unsigned int i = 0; (i+1) < remaining; i++) {  // -1 because we also use argv[i+1]
+		for (unsigned int i = 0; (i+1) < remaining; i+=2) {  // -1 because we also use argv[i+1]
 			if (strcmp(remaining_argv[i], "META_PORTABLE") == 0
 						&& strcmp(remaining_argv[i + 1], "yes") == 0)
 						portable_metafile = true;
@@ -902,7 +905,6 @@ drvplot::derivedConstructor(drvplot):constructBase
 				errf << "adding Plotter parameter " << remaining_argv[i] << ":" << remaining_argv[i + 1] << endl;
 			}
 			(void)Plotter::parampl(remaining_argv[i], const_cast<char*>(remaining_argv[i + 1]));
-			i++;
 		}
 	}
 
@@ -1093,8 +1095,8 @@ void drvplot::open_page()
 	const double POINTS_PER_INCH = 72.0;
 	// height and width of a page of the specified type, in points; also size
 	// of the square viewport that libplot places on such a page
-	double height = POINTS_PER_INCH * (double) known_page_sizes[page_type].height;
-	double width = POINTS_PER_INCH * (double) known_page_sizes[page_type].width;
+	const double height = POINTS_PER_INCH * (double) known_page_sizes[page_type].height;
+	const double width = POINTS_PER_INCH * (double) known_page_sizes[page_type].width;
 
 	(void)plotter->openpl();
 	if (physical_page)
@@ -1103,7 +1105,7 @@ void drvplot::open_page()
 		// extends beyond the viewport, in such a way that it covers the entire
 		// output page
 	{
-		double viewport_size = POINTS_PER_INCH * (double) known_page_sizes[page_type].viewport_size;
+		const double viewport_size = POINTS_PER_INCH * (double) known_page_sizes[page_type].viewport_size;
 		(void)plotter->fspace(0.5 * (width - viewport_size),
 						0.5 * (height - viewport_size),
 						0.5 * (width + viewport_size), 0.5 * (height + viewport_size));
@@ -1129,7 +1131,7 @@ void drvplot::close_page()
 }
 
 // convert to libplot's 16-bit representation for R, G, B intensities
-static inline int plotcolor(const float f)
+static constexpr int plotcolor(const float f)
 {
 	return (int) (65535 * f);
 }
@@ -1192,11 +1194,10 @@ void drvplot::set_line_style()
 
 	// set dashing pattern, which most types of Plotter understand
 	DashPattern dash_pattern(dashPattern());
-	auto numbers = new double[dash_pattern.nrOfEntries];
+	std::unique_ptr<double[]> numbers ( new double[dash_pattern.nrOfEntries]);
 	for (int i = 0; i < dash_pattern.nrOfEntries; i++)
 		numbers[i] = (double) dash_pattern.numbers[i];
-	(void)plotter->flinedash(dash_pattern.nrOfEntries, numbers, (double) dash_pattern.offset);
-	delete[]numbers;
+	(void)plotter->flinedash(dash_pattern.nrOfEntries, numbers.get(), (double) dash_pattern.offset);
 }
 
 // Set libplot's filling-and-edging style.  May set the line width to zero

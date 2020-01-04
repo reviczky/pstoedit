@@ -5,7 +5,7 @@
    $Id: drvmma.cpp,v 1.5 2003/03/15 16:25:46 manfred Exp $
    Based on drvSAMPL.cpp
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net,
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net,
                              Manfred Thole, manfred_AT_thole.org
 
     This program is free software; you can redistribute it and/or modify
@@ -90,6 +90,8 @@ drvMMA::~drvMMA()
 
 // Output a point.
 // NOTE: This is a top-level function, not a member of drvMMA.
+// Attention: there is also a version with a const ref pt in
+// drvbase.h
 static ostream & operator << (ostream & os, Point & pt)
 {
 	os << "{" << pt.x_ << ", " << pt.y_ << "}";
@@ -306,4 +308,3 @@ static DriverDescriptionT < drvMMA > D_mma("mma", "Mathematica graphics", "","m"
 										   DriverDescription::normalopen, true,	// if format supports multiple pages in one file
 										   false  /*clipping */ 
 										   );
- 

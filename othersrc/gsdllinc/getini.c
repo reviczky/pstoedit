@@ -47,9 +47,13 @@ static void getini(int verbose,ostream & errstream, char* szIniFile,const char *
 	szIniFile[0] = '\0';
 	/* strcpy(szIniFile, szExePath); */
 #ifdef _WIN32
-	DWORD version = GetVersion();
+#if 0
+	const DWORD version = GetVersion();
 	bool is_win4 = false;
 	if (LOBYTE(LOWORD(version)) >= 4) is_win4 = true;
+#else
+	const bool is_win4 = true;
+#endif
 	/* allow for user profiles */
 	if (is_win4) {
 	    LONG rc;

@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -25,6 +25,7 @@
 #include I_stdio
 #include I_stdlib
 #include <ctype.h>
+#include <memory>
 
 // for fabs and sqrt
 #include <math.h>
@@ -192,7 +193,7 @@ void drvJAVA2::show_text(const TextInfo & textinfo)
 {
 	if (numberOfElements > limitNumberOfElements)
 		continue_page();
-	unsigned int javaFontNumber = getFontNumber(textinfo.currentFontName.c_str());
+	const unsigned int javaFontNumber = getFontNumber(textinfo.currentFontName.c_str());
 	outf << "    currentPage.add(new PSTextObject(new Color(";
 	outf << currentR() << "f, " << currentG() << "f, " << currentB() << "f)," << endl;
 	outf << "      \"";
@@ -347,23 +348,23 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 	}
 	// write image data to separate file
 	const size_t sizefilename = strlen(outBaseName.c_str()) + 21;
-	auto imgOutFileName = new char[sizefilename];
+	std::unique_ptr<char[]> imgOutFileName ( new char[sizefilename]);
 	const size_t sizefullfilename = strlen(outDirName.c_str()) + strlen(outBaseName.c_str()) + 21;
-	auto imgOutFullFileName = new char[sizefullfilename];
+	std::unique_ptr<char[]> imgOutFullFileName ( new char[sizefullfilename]);
 
-	sprintf_s(TARGETWITHLEN(imgOutFileName,sizefilename), "%s_%u.img", outBaseName.c_str(), numberOfImages);
-	sprintf_s(TARGETWITHLEN(imgOutFullFileName,sizefullfilename), "%s%s", outDirName.c_str(), imgOutFileName);
+	sprintf_s(TARGETWITHLEN(imgOutFileName.get(),sizefilename), "%s_%u.img", outBaseName.c_str(), numberOfImages);
+	sprintf_s(TARGETWITHLEN(imgOutFullFileName.get(),sizefullfilename), "%s%s", outDirName.c_str(), imgOutFileName.get());
 	outf << "    currentPage.add(new PSImageObject(" << imageinfo.
 		width << ", " << imageinfo.height << ", ";
 	outf << imageinfo.bits << ", " << imageinfo.ncomp << ", ";
 	switch (imageinfo.type) {
-	case colorimage:
+	case ImageType::colorimage:
 		outf << "0, ";
 		break;
-	case normalimage:
+	case ImageType::normalimage:
 		outf << "1, ";
 		break;
-	case imagemask:
+	case ImageType::imagemask:
 		outf << "2, ";
 		break;
 	default:
@@ -378,25 +379,20 @@ void drvJAVA2::show_image(const PSImage & imageinfo)
 	outf << (-imageinfo.normalizedImageCurrentMatrix[3]) << "f, ";
 	outf << (imageinfo.normalizedImageCurrentMatrix[4]) << "f, ";
 	outf << (currentDeviceHeight - imageinfo.normalizedImageCurrentMatrix[5]) << "f), " << endl;
-	outf << "      \"" << imgOutFileName << "\"));" << endl;
+	outf << "      \"" << imgOutFileName.get() << "\"));" << endl;
 	FILE *outFile;
-	if ((outFile = fopen(imgOutFileName, "wb")) == nullptr) {
-		errf << "ERROR: cannot open image file " << imgOutFileName << endl;
-		delete[]imgOutFileName;
-		delete[]imgOutFullFileName;
+	const auto outfile_err = fopen_s(&outFile, imgOutFileName.get(), "wb");
+	if (outfile_err) {
+		errf << "ERROR: cannot open image file " << imgOutFileName.get() << endl;
 		return;
 	}
 	if (fwrite(imageinfo.data, 1, imageinfo.nextfreedataitem, outFile) !=
 		imageinfo.nextfreedataitem) {
 		fclose(outFile);
-		errf << "ERROR: cannot write image data to " << imgOutFileName << endl;
-		delete[]imgOutFileName;
-		delete[]imgOutFullFileName;
+		errf << "ERROR: cannot write image data to " << imgOutFileName.get() << endl;
 		return;
 	}
 	fclose(outFile);
-	delete[]imgOutFullFileName;
-	delete[]imgOutFileName;
 	numberOfImages++;
 	numberOfElements++;
 }

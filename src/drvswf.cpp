@@ -2,7 +2,7 @@
    drvSWF.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -527,6 +527,7 @@ void drvSWF::show_text(const TextInfo & textinfo)
 	auto f = new SWFFont(const_cast<char *>(fontfilename.c_str()));
 	if ((f == nullptr) || (f->font == nullptr)) {
 		errf << "Loading font " << fontfilename.c_str() << " failed !" << endl;
+		delete f;
 		return;
 	}
 
@@ -558,14 +559,14 @@ void drvSWF::show_text(const TextInfo & textinfo)
 #else
 	const float *CTM = getCurrentFontMatrix();
 	const float fontsize = textinfo.currentFontSize;
-	float ma = CTM[0] / fontsize;
-	float mb = -CTM[1] / fontsize;
-	float mc = -CTM[2] / fontsize;
-	float md = CTM[3] / fontsize;
+	const float ma = CTM[0] / fontsize;
+	const float mb = -CTM[1] / fontsize;
+	const float mc = -CTM[2] / fontsize;
+	const float md = CTM[3] / fontsize;
 
 	const Point p(CTM[4], CTM[5]);
-	float mx = swfx(p);
-	float my = swfy(p);
+	const float mx = swfx(p);
+	const float my = swfy(p);
 
 	d->move(0.0f, 0.0f);
 	SWFDisplayItem_setMatrix(d->item, ma, mb, mc, md, mx, my);
@@ -653,14 +654,14 @@ void drvSWF::show_image(const PSImage & imageinfo)
 		SWFDisplayItem *d = movie->add(s);
 
 		const float *CTM = imageinfo.normalizedImageCurrentMatrix;
-		float ma = CTM[0];
-		float mb = -CTM[1];
-		float mc = CTM[2];
-		float md = -CTM[3];
+		const float ma = CTM[0];
+		const float mb = -CTM[1];
+		const float mc = CTM[2];
+		const float md = -CTM[3];
 
 		const Point p(CTM[4], CTM[5]);
-		float mx = swfx(p);
-		float my = swfy(p);
+		const float mx = swfx(p);
+		const float my = swfy(p);
 
 
 #if 1

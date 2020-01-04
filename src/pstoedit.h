@@ -4,7 +4,7 @@
    pstoedit.h : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@
 /* #include <iostream.h>   */
 #ifdef HAVE_STL
 #include <iosfwd>
-USESTD
+//USESTD
 #else
 #if defined (__GNUG__)  && (__GNUC__>=3) 
 /* if we don't define HAVE_STL for g++ > 3.0, then we can use the simple forwards */
@@ -54,7 +54,7 @@ typedef int (*execute_interpreter_function)(int argc, const char * const argv[])
 
 
 #ifdef __cplusplus
-typedef const char * (*whichPI_type)(ostream &, int, const char *, const char *);
+typedef const char * (*whichPI_type)(std::ostream &, int, const char *, const char *);
 
 class DescriptionRegister;
 
@@ -63,7 +63,7 @@ class DescriptionRegister;
 extern "C" DLLEXPORT
 int pstoedit(	int argc,
 				const char * const argv[],
-				ostream& errstream,
+				std::ostream& errstream,
   				execute_interpreter_function call_PI,
 				whichPI_type whichPI,
 				const DescriptionRegister* const pushinsPtr =0
@@ -79,7 +79,7 @@ void useCoutForDiag(int flag);
 extern "C" DLLEXPORT 
 int pstoeditwithghostscript(int argc,
 							const char * const argv[],
-							ostream& errstream,
+							std::ostream& errstream,
 							const DescriptionRegister* const pushinsPtr=0
 							);
 

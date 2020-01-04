@@ -2,7 +2,7 @@
    drvMAGICK.cpp : This file is part of pstoedit
    driver for Magick++ API.
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,7 +54,9 @@ static std::list < Magick::Drawable > drawList;
 //test typedef std::list<string> MyStringList;
 
 drvMAGICK::derivedConstructor(drvMAGICK):
-constructBase, imgcount(0), imageptr(NIL)
+constructBase,
+//imgcount(0),
+imageptr(nullptr)
 {
 // driver specific initializations
 // and writing of header to output file
@@ -118,7 +120,7 @@ drvMAGICK::~drvMAGICK()
 		cout << "Caught exception: " << error_.what() << endl;
 	}
 	delete imageptr;
-	imageptr = NIL;
+	imageptr = nullptr;
 }
 
 void drvMAGICK::create_vpath(VPathList &vpath)
@@ -350,7 +352,7 @@ void drvMAGICK::show_image(const PSImage & imageinfo)
 			cout << " sx " << sx << " sy " << sy << " rx " << rx << " ry " << ry << " tx " << tx <<
 				" ty " << ty << " w " << width << " h " << height << endl;
 
-			const string filename = imageinfo.FileName.c_str();
+			const std::string filename = imageinfo.FileName.c_str();
 
 			cout << "drawing subimage from " << filename << endl;
 

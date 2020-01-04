@@ -3,7 +3,7 @@
    Backend for Latex2E files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2019	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
+   Copyright (C) 1993 - 2020	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
 							Scott Pakin, <scott+ps2ed_AT_pakin.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -71,7 +71,7 @@ static ostream & operator << (ostream & os, const Point2e & pt)
 // Convert the coordinates on a path to LaTeX2e.
 void drvLATEX2E::print_coords()
 {
-	Point *firstpoint = NIL;	// Where "closepath" takes us back to
+	Point *firstpoint = nullptr;	// Where "closepath" takes us back to
 	Point pointlist[3];			// Other points we care about
 //old  ostrstream outputline;       // Current line of LaTeX2e to output
 
@@ -107,7 +107,7 @@ void drvLATEX2E::print_coords()
 				assert(firstpoint);
 				pointlist[0] = *firstpoint;
 				delete firstpoint;
-				firstpoint = NIL;
+				firstpoint = nullptr;
 			}
 			if (pointlist[0].x_ == currentpoint.x_) {	// Vertical line
 				if (pointlist[0].y_ == currentpoint.y_)	// (and not a point)
@@ -148,12 +148,12 @@ void drvLATEX2E::print_coords()
 					scalepoint(pointlist[cp]);
 					updatebbox(pointlist[cp]);
 				}
-				float midx = ((3 * pointlist[0].x_ - currentpoint.x_) / 2 +
+				const float midx = ((3 * pointlist[0].x_ - currentpoint.x_) / 2 +
 							  (3 * pointlist[1].x_ - pointlist[2].x_) / 2) / 2;
-				float midy =
+				const float midy =
 					((3 * pointlist[0].y_ - currentpoint.y_) / 2 +
 					 (3 * pointlist[1].y_ - pointlist[2].y_) / 2) / 2;
-				Point midpoint(midx, midy);
+				const Point midpoint(midx, midy);
 				buffer << "  \\qbezier" << Point2e(currentpoint,options->integersonly) << Point2e(midpoint,options->integersonly) << Point2e(pointlist[2],options->integersonly) << endl;
 				currentpoint = pointlist[2];
 			}
@@ -195,7 +195,7 @@ void drvLATEX2E::open_page()
 void drvLATEX2E::close_page()
 {
 	// Specify the picture's width and height and, optionally, the origin.
-	Point boxsize(boundingbox[1].x_ - boundingbox[0].x_, boundingbox[1].y_ - boundingbox[0].y_);
+	const Point boxsize(boundingbox[1].x_ - boundingbox[0].x_, boundingbox[1].y_ - boundingbox[0].y_);
 	outf << "\\begin{picture}" << Point2e(boxsize,options->integersonly);
 	if (boundingbox[0].x_ || boundingbox[0].y_)
 		outf << Point2e(boundingbox[0],options->integersonly);
@@ -230,7 +230,7 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 	buffer.setf(ios::fixed, ios::floatfield);	// TeX can't deal with scientific notation.
 
 	// Set the font and font size if (and only if) it's changed.
-	string fontname(textinfo.currentFontName.c_str());
+	std::string fontname(textinfo.currentFontName.c_str());
 	if (fontname[0] != '{' && fontname != prevfontname) {
 		errf << "Font \"" << fontname
 			<<
@@ -242,11 +242,11 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 		buffer << "  \\usefont" << fontname << endl;
 		prevfontname = fontname;
 	}
-	float fontsize = textinfo.currentFontSize * 72.27f / 72.0f;
+	const float fontsize = textinfo.currentFontSize * 72.27f / 72.0f;
 	if (fontsize != prevfontsize) {
 		buffer << "  \\fontsize{";
 		if (options->integersonly) {
-			long longsize = long (fontsize + 0.5);
+			const long longsize = long (fontsize + 0.5);
 			buffer << longsize << "\\unitlength}{" << longsize;
 		} else
 			buffer << fontsize << "\\unitlength}{" << fontsize;
@@ -380,7 +380,7 @@ void drvLATEX2E::show_rectangle(const float llx, const float lly, const float ur
 	updatebbox(ll);
 	scalepoint(ur);
 	updatebbox(ur);
-	Point framesize(ur.x_ - ll.x_, ur.y_ - ll.y_);
+	const Point framesize(ur.x_ - ll.x_, ur.y_ - ll.y_);
 	buffer << "  \\put" << Point2e(ll,options->integersonly) << "{\\framebox" << Point2e(framesize,options->integersonly) << "{}}" << endl;	// old << ends;
 //old  outputQ.push (outputline.str());
 }

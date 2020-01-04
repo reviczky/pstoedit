@@ -41,17 +41,17 @@ struct HPGL_Mat {
 inline HPGL_Pt transform(const HPGL_Mat& m, const double x, const double y)
 {
     HPGL_Pt result;
-    result.x = (float)(m.xt + m.xx * x + m.xy * y);
-    result.y = (float)(m.yt + m.yx * x + m.yy * y);
+    result.x = static_cast<float>(m.xt + m.xx * x + m.xy * y);
+    result.y = static_cast<float>(m.yt + m.yx * x + m.yy * y);
     return result;
 }
 
-static void transform_points(const HPGL_Mat& m, HPGL_Pt2 *const dst, const HPGL_Pt *const src, const int count)
+static void transform_points(const HPGL_Mat& m, HPGL_Pt2 *const dst, const HPGL_Pt *const src, const size_t count)
 {
     const double xx = m.xx, xy = m.xy, xt = m.xt,
                  yx = m.yx, yy = m.yy, yt = m.yt;
 
-	for (int i = 0; i < count; i++) {
+	for (size_t i = 0; i < count; i++) {
         const double x = src[i].x,
                      y = src[i].y;
         dst[i].x = xt + xx*x + xy*y;
@@ -99,7 +99,7 @@ static void rotation(HPGL_Mat *const forward,
  *         |8 6 7|
 */
 
-static inline int octant(const double x, const double y)
+static constexpr int octant(const double x, const double y)
 {
     return (x > 0.0 ? 1 : 0)
          + (x < 0.0 ? 2 : 0)
@@ -127,7 +127,7 @@ enum inout {
 } ;
 
 static inout inside(const HPGL_Pt2 point[],
-                    const int      points,
+                    const size_t points,
                     const double   x,
                     const double   y,
                     const int      /* nonzero */)
@@ -139,11 +139,11 @@ static inout inside(const HPGL_Pt2 point[],
     if (!curr_octant)
         return BOUNDARY;
 
-    for (int i = 0; i < points; i++) {
+    for (size_t i = 0; i < points; i++) {
 		double distance;
-        double prev_x = curr_x;
-        double prev_y = curr_y;
-        int prev_octant = curr_octant;
+        const double prev_x = curr_x;
+        const double prev_y = curr_y;
+        const int prev_octant = curr_octant;
 
         curr_x = point[i].x - x;
         curr_y = point[i].y - y;
@@ -287,11 +287,13 @@ static inout inside(const HPGL_Pt2 point[],
     return INSIDE;
 }
 
-static inline int insert(double list[], int count, const double value)
+static inline int insert(double list[], unsigned int count, const double value)
 {
-    int i = 0;
-    while (i < count && list[i] < value)
-        i++;
+	size_t i = 0;
+	while (i < count && list[i] < value) {
+		i++;
+	}
+        
 
     if (i >= count) {
         list[count] = value;
@@ -319,7 +321,7 @@ inline double my_round(double d)
 }
 
 static void do_fill(const HPGL_Pt2 point[],
-                    const int      points,
+                    const size_t      points,
                     const HPGL_Mat& /* forward */ ,
                     const HPGL_Mat& backward,
                     const double   ymin,
@@ -339,7 +341,7 @@ static void do_fill(const HPGL_Pt2 point[],
         HPGL_Pt      p;
 
         int intersections = 0;
-        for (int i = 0; i < points; i++)
+        for (size_t i = 0; i < points; i++)
             if (point[i].y == y)
                 intersections = insert(intersect, intersections, point[i].x);
             else
@@ -537,7 +539,7 @@ void drvbase::simulate_fill() {
  //backend->setIsPolygon(false);
   //backend->setPathNumber(pathnumber);
 
- HPGL_Pt point1, point2;
+ const HPGL_Pt point1, point2;
   strokedfill(polygon,
        p_i, //   int     numpoints,
        point1, //   HPGL_Pt point1,

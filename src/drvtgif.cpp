@@ -2,7 +2,7 @@
    drvTGIF.cpp : This file is part of pstoedit
    Backend for TGIF
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -172,9 +172,9 @@ void drvTGIF::show_text(const TextInfo & textinfo)
 	buffer << "," << currentDeviceHeight* tgifscale - textinfo.y()*tgifscale + y_offset - textinfo.currentFontSize*tgifscale;
 #endif
 	buffer << ",'" << textinfo.currentFontName.c_str() << "'";
-	const bool boldfont = (strstr(textinfo.currentFontName.c_str(), "Bold") != NIL);
-	const bool italicfont = ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL)
-							 || (strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL));
+	const bool boldfont = (strstr(textinfo.currentFontName.c_str(), "Bold") != nullptr);
+	const bool italicfont = ((strstr(textinfo.currentFontName.c_str(), "Italic") != nullptr)
+							 || (strstr(textinfo.currentFontName.c_str(), "Oblique") != nullptr));
 	int fonttype = 0;
 	if (boldfont) {
 		if (italicfont)

@@ -2,7 +2,7 @@
    drvJAVA.cpp : This file is part of pstoedit
    backend to generate a Java(TM) applet
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -161,7 +161,7 @@ void drvJAVA::close_page()
 
 void drvJAVA::show_text(const TextInfo & textinfo)
 {
-	unsigned int javaFontNumber = getFontNumber(textinfo.currentFontName.c_str());
+	const unsigned int javaFontNumber = getFontNumber(textinfo.currentFontName.c_str());
 	outf << "\tcurrentpage.theObjects.addElement( new PSTextObject(" << endl;
 	outf << "\t\t" << currentR() << "F," << currentG() << "F," << currentB() << "F," << endl;
 	outf << "\t\t\"";

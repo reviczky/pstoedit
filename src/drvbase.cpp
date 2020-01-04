@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,13 +25,17 @@
 
 #include I_stdlib
 #include I_iostream
-//#include I_iomanip
+#include I_iomanip
+using std::setw;
+using std::setfill;
+using std::ends;
 
 #include I_string_h
 
 #include I_strstream
 
 #include <math.h>
+#include <algorithm>
 
 #ifndef miscutil_h
 #include "miscutil.h"
@@ -42,7 +46,7 @@ static void splitFullFileName(const char *const fullName,
 							  RSString& baseName, 
 							  RSString& fileExt)
 {
-	if (fullName == NIL)
+	if (fullName == nullptr)
 		return;
 
 	char *fullName_T = cppstrdup(fullName);
@@ -54,7 +58,7 @@ static void splitFullFileName(const char *const fullName,
 #else
 	char *c = strrchr(fullName_T, '\\');
 #endif
-	if (c != NIL) {
+	if (c != nullptr) {
 		baseName_T = cppstrdup(c + 1);
 		*(c + 1) = 0;
 		pathName = fullName_T;
@@ -65,7 +69,7 @@ static void splitFullFileName(const char *const fullName,
 
 	// coverity[uninit_use_in_call]
 	c = strrchr(baseName_T, '.');
-	if (c != NIL) {
+	if (c != nullptr) {
 		fileExt =  (c + 1);
 		*c = 0;
 		baseName = baseName_T;
@@ -105,7 +109,7 @@ currentPageNumber(0),
 domerge(false),
 defaultFontName(nullptr),
 ctorOK(true),
-saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driveroptions(nullptr),
+saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), driveroptions(nullptr),
 	// default for PI1 and PI2 and clippath
 	currentPath(nullptr), last_currentPath(nullptr), outputPath(nullptr), lastPath(nullptr)
 	// default for textInfo_ and lasttextInfo_
@@ -191,7 +195,7 @@ saveRestoreInfo(NIL), currentSaveLevel(&saveRestoreInfo), page_empty(true), driv
 				}
 			}
 		} else {
-			cerr << "DOptions_ptr is NIL - program flow error - contact author." << endl;
+			cerr << "DOptions_ptr is nullptr - program flow error - contact author." << endl;
 		}
 	}
 
@@ -236,41 +240,76 @@ drvbase::~drvbase()
 			d_argv[i] = nullptr;
 		}
 		delete[]d_argv;
-		d_argv = NIL;
+		d_argv = nullptr;
 	}
 	if (driveroptions) {
 		delete[]driveroptions;
-		driveroptions = NIL;
+		driveroptions = nullptr;
 	}
-//  delete[] bboxes; bboxes = NIL;
+//  delete[] bboxes; bboxes = nullptr;
 //	delete[]outDirName;
-//	outDirName = NIL;
+//	outDirName = nullptr;
 //	delete[]outBaseName;
-//	outBaseName = NIL;
-//	Pdriverdesc = NIL;
+//	outBaseName = nullptr;
+//	Pdriverdesc = nullptr;
 
 	delete DOptions_ptr;
-	DOptions_ptr = NIL;
+	DOptions_ptr = nullptr;
 
-	if (currentSaveLevel->previous != NIL) {
-		while (currentSaveLevel->previous != NIL) {
+	if (currentSaveLevel->previous != nullptr) {
+		while (currentSaveLevel->previous != nullptr) {
 			currentSaveLevel = currentSaveLevel->previous;
 			delete currentSaveLevel->next;
 		}
 	}
 	currentSaveLevel = nullptr;
-	defaultFontName = NIL;
-	last_currentPath = NIL;
+	defaultFontName = nullptr;
+	last_currentPath = nullptr;
 }
 
 const RSString & drvbase::getPageSize() const { return globaloptions.outputPageSize(); }
 
-static const char * version_string = PACKAGE_VERSION;
+bool drvbase::use_fake_version_and_date = false;
+
 const char * drvbase::VersionString() {
-	return version_string;
+	if (use_fake_version_and_date) {
+		return "9.99";
+	}
+	else {
+		return PACKAGE_VERSION;
+	}
 }
-void drvbase::set_VersionString(const char * v) {
-	version_string = v;
+
+RSString drvbase::DateString()
+{
+	if (drvbase::use_fake_version_and_date) {
+		return RSString("20200103040405");
+	}
+// Comments by Rohan
+// This is a hack
+// Since Windows CE does not support, I am just putting a dummy date(i.e "01/01/18 09:00:00")
+#ifndef OS_WIN32_WCE
+	C_ostrstream datestring;
+	const time_t t = time(nullptr);
+	const struct tm* const localt = localtime(&t);
+	// (D:YYYYMMDDHHmmSSOHH'mm')
+	// All parts of the date after the year are optional.
+	if (localt) {
+		datestring 
+			<< setw(4) << localt->tm_year + 1900
+			<< setw(2) << setfill('0') << localt->tm_mon + 1
+			<< setw(2) << setfill('0') << localt->tm_mday
+			<< setw(2) << setfill('0') << localt->tm_hour
+			<< setw(2) << setfill('0') << localt->tm_min
+			<< setw(2) << setfill('0') << localt->tm_sec << ends;
+		return RSString(datestring.str());
+	} else {
+		return RSString("");
+	}
+#else
+	return RSString("20200101090000");
+#endif
+
 }
 
 const BBox & drvbase::getCurrentBBox() const
@@ -751,8 +790,8 @@ nrOfEntries(-1), numbers(nullptr), offset(0)
 		pattern = patternAsSetDashString;
 		// now get the numbers
 		// repeat the numbers, if number of entries is odd
-		unsigned int rep = nrOfEntries % 2;	// rep is 1 for odd numbers 0 for even
-		size_t len = nrOfEntries * (rep + 1);
+		const unsigned int rep = nrOfEntries % 2;	// rep is 1 for odd numbers 0 for even
+		const size_t len = nrOfEntries * (rep + 1);
 		numbers = new float[len];
 		unsigned int cur = 0;
 #if 1
@@ -760,7 +799,7 @@ nrOfEntries(-1), numbers(nullptr), offset(0)
 			pattern = patternAsSetDashString;
 			while ((*pattern) && (*pattern != ']')) {
 				if (*pattern == ' ' && (*(pattern + 1) != ']')) {
-					float f = (float) atof(pattern);
+					const float f = (float) atof(pattern);
 					assert(cur < len);
 					numbers[cur] = f;
 					// errf << d_numbers[cur] << endl;
@@ -814,7 +853,7 @@ void drvbase::guess_linetype()
 
 	drvbase::linetype curtype = solid;
 	if (nr_of_entries > 0) {
-		int rep = nr_of_entries % 2;	// rep is 1 for odd numbers 0 for even
+		const int rep = nr_of_entries % 2;	// rep is 1 for odd numbers 0 for even
 		// now guess a pattern from
 		// solid, dashed, dotted, dashdot, dashdotdot ; // corresponding to the CGM patterns
 		switch (nr_of_entries * (rep + 1)) {
@@ -1121,25 +1160,25 @@ void drvbase::dumpPath(bool doFlushText)
 			if (isPolygon()) {	/* PolyGon */
 				if (is_a_rectangle()) {
 					const float llx =
-						min(min
+						std::min(std::min
 							(pathElement(0).getPoint(0).x_,
 							 pathElement(1).getPoint(0).x_),
-							min(pathElement(2).getPoint(0).x_, pathElement(3).getPoint(0).x_));
+							std::min(pathElement(2).getPoint(0).x_, pathElement(3).getPoint(0).x_));
 					const float urx =
-						max(max
+						std::max(std::max
 							(pathElement(0).getPoint(0).x_,
 							 pathElement(1).getPoint(0).x_),
-							max(pathElement(2).getPoint(0).x_, pathElement(3).getPoint(0).x_));
+							std::max(pathElement(2).getPoint(0).x_, pathElement(3).getPoint(0).x_));
 					const float lly =
-						min(min
+						std::min(std::min
 							(pathElement(0).getPoint(0).y_,
 							 pathElement(1).getPoint(0).y_),
-							min(pathElement(2).getPoint(0).y_, pathElement(3).getPoint(0).y_));
+							std::min(pathElement(2).getPoint(0).y_, pathElement(3).getPoint(0).y_));
 					const float ury =
-						max(max
+						std::max(std::max
 							(pathElement(0).getPoint(0).y_,
 							 pathElement(1).getPoint(0).y_),
-							max(pathElement(2).getPoint(0).y_, pathElement(3).getPoint(0).y_));
+							std::max(pathElement(2).getPoint(0).y_, pathElement(3).getPoint(0).y_));
 
 					show_rectangle(llx, lly, urx, ury);
 				} else {
@@ -1178,7 +1217,7 @@ void drvbase::addtopath(basedrawingelement * newelement) {
 	if (newelement) {
 	   currentPath->addtopath(newelement, errf);
 	} else {
-		errf << "Fatal: newelement is NIL in addtopath " << endl;
+		errf << "Fatal: newelement is nullptr in addtopath " << endl;
 		exit(1);
 	}
 }
@@ -1216,7 +1255,7 @@ void drvbase::PathInfo::clear()
 	for (unsigned int i = 0; i < numberOfElementsInPath; i++) {
 		// delete path[i];
 		path[i]->deleteyourself(); // see note in drvbase.h 
-		path[i] = 0;
+		path[i] = nullptr;
 	}
 	numberOfElementsInPath = 0;
 	pathWasMerged = false;
@@ -1270,10 +1309,10 @@ ColorTable::~ColorTable()
 	unsigned int current = 0;
 	while (newColors[current] != nullptr) {
 		delete[] newColors[current];
-		newColors[current] = NIL;
+		newColors[current] = nullptr;
 		current++;
 	}
-	// cannot assign since it is const - defaultColors_ = NIL;
+	// cannot assign since it is const - defaultColors_ = nullptr;
 	//lint -esym(1540,ColorTable::defaultColors_)
 }
 

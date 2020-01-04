@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -225,14 +225,14 @@ public:
 	OptionT < RSString, RSStringValueExtractor> drivername ;//= 0; // cannot be const char * because it is changed in pstoedit.cpp
 	OptionT < RSString, RSStringValueExtractor > gsregbase;
 
-	int verbose() const { return (int) verboselevel ? (int) verboselevel : (int) verboseflag; }
+	int verbose() const { return verboselevel() ? verboselevel() : verboseflag(); }
 	
 private:
 	PsToEditOptions() :
 
 	ProgramOptions(true), // expect additional parameters
-	nameOfInputFile(0),
-	nameOfOutputFile(0),	// can contain %d for page splitting
+	nameOfInputFile(nullptr),
+	nameOfOutputFile(nullptr),	// can contain %d for page splitting
 
 	nameOfIncludeFile	(true, "-include","name of a PostScript file to be included",g_t,"name of PostScript file to be included",
 		"This option allows specifying an additional PostScript file that will be "
@@ -528,12 +528,13 @@ private:
 	rotation			(true, "-rotate","angle (0-360)",g_t,"rotate the image",
 		"Rotate image by angle.",
 		0),
+#define LINEBREAK "\\\\"
 	explicitFontMapFile	(true, "-fontmap","name of font map file for pstoedit",t_t,"use a font mapping from a file",
 		"The font map is a "
-		"simple text file containing lines in the following format:BREAK\n"
+		"simple text file containing lines in the following format:" LINEBREAK "\n"
 		"\n\n"
-		"\\verb+document_font_name    target_font_name+BREAK\n"
-		"Lines beginning with \\verb+%+ are considerd comments.BREAK\n"
+		"\\verb+document_font_name    target_font_name+" LINEBREAK "\n"
+		"Lines beginning with \\verb+%+ are considerd comments." LINEBREAK "\n"
 		"For font names with spaces use the "
 		"\\verb+\"font name with spaces\"+ notation.\n"
 		"\n"
@@ -551,7 +552,7 @@ private:
 		"\n"
 		"  \\item MS Windows: The same directory where the \\Prog{pstoedit} executable is located\n"
 		"\n"
-		"  \\item Unix:BREAK\n"
+		"  \\item Unix:" LINEBREAK "\n"
 		"  The default installation directory. If it fails, then $<$\\emph{The directory where the pstoedit executable is located}$>$\\verb+/../lib/+\n"
 		"\n"
 		"\\end{itemize}\n"

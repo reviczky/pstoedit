@@ -4,7 +4,7 @@
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include I_stdio
 #include I_stdlib
 #include <math.h>
+#include <algorithm>
 
 
 // Add a point unless it's the same as the previous point
@@ -35,13 +36,13 @@
       iscale(X) != iscale(newpointlist[newtotalpoints-1]->x_) ||	\
       iscale(Y) != iscale(newpointlist[newtotalpoints-1]->y_)){		\
     newpointlist[newtotalpoints++] = new Point(X,Y);			\
-    assert(newpointlist[newtotalpoints-1] != NIL); }		        \
+    assert(newpointlist[newtotalpoints-1] != nullptr); }		        \
 } while (0)
 
 
 drvIDRAW::derivedConstructor(drvIDRAW):
 //(const char * driveroptions_p,ostream & theoutStream,ostream & theerrStream): // Constructor
-constructBase,  buffer(tempFile.asOutput()), imgcount(1)
+constructBase,  buffer(tempFile.asOutput()) //, imgcount(1)
 {
 	IDRAW_SCALING = 0.799705f ;
 	// Initialize the color table
@@ -649,7 +650,7 @@ const char *drvIDRAW::rgb2name(float red, float green, float blue) const
 
 	// Linear search for a match
 	for (int i = 0; i < IDRAW_NUMCOLORS; i++) {
-		double quality = (red - color[i].red) * (red - color[i].red) +
+		const double quality = (red - color[i].red) * (red - color[i].red) +
 			(green - color[i].green) * (green - color[i].green) +
 			(blue - color[i].blue) * (blue - color[i].blue);
 		if (quality < bestquality) {
@@ -677,12 +678,12 @@ void drvIDRAW::print_header(const char *objtype)
 	// Dash pattern
 	outf << "%I b ";
 	double dash[4];
-	int dashpieces = sscanf_s(dashPattern(), "[ %lf %lf %lf %lf",
+	const int dashpieces = sscanf_s(dashPattern(), "[ %lf %lf %lf %lf",
 							&dash[0], &dash[1], &dash[2], &dash[3]);
 	if (dashpieces) {
 		unsigned int dashbits = 0;  // was unsigned short initially
 		for (int i = 0; i < 4; i++) {
-			unsigned int numbits = min((unsigned int)sizeof(dashbits)*8,iscale((float)dash[i % dashpieces]));
+			const unsigned int numbits = std::min((unsigned int)sizeof(dashbits)*8,iscale((float)dash[i % dashpieces]));
 			for (unsigned int j = 0; j < numbits; j++) {
 				dashbits = dashbits << 1 | (~i & 1);
 			}
@@ -721,7 +722,7 @@ void drvIDRAW::print_header(const char *objtype)
 
 void drvIDRAW::print_coords()
 {
-	unsigned int pathelts = numberOfElementsInPath();
+	const unsigned int pathelts = numberOfElementsInPath();
 	bool closed;				// True if shape is closed
 	bool curved;				// True if shape is curved
 	const Point *firstpoint;	// First and last points in shape
@@ -742,8 +743,8 @@ void drvIDRAW::print_coords()
 	}
 	auto pointlist = new const Point *[pathelts * 3];	// List of points
 	 	// Allocate a conservative amount
-	assert(pointlist != NIL);
-	firstpoint = NIL;
+	assert(pointlist != nullptr);
+	firstpoint = nullptr;
 	lastpoint = &dummypoint;
 	totalpoints = 0;
 	for (i = 0; i < pathelts; i++) {
@@ -771,7 +772,7 @@ void drvIDRAW::print_coords()
 			// ASSUMPTION: Curve is moveto+curveto+curveto+curveto+...
 			// List of points on curve
 			auto newpointlist = new const Point *[pathelts * 3000 / pt_per_cp];	// Allocate a conservative amount
-			assert(newpointlist != NIL);
+			assert(newpointlist != nullptr);
 			for (i = 0; i < totalpoints - 3; i += 3) {
 				const float x0 = pointlist[i]->x_;
 				const float y0 = pointlist[i]->y_;

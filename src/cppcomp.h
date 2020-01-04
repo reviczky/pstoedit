@@ -1,11 +1,15 @@
 #ifndef cppcomp_h
 #define cppcomp_h
+
+//disable warning about copyleft from PVS studio.
+//-V::1042
+
 //{
 /*
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +75,6 @@
 #endif
 
 #if defined (FORCESTLUSAGE)
-// 
 	#define HAVE_STL
 #endif
 
@@ -137,8 +140,8 @@
 
 #ifdef  USE_NEWSTRSTREAM
 #define I_strstream 	<sstream>
-#define C_istrstream istringstream
-#define C_ostrstream ostringstream
+#define C_istrstream std::stringstream
+#define C_ostrstream std::ostringstream
 #else
 #define I_strstream 	<strstream>
 #define C_istrstream istrstream
@@ -149,7 +152,10 @@
 #define I_stdio			<cstdio>
 #define I_stdlib		<cstdlib>
 
-#define USESTD using namespace std;
+// #define USESTD using namespace std;
+#define USESTD using std::cout; using std::cerr; using std::ios;  using std::ofstream; using std::ifstream; using std::ostream; using std::istream; using std::endl; using std::cin; 
+//using std::string;
+
 
 #else
 //} {
@@ -217,13 +223,6 @@
 	#endif
 #endif
 
-#ifndef NIL 
-// 0 pointers
-	#define NIL 0
-#endif
-
-
-
 
 //{
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
@@ -242,6 +241,9 @@
 #define TEMPNAM _tempnam
 #define GETCWD _getcwd
 
+// some I did not migrate (yet)
+#define _CRT_SECURE_NO_WARNINGS 1
+
 #else
 //} {
 
@@ -258,6 +260,22 @@
 #define SETMODE setmode
 #define TEMPNAM tempnam
 #define GETCWD getcwd
+
+#include <assert.h>
+#include <errno.h>
+// Windows promotes fopen_s but g++ does not have it
+inline int fopen_s(FILE **fp, const char *filename, const char *mode) {
+  assert(fp);
+  assert(filename);
+  assert(mode);
+  *(fp) = fopen(filename, mode);
+  if (*fp) {
+    return 0;
+  } else {
+    return errno;
+  }
+}
+
 
 USESTD
 

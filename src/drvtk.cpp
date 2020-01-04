@@ -7,7 +7,7 @@
 
    drvsample.cpp : Backend for TK
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -69,7 +69,7 @@ void drvTK::outputEscapedText(const char *str)
 
 
 drvTK::derivedConstructor(drvTK):
-constructBase, buffer(tempFile.asOutput()), objectId(1),paperinfo(nullptr)
+constructBase, buffer(tempFile.asOutput()) /*, objectId(1) */ ,paperinfo(nullptr)
 {
 //  const RSString & l_pagesize = getPageSize();
 
@@ -937,8 +937,8 @@ void drvTK::print_coords()
 {
 	for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
 		const Point & p = pathElement(n).getPoint(0);
-		float pc_x = (p.x_ + x_offset) ;
-		float pc_y = (currentDeviceHeight - p.y_ + y_offset) ;
+		const float pc_x = (p.x_ + x_offset) ;
+		const float pc_y = (currentDeviceHeight - p.y_ + y_offset) ;
 		buffer << pc_x;
 		buffer << ' ' << pc_y;
 		if (n != numberOfElementsInPath() - 1) {
@@ -986,18 +986,18 @@ void drvTK::open_page()
 
 void drvTK::show_text(const TextInfo & textinfo)
 {
-	int condensedfont = (strstr(textinfo.currentFontName.c_str(), "Condensed") != NIL);
-	int narrowfont = (strstr(textinfo.currentFontName.c_str(), "Narrow") != NIL);
-	int boldfont = (strstr(textinfo.currentFontName.c_str(), "Bold") != NIL);
-	int italicfont = ((strstr(textinfo.currentFontName.c_str(), "Italic") != NIL)
-					  || (strstr(textinfo.currentFontName.c_str(), "Oblique") != NIL));
+	const int condensedfont = (strstr(textinfo.currentFontName.c_str(), "Condensed") != nullptr);
+	const int narrowfont = (strstr(textinfo.currentFontName.c_str(), "Narrow") != nullptr);
+	const int boldfont = (strstr(textinfo.currentFontName.c_str(), "Bold") != nullptr);
+	const int italicfont = ((strstr(textinfo.currentFontName.c_str(), "Italic") != nullptr)
+					  || (strstr(textinfo.currentFontName.c_str(), "Oblique") != nullptr));
 	char*  tempfontname = cppstrdup(textinfo.currentFontName.c_str()) ; // char tempfontname[1024];
 	char fonttype = 'r';
 	char *i;
 	int actualFontSize;
 	// coverity[uninit_use_in_call]
 	i = strchr(tempfontname, '-');
-	if (i != NIL) {
+	if (i != nullptr) {
 		*i = '\0';
 	}
 	if (italicfont)

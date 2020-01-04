@@ -6,7 +6,7 @@
    Class declaration for a MAGICK++ output driver with no additional attributes
    and methods (minimal interface)
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -61,7 +61,7 @@ public:
 
 private:
 	void create_vpath(Magick::VPathList & vpath);
-	int	      imgcount;
+	//int	      imgcount;
 
 	Magick::Image * imageptr; 
 	

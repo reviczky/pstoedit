@@ -2,7 +2,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 
 drvSAMPL::derivedConstructor(drvSAMPL):
 //(const char * driveroptions_p,ostream & theoutStream,ostream & theerrStream): // Constructor
-constructBase, imgcount(0)
+constructBase //, imgcount(0)
 {
 // driver specific initializations
 // and writing of header to output file

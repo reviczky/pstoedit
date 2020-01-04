@@ -2,7 +2,7 @@
    drvPDF.cpp : This file is part of pstoedit
    Backend for PDF(TM) format
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,9 +37,11 @@
 // for sin and cos
 #include <math.h>
 
-USESTD 
+USESTD
+using std::setw;
+using std::setfill;
 
-static float rnd(const float f, const float roundnumber)
+static constexpr float rnd(const float f, const float roundnumber)
 {
 	const float roundup = (f < 0.0f) ? -0.5f : 0.5f;
 	return ((long int) ((f * roundnumber) + roundup)) / roundnumber;
@@ -127,7 +129,7 @@ void drvPDF::endtext()
 }
 
 
-static streampos newlinebytes = 1;	// how many bytes are a newline (1 or 2)
+static std::streampos newlinebytes = 1;	// how many bytes are a newline (1 or 2)
 
 static const char *const stdEncoding = "Standard";
 
@@ -170,14 +172,14 @@ drvPDF::~drvPDF()
 
 	endtext();					// close text if open
 
-	unsigned int outlines = newobject();
+	const unsigned int outlines = newobject();
 	outf << "<<" << endl;
 	outf << "/Type /Outlines" << endl;
 	outf << "/Count 0" << endl;
 	outf << ">>" << endl;
 	endobject();
 
-	unsigned int encoding = newobject();
+	const unsigned int encoding = newobject();
 	// write the diffs between pdf-encoding and WinAnsiEncoding
 	outf << "<<" << endl;
 	outf << "/Type /Encoding" << endl;
@@ -331,10 +333,10 @@ drvPDF::~drvPDF()
 	endobject();
 
 
-	unsigned int firstFontObject = currentobject + 1;
+	const unsigned int firstFontObject = currentobject + 1;
 	// Now define all the 14 standard fonts
 	for (unsigned int f = 0; f < numberOfFonts; f++) {
-		unsigned int font = newobject();
+		const unsigned int font = newobject();
 		unused(&font);
 		outf << "<<" << endl;
 		outf << "/Type /Font" << endl;
@@ -353,7 +355,7 @@ drvPDF::~drvPDF()
 		endobject();
 	}
 
-	unsigned int catalog = newobject();
+	const unsigned int catalog = newobject();
 	unsigned int pages = currentobject + 2;	// will be next after resources;
 	outf << "<<" << endl;
 	outf << "/Type /Catalog" << endl;
@@ -362,7 +364,7 @@ drvPDF::~drvPDF()
 	outf << ">>" << endl;
 	endobject();
 
-	unsigned int nrOfPages = pagenr;
+	const unsigned int nrOfPages = pagenr;
 
 	const unsigned int resources = newobject();
 	outf << "<<" << endl;
@@ -404,7 +406,7 @@ drvPDF::~drvPDF()
 
 	// Now write the Page parts for each page
 	for (unsigned int j = 1; j <= nrOfPages; j++) {
-		unsigned int pageobject = newobject();
+		const unsigned int pageobject = newobject();
 		unused(&pageobject);
 		outf << "<<" << endl;
 		outf << "/Type /Page" << endl;
@@ -415,22 +417,29 @@ drvPDF::~drvPDF()
 		endobject();
 	}
 
-	unsigned int infoobject = newobject();
+	const unsigned int infoobject = newobject();
 	outf << "<<" << endl;
+
+	outf << "/CreationDate (D:" << drvbase::DateString() << ")" << endl;
+#if 0
 // Comments by Rohan
 // This is a hack
 // Since Windows CE does not support, I am just putting a dummy date(i.e "01/01/18 09:00:00")
 #ifndef OS_WIN32_WCE
-	time_t t = time(nullptr);
-	struct tm *localt = localtime(&t);
+	const time_t t = time(nullptr);
+	const struct tm * const localt = localtime(&t);
+	// (D:YYYYMMDDHHmmSSOHH'mm')
+	// All parts of the date after the year are optional.
 	if (localt) {
-	   outf << "/CreationDate (D:"
+		outf << "/CreationDate (D:" << drvbase::DateString() << ")" << endl;
+#if 0
 		<< setw(4) << localt->tm_year + 1900
 		<< setw(2) << setfill('0') << localt->tm_mon + 1
 		<< setw(2) << setfill('0') << localt->tm_mday
 		<< setw(2) << setfill('0') << localt->tm_hour
 		<< setw(2) << setfill('0') << localt->tm_min
 		<< setw(2) << setfill('0') << localt->tm_sec << ")" << endl;
+#endif
 	}
 #else
 	   outf << "/CreationDate (D:"
@@ -441,11 +450,13 @@ drvPDF::~drvPDF()
 		<< setw(2) << setfill('0') << 0
 		<< setw(2) << setfill('0') << 0 << ")" << endl;
 #endif
+#endif
+
 	outf << "/Producer (pstoedit by wglunz35_AT_pstoedit.net)" << endl;
 	outf << ">>" << endl;
 	endobject();
 
-	streampos xrefbegin = outf.tellp();
+	const std::streampos xrefbegin = outf.tellp();
 	outf << "xref" << endl;
 	outf << "0 " << currentobject + 1 << endl;
 	outf << "0000000000 65535 f";
@@ -524,7 +535,7 @@ void drvPDF::print_coords()
 void drvPDF::open_page()
 {
 	endtext();					// close text if open
-	unsigned int currentpage = newobject();
+	const unsigned int currentpage = newobject();
 	unused(&currentpage);
 	pagenr++;
 	// provide a temp stream
@@ -535,7 +546,7 @@ void drvPDF::close_page()
 {
 	endtext();					// close text if open
 
-	streampos endpos = buffer.tellp();
+	const std::streampos endpos = buffer.tellp();
 	outf << "<<" << endl;
 	outf << "/Length " << endpos << endl;
 	outf << ">>" << endl;

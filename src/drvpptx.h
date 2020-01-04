@@ -6,7 +6,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -27,6 +27,8 @@
 #include "drvbase.h"
 #include I_strstream
 #include <set>
+using std::set;
+using std::string;
 
 class drvPPTX : public drvbase {
 
@@ -66,13 +68,13 @@ public:
 
 private:
         struct zip * outzip;        // pptx file to generate (zip format)
-        ostringstream slidef;       // Contents of current slide
+        std::ostringstream slidef;       // Contents of current slide
         BBox slideBBox;             // Bounding box (all slides)
         Point center_offset;        // Translation needed to center the current slide
         unsigned long next_id;      // Next ID number for naming objects
         unsigned long page_images;  // Number of images on the current page
         unsigned long total_images; // Number of images in the entire document
-        set<string> eotlist;        // Set of EOT files to embed
+        std::set<std::string> eotlist;        // Set of EOT files to embed
 
         // OOXML requires a *lot* of boilerplate text.
         static const char * const xml_rels;
@@ -110,7 +112,7 @@ private:
           // Convert an x coordinate from PostScript to OOXML.  To do
           // this we shift the page to the origin, center it on the
           // slide, and scale it from PostScript points to OOXML EMUs.
-          BBox pageBBox = getCurrentBBox();
+          const BBox pageBBox = getCurrentBBox();
           return bp2emu(x_bp - pageBBox.ll.x_ + center_offset.x_);
         }
 
@@ -119,8 +121,8 @@ private:
           // this we shift the page to the origin, center it on the
           // slide, flip it upside down, and scale it from PostScript
           // points to OOXML EMUs.
-          BBox pageBBox = getCurrentBBox();
-          float pageHeight = pageBBox.ur.y_ - pageBBox.ll.y_;
+          const BBox pageBBox = getCurrentBBox();
+          const float pageHeight = pageBBox.ur.y_ - pageBBox.ll.y_;
           return bp2emu(pageHeight - (y_bp - pageBBox.ll.y_) + center_offset.y_);
         }
 

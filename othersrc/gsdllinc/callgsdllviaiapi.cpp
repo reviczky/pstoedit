@@ -82,9 +82,8 @@ static int GSDLLCALL std_inHandler(void * /*caller_handle*/, char *  buf , int  
 /* main handler for the GS DLL */
 class GSDLL {
 public:
-	GSDLL()
-		:
-	 hmodule(0),	
+	GSDLL()	:
+	 hmodule(nullptr),	
 	 new_instance(0),
 	 delete_instance(0),
 	 set_stdio(0),
@@ -192,6 +191,7 @@ public:
 	// pointer to the GhostScript instance (but there can only be one anyway)
 	gs_main_instance *minst;
 
+	NOCOPYANDASSIGN(GSDLL)
 };
 
 
@@ -239,7 +239,7 @@ callgsDLL(int argc, char *argv[])
 
 	if (code == 0) 	code = gsapi.run_string(gsapi.minst, start_string, 0, &exit_code);
 
-    int code1 = gsapi.exit(gsapi.minst);
+    const int code1 = gsapi.exit(gsapi.minst);
     
 	if ((code == 0) || (code == e_Quit)) code = code1;
 

@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -33,7 +33,7 @@
 #include "pstoedit_config.h"
 
 static void write_DXF_handle(ostream& outs, int handle) {
-	outs << "  5\n" << hex << handle << dec << endl;
+	outs << "  5\n" << std::hex << handle << std::dec << endl;
 }
 
 // not used - the acad header also works with icad. later we may introduce an option
@@ -193,10 +193,10 @@ class DXFColor {
 public:
 // The SparcCompiler wants to have this public in order to initialize DXFColors
 	struct rgbcolor {
-		rgbcolor(unsigned short r_p,unsigned short g_p,unsigned short b_p) : r(r_p),g(g_p),b(b_p) {}
-		unsigned short r;
-		unsigned short g;
-		unsigned short b;
+		constexpr rgbcolor(unsigned short r_p, unsigned short g_p, unsigned short b_p) : r(r_p),g(g_p),b(b_p) {}
+		const unsigned short r;
+		const unsigned short g;
+		const unsigned short b;
 	};
 
 private:
@@ -497,7 +497,7 @@ unsigned int DXFColor::getDXFColor(float r, float g, float b,unsigned int firstc
 }
 
 
-static inline unsigned short floatColTointCol(float fcol) {
+static constexpr unsigned short floatColTointCol(float fcol) {
 	return (unsigned short) (fcol*255);
 }
 
@@ -578,8 +578,7 @@ public:
 			nl = nl->next;
 		}
 		// not found - so prepend to list;
-		auto newlayer = new  NamedLayer(s,namedLayers);
-		namedLayers = newlayer; // prepend to list;
+		namedLayers = new NamedLayer(s,namedLayers); // prepend to list;
 		numberOfLayers++;
 	}
 
@@ -590,7 +589,7 @@ public:
 		const unsigned short G = floatColTointCol(g);
 		const unsigned short B = floatColTointCol(b);
 
-		Layer * ptr = LayerTable[index];
+		const Layer * ptr = LayerTable[index];
 		while(ptr) {
 			if( (ptr->rgb.r == R) && 
 				(ptr->rgb.g == G) && 
@@ -610,8 +609,7 @@ public:
 		Layer * headptr = LayerTable[index];
 
 		// prepend new layer to the linked list
-		auto newlayer = new Layer(r,g,b,headptr);
-		LayerTable[index] = newlayer;
+		LayerTable[index] = new Layer(r, g, b, headptr);
 		numberOfLayers++;
 	}
 

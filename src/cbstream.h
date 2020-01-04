@@ -5,7 +5,7 @@
    callbackBuffer : This file is part of pstoedit
    streambuf that writes the data to a user defineable call back function
 
-   Copyright (C) 1998 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -52,7 +52,7 @@ typedef int (__stdcall write_callback_type) (void * cb_data, const char* text, i
 typedef int ( write_callback_type) (void * cb_data, const char* text, int length);
 #endif
 //lint !e1712 // no default ctor
-class DLLEXPORT callbackBuffer : public streambuf {
+class DLLEXPORT callbackBuffer : public std::streambuf {
 public:
 	callbackBuffer(void * cb_data_p, write_callback_type* wcb) : 
 		cb_data(cb_data_p), write_callback(wcb) {}
@@ -66,7 +66,7 @@ protected:
 
     // Defining xsputn is an optional optimization.
     // (streamsize was recently added to ANSI C++, not portable yet.)
-    streamsize xsputn(const char* text, streamsize n);
+    std::streamsize xsputn(const char* text, std::streamsize n);
 
 private:
 	

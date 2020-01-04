@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to Ghostscript
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -346,7 +346,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 #endif
 		if (verbose)
 			errstream << "looking in " << fullinifilename << endl;
-		DWORD result = GetPrivateProfileString("Options",
+		const DWORD result = GetPrivateProfileString("Options",
 											   "GhostscriptDLL",
 											   "",	//default
 											   pathname,
@@ -358,7 +358,7 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 				if (strcmp(inifilename, fullinifilename) == 0) {
 					char sysdir[2000];
 					sysdir[0] = '\0';
-					UINT ret = GetWindowsDirectory(sysdir, 2000);
+					const UINT ret = GetWindowsDirectory(sysdir, 2000);
 					if (ret)
 						errstream << sysdir << '\\';
 				}
@@ -510,7 +510,7 @@ static const char *getOSspecificOptions(int verbose, ostream & errstream, char *
 #endif
 	if (verbose)
 		errstream << "looking in " << fullinifilename << endl;
-	DWORD result = GetPrivateProfileString("Options",
+	const DWORD result = GetPrivateProfileString("Options",
 										   "GhostscriptInclude",
 										   "",	//default
 										   buffer,
@@ -522,7 +522,7 @@ static const char *getOSspecificOptions(int verbose, ostream & errstream, char *
 			if (strcmp(inifilename, fullinifilename) == 0) {
 				char sysdir[2000];
 				sysdir[0] = '\0';
-				UINT ret = GetWindowsDirectory(sysdir, 2000);
+				const UINT ret = GetWindowsDirectory(sysdir, 2000);
 				if (ret)
 					errstream << sysdir << '\\';
 			}

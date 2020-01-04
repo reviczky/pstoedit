@@ -3,7 +3,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -38,6 +38,7 @@
 #include <time.h>
 
 #include <errno.h>
+#include <algorithm>
 
 #ifdef _MSC_VER
 // MS VC++ Windows
@@ -74,6 +75,14 @@ long lroundf(float f) {
 #define unlink _unlink
 
 #endif
+using std::stringstream;
+using std::ostringstream;
+using std::istringstream;
+using std::hex;
+using std::setw;
+using std::setfill;
+
+
 
 /*
   The following are some things to know about the Office Open XML
@@ -453,7 +462,7 @@ const char * const drvPPTX::xml_theme1_xml =
 
 drvPPTX::derivedConstructor(drvPPTX):
 constructBase,
-outzip(NIL)
+outzip(nullptr)
 {
   // Parse our command-line options.
   if (options->colortype == "original")
@@ -510,7 +519,7 @@ outzip(NIL)
   }
 
   // Output all floating-point numbers as integers.
-  slidef << fixed << setprecision(0);
+  slidef << std::fixed << std::setprecision(0);
 
   // Seed the random-number generator.
   srandom((unsigned int) time(nullptr)*getpid());
@@ -765,8 +774,8 @@ void drvPPTX::create_pptx()
 void drvPPTX::print_coords(const BBox & pathBBox)
 {
   // Output a list of coordinates in the shape's coordinate system.
-  long int xshift_emu = -xtrans(pathBBox.ll.x_);
-  long int yshift_emu = -ytrans(pathBBox.ur.y_);
+  const long int xshift_emu = -xtrans(pathBBox.ll.x_);
+  const long int yshift_emu = -ytrans(pathBBox.ur.y_);
   for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
     const basedrawingelement & elem = pathElement(n);
     switch (elem.getType()) {
@@ -814,7 +823,7 @@ void drvPPTX::open_page()
 {
   // Determine how much to offset the current page to center its
   // graphics within the slide.
-  BBox pageBBox = getCurrentBBox();
+  const BBox pageBBox = getCurrentBBox();
   center_offset.x_ = (slideBBox.ur.x_ - slideBBox.ll.x_ - (pageBBox.ur.x_ - pageBBox.ll.x_)) / 2.0f;
   center_offset.y_ = (slideBBox.ur.y_ - slideBBox.ll.y_ - (pageBBox.ur.y_ - pageBBox.ll.y_)) / 2.0f;
 
@@ -1022,9 +1031,9 @@ void drvPPTX::eot2texinfo(const string& eotfilename, TextInfo & textinfo)
   eotfile.read((char *)panose_vals, 10);    // PANOSE values
   eotfile.ignore(1+1+4);                    // Character set, italic, weight
   eotfile.read((char *)charvals, 2);        // Embedding restrictions
-  short fstype = charvals[1]<<8 | charvals[0];
+  const short fstype = charvals[1]<<8 | charvals[0];
   eotfile.read((char *)charvals, 2);        // Magic number
-  unsigned short magicnum = charvals[1]<<8 | charvals[0];
+  const unsigned short magicnum = charvals[1]<<8 | charvals[0];
   if (magicnum != 0x504c) {
     RSString errmessage("ERROR: ");
     errmessage += eotfilename.c_str() ;
@@ -1100,7 +1109,7 @@ float drvPPTX::angle_between(Point first, Point second)
   second.y_ /= scale;
 
   // Determine the direction of the rotation.
-  float direction = first.x_*second.y_ - first.y_*second.x_;
+  const float direction = first.x_*second.y_ - first.y_*second.x_;
 
   // Determine the rotation itself.
   float angle = acos(first.x_*second.x_ + first.y_*second.y_) * 180.0f/(float)M_PI;
@@ -1127,10 +1136,10 @@ void drvPPTX::parse_xform_matrix(const float * origMatrix,
   matrix[5] = 0.0f;
 
   // Determine whether the transformation includes mirroring.
-  Point xunit(1.0f, 0.0f);
-  Point xunit_xform = xunit.transform(matrix);
-  Point yunit(0.0f, 1.0f);
-  Point yunit_xform = yunit.transform(matrix);
+  const Point xunit(1.0f, 0.0f);
+  const Point xunit_xform = xunit.transform(matrix);
+  const Point yunit(0.0f, 1.0f);
+  const Point yunit_xform = yunit.transform(matrix);
   float rot90 = angle_between(xunit_xform, yunit_xform);
   *mirrored = rot90 < 0;
 
@@ -1156,9 +1165,9 @@ void drvPPTX::show_text(const TextInfo & textinfo)
   next_id++;
 
   // Compute the unrotated text width and height.
-  float text_width =                                 // Unrotated width
+  const float text_width =                                 // Unrotated width
     pythagoras(textinfo.x_end() - textinfo.x(), textinfo.y_end() - textinfo.y());
-  float text_height = textinfo.currentFontSize;      // Unrotated height
+  const float text_height = textinfo.currentFontSize;      // Unrotated height
 
   // Determine if the text is flipped horizontally.  We don't test for
   // vertical flipping because this is isomorphic to a horizontal flip
@@ -1171,7 +1180,7 @@ void drvPPTX::show_text(const TextInfo & textinfo)
     angle = -angle;
 
   // Compute the upper-left corner of the rotated text.
-  Point text_pivot(textinfo.x(), textinfo.y());   // Unrotated lower left
+  const Point text_pivot(textinfo.x(), textinfo.y());   // Unrotated lower left
   Point text_ul(textinfo.x(), textinfo.y() + text_height);   // Unrotated upper left
   Point text_c = text_pivot + Point(text_width/2.0f, text_height/2.0f);   // Unrotated center
   if (flipH) {
@@ -1182,9 +1191,9 @@ void drvPPTX::show_text(const TextInfo & textinfo)
   // Rotate the upper-left corner and center around the original
   // lower-left corner, then unrotate the upper-left corner around the
   // new center.
-  Point text_ul_rot = rotate_pt_around(text_ul, angle, text_pivot);
-  Point text_c_rot = rotate_pt_around(text_c, angle, text_pivot);
-  Point text_ofs = rotate_pt_around(text_ul_rot, -angle, text_c_rot);
+  const Point text_ul_rot = rotate_pt_around(text_ul, angle, text_pivot);
+  const Point text_c_rot = rotate_pt_around(text_c, angle, text_pivot);
+  const Point text_ofs = rotate_pt_around(text_ul_rot, -angle, text_c_rot);
 
   // Output the visual shape properties.
   slidef << "        <p:spPr>\n";
@@ -1244,7 +1253,7 @@ void drvPPTX::show_text(const TextInfo & textinfo)
          << "              <a:t>";
   static bool warned_invalid_char = false;  // true=already issued an invalid-character warning
   for (size_t c = 0; c < textinfo.thetext.length(); c++) {
-    unsigned char onechar = textinfo.thetext[c];
+    const unsigned char onechar = textinfo.thetext[c];
     if (onechar < 32 || (onechar >= 128 && onechar < 192)) {
       if (!warned_invalid_char) {
         errf << "Warning: Character " << (unsigned int)onechar << " is not allowed in OOXML text; ignoring\n";
@@ -1318,8 +1327,8 @@ const char * drvPPTX::pt2emu(float x_bp, float y_bp,
 Point drvPPTX::pathCentroid()
 {
   // We start by finding a cycle of knots.
-  unsigned int numElts = numberOfElementsInPath();
-  auto allKnots = new Point[numElts + 1];
+  const unsigned int numElts = numberOfElementsInPath();
+  std::unique_ptr<Point[]>  allKnots ( new Point[numElts + 1]);
   unsigned int numKnots = 0;
   unsigned int movetos = 0;
   for (unsigned int n = 0; n < numElts; n++) {
@@ -1356,7 +1365,7 @@ Point drvPPTX::pathCentroid()
     // Finally, we compute the centroid of the polygon.
     Point p;
     for (unsigned int n = 0; n < numKnots; n++) {
-      float partial = allKnots[n].x_*allKnots[n+1].y_ - allKnots[n+1].x_*allKnots[n].y_;
+      const float partial = allKnots[n].x_*allKnots[n+1].y_ - allKnots[n+1].x_*allKnots[n].y_;
       p.x_ += (allKnots[n].x_ + allKnots[n+1].x_)*partial;
       p.y_ += (allKnots[n].y_ + allKnots[n+1].y_)*partial;
     }
@@ -1364,7 +1373,6 @@ Point drvPPTX::pathCentroid()
     p.y_ /= area*6.0f;
     result = p;
   } 
-  delete[] allKnots;
   return result;
 }
 
@@ -1374,8 +1382,8 @@ Point drvPPTX::rotate_pt_around  (const Point & pt, float angle, const Point & p
   Point shiftedPt = pt;
   shiftedPt.x_ -= pivot.x_;   // Shift the pivot to the origin.
   shiftedPt.y_ -= pivot.y_;
-  float angle_rad = angle * (float)M_PI / 180.0f;
-  Point rotatedPt(shiftedPt.x_*cosf(angle_rad) - shiftedPt.y_*sinf(angle_rad),  // Rotate the shifted point.
+  const float angle_rad = angle * (float)M_PI / 180.0f;
+  const Point rotatedPt(shiftedPt.x_*cosf(angle_rad) - shiftedPt.y_*sinf(angle_rad),  // Rotate the shifted point.
                   shiftedPt.x_*sinf(angle_rad) + shiftedPt.y_*cosf(angle_rad));
   return rotatedPt + pivot;   // Shift back to the original pivot.
 }
@@ -1383,9 +1391,9 @@ Point drvPPTX::rotate_pt_around  (const Point & pt, float angle, const Point & p
 void drvPPTX::print_connections(const BBox & pathBBox)
 {
   // Output shape connection sites (knots and centroid).
-  Point centroid = pathCentroid();
-  long int xshift_emu = -xtrans(pathBBox.ll.x_);
-  long int yshift_emu = -ytrans(pathBBox.ur.y_);
+  const Point centroid = pathCentroid();
+  const long int xshift_emu = -xtrans(pathBBox.ll.x_);
+  const long int yshift_emu = -ytrans(pathBBox.ur.y_);
   slidef << "            <a:cxnLst>\n"
          << "              <a:cxn ang=\"0\">\n"
          << "                <a:pos " << pt2emu(centroid.x_, centroid.y_,
@@ -1396,7 +1404,7 @@ void drvPPTX::print_connections(const BBox & pathBBox)
     if (elem.getNrOfPoints() == 0)
       continue;
     const Point & p = elem.getPoint(elem.getNrOfPoints() - 1);
-    float angle = atan2f(centroid.y_ - p.y_, p.x_ - centroid.x_);
+    const float angle = atan2f(centroid.y_ - p.y_, p.x_ - centroid.x_);
     slidef << "              <a:cxn ang=\"" << angle*60000.0*180.0/M_PI << "\">\n"
            << "                <a:pos " << pt2emu(p.x_, p.y_,
                                                   xshift_emu, yshift_emu) << "/>\n"
@@ -1409,16 +1417,16 @@ void drvPPTX::print_color(int baseIndent, float redF, float greenF, float blueF)
 {
   // Output an OOXML solid color.
   string indentStr = string(baseIndent, ' ');
-  unsigned int red = (unsigned int)lroundf(redF * 255);
-  unsigned int green = (unsigned int)lroundf(greenF * 255);
-  unsigned int blue = (unsigned int)lroundf(blueF * 255);
-  unsigned int rgb = blue + 256*(green + 256*red);
+  const unsigned int red = (unsigned int)lroundf(redF * 255);
+  const unsigned int green = (unsigned int)lroundf(greenF * 255);
+  const unsigned int blue = (unsigned int)lroundf(blueF * 255);
+  const unsigned int rgb = blue + 256*(green + 256*red);
   slidef << indentStr << "<a:solidFill>\n";
   switch (color_type) {
   case C_ORIGINAL:
     // With -colors=original, output the color exactly as specified.
     slidef << indentStr << "  <a:srgbClr val=\""
-           << hex << setw(6) << setfill('0') << rgb << dec << "\"/>\n";
+           << hex << setw(6) << setfill('0') << rgb << std::dec << "\"/>\n";
     break;
 
   case C_THEME:
@@ -1445,7 +1453,7 @@ void drvPPTX::print_color(int baseIndent, float redF, float greenF, float blueF)
           // Randomly alter the luminosity with the constraint that
           // light colors map to light colors and dark colors map to
           // dark colors.
-          float origLum = sqrtf(0.241f*redF*redF + 0.691f*greenF*greenF + 0.068f*blueF*blueF);
+          const float origLum = sqrtf(0.241f*redF*redF + 0.691f*greenF*greenF + 0.068f*blueF*blueF);
           if (origLum >= 0.5)
             newColorInfo.lum = 50000 + random()%40000;  // Map to [50%, 90%].
           else
@@ -1522,7 +1530,7 @@ void drvPPTX::print_dash()
     }
 
     // Output {dash, space} pairs.
-    float lineWidth = currentLineWidth();
+    const float lineWidth = currentLineWidth();
     slidef << "            <a:custDash>\n";
     for (p = 0; p < patternLen; p += 2)
       slidef << "              <a:ds d=\"" << 100000.0*pattern[p]/lineWidth
@@ -1556,14 +1564,14 @@ void drvPPTX::show_path()
     // Non-curves are handled by considering each knot in the
     // bounding-box calcuation.
     const basedrawingelement & elem = pathElement(e);
-    unsigned int numPoints = elem.getNrOfPoints();
+    const unsigned int numPoints = elem.getNrOfPoints();
     if (elem.getType() != curveto)
       for (unsigned int p = 0; p < numPoints; p++) {
-        Point thisPt = elem.getPoint(p);
-        pathBBox.ll.x_ = min(pathBBox.ll.x_, thisPt.x_);
-        pathBBox.ll.y_ = min(pathBBox.ll.y_, thisPt.y_);
-        pathBBox.ur.x_ = max(pathBBox.ur.x_, thisPt.x_);
-        pathBBox.ur.y_ = max(pathBBox.ur.y_, thisPt.y_);
+        const Point thisPt = elem.getPoint(p);
+        pathBBox.ll.x_ = std::min(pathBBox.ll.x_, thisPt.x_);
+        pathBBox.ll.y_ = std::min(pathBBox.ll.y_, thisPt.y_);
+        pathBBox.ur.x_ = std::max(pathBBox.ur.x_, thisPt.x_);
+        pathBBox.ur.y_ = std::max(pathBBox.ur.y_, thisPt.y_);
       }
 
     // Rather than attempt to compute the true bounding box of a
@@ -1573,12 +1581,12 @@ void drvPPTX::show_path()
     if (elem.getType() == curveto) {
       const float numSamples = 100.0f;
       for (float t = 0.0f; t <= 1.0f; t += 1.0f/numSamples) {
-        Point bPoint = PointOnBezier(t, prevPoint, elem.getPoint(0),
+        const Point bPoint = PointOnBezier(t, prevPoint, elem.getPoint(0),
                                      elem.getPoint(1), elem.getPoint(2));
-        pathBBox.ll.x_ = min(pathBBox.ll.x_, bPoint.x_);
-        pathBBox.ll.y_ = min(pathBBox.ll.y_, bPoint.y_);
-        pathBBox.ur.x_ = max(pathBBox.ur.x_, bPoint.x_);
-        pathBBox.ur.y_ = max(pathBBox.ur.y_, bPoint.y_);
+        pathBBox.ll.x_ = std::min(pathBBox.ll.x_, bPoint.x_);
+        pathBBox.ll.y_ = std::min(pathBBox.ll.y_, bPoint.y_);
+        pathBBox.ur.x_ = std::max(pathBBox.ur.x_, bPoint.x_);
+        pathBBox.ur.y_ = std::max(pathBBox.ur.y_, bPoint.y_);
       }
     }
 
@@ -1682,24 +1690,24 @@ void drvPPTX::show_image(const PSImage & imageinfo)
   // and
   // http://math.stackexchange.com/questions/13150/extracting-rotation-scale-values-from-2d-transformation-matrix
   // were helpful here.
-  bool flipH = ctm[0] < 0;
-  bool flipV = ctm[3] > 0;    // Reversed sense because we're already flipping the coordinate system
-  float xscale = pythagoras(ctm[0], ctm[2]);
-  float yscale = pythagoras(ctm[1], ctm[3]);
+  const bool flipH = ctm[0] < 0;
+  const bool flipV = ctm[3] > 0;    // Reversed sense because we're already flipping the coordinate system
+  const float xscale = pythagoras(ctm[0], ctm[2]);
+  const float yscale = pythagoras(ctm[1], ctm[3]);
   float angle = atan2f(ctm[2], ctm[0]) * (float)(180.0f/M_PI);
   if (flipH)
     angle = 180.0f - angle;
   if (flipV)
     angle = -angle;
-  long int angle_int = lroundf(-60000.0f*angle);
+  const long int angle_int = lroundf(-60000.0f*angle);
 
   // DrawingML rotates the image *after* the location for the image's
   // upper-left corner is specified.  Hence, we determine the image's
   // unrotated upper-left corner by applying the CTM to the image's
   // center and taking an offset from that.
-  Point center_orig(imageinfo.width/2.0f, imageinfo.height/2.0f);
-  Point center_xform = center_orig.transform(ctm);
-  Point ofs = center_xform + Point(-xscale*imageinfo.width/2.0f, yscale*imageinfo.height/2.0f);
+  const Point center_orig(imageinfo.width/2.0f, imageinfo.height/2.0f);
+  const Point center_xform = center_orig.transform(ctm);
+  const Point ofs = center_xform + Point(-xscale*imageinfo.width/2.0f, yscale*imageinfo.height/2.0f);
 
   // Place the image on the slide.
   total_images++;
@@ -1726,8 +1734,8 @@ void drvPPTX::show_image(const PSImage & imageinfo)
     slidef << " flipH=\"1\"";
   if (flipV)
     slidef << " flipV=\"1\"";
-  float cx = imageinfo.width*xscale;
-  float cy = imageinfo.height*yscale;
+  const float cx = imageinfo.width*xscale;
+  const float cy = imageinfo.height*yscale;
   slidef << ">\n"
          << "            <a:off " << pt2emu(ofs.x_, ofs.y_) << "/>\n";
   slidef << "            <a:ext " << pt2emu(cx, cy, 0, 0, "cx", "cy", true) << "/>\n"

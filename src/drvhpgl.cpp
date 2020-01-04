@@ -5,7 +5,7 @@
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
-   Copyright (C) 2000 - 2019 Glunz (fill support,  improved color handling)
+   Copyright (C) 2000 - 2020 Glunz (fill support,  improved color handling)
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -146,14 +146,14 @@ drvHPGL::~drvHPGL()
 	// driver specific deallocations
 	// and writing of trailer to output file
 // should be done either here or in close_page      	outf << "PU;PA0,0;SP;EC;PG1;EC1;OE\n";
-	// fillinstruction = NIL;
+	// fillinstruction = nullptr;
 	delete [] penColors;
-	penColors = NIL;
-	options = NIL;
+	penColors = nullptr;
+	options = nullptr;
 }
 
 
-static unsigned int intColor(float R, float G, float B) {
+static constexpr unsigned int intColor(float R, float G, float B) {
 	return  256 * (unsigned int) (R * 16) +	16 * (unsigned int) (G * 16) + (unsigned int) (B * 16);
 }
 

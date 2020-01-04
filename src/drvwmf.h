@@ -105,11 +105,11 @@ private:
 
 	enum polyType {TYPE_FILL,TYPE_LINES};
 
-	void	drawPoly			(polyType type);
+	void drawPoly(polyType type);
 
-	void	setDrawAttr			();
+	void setDrawAttr();
 
-	int		fetchFont			(const TextInfo & textinfo, short int, short int);
+	int fetchFont(const TextInfo & textinfo, short int, short int);
 
 	float scale() const;
 	long transx(float x) const;
@@ -119,8 +119,8 @@ private:
 
 // This contains all private data of drvwmf.
 
-	HDC				metaDC;
-	HDC				desktopDC;
+	HDC			metaDC;
+	HDC			desktopDC;
 
 	LOGPEN			penData;
 	HPEN			coloredPen;

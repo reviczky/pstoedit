@@ -40,6 +40,7 @@
 */
 
 #include "drvnoi.h"
+#include <memory>
 
 // function prototypes
 
@@ -94,7 +95,7 @@ static unsigned short DLLFUNCNUM = (sizeof(DllFunc)/sizeof(noifptr));
 
 // driver constructor
 // looks for resource file and bezier split level parameters
-drvNOI::derivedConstructor(drvNOI): constructBase, imgcount(0)
+drvNOI::derivedConstructor(drvNOI): constructBase //, imgcount(0)
   {  
   if (!outFileName.length())
 	{
@@ -174,8 +175,8 @@ static void AddPoint(double points[][2], const Point& p, unsigned &npoints)
 void drvNOI::draw_polyline()
   {
   Point p0, pc;
-  Point pf(x_offset, y_offset);
-  auto points = new double[numberOfElementsInPath()][2];
+  const Point pf(x_offset, y_offset);
+  std::unique_ptr<double[][2]> points ( new double[numberOfElementsInPath()][2]);
   unsigned npoints = 0;
 
   for (unsigned int n = 0; n < numberOfElementsInPath(); n++) 
@@ -185,32 +186,32 @@ void drvNOI::draw_polyline()
 	switch (elem.getType()) 
 	  {
 	  case moveto:
-	    (void)NoiDrawPolyline(points, npoints);	
+	    (void)NoiDrawPolyline(points.get(), npoints);	
 		npoints = 0;	  
 		  
 		p0 = elem.getPoint(0) + pf;
 		pc = p0;
-		AddPoint(points, pc, npoints);
+		AddPoint(points.get(), pc, npoints);
 		break;
 
 	  case lineto:
 		{
-		Point p = elem.getPoint(0) + pf;
+		const Point p = elem.getPoint(0) + pf;
 		pc = p;
-		AddPoint(points, pc, npoints);
+		AddPoint(points.get(), pc, npoints);
 		}
 		break;
 
 	  case closepath:
-	    AddPoint(points, p0, npoints);
-  	    (void)NoiDrawPolyline(points, npoints);	
+	    AddPoint(points.get(), p0, npoints);
+  	    (void)NoiDrawPolyline(points.get(), npoints);
 		npoints = 0;	  
-	    AddPoint(points, p0, npoints);
+	    AddPoint(points.get(), p0, npoints);
 		break;
 
 	  case curveto:
 		{
-  	    (void)NoiDrawPolyline(points, npoints);		  
+  	    (void)NoiDrawPolyline(points.get(), npoints);
 		npoints = 0;
 		
 		Point p[3];
@@ -220,27 +221,26 @@ void drvNOI::draw_polyline()
 		(void)NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
 		pc = p[2];
 		
-		AddPoint(points, pc, npoints);
+		AddPoint(points.get(), pc, npoints);
 		}
 		break;
 	  default:; // no expected
 	  }
 	}
 	
-  (void)NoiDrawPolyline(points, npoints);		  
+  (void)NoiDrawPolyline(points.get(), npoints);
   (void)NoiEndPolyline();
-  delete []points;
   }
 
 //	draw_polygon - very similar to draw_polyline, but represents the filled objects
 //  with straight-line borders as Allplan Filling objects
 void drvNOI::draw_polygon()
   {
-  auto points = new double[numberOfElementsInPath()][2];
+  std::unique_ptr<double[][2]> points (new double[numberOfElementsInPath()][2]);
   unsigned npoints = 0;
   Point p0, pc;
   bool isFillObject = (currentShowType() == fill);
-  Point pf(x_offset, y_offset);
+  const Point pf(x_offset, y_offset);
 	
   for (unsigned n = 0; n < numberOfElementsInPath(); n++) 
 	{
@@ -249,29 +249,29 @@ void drvNOI::draw_polygon()
 	switch (elem.getType()) 
 	  {
 	  case moveto:
-	    (void)NoiDrawPolyline(points, npoints);	
+	    (void)NoiDrawPolyline(points.get(), npoints);	
 		npoints = 0;	  
 	  
   		p0 = elem.getPoint(0) + pf;
   		pc = p0;
-		AddPoint(points, pc, npoints);
+		AddPoint(points.get(), pc, npoints);
 		break;
 
 	  case lineto:
 		{
-		Point p = elem.getPoint(0) + pf;
+		const Point p = elem.getPoint(0) + pf;
 		pc = p;
-		AddPoint(points, pc, npoints);
+		AddPoint(points.get(), pc, npoints);
 		}
 		break;
 
 	  case closepath:
-	    AddPoint(points, p0, npoints);
+	    AddPoint(points.get(), p0, npoints);
 	    if (!isFillObject)
 	      {
-  		  (void)NoiDrawPolyline(points, npoints);
+  		  (void)NoiDrawPolyline(points.get(), npoints);
   		  npoints = 0;
-	      AddPoint(points, p0, npoints);
+	      AddPoint(points.get(), p0, npoints);
 	      }
 	      
 		pc = p0;
@@ -280,7 +280,7 @@ void drvNOI::draw_polygon()
 	  case curveto:
 		{
 		isFillObject = false;
-		(void)NoiDrawPolyline(points, npoints);		  
+		(void)NoiDrawPolyline(points.get(), npoints);
 		npoints = 0;  
 
 		Point p[3];
@@ -290,7 +290,7 @@ void drvNOI::draw_polygon()
 		(void)NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
 		pc = p[2];
 		
-		AddPoint(points, pc, npoints);
+		AddPoint(points.get(), pc, npoints);
 		break;
 		}
 	  default:; // not expected
@@ -299,12 +299,11 @@ void drvNOI::draw_polygon()
 
   isFillObject = isFillObject && (pc == p0);
   if (isFillObject)
-	(void)NoiDrawFill(points, npoints);
+	(void)NoiDrawFill(points.get(), npoints);
   else
-	(void)NoiDrawPolyline(points, npoints);
+	(void)NoiDrawPolyline(points.get(), npoints);
 
   (void)NoiEndPolyline();
-  delete []points;
   }
   
 void drvNOI::show_path()
@@ -349,7 +348,7 @@ void drvNOI::show_rectangle(const float llx, const float lly, const float urx,
 // text objects
 void drvNOI::show_text(const TextInfo &textinfo)
   {
-  Point pf(x_offset, y_offset);
+  const Point pf(x_offset, y_offset);
 
   (void)NoiSetCurrentColor((BYTE)(255 * textinfo.currentR), (BYTE)(255 * textinfo.currentG), 
     (BYTE)(255 * textinfo.currentB));
@@ -368,7 +367,7 @@ void drvNOI::show_image(const PSImage &imageinfo)
   assert(imageinfo.isFileImage);
   Point p1, p2;
   imageinfo.getBoundingBox(p1, p2);
-  Point pf(x_offset, y_offset);
+  const Point pf(x_offset, y_offset);
   p1 += pf;
   p2 += pf;
   (void)NoiDrawImage(p1.x_, p1.y_, p2.x_, p2.y_, imageinfo.FileName.c_str());

@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ static char *dlerror()
 {
 	LPVOID lpMsgBuf;
   //  LPVOID lpDisplayBuf;
-    DWORD dw = GetLastError(); 
+    const DWORD dw = GetLastError(); 
 
     (void)FormatMessage(
         FORMAT_MESSAGE_ALLOCATE_BUFFER | 
@@ -132,7 +132,7 @@ void DynLoader::open(const char *libname_P)
 	}
 	handle = WINLOADLIB(LPSTRtoLPWSTR(fulllibname).c_str());
 #elif defined(_WIN32)
-	if (sizeof(void*) != sizeof(HMODULE)) {
+	if constexpr(sizeof(void*) != sizeof(HMODULE)) {
 		errstream << "type of handle in dynload.cpp seems to be wrong" << endl;
 		return;
 	}
@@ -240,7 +240,7 @@ DynLoader::fptr DynLoader::getSymbol(const char *name, int check) const
 #elif defined(OS_WIN32_WCE)
 	DynLoader::fptr rfptr = ptr_to_fptr(GetProcAddress((HINSTANCE) handle, LPSTRtoLPWSTR(name).c_str()));	//lint !e611 //: Suspicious cast
 #elif defined(_WIN32)
-	DynLoader::fptr rfptr = ptr_to_fptr(GetProcAddress((HINSTANCE) handle, name));	//lint !e611 //: Suspicious cast
+	DynLoader::fptr rfptr = /* ptr_to_fptr */(GetProcAddress((HINSTANCE) handle, name));	//lint !e611 //: Suspicious cast
 #else
 #error "system unsupported so far"
 #endif
@@ -325,7 +325,7 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 			errstream << "could not find getglobalRp " << endl;
 			return;
 		}
-		DescriptionRegister *dynglobalRp = dyngetglobalRpFunc();
+		const DescriptionRegister * const dynglobalRp = dyngetglobalRpFunc();
 		if (dynglobalRp == nullptr) {
 			errstream << " didn't find any registered Drivers " << endl;
 		} else if (dynglobalRp != getglobalRp()) {
@@ -398,7 +398,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 			return;
 		}
 
-		while ((direntp = readdir(dirp)) != NIL) {
+		while ((direntp = readdir(dirp)) != nullptr) {
 //      cout <<  direntp->d_name << endl;
 			unsigned int flen = strlen(direntp->d_name);
 			char *expectedpositionofsuffix = direntp->d_name + flen - strlen(suffix);
@@ -441,7 +441,8 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 		WIN32_FIND_DATA finddata;
 
 		const char pattern[] = "/*.dll";
-		const size_t size = strlen(pluginDir) + strlen(pattern) + 1; 
+		const size_t pluginDirsize = strlen(pluginDir);
+		const size_t size = pluginDirsize + strlen(pattern) + 1;
 		char *searchpattern = new char[size];
 		strcpy_s(searchpattern, size, pluginDir);
 		strcat_s(searchpattern, size, pattern);
@@ -471,7 +472,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 				if (STRICMP(&finddata.cFileName[len - 4], ".dll") == 0) {
 #endif
 					// cout << &finddata.cFileName[len -4 ] << endl;
-					const size_t size_2 = strlen(pluginDir) + len + 3; 
+					const size_t size_2 = pluginDirsize + len + 3;
 					char *fullname = new char[size_2];
 					strcpy_s(fullname, size_2, pluginDir);
 					strcat_s(fullname, size_2, "\\");

@@ -5,7 +5,7 @@
    drvsampl.h : This file is part of pstoedit
    Class declaration for a Kontour output driver.
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 1998 Kai-Uwe Sattler, kus@iti.cs.uni-magdeburg.de
 
    This program is free software; you can redistribute it and/or modify

@@ -6,7 +6,7 @@
    Backend for Asymptote files
    Contributed by: John Bowman
 
-   Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -61,15 +61,15 @@ private:
   void save();
   void restore();
   // Previous values of graphics state variables
-  string prevFontName;
-  string prevFontWeight;
+  std::string prevFontName;
+  std::string prevFontWeight;
   float prevR, prevG, prevB;
   float prevFontAngle;
   float prevFontSize;
   float prevLineWidth;
   unsigned int prevLineCap;
   unsigned int prevLineJoin;
-  string prevDashPattern;
+  std::string prevDashPattern;
 
   // Set to true for fill or eofill, false for stroke
   bool fillmode;

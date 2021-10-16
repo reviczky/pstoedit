@@ -10,7 +10,7 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT([pstoedit],[3.76],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
+AC_INIT([pstoedit],[3.77],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([foreign subdir-objects info-in-builddir -Wall])

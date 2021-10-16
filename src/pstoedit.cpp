@@ -258,23 +258,15 @@ void checkheap(const char * tracep, const void * pUserData) {};
 static void loadpstoeditplugins(const char *progname, ostream & errstream, bool verbose)
 {
 	static bool pluginsloaded = false;
-	if (pluginsloaded)
+	if (pluginsloaded) {
 		return;
-	RSString plugindir = getRegistryValue(errstream, "common", "plugindir");
+	}
+	const RSString plugindir = getRegistryValue(errstream, "common", "plugindir");
 	if (plugindir.length()) {
 		loadPlugInDrivers(plugindir.c_str(), errstream, verbose);	// load the driver plugins
-		pluginsloaded = true;
+		//pluginsloaded = true;
 	}
-#ifdef PSTOEDITLIBDIR
-	struct stat s;
-	if (!pluginsloaded &&
-	    !stat(PSTOEDITLIBDIR, &s) &&
-	    S_ISDIR(s.st_mode)) {
-  	  // also try to load drivers from the PSTOEDITLIBDIR
-	  loadPlugInDrivers(PSTOEDITLIBDIR, errstream,verbose);
-	  pluginsloaded = true;
-	}
-#endif
+
 	// If the above failed, also look in the directory where the pstoedit .exe/dll was found
 	if (!pluginsloaded) {
 	  char szExePath[1000];
@@ -284,23 +276,34 @@ static void loadpstoeditplugins(const char *progname, ostream & errstream, bool 
 	  char *p = nullptr;
 	  if (r && (p = strrchr(szExePath, directoryDelimiter)) != nullptr) {
 		*p = '\0';
-		loadPlugInDrivers(szExePath, errstream,verbose);
+		pluginsloaded |= loadPlugInDrivers(szExePath, errstream,verbose);
 	  }
 	  // now try also $exepath/../lib/pstoedit
-          if (szExePath[0]) {
-            // it is not an empty string
+      if (szExePath[0]) {
+         // it is not an empty string
 #if COMPILEDFOR64BIT 
 	    strcat_s(szExePath,1000,"/../lib64/pstoedit");
 #else
 	    strcat_s(szExePath,1000,"/../lib/pstoedit");
 #endif
 	    if (!strequal(szExePath, plugindir.c_str())) {
-	      loadPlugInDrivers(szExePath, errstream,verbose);
+	      pluginsloaded |= loadPlugInDrivers(szExePath, errstream,verbose);
 	    }
 	  }
 	}
+#ifdef PSTOEDITLIBDIR
+	if (!pluginsloaded) {
+		struct stat s;
+		if (!pluginsloaded &&
+			!stat(PSTOEDITLIBDIR, &s) &&
+			S_ISDIR(s.st_mode))	{
+			// also try to load drivers from the PSTOEDITLIBDIR
+			loadPlugInDrivers(PSTOEDITLIBDIR, errstream, verbose);
+			pluginsloaded = true;
+		}
+	}
+#endif
 
-	// delete[]plugindir;
 }
 #endif
 

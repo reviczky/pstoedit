@@ -62,8 +62,5 @@ class ostream;
 #endif
 #ifndef LEANDYNLOAD
 // lean - just the dlopen/dlclose stuff
-void loadPlugInDrivers(const char * pluginDir,ostream& errstream,bool verbose);
+bool loadPlugInDrivers(const char * pluginDir,ostream& errstream,bool verbose);
 #endif 
- 
- 
- 

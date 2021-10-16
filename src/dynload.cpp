@@ -184,8 +184,6 @@ void DynLoader::close()
 				errstream << "not really closing dynamic library because of pthread problem under Linux - contact author for details or check dynload.cpp from pstoedit source code " << libname << endl;
 		// dlclose(handle);
 #else
-		if (libname && verbose)
-				errstream << "closing dynamic library " << libname << endl;
 		dlclose(handle);
 #endif
 
@@ -291,9 +289,9 @@ public:
 
 static PluginVector LoadedPlugins;
 
-static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
+static bool loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 {
- 	if (!filename) return;
+ 	if (!filename) return false;
 	if ( verbose )
 		errstream << "loading plugin: " << filename << endl;
 
@@ -304,7 +302,7 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 		errstream << "Problem during opening of pstoedit driver plugin: " << filename <<
 			". This is no problem as long the driver in this library is not needed. Possibly you need to install further libraries and/or extend the LD_LIBRARY_PATH (*nix) or PATH (Windows) environment variables."
 			<< endl;
-		return;
+		return false;
 	} else {
 #if defined (__APPLE__)
 // on MacOS it seems necessary to at least do a dlsym to an existing symbol 
@@ -328,11 +326,12 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 			(getglobalRpFuncPtr) dynloader->getSymbol("getglobalRp");
 		if (dyngetglobalRpFunc == nullptr) {
 			errstream << "could not find getglobalRp " << endl;
-			return;
+			return false;
 		}
 		const DescriptionRegister * const dynglobalRp = dyngetglobalRpFunc();
 		if (dynglobalRp == nullptr) {
 			errstream << " didn't find any registered Drivers " << endl;
+			return false;
 		} else if (dynglobalRp != getglobalRp()) {
 //                      globalRp->explainformats(errstream);
 			getglobalRp()->mergeRegister(errstream, *dynglobalRp, filename);
@@ -344,6 +343,7 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 		// one from the caller
 	}
 //          globalRp->explainformats(errstream);
+  return true;
 }
 
 // for directory search
@@ -373,7 +373,7 @@ static void loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 
 #ifdef DIR_VERSION
 // this is for all *nix like systems
-void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
+bool loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
 	if (pluginDir) {
 		DIR *dirp;
@@ -400,9 +400,9 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 		if (!dirp) {
 			if (verbose && pluginDir)
 				errstream << "opendir failed on: " << pluginDir << endl;
-			return;
+			return false;
 		}
-
+        bool plugin_loaded = false;
 		while ((direntp = readdir(dirp)) != nullptr) {
 //      cout <<  direntp->d_name << endl;
 			unsigned int flen = strlen(direntp->d_name);
@@ -422,21 +422,22 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 				strcat_s(fullname, newlen, "/");
 				strcat_s(fullname, newlen, direntp->d_name);
 //          cout <<  direntp->d_name  << " " << fullname << endl;
-				loadaPlugin(fullname, errstream, verbose);
+				plugin_loaded |= loadaPlugin(fullname, errstream, verbose);
 				delete[]fullname;
 			}
 
 		}						// while
 		closedir(dirp);
+		return plugin_loaded;
 	} else {
 		errstream << "Could not load plugins - parameter pluginDir is null " << endl;
-		return;
+		return false;
 	}
 }
 #elif defined(_WIN32)
 
 
-void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
+bool loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
 	if (pluginDir != nullptr) {
 		char szExePath[1000];
@@ -456,12 +457,13 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 #else
 		HANDLE findHandle = FindFirstFile(searchpattern, &finddata);
 #endif
+		bool plugin_loaded = false;
 		if (findHandle == INVALID_HANDLE_VALUE) {
 			if (verbose)
 				errstream << "Could not open plug-in directory (" << pluginDir
 					<< " or didn't find any plugin there" << endl;
 		} else {
-			BOOL more = true;
+			BOOL more = true;	
 			while (more) {
 				// check for suffix being really .dll because FindFirstFile also matches
 				// files such as e.g. .dllx
@@ -497,7 +499,7 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 #endif
 						// avoid loading dll itself again
 						//                 errstream << "loading " << fullname << endl;
-						loadaPlugin(fullname, errstream, verbose);
+						plugin_loaded |= loadaPlugin(fullname, errstream, verbose);
 					} else {
 						//                 errstream << "ignoring myself " << finddata.cFileName << endl;
 					}
@@ -508,9 +510,10 @@ void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 			(void) FindClose(findHandle);
 		}
 		delete[]searchpattern;
+		return plugin_loaded;
 	} else {
 		errstream << "Could not load plugins - parameter pluginDir is null " << endl;
-		return;
+		return false;
 	}
 }
 #else
@@ -529,12 +532,13 @@ using namespace std;
 #else
 class ostream;
 #endif
-void loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
+bool loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
 	if (verbose) {
 		errstream <<
 			"dummy version of loadPlugInDrivers called since you system doesn't seem to support loading libraries at runtime - If you think that this is not correct, contact the author of this program (wglunz35_AT_pstoedit.net) "
 			<< endl;
 	}
+	return false;
 }								// just a dummy Version
 #endif

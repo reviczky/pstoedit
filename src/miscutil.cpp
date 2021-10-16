@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2020  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2021  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -217,21 +217,17 @@ RSString full_qualified_tempnam(const char *pref)
 	return result;
 #else
 	convertBackSlashes(filename);
+	RSString result("");
 	if ((strchr(filename, '\\') == nullptr) && (strchr(filename, '/') == nullptr)) {	// keine Pfadangaben..
-		RSString result("");
 		char cwd[400];
 		if (GETCWD(cwd, 400)) {
 		    result += cwd;
 			result += "/";
 		}
-		result += filename;
-		free(filename);
-		return result;
-	} else {
-		const RSString result(filename);
-		free(filename);
-		return result;
-	}
+	} 
+	result += filename;
+	free(filename);
+	return result;
 #endif
 }
 

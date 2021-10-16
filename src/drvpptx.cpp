@@ -3,7 +3,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -71,7 +71,9 @@ long lroundf(float f) {
 // handle this warning: 
 // 'xxxx': The POSIX name for this item is deprecated. Instead, use the ISO C++ conformant name: _xxxx. See online help for details.
 #define getpid _getpid
+#ifndef strdup
 #define strdup _strdup
+#endif
 #define unlink _unlink
 
 #endif
@@ -1019,21 +1021,40 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
   *pitchFamily = panose2pitch(panose_vals);
 }
 
+static unsigned short read_ushort(ifstream& eotfile) {
+  unsigned char charvals[4];
+  eotfile.read((char *)charvals, 2);        
+  const unsigned short rsl = charvals[1]<<8 | charvals[0]; // coverity [var_assign_alias]
+  // not sure why rsl is regared as tainted here.
+  return rsl; //coverity [return_tainted_data]
+}
+
+static RSString read_len_and_string(ifstream& eotfile) {
+  const unsigned short size = read_ushort(eotfile); // length
+  auto name = new char[size];
+  eotfile.read(name, size);       // string
+  for (unsigned short i = 0; i < size/2; i++)
+    // Cheesy conversion from Unicode to ASCII
+    name[i] = name[i*2];
+  RSString rsl(name, size/2);
+  delete[] name;
+  return rsl;
+}
+
 // Fabricate a TextInfo structure from an EOT file header.
+// see https://docs.fileformat.com/font/eot/ for file format of EOT files
+//
 void drvPPTX::eot2texinfo(const string& eotfilename, TextInfo & textinfo)
 {
   unsigned char panose_vals[10];
-  unsigned char charvals[4];
 
   // Parse the EOT header.
   ifstream eotfile(eotfilename.c_str());
   eotfile.ignore(4+4+4+4);                  // Size, font data size, version, flags
   eotfile.read((char *)panose_vals, 10);    // PANOSE values
   eotfile.ignore(1+1+4);                    // Character set, italic, weight
-  eotfile.read((char *)charvals, 2);        // Embedding restrictions
-  const short fstype = charvals[1]<<8 | charvals[0];
-  eotfile.read((char *)charvals, 2);        // Magic number
-  const unsigned short magicnum = charvals[1]<<8 | charvals[0];
+  const unsigned short fstype = read_ushort(eotfile); // Embedding restrictions
+  const unsigned short magicnum = read_ushort(eotfile); // Magic number
   if (magicnum != 0x504c) {
     RSString errmessage("ERROR: ");
     errmessage += eotfilename.c_str() ;
@@ -1043,33 +1064,16 @@ void drvPPTX::eot2texinfo(const string& eotfilename, TextInfo & textinfo)
   }
   eotfile.ignore(4+4+4+4+4+4);              // Unicode ranges 1-4 and code page ranges 1-2
   eotfile.ignore(4+4+4+4+4+2);              // Checksum adjustment, reserved 1-4, padding
-  eotfile.read((char *)charvals, 2);        // Family-name length
-  unsigned short namesize = charvals[1]<<8 | charvals[0];
-  auto familyname = new char[namesize];
-  eotfile.read(familyname, namesize);       // Family name
-  for (unsigned short i = 0; i < namesize/2; i++)
-    // Cheesy conversion from Unicode to ASCII
-    familyname[i] = familyname[i*2];
-  textinfo.currentFontFamilyName = RSString(familyname, namesize/2);
-  delete[] familyname;
+  textinfo.currentFontFamilyName = read_len_and_string(eotfile); // Family name
+
   eotfile.ignore(2);                        // Padding
-  eotfile.read((char *)charvals, 2);        // Style-name length
-  namesize = charvals[1]<<8 | charvals[0];
-  eotfile.ignore(namesize);                 // Style name
+  const unsigned short namesize_sn = read_ushort(eotfile);          // Style-name length
+  eotfile.ignore(namesize_sn);                 // Style name
   eotfile.ignore(2);                        // Padding
-  eotfile.read((char *)charvals, 2);        // Version-name length
-  namesize = charvals[1]<<8 | charvals[0];
-  eotfile.ignore(namesize);                 // Version name
+  const unsigned short namesize_vn = read_ushort(eotfile);          // Version-name length
+  eotfile.ignore(namesize_vn);                 // Version name
   eotfile.ignore(2);                        // Padding
-  eotfile.read((char *)charvals, 2);        // Full-name length
-  namesize = charvals[1]<<8 | charvals[0];
-  auto fullname = new char[namesize];
-  eotfile.read(fullname, namesize);         // Full name
-  for (unsigned short i = 0; i < namesize/2; i++)
-    // Cheesy conversion from Unicode to ASCII
-    fullname[i] = fullname[i*2];
-  textinfo.currentFontFullName = RSString(fullname, namesize/2);
-  delete[] fullname;
+  textinfo.currentFontFullName = read_len_and_string(eotfile); // Full-name 
   eotfile.close();
 
   // Warn the user if the font has embedding restrictions.
@@ -1448,16 +1452,18 @@ void drvPPTX::print_color(int baseIndent, float redF, float greenF, float blueF)
           "dk2", "lt2", "accent1", "accent2", "accent3",
           "accent4", "accent5", "accent6"
         };
-        newColorInfo.name = colorList[random() % (sizeof(colorList)/sizeof(colorList[0]))];
+        newColorInfo.name = colorList[random() % (sizeof(colorList)/sizeof(colorList[0]))]; // coverity [DC.WEAK_CRYPTO]
         if (color_type == C_THEME) {
           // Randomly alter the luminosity with the constraint that
           // light colors map to light colors and dark colors map to
           // dark colors.
           const float origLum = sqrtf(0.241f*redF*redF + 0.691f*greenF*greenF + 0.068f*blueF*blueF);
           if (origLum >= 0.5)
-            newColorInfo.lum = 50000 + random()%40000;  // Map to [50%, 90%].
+	    // Map to [50%, 90%]. 
+            newColorInfo.lum = 50000 + random()%40000;  // coverity [DC.WEAK_CRYPTO]
           else
-            newColorInfo.lum = 30000 + random()%20000;  // Map to [30%, 50%].
+	    // Map to [30%, 50%]. 
+            newColorInfo.lum = 30000 + random()%20000;  // coverity [DC.WEAK_CRYPTO]
         }
         rgb2theme.insert(rgb, newColorInfo);
         colorInfo = &newColorInfo;

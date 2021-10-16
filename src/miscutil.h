@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,15 +43,11 @@ USESTD
 #include <assert.h>
 #endif
 
-// used to eliminate compiler warnings about unused parameters
-inline void unused(const void * const) { }
-//lint -esym(522,unused)
-
 
 #if defined(_WIN32) || defined(__OS2__)
-const char directoryDelimiter = '\\';
+constexpr char directoryDelimiter = '\\';
 #else
-const char directoryDelimiter = '/';
+constexpr char directoryDelimiter = '/';
 #endif
 
 
@@ -62,11 +58,12 @@ const char directoryDelimiter = '/';
 
 inline char * cppstrndup(const char * const src, const size_t length, const size_t addon = 0 )
 {
+	assert(src);
 	const size_t lp1 = length+1;
 	char * const ret = new char[lp1 + addon];
 	for (size_t i = 0 ; i < lp1; i++)
 	{
-			ret[i] = src[i];
+		ret[i] = src[i];
 	}
 	return ret;
 
@@ -332,7 +329,9 @@ DLLEXPORT void errorMessage(const char * errortext); // display an error message
 DLLEXPORT void copy_file(istream& infile,ostream& outfile) ;
 DLLEXPORT RSString getOutputFileNameFromPageNumber(const char * const outputFileTemplate, const RSString & pagenumberformatOption, unsigned int pagenumber);
 
-inline float pythagoras(const float x, const float y) { return sqrt( x*x + y*y); }
+inline float pythagoras(const float x, const float y) { 
+	return static_cast<float>(sqrt( x*x + y*y)); 
+}
 
 
 #endif

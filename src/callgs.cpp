@@ -2,7 +2,7 @@
    callgs.cpp : This file is part of pstoedit
    interface to Ghostscript
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    
    Proposal for a "cleaned up" version: removed (IMHO) dead/old code,
    e.g., WIN32 is "dll only" now, because gs32 comes w/DLL 
@@ -114,7 +114,7 @@ static int callgsEXE(int argc, const char * const argv[])
     DWORD gs_status = 0;
 
 	const RSString& commandline = createCmdLine(argc,argv);
-	cerr << "running-win command line: " << commandline << endl;
+	cerr << "running-win x command line: " << commandline << endl;
 
 	BOOL status = CreateProcess(
               nullptr, // Application Name 
@@ -368,9 +368,9 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 		} else {
 		    if (verbose) errstream<< "nothing found in gsview32.ini file - using find_gs to lookup latest version of Ghostscript in registry " << endl;
 			static char buf[1000];
-			if (find_gs(buf, sizeof(buf), 550 /* min ver*/ , getPstoeditsetDLLUsage() , gsregbase)) { 
+			if (find_gs(buf, sizeof(buf), 550 /* min ver*/ , getPstoeditsetDLLUsage() , gsregbase, verbose)) { 
 				if (verbose) {
-					(void)dumpgsvers(gsregbase);
+					(void)dumpgsvers(gsregbase, verbose);
 					if (getPstoeditsetDLLUsage()) errstream << "Latest GS DLL is " << buf << endl;
 					else		errstream << "Latest GS EXE is " << buf << endl;
 				}

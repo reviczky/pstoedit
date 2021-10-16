@@ -2,9 +2,8 @@
 #define PSTOEDIT_H
 /*
    pstoedit.h : This file is part of pstoedit
-   main control procedure
-
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,7 +65,7 @@ int pstoedit(	int argc,
 				std::ostream& errstream,
   				execute_interpreter_function call_PI,
 				whichPI_type whichPI,
-				const DescriptionRegister* const pushinsPtr =0
+				const DescriptionRegister* const pushinsPtr = 0
 			);
 
 /*
@@ -138,6 +137,8 @@ extern "C" DLLEXPORT void setPstoeditOutputFunction(void * cbData,write_callback
 extern "C" DLLEXPORT void setPstoeditsetDLLUsage( int useDLL_p);
 extern "C" DLLEXPORT int getPstoeditsetDLLUsage();
 
+
+extern "C" DLLEXPORT class ProgramOptions* getProgramOptions();
 
 #endif
 

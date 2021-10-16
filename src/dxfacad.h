@@ -1,5 +1,5 @@
 #include <cmath>
-static const char  dxf14acadheader_prelayer1 [] =
+static const char dxf14acadheader_prelayer1 [] =
 "  0\n"
 "SECTION\n"
 "  2\n"
@@ -1319,7 +1319,7 @@ static const char  dxf14acadheader_postlayer [] =
 "  2\n"
 "ENTITIES\n";
 
-static const char  dxf14acadspline [] =
+static const char dxf14acadspline [] =
 "  0\n"
 "SPLINE\n"
 "  5\n"

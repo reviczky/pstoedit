@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -93,9 +93,7 @@ drvbase::drvbase(const char *driveroptions_p, ostream & theoutStream,
 :								// constructor
 driverdesc(driverdesc_p), 
 DOptions_ptr(driverdesc_p.createDriverOptions()),
-//  totalNumberOfPages(0),
-//  bboxes(0),
-	outf(theoutStream),
+outf(theoutStream),
 errf(theerrStream),
 inFileName(nameOfInputFile_p ? nameOfInputFile_p : ""),
 outFileName(nameOfOutputFile_p ? nameOfOutputFile_p : ""), 
@@ -183,10 +181,12 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 		}
 	}
 
-// now call the driver specific option parser.
-	if (d_argc>0) {
-		if (DOptions_ptr) {
-			//debug errf << "DOptions_ptr: " << (void*) DOptions_ptr << endl;
+    // now call the driver specific option parser.
+	// Note: derived driver object does not yet exist at this point. 
+	// we are in base class ctor here. See also comment for
+	// constructBase
+	if (DOptions_ptr) {
+	   if (d_argc>0) {		//debug errf << "DOptions_ptr: " << (void*) DOptions_ptr << endl;
 			const unsigned int remaining = DOptions_ptr->parseoptions(errf,d_argc,d_argv);
 			if ((remaining > 0) && !DOptions_ptr->expectUnhandled) {
 				errf << "the following " << remaining  << " options could not be handled by the driver: " << endl;
@@ -194,10 +194,11 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 					errf << DOptions_ptr->unhandledOptions[i] << endl;
 				}
 			}
-		} else {
-			cerr << "DOptions_ptr is nullptr - program flow error - contact author." << endl;
-		}
+		}	
+	} else {
+	   cerr << "DOptions_ptr is nullptr - program flow error - contact author." << endl;
 	}
+	
 
 //  bboxes = new BBox[maxPages];
 
@@ -242,10 +243,9 @@ drvbase::~drvbase()
 		delete[]d_argv;
 		d_argv = nullptr;
 	}
-	if (driveroptions) {
-		delete[]driveroptions;
-		driveroptions = nullptr;
-	}
+	delete[]driveroptions;
+	driveroptions = nullptr;
+	
 //  delete[] bboxes; bboxes = nullptr;
 //	delete[]outDirName;
 //	outDirName = nullptr;

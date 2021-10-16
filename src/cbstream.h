@@ -5,7 +5,7 @@
    callbackBuffer : This file is part of pstoedit
    streambuf that writes the data to a user defineable call back function
 
-   Copyright (C) 1998 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -72,8 +72,8 @@ private:
 	
 	void * cb_data;
 	write_callback_type * write_callback;
-	callbackBuffer(const callbackBuffer &); // not defined
-	const callbackBuffer & operator = (const callbackBuffer &); // not defined
+	callbackBuffer(const callbackBuffer &) = delete; // not defined
+	const callbackBuffer & operator = (const callbackBuffer &) = delete; // not defined
 };
 
 #endif

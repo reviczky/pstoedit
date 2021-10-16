@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -312,10 +312,9 @@ extern FILE *yyin;				// used by lexer
 static void usage(ostream & outstream, bool forTeX, bool withdetails, bool withcategories = false)
 {
 	if (withcategories) {
-		// PropSheetEnum {g_t, t_t, d_t, a_t, b_t, h_t };
-		for (unsigned int sheet = PsToEditOptions::g_t ; sheet < PsToEditOptions::h_t ; sheet++ ) {
+		for (unsigned int sheet = PsToEditOptions::theOptions().g_t ; sheet < PsToEditOptions::theOptions().h_t ; sheet++ ) {
 	        // if (sheet == PsToEditOptions::a_t) continue; // skip "about"
-			outstream << "\\subsection{"  << PsToEditOptions::propSheetName((PsToEditOptions::PropSheetEnum) sheet) << "}" << endl;
+			outstream << "\\subsection{"  << PsToEditOptions::theOptions().propSheetName(sheet) << "}" << endl;
 			PsToEditOptions::theOptions().showhelp(outstream,forTeX,withdetails,sheet);
 		}
 		outstream << "\\subsection{Input and outfile file arguments}" << endl;
@@ -337,6 +336,11 @@ bool f_useCoutForDiag = false; // default is cout - but some clients may redirec
 
 extern "C" DLLEXPORT
 void useCoutForDiag(int flag) { f_useCoutForDiag = (flag != 0); }
+
+extern "C" DLLEXPORT 
+ProgramOptions* getProgramOptions() {
+	return &PsToEditOptions::theOptions();
+}
 
 
 extern "C" DLLEXPORT
@@ -400,7 +404,7 @@ extern "C" DLLEXPORT
 #endif
 		errstream << "pstoedit: version " << PACKAGE_VERSION << " / DLL interface " <<
 		drvbaseVersion << " (built: " << __DATE__ << " - " << buildtype << " - " << compversion << ")"
-		" : Copyright (C) 1993 - 2020 Wolfgang Glunz\n";
+		" : Copyright (C) 1993 - 2021 Wolfgang Glunz\n";
 	}
 
 	//  handling of derived parameters
@@ -1560,6 +1564,7 @@ extern "C" DLLEXPORT void setPstoeditOutputFunction(void *cbData, write_callback
 	(void) cbBuffer.set_callback(cbData, cbFunction);
 #if defined(HAVE_STL) || defined(__OS2__)
 	(void)cerr.rdbuf(&cbBuffer);
+//	(void)cout.rdbuf(&cbBuffer);
 #else
 	cerr = &cbBuffer;
 #endif

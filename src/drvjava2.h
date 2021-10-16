@@ -5,7 +5,7 @@
    drvjava2.h : This file is part of pstoedit
    Class declaration for a Java2 output driver -- test version
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert@tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify

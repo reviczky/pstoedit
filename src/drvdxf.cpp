@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -203,7 +203,7 @@ private:
 	static const rgbcolor DXFColors[];
 public:
 	static const unsigned short numberOfColors;
-	static unsigned int getDXFColor(float r, float g, float b,unsigned int firstcolor = 0);
+	static unsigned int getDXFColor(float r, float g, float b, unsigned int firstcolor = 0);
 };
 
 
@@ -215,7 +215,7 @@ const DXFColor::rgbcolor DXFColor::DXFColors[] = {
 	rgbcolor(0x00, 0xFF, 0xFF),
 	rgbcolor(0x00, 0x00, 0xFF),			//5
 	rgbcolor(0xFF, 0x00, 0xFF),
-	rgbcolor(0xFF, 0xFF, 0xFF),			// 7 is the "visible" color - so what normally in PostScript is black (in CAD "white" is visible)
+	rgbcolor(0xFF, 0xFF, 0xFF),			//7 is the "visible" color - so what normally in PostScript is black (in CAD "white" is visible)
 	rgbcolor(0x41, 0x41, 0x41),
 	rgbcolor(0x80, 0x80, 0x80),
 	rgbcolor(0xFF, 0x00, 0x00),			//10
@@ -510,29 +510,30 @@ public:
 		// all non-alphanumeric characters are replaced by '_'
 
 		char * s_copy = cppstrdup(s.c_str());
+		assert(s_copy);
 		char * cp = s_copy;
 		while (cp && *cp) {
 			if(islower(*cp) && isascii(*cp)) {
-				*cp = (char) toupper(*cp);
+				*cp = static_cast<char>(toupper(*cp));
 			}
 			if (!isalnum(*cp)) {
 				*cp = '_'; // replace all not alphanumeric characters with _
 			}
 			cp++;
 		}
-		RSString normalized(s_copy);
+		const RSString normalized(s_copy);
 		delete [] s_copy;
 		return normalized;
 	}
 
 	struct Layer {
 		Layer(float r, float g, float b, struct Layer * next_p = nullptr): rgb(floatColTointCol(r),floatColTointCol(g),floatColTointCol(b)), next(next_p) {}
-		DXFColor::rgbcolor rgb;
+		const DXFColor::rgbcolor rgb;
 		struct Layer * next;
 	};
 	struct NamedLayer {
 		explicit NamedLayer(const RSString& s, struct NamedLayer * next_p=nullptr): layerName(s), next(next_p) {}
-		RSString layerName;
+		const RSString layerName;
 		struct NamedLayer* next;
 	};
 
@@ -881,39 +882,7 @@ void drvDXF::writeLayer(float r, float g, float b, const RSString& colorName)
 	//
 
 	buffer << "  8\n";
-#if 1
 	buffer << calculateLayerString(r,g,b,colorName) << endl;
-#else
-	if (options->colorsToLayers) {		
-		const float roundinglimit = 0.001f;
-
-		// map black (0,0,0) to layer 7-black and white (1,1,1) to 7-white
-
-		if (colorName != "") {
-			cout << colorName << endl;
-		} else if ((r < roundinglimit) && 
-			(g < roundinglimit) && 
-			(b < roundinglimit) ) {
-					// black
-			buffer << "C00-00-00-BLACK" << endl;
-		} else if (	(r > (1.0f- roundinglimit)) && 
-					(g > (1.0f- roundinglimit)) && 
-					(b > (1.0f- roundinglimit)) ) {
-			buffer << "CFF-FF-FF-WHITE" << endl;
-						// white
-		} else {
-			const unsigned int dxfcolor = DXFColor::getDXFColor(r,g,b,1);
-			const char * layerString = DXFLayers::getLayerName(r,g,b);
-			if (! (layers->alreadyDefined(r,g,b,dxfcolor))) {
-				layers->defineLayer(r,g,b,dxfcolor);
-	//			cout << "defined new layer " << layerString << endl;
-			}
-			buffer << layerString << endl;
-		}
-	} else {
-		buffer << "0\n";
-	}
-#endif
 }
 RSString drvDXF::calculateLayerString(float r, float g, float b, const RSString& colorName) 
 {
@@ -926,7 +895,7 @@ RSString drvDXF::calculateLayerString(float r, float g, float b, const RSString&
 	//
 
 	if (options->colorsToLayers) {		
-		const float roundinglimit = 0.001f;
+		constexpr float roundinglimit = 0.001f;
 
 		// map black (0,0,0) to layer 7-black and white (1,1,1) to 7-white
 
@@ -1002,7 +971,7 @@ void drvDXF::show_text(const TextInfo & textinfo)
 {
   if (wantedLayer(textinfo.currentR, textinfo.currentG, textinfo.currentB,DXFLayers::normalizeColorName(textinfo.colorName))) {
 	buffer << "  0\n"
-			"TEXT\n";
+			  "TEXT\n";
 
 	if (formatis14) {
 		writeHandle(buffer);
@@ -1033,11 +1002,13 @@ void drvDXF::show_text(const TextInfo & textinfo)
   }
 }
 
-void drvDXF::printPoint(ostream & out, const Point & p, unsigned short offset)
+void drvDXF::printPoint(ostream & out, const Point & p, unsigned short offset, bool with_z)
 {
 	out << " " << offset << "\n" << p.x_* scalefactor << "\n";
 	out << " " << 10 + offset << "\n" << p.y_* scalefactor << "\n";
-	out << " " << 20 + offset << "\n" << "0.0" << "\n";
+	if (with_z) {
+		out << " " << 20 + offset << "\n" << "0.0" << "\n";
+	}
 }
 
 void drvDXF::drawVertex(const Point & p, bool withlinewidth, int val70)
@@ -1168,7 +1139,7 @@ DXF: X value; APP: 3D point
 
 //NU const unsigned short ClosedSpline	= 1 ; //= Closed spline
 //NU const unsigned short PeriodicSpline = 2 ; //= Periodic spline
-const unsigned short RationalSpline = 4 ; //= Rational spline
+constexpr unsigned short RationalSpline = 4 ; //= Rational spline
 //NU const unsigned short PlanarSpline	= 8 ; //= Planar
 //NU const unsigned short LinearSpline	= 16 ; //= Linear (planar bit is also set) 
 
@@ -1574,9 +1545,66 @@ if (0) {
 	buffer << "  0\nSEQEND\n  8\n0\n";
 
 #endif
+void drvDXF::showHatch() {
+	if (wantedLayer(currentR(), currentG(), currentB(), DXFLayers::normalizeColorName(currentColorName()))) {
+		if (formatis14) {
+			buffer << "  0\n" "HATCH\n";
+			writeHandle(buffer);
+			buffer << "100\n" "AcDbEntity\n";
+			writeLayer(currentR(), currentG(), currentB(), DXFLayers::normalizeColorName(currentColorName()));
+			writeColorAndStyle();
+			buffer << "100\n" "AcDbHatch\n";
+			// elevation "points"
+			const Point hatch_dummy(0, 0);
+			printPoint(buffer, hatch_dummy, 10, false);
+
+			// TrueView wants Extrusion directions
+			buffer << "210\n" "0\n";
+			buffer << "220\n" "0\n";
+			buffer << "230\n" "1\n"; // 1 taken from example - not sure it is correct
+
+			buffer << "  2\n" "SOLID\n";
+			buffer << " 70\n" "1\n"; //solid fill flag
+			buffer << " 71\n" "0\n"; //non associative
+			buffer << " 91\n" "1\n"; //number of boundary paths
+			buffer << " 92\n" "0\n"; //Boundary path type flag(bit coded)
+			/* 	0 = Default; 1 = External; 2 = Polyline
+				4 = Derived; 8 = Textbox; 16 = Outermost */
+			constexpr bool usepolyline = false;
+			if (usepolyline) {
+				//TODO Polyline boundary type data(only if boundary = polyline).
+			} else {
+				// hatch needs the path to be closed
+				buffer << " 93\n" << numberOfElementsInPath() << "\n";
+				// Number of edges in this boundary path(only if boundary is not a polyline)
+				// loop for as many edges
+				// Starting from 1. Element 0 will be used when t is at numberOfElementsInPath
+				// in order to close the path as needed for HATCH
+				for (unsigned int t = 1; t <= numberOfElementsInPath(); t++) {
+					buffer << " 72\n" << "1\n";
+					//Edge type(only if boundary is not a polyline) :
+					//	1 = Line; 2 = Circular arc; 3 = Elliptic arc; 4 = Spline
+					const Point& p = pathElement(t - 1).getLastPoint();
+					// wrap around to first element
+					const Point& q = pathElement((t == numberOfElementsInPath()) ? 0 : t).getLastPoint();
+					//write start and end point for each line
+					printPoint(buffer, p, 10, false);
+					printPoint(buffer, q, 11, false);
+				}
+			}
+			buffer << " 97\n" "0\n"; // Number of source boundary objects
+			buffer << " 75\n" "0\n"; //hatch style
+			buffer << " 76\n" "1\n"; //hatch pattern type
+			buffer << " 98\n" "0\n"; //number of seed points
+		} // only supported with version 14
+	}
+}
 
 void drvDXF::show_path()
 {
+	if (options->fillToHatch && (currentShowType() != stroke)) {
+		showHatch();
+	}
 	if (driverdesc.backendSupportsCurveto) {
 		Point currentPoint(0.0f, 0.0f);
 		const Point firstPoint = pathElement(0).getPoint(0);

@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -57,7 +57,17 @@
 #include <memory>
 
 
-static const float PntFig = 1200.0f / 72.0f;
+/*
+A fig file that contains the option "Inches" in the preamble has the resolution set to 1200 units/inch. 
+In fact, the resolution is also given in the fig file, but the 1200 is never changed. 
+With the option "Metric", the resolution is understood, by both Xfig and fig2dev, to be 450 /cm, 
+although the default resolution of 1200 still remains in the file. 
+The [format specification]( http://mcj.sourceforge.net/fig-format.html) gives a hint about this. 
+Xfig writes "Metric" and "1200" to the fig file, fig2dev reads it, and scales a 450 units long line by approx. 
+5% such that it has, on output, the correct length of 472.44/1200 in.
+With the -metric option to the fig driver, pstoedit should do the same.
+*/
+static float PntFig; 
 
 
 static const char *colorstring(float r, float g, float b)
@@ -134,59 +144,14 @@ glob_min_x(0), glob_max_x(0), glob_min_y(0), glob_max_y(0),
 loc_min_x(0), loc_max_x(0), loc_min_y(0), loc_max_y(0), glo_bbox_flag(0), loc_bbox_flag(0)
 
 {
-	// driver specific initializations
-//	float depth_in_inches = 11;
-//	bool show_usage_line = false;
-
-
-#if 0
-	for (unsigned int i = 0; i < d_argc; i++) {
-		assert(d_argv && d_argv[i]);	//lint !e796 !e1776
-		if (Verbose())
-			outf << "% " << d_argv[i] << endl;
-		if (strcmp(d_argv[i], "-startdepth") == 0) {
-			i++;
-			if (i >= d_argc) {
-				errf << "-startdepth requires a depth in the range of 0-999" << endl;
-				show_usage_line = true;
-			} else {
-				assert(d_argv && d_argv[i]);	//lint !e796 !e1776
-				startdepth = (int) atoi(d_argv[i]);
-			}
-			//            } else if (strcmp(d_argv[i],"-f31") == 0) {
-			//                        format = 31;
-		} else if (strcmp(d_argv[i], "-depth") == 0) {
-			i++;
-			if (i >= d_argc) {
-				errf << "-depth requires a depth in inches" << endl;
-				show_usage_line = true;
-			} else {
-				assert(d_argv && d_argv[i]);	//lint !e796 !e1776
-				depth_in_inches = (float) atof(d_argv[i]);
-			}
-		} else if (strcmp(d_argv[i], "-metric") == 0) {
-			units = "Metric";
-		} else if (strcmp(d_argv[i], "-help") == 0) {
-			errf << "-help    Show this message" << endl;
-			errf << "-depth # Set the page depth in inches" << endl;
-			errf << "-metric # Set display to use centimeters" << endl;
-			errf << "-startdepth # Set the initial depth (default 999)" << endl;
-			show_usage_line = true;
-		} else {
-			errf << "Unknown fig driver option: " << d_argv[i] << endl;
-			show_usage_line = true;
-		}
-	}
-
-	if (show_usage_line) {
-		errf << "Usage -f 'fig: [-help] [-depth #] [-startdepth #]'" << endl;
-	}
-#endif
-
-	const char *units = (options->metric) ? "Metric" : "Inches";
+	const char *const units = (options->metric) ? "Metric" : "Inches";
+	PntFig = ((options->metric) 
+	            ? (450.0f * 2.54f)
+		    : 1200.0f
+		 )/ 72.0f;
 
 	// Set the papersize
-	const char *paper_size  = (options->depth_in_inches <= 11.0 ? "Letter" : "A4");
+	const char *const paper_size  = (options->depth_in_inches <= 11.0 ? "Letter" : "A4");
 
 	// set FIG specific values
 	currentDeviceHeight = options->depth_in_inches * 1200.0f ;

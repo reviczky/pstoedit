@@ -153,7 +153,7 @@ void drvNOI::LoadNOIProxy()
         errf << endl << DllFuncName[i] << " function not found in " << 
 		  NOI_XML_Proxy_DLL << ".dll" << endl; 
 		abort();
-		}	  
+		}
 	  }
 	}
   }

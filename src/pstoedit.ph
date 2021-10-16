@@ -8,7 +8,7 @@ const char * const PS_prologue[] =
 // This file contains some redefinitions of PostScript(TM) operators
 // useful for the conversion of PostScript into a vector format via Ghostscript
 // 
-// Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net  
+// Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net  
 //
 //    This program is free software; you can redistribute it and/or modify
 //    it under the terms of the GNU General Public License as published by
@@ -24,11 +24,13 @@ const char * const PS_prologue[] =
 //    along with this program; if not, write to the Free Software
 //    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
- " /pstoedit.copyright (Copyright \\(C\\) 1993 - 2020 Wolfgang Glunz) def ",
+ " /pstoedit.copyright (Copyright \\(C\\) 1993 - 2021 Wolfgang Glunz) def ",
  " systemdict /.addcontrolpath known { ",
  " /PermitFileReading pstoedit.inputfilename  .addcontrolpath ",
  " /PermitFileWriting pstoedit.targetoutputfile .addcontrolpath ",
+ " currentdict /pstoedit.nameOfOutputFilewithoutpercentD known {  ",
  " /PermitFileWriting pstoedit.nameOfOutputFilewithoutpercentD (*) concatstrings .addcontrolpath ",
+ " } if ",
  " /PermitFileWriting pstoedit.outputfilename .addcontrolpath ",
  " /PermitFileWriting (pscover.txt) .addcontrolpath ",
  " currentdict /pstoedit.nameOfIncludeFile known { 	 ",

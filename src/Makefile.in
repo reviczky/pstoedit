@@ -172,9 +172,9 @@ am_libp2edrvstd_la_OBJECTS = initlibrary.lo drvgcode.lo drvcairo.lo \
 	drvlwo.lo drvrib.lo drvrpl.lo drvdxf.lo drvjava.lo drvjava2.lo \
 	drvpdf.lo drvkillu.lo drvtext.lo drvsk.lo drvmpost.lo \
 	drvasy.lo drvmma.lo drvlatex2e.lo drvnoi.lo drvpic.lo \
-	drvhpgl.lo drvpcb1.lo drvpcb2.lo drvpcbfill.lo drvgschem.lo \
-	drvcfdg.lo drvtk.lo drvvtk.lo drvsvm.lo $(am__objects_1) \
-	$(am__objects_2)
+	drvhpgl.lo drvpcb1.lo drvpcb2.lo drvpcbfill.lo drvpcbrnd.lo \
+	drvgschem.lo drvcfdg.lo drvtk.lo drvvtk.lo drvsvm.lo \
+	$(am__objects_1) $(am__objects_2)
 libp2edrvstd_la_OBJECTS = $(am_libp2edrvstd_la_OBJECTS)
 libp2edrvstd_la_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CXX \
 	$(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=link $(CXXLD) \
@@ -524,6 +524,7 @@ libp2edrvstd_la_SOURCES = \
 	drvpcb1.cpp	drvpcb1.h               \
 	drvpcb2.cpp	drvpcb2.h               \
 	drvpcbfill.cpp	drvpcbfill.h            \
+	drvpcbrnd.cpp	drvpcbrnd.h libminuid.inc \
 	drvgschem.cpp	drvgschem.h             \
 	drvcfdg.cpp     drvcfdg.h               \
 	drvtk.cpp	drvtk.h                 \
@@ -825,6 +826,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpcb1.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpcb2.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpcbfill.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpcbrnd.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpdf.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/drvpptx.Plo@am__quote@

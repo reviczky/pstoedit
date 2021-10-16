@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2020 Wolfgang Glunz
+   Copyright (C) 1998 - 2021 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -284,19 +284,6 @@ drvWMF::derivedConstructor(drvWMF):
 	}
 
 	if (enhanced) {
-#if 1
-		const BBox & psBBox = getCurrentBBox();
-
-		minX = transx(psBBox.ll.x_);
-		minY = transy(psBBox.ur.y_);
-		maxX = transx(psBBox.ur.x_);
-		maxY = transy(psBBox.ll.y_);
-
-//		const RECT bbox = { minX, minY, maxX, maxY };
-		if (Verbose()) errf << "calculated Bounding Box: " << minX << " " << minY << " " << maxX << " " << maxY << endl;
-		// cout << "PostScript Bounding Box: " << psBBox.ll.x_  << " " << psBBox.ll.y_ << " " << psBBox.ur.x_ << " " << psBBox.ur.y_ << endl;
-#endif
-
 		// 
 		// enhanced-Metafile (memory based) for W95/98 or NT
 		// if -nb is set, then narrowbox = false , -nb means no bounding box 
@@ -304,10 +291,8 @@ drvWMF::derivedConstructor(drvWMF):
 			if (Verbose()) errf << " Windows will calculate BB " << endl;
 			metaDC = CreateEnhMetaFile(desktopDC, nullptr, nullptr, nullptr);
 		} else {
-	// under non Windows systems we cannot use PlayEnhMetafile
-			if (Verbose()) errf << " not creating with bounding box " << endl;
-			// metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), &bbox , description);
-			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), nullptr, description);
+			if (Verbose()) errf << " Will use the PS BB " << endl;
+			metaDC = CreateEnhMetaFile(desktopDC, nullptr, nullptr, nullptr);
 		}
 
 		if (!metaDC) {
@@ -439,36 +424,15 @@ drvWMF::~drvWMF()
 	}
 	// close and destroy metafile
 	if (enhanced) {
+		// get conversion figures
+		LONG mmx, mmy, devx, devy;
+		mmx = GetDeviceCaps(metaDC, HORZSIZE);
+		mmy = GetDeviceCaps(metaDC, VERTSIZE);
+		devx = GetDeviceCaps(metaDC, HORZRES);
+		devy = GetDeviceCaps(metaDC, VERTRES);
+
 		// close memory-based metafile (we're done drawing)
 		HENHMETAFILE hMeta = CloseEnhMetaFile(metaDC);
-
-#if 0
-		// query bounding informations
-		ENHMETAHEADER enhHeader;
-		GetEnhMetaFileHeader(hMeta, sizeof(ENHMETAHEADER), &enhHeader);
-
-//
-// under construction. should somehow be possible to abandon dummy pixel drawing for
-// EMF, by setting bounding box and friends appropriately
-// 
-		errf << "bbox: " << minX << " " << minY << " " << maxX << " " << maxY << endl;
-
-		const RECT dimension = { 0, 0,
-			enhHeader.rclFrame.right - enhHeader.rclFrame.left,
-			enhHeader.rclFrame.bottom - enhHeader.rclFrame.top
-		};
-		const RECT dimension = { 0, 0,
-			(long) (((float) (maxX - minX) * (float) GetDeviceCaps(desktopDC,
-																   HORZRES) /
-					 (float) GetDeviceCaps(desktopDC,
-										   HORZSIZE)) * 10.0 + .5),
-			(long) (((float) (maxY - minY) * (float) GetDeviceCaps(desktopDC,
-																   VERTRES) /
-					 (float) GetDeviceCaps(desktopDC,
-										   VERTSIZE)) * 10.0 + .5)
-		};
-#endif
-
 
 		// create our final metafile (metaDC is reused)
 		// need to have two metafiles, because we know the output dimension just now
@@ -479,24 +443,28 @@ drvWMF::~drvWMF()
 			// don't need a BB here - Windows will calculate it by itself (that is the whole purpose of the later replay)
 			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), nullptr, description);
 			initMetaDC(metaDC);
+		} else {
+			// use the PS bounding box
+			const RECT bbox = {
+				minX * (mmx*100) / (devx),
+				minY * (mmy*100) / (devy),
+				maxX * (mmx*100) / (devx),
+				maxY * (mmy*100) / (devy)
+			};
+			if (Verbose()) errf << "creating final metafile" << endl;
+			metaDC = CreateEnhMetaFile(desktopDC, outFileName.c_str(), &bbox , description);
 		}
 		if (metaDC) {
-
-			if (options->winbb) {
-				const RECT bbox = { minX, minY, maxX, maxY };
-//          const RECT  bbox = {minX, minY, maxX-minX, maxY-minY};
-//          const RECT  bbox = {minX, maxY, maxX-minX, maxY-minY};
-//          const RECT  bbox = {minX, maxY, maxX+2*minX, -minY-maxY};
+			const RECT bbox = { minX, minY, maxX, maxY };
 
 			// replay recorded metafile (hMeta -> metaDC)
-				if (Verbose()) errf << "Info: replaying hMeta to metaDC with bounding box : " << minX << "," << minY<< "," << maxX<< "," << maxY << endl;
+			if (Verbose()) errf << "Info: replaying hMeta to metaDC with bounding box : " << minX << "," << minY<< "," << maxX<< "," << maxY << endl;
 
-				if (!PlayEnhMetaFile(metaDC, hMeta, &bbox)) {
-					writeErrorCause("PlayEnhMetaFile");
-					errf << "ERROR: cannot replay created metafile" << endl;
-				} else {
-					if (Verbose())	errf << "Info: replayed metafile" << endl;
-				}
+			if (!PlayEnhMetaFile(metaDC, hMeta, &bbox)) {
+				writeErrorCause("PlayEnhMetaFile");
+				errf << "ERROR: cannot replay created metafile" << endl;
+			} else {
+				if (Verbose())	errf << "Info: replayed metafile" << endl;
 			}
 			// close and commit metafile
 			(void)DeleteEnhMetaFile(CloseEnhMetaFile(metaDC));

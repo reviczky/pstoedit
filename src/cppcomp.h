@@ -9,7 +9,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,6 +26,16 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
+#define MSVC_CHECK_LEAKS 0
+// for development only
+// needs a bit more work to handle also new - see 
+// https://docs.microsoft.com/en-us/visualstudio/debugger/finding-memory-leaks-using-the-crt-library?view=vs-2015
+#if MSVC_CHECK_LEAKS
+#define _CRTDBG_MAP_ALLOC  
+#include <stdlib.h>  
+#include <crtdbg.h>  
+#endif
+
 #ifdef HAVE_CONFIG_H
 	#include "pstoedit_config.h"
 #endif
@@ -207,6 +217,8 @@
 		classname(const classname&) = delete; \
 		const classname & operator=(const classname&) = delete;
 
+//lint -esym(665, NOCOPYANDASSIGN)
+//classname not in ()
 
 
 // rcw2: work round case insensitivity in RiscOS
@@ -330,6 +342,11 @@ static inline void strcat_s(char * de, size_t de_size, const char *  so) {
 
 #endif
 //}
+
+// used to eliminate compiler warnings about unused parameters
+inline void unused(const void * const) { }
+//lint -esym(522,unused)
+//lint -esym(523,unused)
 
 #endif
 //}

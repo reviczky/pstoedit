@@ -2,7 +2,7 @@
    drvfuncs.h : This file is part of pstoedit
    This file contains the declarations of the functions, // each driver has to implement
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,5 +32,3 @@ private: // yes these are private, library users should use the public interface
 //	void show_text(const TextInfo & textinfo);
 
 //	void show_rectangle(const float llx, const float lly, const float urx, const float ury);
-
-

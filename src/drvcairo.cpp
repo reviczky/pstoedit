@@ -1,6 +1,6 @@
 /*
   drvcairo.cpp : This file is part of pstoedit
-  Copyright (C) 2009 - 2020 Dan McMahill dan_AT_mcmahill_DOT_net
+  Copyright (C) 2009 - 2021 Dan McMahill dan_AT_mcmahill_DOT_net
 
   This driver used drvSAMPL.cpp as a reference.
   

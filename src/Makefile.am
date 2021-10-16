@@ -84,6 +84,7 @@ libp2edrvstd_la_SOURCES=			\
 	drvpcb1.cpp	drvpcb1.h               \
 	drvpcb2.cpp	drvpcb2.h               \
 	drvpcbfill.cpp	drvpcbfill.h            \
+	drvpcbrnd.cpp	drvpcbrnd.h libminuid.inc \
 	drvgschem.cpp	drvgschem.h             \
 	drvcfdg.cpp     drvcfdg.h               \
 	drvtk.cpp	drvtk.h                 \

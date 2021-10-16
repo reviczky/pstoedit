@@ -2,7 +2,7 @@
    cmdmain.cpp : This file is part of pstoedit
    main program for command line usage
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,9 +32,12 @@
 int main(int argc, const char *const argv[])
 {
 #if defined(_WIN32) || defined (__OS2__)
-	if (!pstoedit_checkversion(301))
-		return 1;
-	if (!getenv("PSTOEDITUSEGSEXE")) setPstoeditsetDLLUsage(true); // use the gs DLL in stand-alone mode
+    if (!pstoedit_checkversion(301)) {
+	    return 1;
+    }
+    if (!getenv("PSTOEDITUSEGSEXE")) {
+        setPstoeditsetDLLUsage(true); // use the gs DLL in stand-alone mode
+    }
 #else
 	ignoreVersionCheck();
 #endif
@@ -42,5 +45,9 @@ int main(int argc, const char *const argv[])
 	// except for some help/diag messages which are preferred on cout 
 	useCoutForDiag(true);
 	const int result = pstoeditwithghostscript(argc, argv, cerr);
+#if MSVC_CHECK_LEAKS
+    cout << "now checking memory leaks" << endl;
+    _CrtDumpMemoryLeaks();
+#endif
 	return result;
 }

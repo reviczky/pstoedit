@@ -2,7 +2,7 @@
    drvMAGICK.cpp : This file is part of pstoedit
    driver for Magick++ API.
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -35,12 +35,21 @@
 #include I_stdlib
 
 using namespace Magick;
+#ifdef MagickWebSite
+// This is GraphicsMagick
+// GraphicsMagick has version numbers different from ImageMagick
+// #if MagickLibVersion  < 0x201702
+typedef DrawableDashArray DrawableDashArrayType;
+typedef std::list < Magick::Drawable > drawListType;
+#else
+// This is for ImageMagick
 #if MagickLibVersion  > 0x700
 typedef DrawableStrokeDashArray DrawableDashArrayType;
 typedef std::vector < Magick::Drawable > drawListType;
 #else
 typedef DrawableDashArray DrawableDashArrayType;
 typedef std::list < Magick::Drawable > drawListType;
+#endif
 #endif
 
 static const bool withdummycontext = false; 

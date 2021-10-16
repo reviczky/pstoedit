@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -712,7 +712,7 @@ private:
 };
 
 typedef const char * (*makeColorNameType)(float r, float g, float b);
-const unsigned int maxcolors = 10000 ; //  maximum number of colors 
+constexpr unsigned int maxcolors = 10000 ; //  maximum number of colors 
 
 //lint -esym(1712,ColorTable) // no default ctor
 class DLLEXPORT ColorTable 
@@ -761,6 +761,9 @@ public:
 	basedrawingelement() = default;	
 	virtual ~basedrawingelement() = default;
 	virtual const Point &getPoint(unsigned int i) const = 0;
+	const Point& getLastPoint() const {
+		return getPoint(getNrOfPoints()-1);
+	}
 	virtual Dtype getType() const = 0;
 	friend ostream & operator<<(ostream & out, const basedrawingelement &elem);
 	bool operator==(const basedrawingelement& bd2) const;
@@ -879,9 +882,22 @@ typedef drawingelement<(unsigned int) 3,curveto> 	Curveto;
 
 // use of static_cast instead of dynamic_cast, because some tools complain about problems then since
 // in theory dynamic_cast could return 0
-// but clang tidy wants dynamic_cast
-// #define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), options(static_cast<DriverOptions*>(DOptions_ptr))
-#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), options(dynamic_cast<DriverOptions*>(DOptions_ptr))
+// Note: clang tidy wants dynamic_cast, but ignoring that wish.
+#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), \
+                      options(static_cast<DriverOptions*>(DOptions_ptr))
+//Note: 
+//room for improvement, but would need wider changes:
+//Class containing option descriptions is a local one in each driver class
+//But we need an instance of this already in drvbase ctor because we parse the options there 
+//and want to store the values.
+//So drvbase ctor creates the option object via createDriveroptions even before the derived driver class
+//is created completely.
+//Note: an "option" object is also needed/created for help output without creating a derived driver object.
+//Instead of adding the Description of Driver option in to the derived driver class
+//we would need a new class, e.g. derived from driverdescription<T> and add the options there.
+//But that is a wider change involving many source files.
+
+
 
 
 class DLLEXPORT DescriptionRegister
@@ -1105,7 +1121,7 @@ public:
 	virtual unsigned int getdrvbaseVersion() const { return drvbaseVersion; }
 
 	static std::vector<const DriverDescriptionT<T> *> & instances() {
-	    static std::vector<const DriverDescriptionT<T> *> the_instances;
+	    static std::vector<const DriverDescriptionT<T> *> the_instances(0);
 	    return the_instances;
 	}
 

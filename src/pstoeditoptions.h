@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -120,24 +120,11 @@ static const char * const UseDefaultDoku = emptyString;
 class DLLEXPORT PsToEditOptions : public ProgramOptions {
 public:
 	static PsToEditOptions& theOptions(); // singleton
-	enum PropSheetEnum {g_t=0, t_t, d_t,/* a_t, */ b_t, h_t };
-	// g - general
-	// t - text
-	// d - drawing
-	// a - unused
-	// b - debug
-	// h - hidden
-	static const char * propSheetName(PropSheetEnum sheet) {
-	  switch (sheet) {
-		case g_t : return "General options"; break;
-		case t_t : return "Text and font handling related options"; break;
-		case d_t : return "Drawing related options"; break;
-		case b_t : return "Debug options"; break;
-		case h_t : return "Hidden options"; break;
-		default  : return "out of range sheet type";
-	  }
-    }
-		// cannot be const  because it needs to be changed on non UNIX systems (convertBackSlashes)
+
+	// option categories
+	const unsigned int g_t, t_t, d_t, b_t, h_t;
+
+	// cannot be const  because it needs to be changed on non UNIX systems (convertBackSlashes)
 	char *nameOfInputFile  ; //= 0;
 	char *nameOfOutputFile ; //= 0;	// can contain %d for page splitting
 
@@ -231,6 +218,13 @@ private:
 	PsToEditOptions() :
 
 	ProgramOptions(true), // expect additional parameters
+
+	g_t(add_category("General options")),
+	t_t(add_category("Text and font handling related options")),
+	d_t(add_category("Drawing related options")),
+	b_t(add_category("Debug options")),
+	h_t(add_category("Hidden options")),
+
 	nameOfInputFile(nullptr),
 	nameOfOutputFile(nullptr),	// can contain %d for page splitting
 
@@ -655,9 +649,6 @@ private:
 	  "instead of HKLM/Software/GPL Ghostscript.",
 	  emptyString)
 	{
-
-	// nameOfInputFile (0);
-	// nameOfOutputFile (0),	// can contain %d for page splitting
 
 #define MAKESTRING(x) #x
 #define ADD(x) add(&x,MAKESTRING(x))

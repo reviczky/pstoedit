@@ -2,7 +2,7 @@
    drvkillu.cpp : This file is part of pstoedit
    Implementation of Kontour output driver.
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 1998,1999 Kai-Uwe Sattler, kus_AT_iti.cs.uni-magdeburg.de
 
    This program is free software; you can redistribute it and/or modify

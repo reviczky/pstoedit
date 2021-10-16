@@ -3,7 +3,7 @@
    simple backend for Pcbfill format.
    Contributed / Copyright 2004 by: Mark Rages 
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify

@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,6 +31,7 @@
 #include I_istream
 
 #include "miscutil.h"
+#include <vector>
 
 USESTD
 
@@ -84,7 +85,7 @@ public:
 
 class DLLEXPORT OptionBase {
 public:
-	OptionBase(bool optional_p,const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p):
+	OptionBase(bool optional_p,const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p):
 	  flag(flag_p),
 	  argname(argname_p),
 	  propsheet(propsheet_p),
@@ -109,7 +110,7 @@ public:
 	//lint -esym(1540,OptionBase::description) // not freed
 	const char * const flag;		// -bf
 	const char * const argname;     // a meaningfull name of the argument (if not a boolean option)
-	int propsheet;					// the number of the propertysheet to place this option on
+	unsigned int propsheet;	        // the number of the propertysheet to place this option on
 	const char * const description;	// help text
 	const char * const TeXhelp;
 	bool optional;
@@ -124,11 +125,11 @@ private:
 template <class ValueType, class ExtractorType >
 class OptionT : public OptionBase {
 public:
-	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue)	:
+	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue)	:
 		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p),
 		value(initialvalue) {
 	};
-	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, int propsheet_p, const char *description_p, const char * TeXhelp_p )	:
+	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p )	:
 		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p),
         value() // use default init for value
 	{
@@ -142,7 +143,9 @@ public:
 	}
 	bool copyvalue_simple(const char *valuestring) {
 		unsigned int num = 0;
-		return copyvalue("no name because of copyvalue_simple",valuestring,num);
+		const bool rsl =  copyvalue("no name because of copyvalue_simple",valuestring,num);
+		unused(&num);
+		return rsl;
 	}
 #if 0
 	bool copyvalue_simple(bool boolvalue  ) {
@@ -182,9 +185,9 @@ public:
 	ValueType value;
 
 private:
-	OptionT();// disabled
-	OptionT(const OptionT&);// disabled
-	const OptionT& operator=(const OptionT&); // disabled
+	OptionT() = delete;// disabled
+	OptionT(const OptionT&) = delete;// disabled
+	const OptionT& operator=(const OptionT&) = delete; // disabled
 };
 
 
@@ -196,9 +199,19 @@ ostream & OptionT<ValueType, ExtractorType>::writevalue(ostream & out) const {
 
 class DLLEXPORT ProgramOptions {
 public:
-	explicit ProgramOptions(bool expectUnhandled_p = false) : expectUnhandled(expectUnhandled_p), unhandledCounter(0), optcount(0)   { unhandledOptions[0]=nullptr;alloptions[0]=nullptr; };
+	explicit ProgramOptions(bool expectUnhandled_p = false) : 
+		expectUnhandled(expectUnhandled_p), 
+		unhandledCounter(0)
+		//,	optcount(0)   
+	{ 
+		// cout << "constructed options " << this << endl;
+		unhandledOptions.clear();
+		alloptions.clear(); 
+	};
 
-	virtual ~ProgramOptions() {}
+	virtual ~ProgramOptions() {
+		// cout << "destroyed   options " << this << endl;
+	}
 	unsigned int parseoptions(ostream & outstr, unsigned int argc, const char * const*argv) ;
 	// unsigned int sheet: -1 indicates "all"
 	void showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet = -1) const ;
@@ -206,27 +219,39 @@ public:
 #if 1
 	void showvalues(ostream & outstr, bool withdescription = true) const ;
 #endif
+	//TODO: use std iterators
 	const OptionBase * const * getOptionConstIterator() const { return &alloptions[0]; }
 	OptionBase * const * getOptionIterator() const { return &alloptions[0]; }
-	unsigned int numberOfOptions() const { return optcount; }
+	
+	size_t numberOfOptions() const { return alloptions.size(); /* optcount */ }
 	virtual bool hideFromDoku(const OptionBase& /* opt */ ) const { return false; } // some options may be hidden, i.e. debug only options
 
 
   protected:
 	void add(OptionBase * op, const char * const membername_p) ;
+	unsigned int add_category(const char* category) { 
+		categories.push_back(category); 
+		return (unsigned int)(categories.size() - 1); // the index
+	}
+public:
+	const char* propSheetName(unsigned int sheet) const {
+		assert(sheet < categories.size());
+		return categories[sheet];
+	}
 
-  public:
-	bool expectUnhandled; // whether to expect unhandled arguments
-	unsigned int unhandledCounter;
-	const char *unhandledOptions[100];
+	const bool expectUnhandled; // whether to expect unhandled arguments
+	unsigned int unhandledCounter; //TODO remove this member
+	std::vector<const char*> unhandledOptions;
+
+	std::vector<const char*> categories;
 
   private:
-	unsigned int optcount;
-	OptionBase *alloptions[100];
+	// unsigned int optcount; // TODO remove this member
+	std::vector<OptionBase*> alloptions;
 
   private:
-	ProgramOptions(const ProgramOptions&); // disabled
-	const ProgramOptions& operator =(const ProgramOptions&); // disabled
+	ProgramOptions(const ProgramOptions&) = delete; // disabled
+	const ProgramOptions& operator =(const ProgramOptions&) = delete; // disabled
 };
 
 #endif

@@ -1,7 +1,7 @@
 /*
    pstoeditoutputlib.h : 
 
-   Copyright (C) 2002 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 2002 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,10 +19,31 @@
 
 */
 
-/* 
-   the struct version of DriverDescription 
-   this is needed in order to allow plain old C programs to use the .dll
-*/
+// class for using the pstoedit drivers directly.
+// Example code:
+#if 0
+#include "pstoeditoutputlib.h"
+
+
+int main(const int argc, const char* const argv[])
+{
+    PstoeditOutputInterface interfc;
+
+    drvbase* outputdriver = interfc.getdriver("pdf");
+
+    outputdriver->addtopath(new Moveto(10, 20));  // delete will be done by the driver base class
+    outputdriver->addtopath(new Lineto(110, 120));
+    outputdriver->dumpPath();
+
+    outputdriver->dumpText("hello world", 100, 200);
+
+
+    return 0;
+}
+#endif
+
+
+
 
 #include "drvbase.h"
 
@@ -38,6 +59,6 @@ private:
 	class PstoeditLibraryPrivate * privatedata;
 
 	// disallowed - not implemented
-	PstoeditOutputInterface(const PstoeditOutputInterface&);
-	const PstoeditOutputInterface& operator=(const PstoeditOutputInterface&);
+	PstoeditOutputInterface(const PstoeditOutputInterface&) = delete;
+	const PstoeditOutputInterface& operator=(const PstoeditOutputInterface&) = delete;
 };

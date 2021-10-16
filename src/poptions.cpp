@@ -2,7 +2,7 @@
    poptions.cpp : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -142,7 +142,7 @@ bool BoolTrueExtractor::getvalue(const char *UNUSEDARG(optname), const char *UNU
 // debug
 void ProgramOptions::showvalues(ostream & outstr, bool withdescription) const
 {
-	for (unsigned int i = 0; i < optcount; i++) {
+	for (unsigned int i = 0; i < numberOfOptions(); i++) {
 		(void) outstr.width(20);
 		outstr << alloptions[i]->flag << "\t : " << alloptions[i]->gettypename() << "\t : ";
 		if (withdescription)
@@ -176,7 +176,7 @@ unsigned int ProgramOptions::parseoptions(ostream & outstr, unsigned int argc,
 	//debug outstr << "parsing options: argc : " << argc << endl;
 	while (i < argc) {
 		bool found = false;
-		for (unsigned int j = 0; j < optcount; j++) {
+		for (unsigned int j = 0; j < numberOfOptions(); j++) {
 			const char *optid = alloptions[j]->flag;
 			if (strcmp(optid, argv[i]) == 0) {
 				//debug outstr << " found arg:" << i << " " << argv[i] << endl;
@@ -193,7 +193,7 @@ unsigned int ProgramOptions::parseoptions(ostream & outstr, unsigned int argc,
 			if ((strlen(argv[i]) > 1) && (argv[i])[0] == '-') {
 				outstr << "unknown option " << argv[i] << endl;
 			} else {
-				unhandledOptions[unhandledCounter] = argv[i];
+				unhandledOptions.push_back(argv[i]);
 				++unhandledCounter;
 			}
 		}
@@ -223,16 +223,16 @@ static void TeXescapedOutput(ostream & outstr, const char *const st)
 
 void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet) const
 {
-	if (optcount && forTeX && withdescription) {
+	if (numberOfOptions() && forTeX && withdescription) {
 		outstr << "The following format specific options are available:" << endl;
 		outstr << "\\begin{description}" << endl;
 	}
 	const char *const terminator = withdescription ? "]" : "";
-	for (unsigned int i = 0; i < optcount; i++) {
+	for (unsigned int i = 0; i < numberOfOptions(); i++) {
 		if (forTeX) {
 			if ((!hideFromDoku(*(alloptions[i])) && (sheet == -1))
 				// -1 means : show all sheets (except the hidden ones)
-				|| (alloptions[i]->propsheet == sheet)) {
+				|| ((int)(alloptions[i]->propsheet) == sheet)) {
 				if (withdescription)
 					outstr << "\\item[";
 				if (alloptions[i]->gettypeID() == bool_ty) {
@@ -285,7 +285,7 @@ void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescriptio
 	}
 
 	if (forTeX && withdescription) {
-		if (optcount) {
+		if (numberOfOptions()) {
 			outstr << "\\end{description}" << endl;
 		} else {
 			// this happens only in the context of driver options
@@ -309,7 +309,14 @@ void ProgramOptions::dumpunhandled(ostream & outstr) const
 
 void ProgramOptions::add(OptionBase * op, const char *const membername_p)
 {
+#if 0
 	alloptions[optcount] = op;
-	op->membername = membername_p;
 	alloptions[++optcount] = nullptr;
+#else
+	alloptions.push_back(op);
+	//TODO: remove optcount member
+	//optcount++;
+	//assert(optcount == alloptions.size());
+#endif
+	op->membername = membername_p;
 }

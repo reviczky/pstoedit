@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2020 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -240,7 +240,12 @@ DynLoader::fptr DynLoader::getSymbol(const char *name, int check) const
 #elif defined(OS_WIN32_WCE)
 	DynLoader::fptr rfptr = ptr_to_fptr(GetProcAddress((HINSTANCE) handle, LPSTRtoLPWSTR(name).c_str()));	//lint !e611 //: Suspicious cast
 #elif defined(_WIN32)
+#ifdef _WIN64
 	DynLoader::fptr rfptr = /* ptr_to_fptr */(GetProcAddress((HINSTANCE) handle, name));	//lint !e611 //: Suspicious cast
+#else
+	DynLoader::fptr rfptr = ptr_to_fptr(GetProcAddress((HINSTANCE)handle, name));
+#endif
+
 #else
 #error "system unsupported so far"
 #endif

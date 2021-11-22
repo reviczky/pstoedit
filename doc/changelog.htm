@@ -8,9 +8,16 @@
 
     <h1 align="left">Changelog for pstoedit</h1>
 
+    <h2>New or changed in 3.78:</h2>
+    <ul>
+        <li>Bug fix. pstoedit did not find older versions of GhostScript under Windows.</li>
+        <li>Support for mawk in creation of pstoedit.ph header file. mawk is often used on build 
+	    servers in place of gawk.</li>
+    </ul>
+
     <h2>New or changed in 3.77:</h2>
     <ul>
-	<li>Some small update to comply with some Debian requirements.</li>
+        <li>Some small update to comply with some Debian requirements.</li>
     </ul>
 
     <h2>New or changed in 3.76:</h2>
@@ -20,8 +27,10 @@
         <li>Adapted to new versioning scheme of GhostScript.</li>
         <li>Additional backend for pcb-rnd contributed by Erich Heinzle.</li>
         <li>Some additional options in WEMF driver.</li>
-        <li>Better handling of bounding box in EMF output. Contributed by
-	Samuel Thibault.</li>
+        <li>
+            Better handling of bounding box in EMF output. Contributed by
+            Samuel Thibault.
+        </li>
         <li>Better handling of metric option in fig driver.</li>
     </ul>
 

@@ -8,7 +8,11 @@ BEGIN {
 /^[ \t]*%/      { next; }
 /^[ \t]*$$/      { next; }
 { gsub(/^[ \t]*/,""); 
-  gsub(/\\/,"\\\\"); 
+  # need to replace backslash with two backslashes
+  # in two rounds. Some does not work in posix mode
+  # when done in one step
+  gsub(/\\/,"BACKSLASHBACKSLASH"); 
+  gsub(/BACKSLASH/,"\\"); 
   gsub(/"/,"\\\""); 
   print " \" " $0 " \","; } 
 END   { print "nullptr"; print "};" } 

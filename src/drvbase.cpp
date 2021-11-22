@@ -937,7 +937,7 @@ void drvbase::dumpRearrangedPaths()
 	// Rearrange the path if necessary
 	if ((numpaths > 1) && (currentLineWidth() == 0.0) && (currentShowType() != drvbase::stroke)) {
 		if (verbose)
-			errf << "Starting rearrangment of subpaths" << endl;
+			errf << "Starting rearrangement of subpaths" << endl;
 		outputPath->rearrange();
 		numpaths = nrOfSubpaths();
 	}

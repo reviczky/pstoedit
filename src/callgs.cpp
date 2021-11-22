@@ -366,11 +366,13 @@ const char *whichPI(ostream & errstream, int verbose, const char *gsregbase, con
 			}
 			gstocall = pathname;
 		} else {
-		    if (verbose) errstream<< "nothing found in gsview32.ini file - using find_gs to lookup latest version of Ghostscript in registry " << endl;
+		    if (verbose) {
+				errstream<< "nothing found in gsview32.ini file - using find_gs to lookup latest version of Ghostscript in registry " << endl;
+				(void)dumpgsvers(gsregbase, verbose);
+			}
 			static char buf[1000];
 			if (find_gs(buf, sizeof(buf), 550 /* min ver*/ , getPstoeditsetDLLUsage() , gsregbase, verbose)) { 
 				if (verbose) {
-					(void)dumpgsvers(gsregbase, verbose);
 					if (getPstoeditsetDLLUsage()) errstream << "Latest GS DLL is " << buf << endl;
 					else		errstream << "Latest GS EXE is " << buf << endl;
 				}

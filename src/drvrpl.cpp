@@ -7,7 +7,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -50,12 +50,12 @@ void drvRPL::print_coords()
 		switch (elem.getType()) {
 		case moveto:{
 				const Point & p = elem.getPoint(0);
-				outf << p.x_ + x_offset << " 0 " << p.y_ + y_offset << endl;
+				outf << p.x() + x_offset << " 0 " << p.y() + y_offset << endl;
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
-				outf << p.x_ + x_offset << " 0 " << p.y_ + y_offset << endl;
+				outf << p.x() + x_offset << " 0 " << p.y() + y_offset << endl;
 			}
 			break;
 		case closepath:		// Not supported
@@ -64,7 +64,7 @@ void drvRPL::print_coords()
 			}
 			break;
 		default:
-			errf << "\t\tFatal: unexpected case in drvpdf " << endl;
+			errf << "\t\tFatal: unexpected case in drvRPL " << endl;
 			abort();
 			break;
 		}
@@ -111,7 +111,7 @@ static DriverDescriptionT < drvRPL > D_rpl("rpl", "Real3D Programming Language f
 										   false,	// if backend supports curves, else 0
 										   false,	// if backend supports elements with fill and edges
 										   false,	// if backend supports text, else 0
-										   DriverDescription::noimage,	// no support for PNG file images
-										   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+										   DriverDescription::imageformat::noimage,	// no support for PNG file images
+										   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 										   false  /*clipping */ 
 										   );

@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -58,9 +58,7 @@ USESTD
 #include "miscutil.h"
 #endif
 
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
 #include <vector>
-#endif
 
 // for compatibility checking
 static constexpr unsigned int drvbaseVersion = 108;
@@ -74,38 +72,32 @@ static constexpr unsigned int drvbaseVersion = 108;
 // 108 new driver descriptions -- added info about driver options
 
 constexpr unsigned int  maxPages     = 10000;   // maximum number of pages - needed for the array of bounding boxes
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
- // we can use std::vector
-#else
-const unsigned int	maxPoints    = 80000;	// twice the maximal number of points in a path
-const unsigned int	maxElements  = maxPoints/2;
-const unsigned int	maxSegments  = maxPoints/2;// at least half of maxpoints (if we only have segments with one point)
-#endif
 
 class DLLEXPORT Point
 {
 public:
 	Point(float x, float y) : x_(x),y_(y) {}
 	Point() : x_(0.0f), y_(0.0f) {}; // for arrays
-	float x_;
-	float y_;
+
 	float x() const { return x_; }
 	float y() const { return y_; }
+	void set_x(float f) { x_ = f; }
+	void set_y(float f) { y_ = f; }
 	bool operator==(const Point & p2) const { 
 		return (x_ == p2.x_) && (y_ == p2.y_); //lint !e777
 	}
 	bool operator!=(const Point & p2) const { 
 		return !(*this == p2);
 	}
-	Point operator+(const Point & p) const { return Point (x_+p.x_,y_+p.y_); }
+	Point operator+(const Point & p) const { return Point (x_ + p.x_, y_ + p.y_); }
 	const Point & operator+=(const Point & p) { x_+=p.x_; y_+=p.y_; return *this; }
-	Point operator*(float f) const { return Point (x_*f,y_*f); }
+	Point operator-(const Point & p) const { return Point (x_ - p.x_, y_ - p.y_); }
+	const Point& operator-=(const Point& p) { x_ -= p.x_; y_ -= p.y_; return *this; }
+	Point operator*(float f) const { return Point(x_ * f, y_ * f); }
+	const Point& operator*=(float f) { x_ *= f; y_ *= f; return *this; }
+	Point operator/(float f) const { return Point(x_ / f, y_ / f); }
+	const Point& operator/=(float f) { x_ /= f; y_ /= f; return *this; }
 
-#if 0
-	friend bool operator==(const Point & p1, const Point & p2) { 
-		return (p1.x_ == p2.x_) && (p1.y_ == p2.y_); //lint !e777
-	}
-#endif
 	Point transform(const float matrix[6]) const;
 
 	friend ostream & operator<<(ostream & out, const Point &p) {
@@ -113,6 +105,8 @@ public:
 	}
 
 private:
+	float x_;
+	float y_;
 };
 
 struct DLLEXPORT BBox // holds two points describing a Bounding Box 
@@ -227,8 +221,8 @@ public:
 			  // obsolete with new C++ - already done in init
 			  for (int i = 0; i < 6; i++) { FontMatrix[i] = 0.0f; }
 			}
-		~TextInfo() { }
 
+		~TextInfo() = default;
         TextInfo(const TextInfo&) = default;
 		TextInfo& operator=(const TextInfo&) = default;
 	};
@@ -246,11 +240,7 @@ protected:
 		unsigned int    currentLineJoin;
 		float			currentMiterLimit;
 		unsigned int    nr;
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
 		std::vector<basedrawingelement *> path;
-#else
-		basedrawingelement * * path; // a path is an array of pointers to basedrawingelements
-#endif
 		bool	 	isPolygon; // whether current path was closed via closepath or not
 		unsigned int	numberOfElementsInPath;
 		unsigned int	subpathoffset; // normally 0, but if subpaths are simulated
@@ -288,20 +278,11 @@ protected:
 			pathWasMerged(false),
 			dashPattern(emptyDashPattern)
 			{
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
-#else
-			    path = new basedrawingelement *[maxElements];
-#endif
 			}
 
 		virtual ~PathInfo() { // added virtual because of windows memory handling
 			// the path content is deleted by clear
 			clear();
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
-			// use std dtor
-#else
-			delete [] path;
-#endif
 		}
 		void addtopath(basedrawingelement * newelement,
 			           ostream & errf);
@@ -339,7 +320,8 @@ public:
 
 	const DriverDescription& driverdesc; // reference to the derived class' driverdescription
 
-	ProgramOptions* DOptions_ptr;
+	ProgramOptions* DOptions_ptr; // the driver specific options
+	const bool canDeleteDriverOptions;
 
 	PSImage 		imageInfo;
 
@@ -409,6 +391,7 @@ public:
 		const char* nameOfInputFile_p,
 		const char* nameOfOutputFile_p,
 		PsToEditOptions & globaloptions_p,
+		ProgramOptions* driverOptions_p,
 		const class DriverDescription & driverdesc_p
 	); // constructor
 	virtual ~drvbase();  		// destructor
@@ -738,16 +721,7 @@ private:
 
 
 
-#ifdef __TCPLUSPLUS__
-// turbo C++ has problems with enum for template parameters
-typedef unsigned int Dtype;
-const Dtype moveto = 1;
-const Dtype lineto = 2;
-const Dtype closepath = 3;
-const Dtype curveto = 4;
-#else
 enum  Dtype {moveto, lineto, closepath, curveto};
-#endif
 // closepath is only generated if backend supportes subpaths
 // curveto   is only generated if backend supportes it
 
@@ -787,10 +761,6 @@ template <unsigned int nr, Dtype curtype>
 class drawingelement : public basedrawingelement
 {
 public:
-// CenterLine !!!!
-// "drvbase.h", line 455: sorry, not implemented: cannot expand inline function  drawingelement 
-//   <1 , 0 >::drawingelement__pt__19_XCUiL11XC5DtypeL10(Point*) with  for statement in inline
-
 	drawingelement(float x_1, float y_1, float x_2 = 0.0, float y_2 = 0.0, float x_3 = 0.0, float y_3 = 0.0)
 	: basedrawingelement()
 	{
@@ -815,9 +785,17 @@ public:
 	explicit drawingelement(const Point p[])
 	: basedrawingelement()
 	{
-//	for (unsigned int i = 0 ; i < nr ; i++ ) points[i] = p[i]; 
 		copyPoints(nr,p,points);
 	}
+	// just for single point elements
+	explicit drawingelement(const Point & p)
+		: basedrawingelement()
+	{
+		// static_assert(nr == 1);
+		assert(nr == 1);
+		points[0] = p;
+	}
+
 	drawingelement(const drawingelement<nr,curtype> & orig)
 	: basedrawingelement() //lint !e1724 // Argument to copy constructor for class drawingelement<<1>,<2>> should be a const reference
 	{ // copy ctor
@@ -852,19 +830,6 @@ private:
 };
 
 
-// CenterLine !!!!
-// "drvbase.h", line 477: sorry, not implemented: cannot expand inline function  
-// drawingelement <3 , 3 >::drawingelement__pt__19_XCUiL13XC5DtypeL13(Point*) with  for statement in inline
-
-#if 0
-template <unsigned int nr, Dtype curtype>
-inline drawingelement<nr,curtype>::drawingelement(Point p[]) 
-	: basedrawingelement()
-{
-	for (unsigned int i = 0 ; i < nr ; i++ ) points[i] = p[i]; 
-}
-#endif
-
 typedef drawingelement<(unsigned int) 1,moveto>  	Moveto;
 typedef drawingelement<(unsigned int) 1,lineto> 	Lineto;
 typedef drawingelement<(unsigned int) 1,closepath> 	Closepath;
@@ -877,13 +842,14 @@ typedef drawingelement<(unsigned int) 3,curveto> 	Curveto;
               ostream & theerrStream, 			\
               const char* nameOfInputFile_p,	\
               const char* nameOfOutputFile_p,	\
-              PsToEditOptions & globaloptions_p, /* non const because driver can also add options */ 		\
+              PsToEditOptions& globaloptions_p, /* non const because driver can also add options */ 		\
+              ProgramOptions* driverOptions_p, \
               const class DriverDescription & descref)	
 
 // use of static_cast instead of dynamic_cast, because some tools complain about problems then since
 // in theory dynamic_cast could return 0
 // Note: clang tidy wants dynamic_cast, but ignoring that wish.
-#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,descref), \
+#define constructBase drvbase(driveroptions_p,theoutStream,theerrStream,nameOfInputFile_p,nameOfOutputFile_p,globaloptions_p,driverOptions_p,descref), \
                       options(static_cast<DriverOptions*>(DOptions_ptr))
 //Note: 
 //room for improvement, but would need wider changes:
@@ -935,28 +901,9 @@ private:
 	NOCOPYANDASSIGN(DescriptionRegister)
 };
 
-//extern DLLEXPORT DescriptionRegister* globalRp;
 extern "C" DLLEXPORT DescriptionRegister * getglobalRp(void);
 
-//extern __declspec ( dllexport) "C" {
-//not needed // DescriptionRegister* getglobalRp();
 typedef DescriptionRegister* (*getglobalRpFuncPtr)(void);
-//}
-
-//class Rinit 
-//{
-//public:
-//	Rinit() { if (!globalRp) {globalRp = new DescriptionRegister; ref = 1 ; } else { ref++;} }
-//	~Rinit() { ref--; if (ref == 0) delete globalRp; }
-//
-//private:
-//	static	int ref;
-//};
-
-//static Rinit Rinit_var;
-
-//now in drvdesc.h typedef bool (*checkfuncptr)();
-// static bool nocheck() { return true; }
 
 typedef bool (*checkfuncptr)(void);
 class drvbase;
@@ -973,17 +920,11 @@ private:
 	const OptionDescription& operator=(const OptionDescription&) = delete;
 };
 
-// An Array of OptionDescription is delimited by an element where Name is 0
-//FIXME const OptionDescription endofoptions(0,0,0);
-
-//FIXME const OptionDescription nodriverspecificoptions[] = {OptionDescription("driver has no further options",0,0),endofoptions};
-
-
 //lint -esym(1712,DriverDescription) // no default ctor
 class DLLEXPORT DriverDescription {
 public:
-	enum opentype {noopen, normalopen, binaryopen};
-	enum imageformat { noimage, png, bmp, eps, memoryeps }; // format to be used for transfer of raster images
+	enum class opentype {noopen, normalopen, binaryopen};
+	enum class imageformat { noimage, png, bmp, eps, memoryeps }; // format to be used for transfer of raster images
 
 	DriverDescription(const char * const s_name, 
 			const char * const short_expl, 
@@ -999,19 +940,15 @@ public:
 			const bool	backendSupportsClipping_p,
 			const bool	nativedriver_p = true,
 			checkfuncptr checkfunc_p = 0);
-	virtual ~DriverDescription() {
-		//		symbolicname = nullptr; // these are const
-		//		explanation= nullptr;
-		//		suffix= nullptr;
-		//		additionalInfo= nullptr;
-	} //lint !e1540
+	virtual ~DriverDescription() = default;
 
 	virtual drvbase * CreateBackend (const char * const driveroptions_P,
 			 ostream & theoutStream, 
 			 ostream & theerrStream,   
 			 const char* const nameOfInputFile,
 		     const char* const nameOfOutputFile,
-			 PsToEditOptions & globaloptions_p
+			 PsToEditOptions & globaloptions_p,
+			 ProgramOptions * driverOptions_p
 			 ) const = 0;
 	virtual ProgramOptions * createDriverOptions() const = 0;
 
@@ -1051,15 +988,6 @@ public:
 };
 
 class DescriptionRegister;
-
-#if 0
-template <class T>
-class woglvector : public std::vector<T> {
-public:
-	woglvector() { cout << "created " << this << endl << flush; }
-	~woglvector() { cout << "deleted " << this << endl << flush; }
-};
-#endif
 
 //lint -esym(1712,DriverDescription*) // no default ctor
 template <class T>
@@ -1104,10 +1032,11 @@ public:
 		    ostream & theerrStream,   
 			const char* const nameOfInputFile,
 	       	const char* const nameOfOutputFile,
-			PsToEditOptions & globaloptions_p /* non const because driver can also add arguments */
+			PsToEditOptions & globaloptions_p, /* non const because driver can also add arguments */
+		    ProgramOptions* driverOptions_p
 			 ) const
 	{ 
-		drvbase * backend = new T(driveroptions_P, theoutStream, theerrStream, nameOfInputFile, nameOfOutputFile, globaloptions_p, *this); 
+		drvbase * backend = new T(driveroptions_P, theoutStream, theerrStream, nameOfInputFile, nameOfOutputFile, globaloptions_p, driverOptions_p , *this);
 		return backend;
 	} 
 
@@ -1142,13 +1071,7 @@ private:
 	NOCOPYANDASSIGN(DriverDescriptionT<T>)
 };
 
-#if 0
-template <class T>
-//std::vector<const DriverDescriptionT<T> *> DriverDescriptionT<T>::instances;
-woglvector<const DriverDescriptionT<T> *> DriverDescriptionT<T>::instances;
-#endif
-
-#if !( (defined (__GNUG__)  && (__GNUC__>=3) && defined (HAVE_STL)) || defined (_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1900) )
+#if !( (defined (__GNUG__)  && (__GNUC__>=3) ) || defined (_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1900) )
 // 1300 is MSVC.net (7.0)
 // 1200 is MSVC 6.0
 //G++3.0 comes with a STL lib that includes a definition of min and max
@@ -1161,24 +1084,6 @@ woglvector<const DriverDescriptionT<T> *> DriverDescriptionT<T>::instances;
 #undef max
 #endif
 
-#if 0
-// should come from algorithm now
-#ifndef min
-template <class T>
-inline T min(T x, T y)
-{
-	return (x<y) ? x:y;
-}
-#endif
-
-#ifndef max
-template <class T>
-inline T max(T x, T y)
-{
-	return (x>y) ? x:y;
-}
-#endif
-#endif
 
 #endif
 
@@ -1198,17 +1103,10 @@ inline float bezpnt(float t, float z1, float z2, float z3, float z4)
 
 inline Point PointOnBezier(float t, const Point & p1, const Point & p2, const Point & p3, const Point & p4)
 {
-	return Point(bezpnt(t,p1.x_,p2.x_,p3.x_,p4.x_), bezpnt(t,p1.y_,p2.y_,p3.y_,p4.y_));
+	return Point(bezpnt(t,p1.x(),p2.x(),p3.x(),p4.x()), 
+				 bezpnt(t,p1.y(),p2.y(),p3.y(),p4.y()));
 }
 
 
-
-
 #endif
- 
- 
- 
- 
- 
- 
  

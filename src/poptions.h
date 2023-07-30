@@ -4,7 +4,7 @@
    poptions.h : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,6 +66,7 @@ public:
 };
 
 //lint -esym(1790,BoolBaseExtractor)
+#if 0
 class DLLEXPORT BoolInvertingExtractor : public BoolBaseExtractor {
 public:
 	static bool getvalue(const char *optname, const char *instring, unsigned int &currentarg, bool &result) ;
@@ -75,6 +76,7 @@ class DLLEXPORT BoolFalseExtractor : public BoolBaseExtractor{
 public:
 	static bool getvalue(const char *optname, const char *instring, unsigned int &currentarg, bool &result) ;
 };
+#endif
 
 class DLLEXPORT BoolTrueExtractor : public BoolBaseExtractor{
 public:
@@ -85,23 +87,27 @@ public:
 
 class DLLEXPORT OptionBase {
 public:
-	OptionBase(bool optional_p,const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p):
+	OptionBase(bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p, bool hideInGui_p):
 	  flag(flag_p),
 	  argname(argname_p),
 	  propsheet(propsheet_p),
 	  description(description_p),
 	  TeXhelp(TeXhelp_p),
 	  optional(optional_p),
-	  membername(""){ // membername is set during "add" because it was simpler to grab the membername during the add
+	  membername(""), // membername is set during "add" because it was simpler to grab the membername during the add
+	  hideInGui(hideInGui_p) { 
+		assert(flag_p);
+		assert(description_p);
+		// if (!argname_p) { cerr << "flag " << flag_p << " description " << description_p << endl; }
+		assert(argname_p);
 	};
 	virtual ~OptionBase() { membername = nullptr; }
 	virtual ostream & writevalue(ostream & out) const = 0;
-#if 1
 	void toString(RSString &) const;  
-#endif
-	virtual bool copyvalue(const char *optname, const char *valuestring, unsigned int &currentarg) = 0;
-	virtual bool copyvalue_simple(const char *valuestring) = 0;
-//	virtual bool copyvalue_simple(bool boolvalue) = 0; 
+	std::string valueAsStdString() const;
+
+	virtual bool copyValueFromArgcArgv(const char *optname, const char *valuestring, unsigned int &currentarg) = 0;
+	virtual bool copyValueFromString(const char *valuestring) = 0;
 	virtual const char *gettypename() const = 0;
 	virtual unsigned int gettypeID() const = 0;
 	virtual void * GetAddrOfValue() = 0; // will return real type instead of void
@@ -110,12 +116,13 @@ public:
 	//lint -esym(1540,OptionBase::description) // not freed
 	const char * const flag;		// -bf
 	const char * const argname;     // a meaningfull name of the argument (if not a boolean option)
-	unsigned int propsheet;	        // the number of the propertysheet to place this option on
+	const unsigned int propsheet;	        // the number of the propertysheet to place this option on
 	const char * const description;	// help text
-	const char * const TeXhelp;
-	bool optional;
-	const char * membername;
-
+	const char * const TeXhelp; // the long documentation. Will be generated into the overall .tex documentation.
+	const bool optional;
+	const char * membername; // membername is set during "add" because it was simpler to grab the membername during the add
+	const bool hideInGui;
+	enum class ctorToUseForValue { useDefaultCtor };
 private:
 	OptionBase(); // disabled
 	OptionBase(const OptionBase&); // disabled
@@ -125,40 +132,28 @@ private:
 template <class ValueType, class ExtractorType >
 class OptionT : public OptionBase {
 public:
-	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue)	:
-		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p),
+	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue, bool hideInGui_p = false)	:
+		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p, hideInGui_p),
 		value(initialvalue) {
 	};
-	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p )	:
-		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p),
+	OptionT < ValueType, ExtractorType >(bool optional_p, const char* flag_p, const char* argname_p, unsigned int propsheet_p, const char* description_p, const char* TeXhelp_p, ctorToUseForValue , bool hideInGui_p = false) :
+		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p, hideInGui_p),
         value() // use default init for value
 	{
 			//lint -esym(1401,*::value) // not initialized - we use the default ctor here
 	};
 	virtual ostream & writevalue(ostream & out) const;
 
-
-	virtual bool copyvalue(const char *optname, const char *valuestring, unsigned int &currentarg) {
+	// used for parsing driver specific options.
+	virtual bool copyValueFromArgcArgv(const char *optname, const char *valuestring, unsigned int &currentarg) {
 		return ExtractorType::getvalue(optname, valuestring, currentarg, value);
 	}
-	bool copyvalue_simple(const char *valuestring) {
-		unsigned int num = 0;
-		const bool rsl =  copyvalue("no name because of copyvalue_simple",valuestring,num);
-		unused(&num);
-		return rsl;
+
+	virtual bool copyValueFromString(const char *valuestring) {
+		// just copy the value from a given string, no handling of argc and argv related pointers. 
+		unsigned int dummy = 0; // 0 means - use boolean from string
+		return ExtractorType::getvalue("no name because of copyvalueFromString", valuestring, dummy, value);
 	}
-#if 0
-	bool copyvalue_simple(bool boolvalue  ) {
-//		value = boolvalue;
-	//	unsigned int num = 0;
-		// we cannot just use the "extractor" since that works like the option has given on the commandline
-		// but copyvalue_simple is called for all options - but that does not mean that all options are
-		// "put on the virtual commandline" - clear ?
-	//	return copyvalue("no name because of copyvalue_simple","",num);
-		value = boolvalue;
-	 	return true; // wogl FIXME
-	}
-#endif
 	virtual const char *gettypename() const {
 		return ExtractorType::gettypename();
 	}
@@ -181,7 +176,6 @@ public:
 	bool operator !() const { return !value ; }
 	virtual void * GetAddrOfValue() { return &value;}
 
-
 	ValueType value;
 
 private:
@@ -202,9 +196,7 @@ public:
 	explicit ProgramOptions(bool expectUnhandled_p = false) : 
 		expectUnhandled(expectUnhandled_p), 
 		unhandledCounter(0)
-		//,	optcount(0)   
 	{ 
-		// cout << "constructed options " << this << endl;
 		unhandledOptions.clear();
 		alloptions.clear(); 
 	};
@@ -213,40 +205,39 @@ public:
 		// cout << "destroyed   options " << this << endl;
 	}
 	unsigned int parseoptions(ostream & outstr, unsigned int argc, const char * const*argv) ;
-	// unsigned int sheet: -1 indicates "all"
-	void showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet = -1) const ;
+	//  int sheet: -1 indicates "all"
+	static constexpr int allSheets = -1;
+	void showhelp(ostream & outstr, const char* const introText, const char * prefix_for_anchor, bool forTeX, bool withdescription, int sheet ) const ;
 	void dumpunhandled(ostream & outstr) const ;	
 #if 1
 	void showvalues(ostream & outstr, bool withdescription = true) const ;
 #endif
-	//TODO: use std iterators
-	const OptionBase * const * getOptionConstIterator() const { return &alloptions[0]; }
-	OptionBase * const * getOptionIterator() const { return &alloptions[0]; }
+	std::vector<OptionBase*>& getOptions(); 
+	const std::vector<OptionBase*>& getOptionConst() const; 
 	
-	size_t numberOfOptions() const { return alloptions.size(); /* optcount */ }
+	size_t numberOfOptions() const;
+	const OptionBase* iThOption(unsigned int i) const;
+	OptionBase* iThOption(unsigned int i);
+	OptionBase* optionByFlag(const char * flag);
+
 	virtual bool hideFromDoku(const OptionBase& /* opt */ ) const { return false; } // some options may be hidden, i.e. debug only options
+	virtual bool hideSheetFromGui(unsigned int /* sheet */) const { return false; }
 
-
-  protected:
+protected:
 	void add(OptionBase * op, const char * const membername_p) ;
 	unsigned int add_category(const char* category) { 
 		categories.push_back(category); 
 		return (unsigned int)(categories.size() - 1); // the index
 	}
 public:
-	const char* propSheetName(unsigned int sheet) const {
-		assert(sheet < categories.size());
-		return categories[sheet];
-	}
-
+	const char* propSheetName(unsigned int sheet) const;
+	void setInputAndOutputFile(const char* const inputFile, const char* const outputFile); // sets to files into unhandledOptions
 	const bool expectUnhandled; // whether to expect unhandled arguments
 	unsigned int unhandledCounter; //TODO remove this member
 	std::vector<const char*> unhandledOptions;
-
 	std::vector<const char*> categories;
 
   private:
-	// unsigned int optcount; // TODO remove this member
 	std::vector<OptionBase*> alloptions;
 
   private:

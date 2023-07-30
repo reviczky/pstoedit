@@ -2,7 +2,7 @@
    poptions.cpp : This file is part of pstoedit
    program option handling 
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -113,6 +113,7 @@ unsigned int BoolBaseExtractor::gettypeID()
 	return bool_ty;
 }
 
+#if 0
 bool BoolInvertingExtractor::getvalue(const char *UNUSEDARG(optname),
 									  const char *UNUSEDARG(instring),
 									  unsigned int &UNUSEDARG(currentarg), bool &result)
@@ -121,24 +122,55 @@ bool BoolInvertingExtractor::getvalue(const char *UNUSEDARG(optname),
 	return true;
 }
 
-
 bool BoolFalseExtractor::getvalue(const char *UNUSEDARG(optname), const char *UNUSEDARG(instring),
 								  unsigned int &UNUSEDARG(currentarg), bool &result)
 {
 	result = false;
 	return true;
 }
+#endif
 
 
-bool BoolTrueExtractor::getvalue(const char *UNUSEDARG(optname), const char *UNUSEDARG(instring),
-								 unsigned int &UNUSEDARG(currentarg), bool &result)
+bool BoolTrueExtractor::getvalue(const char * /*optname*/,  const char *instring,
+								 unsigned int &currentarg, bool &result)
 {
-	result = true;
+	if (currentarg) { // from context of parsing argc/argv
+		// just set it
+		result = true;		
+	} else {
+		// use from string
+		result = instring ? (instring[0] == '1') : false;
+	}
+//	cerr << "getting value for " << optname << " from '" << instring << "' results in " << result << " " << currentarg << endl;
 	return true;
 }
 
+// Exporting STL container on DLL interface creates problem when using a release DLL in a Debug executable.
+// hence we need to avoid inline functions for these.
+#if 0
+std::vector<OptionBase*>& ProgramOptions::getOptions() { return alloptions; }
+const std::vector<OptionBase*>& ProgramOptions::getOptionConst() const { return alloptions; }
+#endif
 
-#if 1 
+size_t ProgramOptions::numberOfOptions() const { return alloptions.size(); }
+const OptionBase* ProgramOptions::iThOption(unsigned int i) const
+{
+	return alloptions[i];
+}
+OptionBase* ProgramOptions::iThOption(unsigned int i) 
+{
+	return alloptions[i];
+}
+
+OptionBase* ProgramOptions::optionByFlag(const char* flag) {
+	for (unsigned int i = 0; i < numberOfOptions(); i++) {
+		if (strcmp(alloptions[i]->flag, flag) == 0) {
+			return alloptions[i];
+		}
+	}
+	return nullptr;
+}
+
 // debug
 void ProgramOptions::showvalues(ostream & outstr, bool withdescription) const
 {
@@ -166,7 +198,31 @@ void OptionBase::toString(RSString & result) const
 	tempstream.rdbuf()->freeze(0);
 #endif
 }
-#endif
+
+std::string OptionBase::valueAsStdString() const
+{
+	RSString tmp;
+	toString(tmp);
+	const std::string result = tmp;
+	return result;
+}
+
+const char* ProgramOptions::propSheetName(unsigned int sheet) const {
+	if (sheet < categories.size()) {
+		return categories[sheet];
+	}
+	else {
+		return nullptr;
+	}
+}
+
+void ProgramOptions::setInputAndOutputFile(const char* const inputFile, const char* const outputFile)
+{
+	unhandledOptions.clear();
+	unhandledOptions.push_back(inputFile);
+	unhandledOptions.push_back(outputFile);
+	unhandledCounter = 2;
+}
 
 unsigned int ProgramOptions::parseoptions(ostream & outstr, unsigned int argc,
 										  const char *const *argv)
@@ -181,7 +237,7 @@ unsigned int ProgramOptions::parseoptions(ostream & outstr, unsigned int argc,
 			if (strcmp(optid, argv[i]) == 0) {
 				//debug outstr << " found arg:" << i << " " << argv[i] << endl;
 				const char *nextarg = (i < argc) ? argv[i + 1] : (const char *) nullptr;
-				if (!alloptions[j]->copyvalue(argv[i], nextarg, i)) {
+				if (!alloptions[j]->copyValueFromArgcArgv(argv[i], nextarg, i)) {
 					outstr << "Error in option " << argv[i] << endl;
 				}
 				found = true;
@@ -221,11 +277,14 @@ static void TeXescapedOutput(ostream & outstr, const char *const st)
 	}
 }
 
-void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescription, int sheet) const
+void ProgramOptions::showhelp(ostream & outstr, const char * const introText, const char * prefix_for_anchor, bool forTeX, bool withdescription, int sheet) const
 {
-	if (numberOfOptions() && forTeX && withdescription) {
-		outstr << "The following format specific options are available:" << endl;
-		outstr << "\\begin{description}" << endl;
+	if (numberOfOptions()) {
+		outstr << introText << endl;
+		if (forTeX && withdescription) {
+			//outstr << "The following format specific options are available:" << endl;
+			outstr << "\\begin{description}" << endl;
+		}
 	}
 	const char *const terminator = withdescription ? "]" : "";
 	for (unsigned int i = 0; i < numberOfOptions(); i++) {
@@ -233,8 +292,9 @@ void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescriptio
 			if ((!hideFromDoku(*(alloptions[i])) && (sheet == -1))
 				// -1 means : show all sheets (except the hidden ones)
 				|| ((int)(alloptions[i]->propsheet) == sheet)) {
-				if (withdescription)
+				if (withdescription) {
 					outstr << "\\item[";
+				}		
 				if (alloptions[i]->gettypeID() == bool_ty) {
 					if (alloptions[i]->optional)
 						outstr << "\\oOpt{";
@@ -256,9 +316,13 @@ void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescriptio
 					outstr << "}" << terminator << endl;
 				}
 				if (withdescription) {
+					outstr << "\\Anchor{option-"; 
+					outstr << prefix_for_anchor;
+					TeXescapedOutput(outstr, alloptions[i]->flag); outstr << "}" << endl;
 					const char *help =
-						alloptions[i]->TeXhelp ? alloptions[i]->TeXhelp : alloptions[i]->
-						description;
+						(alloptions[i]->TeXhelp && strlen(alloptions[i]->TeXhelp))
+						   ? alloptions[i]->TeXhelp 
+						   : alloptions[i]->description;
 					outstr << help << endl << endl;
 				}
 #if 0
@@ -292,7 +356,6 @@ void ProgramOptions::showhelp(ostream & outstr, bool forTeX, bool withdescriptio
 			outstr << "No format specific options" << endl;
 		}
 	}
-
 }
 
 void ProgramOptions::dumpunhandled(ostream & outstr) const
@@ -309,14 +372,6 @@ void ProgramOptions::dumpunhandled(ostream & outstr) const
 
 void ProgramOptions::add(OptionBase * op, const char *const membername_p)
 {
-#if 0
-	alloptions[optcount] = op;
-	alloptions[++optcount] = nullptr;
-#else
 	alloptions.push_back(op);
-	//TODO: remove optcount member
-	//optcount++;
-	//assert(optcount == alloptions.size());
-#endif
 	op->membername = membername_p;
 }

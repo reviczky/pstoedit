@@ -5,7 +5,7 @@
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
-   Copyright (C) 2000 - 2021 Glunz (fill support,  improved color handling)
+   Copyright (C) 2000 - 2023 Glunz (fill support,  improved color handling)
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or
@@ -210,8 +210,8 @@ void drvHPGL::print_coords()
 			case moveto:
 				{
 					const Point & p = elem.getPoint(0);
-					double x = (p.x_ + x_offset) * HPGLScale;
-					double y = (p.y_ + y_offset) * HPGLScale;
+					double x = (p.x() + x_offset) * HPGLScale;
+					double y = (p.y() + y_offset) * HPGLScale;
 					rot(x, y, rotation);
 #if USESPRINTF
 					char str[256];
@@ -226,8 +226,8 @@ void drvHPGL::print_coords()
 				{
 					{
 						const Point & p = elem.getPoint(0);
-						double x = (p.x_ + x_offset) * HPGLScale;
-						double y = (p.y_ + y_offset) * HPGLScale;
+						double x = (p.x() + x_offset) * HPGLScale;
+						double y = (p.y() + y_offset) * HPGLScale;
 						rot(x, y, rotation);
 #if USESPRINTF
 						char str[256];
@@ -240,8 +240,8 @@ void drvHPGL::print_coords()
 					if (isPolygon() && (n == elems)) {
 						const basedrawingelement & elemnull = pathElement(0);
 						const Point & pnull = elemnull.getPoint(0);
-						double x = (pnull.x_ + x_offset) * HPGLScale;
-						double y = (pnull.y_ + y_offset) * HPGLScale;
+						double x = (pnull.x() + x_offset) * HPGLScale;
+						double y = (pnull.y() + y_offset) * HPGLScale;
 						rot(x, y, rotation);
 #if USESPRINTF
 						char str[256];
@@ -256,8 +256,8 @@ void drvHPGL::print_coords()
 			case closepath:
 				{
 					const Point & p = pathElement(0).getPoint(0);
-					double x = (p.x_ + x_offset) * HPGLScale;
-					double y = (p.y_ + y_offset) * HPGLScale;
+					double x = (p.x() + x_offset) * HPGLScale;
+					double y = (p.y() + y_offset) * HPGLScale;
 					rot(x, y, rotation);
 #if USESPRINTF
 					char str[256];
@@ -462,8 +462,8 @@ void drvHPGL::show_path()
 		case drvbase::fill:
 			{
 				const Point & p = pathElement(0).getPoint(0);
-				double x = (p.x_ + x_offset) * HPGLScale;
-				double y = (p.y_ + y_offset) * HPGLScale;
+				double x = (p.x() + x_offset) * HPGLScale;
+				double y = (p.y() + y_offset) * HPGLScale;
 				rot(x, y, rotation);
 #if USESPRINTF
 				char str[256];
@@ -525,8 +525,8 @@ static DriverDescriptionT < drvHPGL > D_HPGL("hpgl", "HPGL code", "","hpgl", fal
 												 false,	// backend supports curves
 												 false,	// backend supports elements which are filled and have edges
 												 true,	// backend supports text
-												 DriverDescription::noimage,	// no support for PNG file images
-												 DriverDescription::normalopen, false,	// backend support multiple pages
+												 DriverDescription::imageformat::noimage,	// no support for PNG file images
+												 DriverDescription::opentype::normalopen, false,	// backend support multiple pages
 												 false /*clipping */ );
 
 static DriverDescriptionT < drvHPGL > D_PCL("pcl", "PCL code", "","pcl", false,	// backend supports subpaths
@@ -545,6 +545,6 @@ static DriverDescriptionT < drvHPGL > D_PCL("pcl", "PCL code", "","pcl", false,	
 												 false,	// backend supports curves
 												 false,	// backend supports elements which are filled and have edges
 												 true,	// backend supports text
-												 DriverDescription::noimage,	// no support for PNG file images
-												 DriverDescription::normalopen, false,	// backend support multiple pages
+												 DriverDescription::imageformat::noimage,	// no support for PNG file images
+												 DriverDescription::opentype::normalopen, false,	// backend support multiple pages
 												 false /*clipping */ );

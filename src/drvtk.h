@@ -11,7 +11,7 @@
    drvsample.h
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -47,8 +47,8 @@ public:
 		OptionT < RSString, RSStringValueExtractor> tagNames;
 
 		DriverOptions() :
-			swapHW(true,"-R",nullptr,0,"swap HW",nullptr,false),
-			noImPress(true,"-I",nullptr,0,"no impress",nullptr,false),
+			swapHW(true,"-R","",0,"swap HW",nullptr,false),
+			noImPress(true,"-I","",0,"no impress",nullptr,false),
 			tagNames(true,"-n","string",0,"tagnames",nullptr,"")
 		{
 			ADD(swapHW);

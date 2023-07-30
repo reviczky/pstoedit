@@ -1,6 +1,6 @@
 /*
   drvcairo.cpp : This file is part of pstoedit
-  Copyright (C) 2009 - 2021 Dan McMahill dan_AT_mcmahill_DOT_net
+  Copyright (C) 2009 - 2023 Dan McMahill dan_AT_mcmahill_DOT_net
 
   This driver used drvSAMPL.cpp as a reference.
   
@@ -161,13 +161,13 @@ void drvCAIRO::print_coords()
     case moveto:{
       const Point & p = elem.getPoint(0);
       outf << "  cairo_move_to (cr, ";
-      outf << p.x_ + x_offset << ", " << /*   currentDeviceHeight -  */ -1*p.y_ + y_offset << ");";
+      outf << p.x() + x_offset << ", " << /*   currentDeviceHeight -  */ -1*p.y() + y_offset << ");";
     }
       break;
     case lineto:{
       const Point & p = elem.getPoint(0);
       outf << "  cairo_line_to (cr, ";
-      outf << p.x_ + x_offset << ", " << /*   currentDeviceHeight -  */ -1*p.y_ + y_offset << ");";
+      outf << p.x() + x_offset << ", " << /*   currentDeviceHeight -  */ -1*p.y() + y_offset << ");";
     }
       break;
     case closepath:
@@ -178,8 +178,8 @@ void drvCAIRO::print_coords()
       for (unsigned int cp = 0; cp < 3; cp++) {
 	const Point & p = elem.getPoint(cp);
 	outf << 
-	  ", " << (p.x_ + x_offset) << 
-	  ", " << /*   currentDeviceHeight -  */ (-1*p.y_ + y_offset);
+	  ", " << (p.x() + x_offset) << 
+	  ", " << /*   currentDeviceHeight -  */ (-1*p.y() + y_offset);
       }
       outf << ");" << endl;
     }
@@ -201,8 +201,8 @@ void drvCAIRO::open_page()
 
   mybox = getCurrentBBox();
 
-  x_offset = -mybox.ll.x_;
-  y_offset = mybox.ur.y_;
+  x_offset = -mybox.ll.x();
+  y_offset = mybox.ur.y();
   //cout << "Set offset to (" << x_offset << ", " << y_offset << ")" << endl;
 
   outf << "/*" << endl;
@@ -214,17 +214,17 @@ void drvCAIRO::open_page()
   outf << " */" << endl;
 
   outf << "static int " << options->funcname.value <<"_page_" << currentPageNumber << "_width = " << 
-    mybox.ur.x_ - mybox.ll.x_ << ";" << endl;
+    mybox.ur.x() - mybox.ll.x() << ";" << endl;
   outf << "static int " << options->funcname.value << "_page_" << currentPageNumber << "_height = " << 
-       mybox.ur.y_ - mybox.ll.y_ << ";" << endl;
+       mybox.ur.y() - mybox.ll.y() << ";" << endl;
   outf << endl;
 
-  if (mybox.ur.x_ - mybox.ll.x_ > maxw) {
-    maxw = mybox.ur.x_ - mybox.ll.x_;
+  if (mybox.ur.x() - mybox.ll.x() > maxw) {
+    maxw = mybox.ur.x() - mybox.ll.x();
   }
 
-  if (mybox.ur.y_ - mybox.ll.y_ > maxh) {
-    maxh = mybox.ur.y_ - mybox.ll.y_;
+  if (mybox.ur.y() - mybox.ll.y() > maxh) {
+    maxh = mybox.ur.y() - mybox.ll.y();
   }
 
   outf << "static cairo_t * " << options->funcname.value << "_page_" << currentPageNumber << "_render";
@@ -552,13 +552,11 @@ void drvCAIRO::show_image(const PSImage & imageinfo)
   // but also transformation matrix!
 
   // scale bounding box
-  lowerLeft.x_ *= getScale();
-  lowerLeft.y_ *= getScale();
-  upperRight.x_ *= getScale();
-  upperRight.y_ *= getScale();
+  lowerLeft *= getScale();
+  upperRight *= getScale();
 
-  const long width  = abs(i_transX(upperRight.x_) - i_transX(lowerLeft.x_));
-  const long height = abs(i_transY(upperRight.y_) - i_transY(lowerLeft.y_));
+  const long width  = abs(i_transX(upperRight.x()) - i_transX(lowerLeft.x()));
+  const long height = abs(i_transY(upperRight.y()) - i_transY(lowerLeft.y()));
   
   if (Verbose()) {
     errf << "image.Width:" << imageinfo.width << " image.Height: " << imageinfo.height << endl;
@@ -633,12 +631,12 @@ void drvCAIRO::show_image(const PSImage & imageinfo)
       // now transform from device coordinate space to image space
       
       // apply transformation
-      const Point currPoint = Point(xpos + lowerLeft.x_,
-				    ypos + lowerLeft.y_).transform(inverseMatrix);
+      const Point currPoint = Point(xpos + lowerLeft.x(),
+				    ypos + lowerLeft.y()).transform(inverseMatrix);
       
       // round to integers
-      const long sourceX = (long) (currPoint.x_ + .5);
-      const long sourceY = (long) (currPoint.y_ + .5);
+      const long sourceX = (long) (currPoint.x() + .5);
+      const long sourceY = (long) (currPoint.y() + .5);
       
       // is the pixel out of bounds? If yes, no further processing necessary
       if (sourceX >= 0L && (unsigned long) sourceX < imageinfo.width &&
@@ -713,8 +711,8 @@ static DriverDescriptionT < drvCAIRO > D_cairo("cairo",  // name
 					       true,	// backend supports curves
 					       true,	// backend supports elements which are filled and have edges
 					       true,	// backend supports text
-					       DriverDescription::memoryeps,	// format to be used for raster imagese
-					       DriverDescription::normalopen, // binary or ascii output file
+					       DriverDescription::imageformat::memoryeps,	// format to be used for raster imagese
+					       DriverDescription::opentype::normalopen, // binary or ascii output file
 					       true,	// if format supports multiple pages in one file
 					       true  /*clipping */ 
 					       );

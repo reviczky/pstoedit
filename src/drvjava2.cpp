@@ -2,7 +2,7 @@
    drvJAVA2.cpp : This file is part of pstoedit
    backend to generate a Java(TM) 2 applet -- test version
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 2000 TapirSoft Gisbert & Harald Selke GbR, gisbert_AT_tapirsoft.de
 
     This program is free software; you can redistribute it and/or modify
@@ -155,14 +155,14 @@ void drvJAVA2::print_coords()
 		switch (elem.getType()) {
 		case moveto:{
 				const Point & p = elem.getPoint(0);
-				outf << "    currentPath.moveTo(" << (p.x_ + x_offset) << "f, " <<
-					(currentDeviceHeight - p.y_ + y_offset) << "f);";
+				outf << "    currentPath.moveTo(" << (p.x() + x_offset) << "f, " <<
+					(currentDeviceHeight - p.y() + y_offset) << "f);";
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
-				outf << "    currentPath.lineTo(" << (p.x_ + x_offset) << "f, " <<
-					(currentDeviceHeight - p.y_ + y_offset) << "f);";
+				outf << "    currentPath.lineTo(" << (p.x() + x_offset) << "f, " <<
+					(currentDeviceHeight - p.y() + y_offset) << "f);";
 			}
 			break;
 		case closepath:
@@ -170,12 +170,12 @@ void drvJAVA2::print_coords()
 			break;
 		case curveto:{
 				outf << "    currentPath.curveTo(";
-				outf << (elem.getPoint(0).x_ +
-						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(0).y_ + y_offset) << "f, ";
-				outf << (elem.getPoint(1).x_ +
-						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(1).y_ + y_offset) << "f, ";
-				outf << (elem.getPoint(2).x_ +
-						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(2).y_ + y_offset) << "f);";
+				outf << (elem.getPoint(0).x() +
+						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(0).y() + y_offset) << "f, ";
+				outf << (elem.getPoint(1).x() +
+						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(1).y() + y_offset) << "f, ";
+				outf << (elem.getPoint(2).x() +
+						 x_offset) << "f, " << (currentDeviceHeight - elem.getPoint(2).y() + y_offset) << "f);";
 			}
 			break;
 		default:
@@ -414,6 +414,6 @@ static DriverDescriptionT < drvJAVA2 > D_java2("java2", "java 2 source code", ""
 											   true,	// backend supports curves
 											   false,	// backend does not support elements with both fill and edges
 											   true,	// backend supports text
-											   DriverDescription::memoryeps,	// no support for PNG file images
-											   DriverDescription::normalopen, true,	// format supports multiple pages in one file
+											   DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+											   DriverDescription::opentype::normalopen, true,	// format supports multiple pages in one file
 											   false /*clipping */ );

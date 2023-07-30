@@ -3,7 +3,7 @@
    simple backend for GNUplot format.
    Contributed by: Carsten Hammer (chammer_AT_hermes.hrz.uni-bielefeld.de)
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -59,7 +59,7 @@ void drvGNUPLOT::show_path()
 	outf << "\n#Polyline:\n";
 	for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
 		const Point & p = pathElement(n).getPoint(0);
-		outf << p.x_ << "	" << p.y_ << "\n";
+		outf << p.x() << "	" << p.y() << "\n";
 	}
 }
 
@@ -80,6 +80,6 @@ static DriverDescriptionT < drvGNUPLOT > D_gnuplot("gnuplot", "gnuplot format", 
 												   false,	// if backend supports curves
 												   false,	// if backend supports elements with fill and edges
 												   false,	// if backend supports text
-												   DriverDescription::noimage,	// no support for PNG file images
-												   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+												   DriverDescription::imageformat::noimage,	// no support for PNG file images
+												   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 												   false /*clipping */ );

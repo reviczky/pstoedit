@@ -6,7 +6,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -31,9 +31,7 @@ using std::set;
 using std::string;
 
 class drvPPTX : public drvbase {
-
 public:
-
         derivedConstructor(drvPPTX);
         ~drvPPTX() override; // Destructor
         class DriverOptions : public ProgramOptions {
@@ -113,7 +111,7 @@ private:
           // this we shift the page to the origin, center it on the
           // slide, and scale it from PostScript points to OOXML EMUs.
           const BBox pageBBox = getCurrentBBox();
-          return bp2emu(x_bp - pageBBox.ll.x_ + center_offset.x_);
+          return bp2emu(x_bp - pageBBox.ll.x() + center_offset.x());
         }
 
         long int ytrans (float y_bp) const {
@@ -122,8 +120,8 @@ private:
           // slide, flip it upside down, and scale it from PostScript
           // points to OOXML EMUs.
           const BBox pageBBox = getCurrentBBox();
-          const float pageHeight = pageBBox.ur.y_ - pageBBox.ll.y_;
-          return bp2emu(pageHeight - (y_bp - pageBBox.ll.y_) + center_offset.y_);
+          const float pageHeight = pageBBox.ur.y() - pageBBox.ll.y();
+          return bp2emu(pageHeight - (y_bp - pageBBox.ll.y()) + center_offset.y());
         }
 
         static unsigned char panose2pitch (const unsigned int * panose_vals);
@@ -138,7 +136,7 @@ private:
         public:
           string name;            // Color name
           unsigned int lum;       // New luminance (thousandths of a %)
-          explicit ThemeColor(string tName="unknown", unsigned int tLum=~0U) :
+          explicit ThemeColor(const string& tName="unknown", unsigned int tLum=~0U) :
             name(tName),
             lum(tLum)
           {}

@@ -161,8 +161,8 @@ void drvNOI::LoadNOIProxy()
 // add point coordinates to a double array; increment the point number
 static void AddPoint(double points[][2], const Point& p, unsigned &npoints)
   {
-  points[npoints][0] = p.x_;
-  points[npoints][1] = p.y_;
+  points[npoints][0] = p.x();
+  points[npoints][1] = p.y();
   npoints++;
   }
 
@@ -218,7 +218,10 @@ void drvNOI::draw_polyline()
 		p[0] = elem.getPoint(0) + pf;
 		p[1] = elem.getPoint(1) + pf;
 		p[2] = elem.getPoint(2) + pf;
-		(void)NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
+		(void)NoiDrawCurve(pc.x(), pc.y(), 
+							p[0].x(), p[0].y(), 
+							p[1].x(), p[1].y(), 
+							p[2].x(), p[2].y());
 		pc = p[2];
 		
 		AddPoint(points.get(), pc, npoints);
@@ -287,7 +290,10 @@ void drvNOI::draw_polygon()
 		p[0] = elem.getPoint(0) + pf;
 		p[1] = elem.getPoint(1) + pf;
 		p[2] = elem.getPoint(2) + pf;
-		(void)NoiDrawCurve(pc.x_, pc.y_, p[0].x_, p[0].y_, p[1].x_, p[1].y_, p[2].x_, p[2].y_);
+		(void)NoiDrawCurve(pc.x(), pc.y(), 
+							p[0].x(), p[0].y(), 
+							p[1].x(), p[1].y(), 
+							p[2].x(), p[2].y());
 		pc = p[2];
 		
 		AddPoint(points.get(), pc, npoints);
@@ -356,8 +362,8 @@ void drvNOI::show_text(const TextInfo &textinfo)
   (void)NoiSetFont(textinfo.currentFontName.c_str(), textinfo.currentFontFullName.c_str(), 
     atof(textinfo.currentFontWeight.c_str()), textinfo.currentFontSize);
   
-  (void)NoiDrawText(textinfo.thetext.c_str(), textinfo.x() + pf.x_, textinfo.y() + pf.y_, 
-	textinfo.x_end() - textinfo.x() + pf.x_, textinfo.y_end() - textinfo.y() + pf.y_, 
+  (void)NoiDrawText(textinfo.thetext.c_str(), textinfo.x() + pf.x(), textinfo.y() + pf.y(), 
+	textinfo.x_end() - textinfo.x() + pf.x(), textinfo.y_end() - textinfo.y() + pf.y(), 
 	textinfo.currentFontAngle);
   }
 
@@ -370,7 +376,7 @@ void drvNOI::show_image(const PSImage &imageinfo)
   const Point pf(x_offset, y_offset);
   p1 += pf;
   p2 += pf;
-  (void)NoiDrawImage(p1.x_, p1.y_, p2.x_, p2.y_, imageinfo.FileName.c_str());
+  (void)NoiDrawImage(p1.x(), p1.y(), p2.x(), p2.y(), imageinfo.FileName.c_str());
   }
 
 // paging support - each new page is placed on the right
@@ -387,5 +393,5 @@ void drvNOI::close_page()
 // driver description, no clipping support
 static DriverDescriptionT <drvNOI> D_noi(DRIVER_NAME, DRIVER_DESCR,
   DRIVER_LONG_DESCR, FILE_SUFFIX, true, true, true, true, 
-  DriverDescription::png, DriverDescription::normalopen, true, false);
+  DriverDescription::imageformat::png, DriverDescription::opentype::normalopen, true, false);
 

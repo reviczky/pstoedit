@@ -3,7 +3,7 @@
 /*
    psimage.h : This file is part of pstoedit.
   
-   Copyright (C) 1997 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1997 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -56,8 +56,6 @@ public:
 	~PSImage() { delete [] data; data = nullptr; nextfreedataitem = 0;}
 	void writeEPSImage(ostream & outi) const;
 	void writeIdrawImage(ostream & outi, float scalefactor) const;
-//obsolete	void writePNGImage(const char * pngFileName, const char * source, const char * title, const char * generator) const;
-//obsolete	static bool PNGSupported();
 	void getBoundingBox(Point & ll_p, Point & ur_p) const
 		{ ll_p = ll; ur_p = ur; }
 	void calculateBoundingBox();

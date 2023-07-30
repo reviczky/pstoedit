@@ -3,7 +3,7 @@
    Backend for Latex2E files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2021	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
+   Copyright (C) 1993 - 2023	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
 							Scott Pakin, <scott+ps2ed_AT_pakin.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -60,9 +60,9 @@ struct Point2e {
 static ostream & operator << (ostream & os, const Point2e & pt)
 {
 	if (pt.integersonly) {
-		os << '(' << long (pt.p.x_ + 0.5) << ',' << long (pt.p.y_ + 0.5) << ')';
+		os << '(' << long (pt.p.x() + 0.5) << ',' << long (pt.p.y() + 0.5) << ')';
 	} else {
-		os << '(' << pt.p.x_ << ',' << pt.p.y_ << ')';
+		os << '(' << pt.p.x() << ',' << pt.p.y() << ')';
 	}
 	return os;
 }
@@ -85,7 +85,7 @@ void drvLATEX2E::print_coords()
 			scalepoint(currentpoint);
 			updatebbox(currentpoint);
 			if (!firstpoint) {
-				firstpoint = new Point(currentpoint.x_, currentpoint.y_);
+				firstpoint = new Point(currentpoint);
 				assert(firstpoint);
 			}
 			break;
@@ -109,21 +109,21 @@ void drvLATEX2E::print_coords()
 				delete firstpoint;
 				firstpoint = nullptr;
 			}
-			if (pointlist[0].x_ == currentpoint.x_) {	// Vertical line
-				if (pointlist[0].y_ == currentpoint.y_)	// (and not a point)
+			if (pointlist[0].x() == currentpoint.x()) {	// Vertical line
+				if (pointlist[0].y() == currentpoint.y())	// (and not a point)
 					break;
-				const float p_distance = (float) fabs(pointlist[0].y_ - currentpoint.y_);
+				const float p_distance = (float) fabs(pointlist[0].y() - currentpoint.y());
 				buffer << "  \\put" << Point2e(currentpoint,options->integersonly) << "{\\line(0," <<
-					(pointlist[0].y_ > currentpoint.y_ ? 1 : -1) << "){";
+					(pointlist[0].y() > currentpoint.y() ? 1 : -1) << "){";
 				if (options->integersonly) {
 					buffer << long (p_distance + 0.5) << "}}";
 				} else {
 					buffer << p_distance << "}}";
 				}
-			} else if (pointlist[0].y_ == currentpoint.y_) {	// Horizontal line
-				const float p_distance = (float) fabs(pointlist[0].x_ - currentpoint.x_);
+			} else if (pointlist[0].y() == currentpoint.y()) {	// Horizontal line
+				const float p_distance = (float) fabs(pointlist[0].x() - currentpoint.x());
 				buffer << "  \\put" << Point2e(currentpoint,options->integersonly) << "{\\line(" <<
-					(pointlist[0].x_ > currentpoint.x_ ? 1 : -1) << ",0){";
+					(pointlist[0].x() > currentpoint.x() ? 1 : -1) << ",0){";
 				if (options->integersonly) {
 					buffer << long (p_distance + 0.5) << "}}";
 				} else {
@@ -148,11 +148,11 @@ void drvLATEX2E::print_coords()
 					scalepoint(pointlist[cp]);
 					updatebbox(pointlist[cp]);
 				}
-				const float midx = ((3 * pointlist[0].x_ - currentpoint.x_) / 2 +
-							  (3 * pointlist[1].x_ - pointlist[2].x_) / 2) / 2;
+				const float midx = ((3 * pointlist[0].x() - currentpoint.x()) / 2 +
+							  (3 * pointlist[1].x() - pointlist[2].x()) / 2) / 2;
 				const float midy =
-					((3 * pointlist[0].y_ - currentpoint.y_) / 2 +
-					 (3 * pointlist[1].y_ - pointlist[2].y_) / 2) / 2;
+					((3 * pointlist[0].y() - currentpoint.y()) / 2 +
+					 (3 * pointlist[1].y() - pointlist[2].y()) / 2) / 2;
 				const Point midpoint(midx, midy);
 				buffer << "  \\qbezier" << Point2e(currentpoint,options->integersonly) << Point2e(midpoint,options->integersonly) << Point2e(pointlist[2],options->integersonly) << endl;
 				currentpoint = pointlist[2];
@@ -179,10 +179,9 @@ void drvLATEX2E::print_coords()
 // versions of things.
 void drvLATEX2E::open_page()
 {
-	currentpoint.x_ = 0;
-	currentpoint.y_ = 0;
-	boundingbox[0].x_ = boundingbox[0].y_ = 1e+10; //lint !e736
-	boundingbox[1].x_ = boundingbox[1].y_ = -1e+10; //lint !e736
+	currentpoint = Point( 0, 0);
+	boundingbox[0] = Point(1e+10, 1e+10);; //lint !e736
+	boundingbox[1] = Point(-1e+10, -1e+10); //lint !e736
 	prevR = prevG = prevB = 0.0;
 	thicklines = false;
 	prevfontname = "";
@@ -195,9 +194,9 @@ void drvLATEX2E::open_page()
 void drvLATEX2E::close_page()
 {
 	// Specify the picture's width and height and, optionally, the origin.
-	const Point boxsize(boundingbox[1].x_ - boundingbox[0].x_, boundingbox[1].y_ - boundingbox[0].y_);
+	const Point boxsize(boundingbox[1].x() - boundingbox[0].x(), boundingbox[1].y() - boundingbox[0].y());
 	outf << "\\begin{picture}" << Point2e(boxsize,options->integersonly);
-	if (boundingbox[0].x_ || boundingbox[0].y_)
+	if (boundingbox[0].x() || boundingbox[0].y())
 		outf << Point2e(boundingbox[0],options->integersonly);
 	outf << endl;
 
@@ -380,7 +379,7 @@ void drvLATEX2E::show_rectangle(const float llx, const float lly, const float ur
 	updatebbox(ll);
 	scalepoint(ur);
 	updatebbox(ur);
-	const Point framesize(ur.x_ - ll.x_, ur.y_ - ll.y_);
+	const Point framesize(ur.x() - ll.x(), ur.y() - ll.y());
 	buffer << "  \\put" << Point2e(ll,options->integersonly) << "{\\framebox" << Point2e(framesize,options->integersonly) << "{}}" << endl;	// old << ends;
 //old  outputQ.push (outputline.str());
 }
@@ -409,8 +408,8 @@ static DriverDescriptionT < drvLATEX2E > D_latex2e("latex2e", "\\LaTeX2e picture
 												   true,	// backend supports curves
 												   false,	// backend supports elements which are filled and have edges
 												   true,	// backend supports text
-												   DriverDescription::noimage,	// no support for PNG file images
-												   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+												   DriverDescription::imageformat::noimage,	// no support for PNG file images
+												   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 												   false 	// no clipping 
 												   
 	);

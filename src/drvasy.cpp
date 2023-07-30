@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_geocities.com
+  Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ drvASY::derivedConstructor(drvASY):
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2021 Wolfgang Glunz"
+       << "// pstoedit is Copyright (C) 1993 - 2023 Wolfgang Glunz"
        << " <wglunz35_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
@@ -164,7 +164,7 @@ void drvASY::print_coords()
 	    }
 	  }
 	  
-	  outf << '(' << (p.x_ + x_offset) << ',' << (p.y_ + y_offset)
+	  outf << '(' << (p.x() + x_offset) << ',' << (p.y() + y_offset)
 	       << ')';
 	  withinpath = true;
 	  havecycle=false;
@@ -184,12 +184,12 @@ void drvASY::print_coords()
 	    break;
 	  }
 	  const Point & p0 = elem.getPoint(0);
-	  outf << "..controls (" << (p0.x_ + x_offset)
-	       << ',' << (p0.y_ + y_offset) << ") and (";
+	  outf << "..controls (" << (p0.x() + x_offset)
+	       << ',' << (p0.y() + y_offset) << ") and (";
 	  const Point & pt1 = elem.getPoint(1);
-	  outf << (pt1.x_ + x_offset) << ',' << (pt1.y_ + y_offset) << ")..(";
+	  outf << (pt1.x() + x_offset) << ',' << (pt1.y() + y_offset) << ")..(";
 	  const Point & pt2 = elem.getPoint(2);
-	  outf << (pt2.x_ + x_offset) << ',' << (pt2.y_ + y_offset) << ')';
+	  outf << (pt2.x() + x_offset) << ',' << (pt2.y() + y_offset) << ')';
 	  pointsOnLine += 3;
 	  withinpath = true;
 	  havecycle=false;
@@ -233,7 +233,7 @@ void drvASY::print_coords()
 	    if (withinpath) outf << "^^";
 	  }
 	  
-	  outf << '(' << (p.x_ + x_offset) << ',' << (p.y_ + y_offset)
+	  outf << '(' << (p.x() + x_offset) << ',' << (p.y() + y_offset)
 	       << ')';
 	  withinpath = true;
 	  pointsOnLine++;
@@ -253,12 +253,12 @@ void drvASY::print_coords()
 	    break;
 	  }
 	  const Point & p0 = elem.getPoint(0);
-	  outf << "..controls (" << (p0.x_ + x_offset)
-	       << ',' << (p0.y_ + y_offset) << ") and (";
+	  outf << "..controls (" << (p0.x() + x_offset)
+	       << ',' << (p0.y() + y_offset) << ") and (";
 	  const Point & pt1 = elem.getPoint(1);
-	  outf << (pt1.x_ + x_offset) << ',' << (pt1.y_ + y_offset) << ")..(";
+	  outf << (pt1.x() + x_offset) << ',' << (pt1.y() + y_offset) << ")..(";
 	  const Point & pt2 = elem.getPoint(2);
-	  outf << (pt2.x_ + x_offset) << ',' << (pt2.y_ + y_offset) << ')';
+	  outf << (pt2.x() + x_offset) << ',' << (pt2.y() + y_offset) << ')';
 	  pointsOnLine += 3;
 	  withinpath = true;
 	}
@@ -312,8 +312,8 @@ void drvASY::show_image(const PSImage & imageinfo)
   buf << outBaseName << "." << imgcount << ".eps";
   
   outf << "label(graphic(\"" << buf.str() << "\",\"bb="
-       << ll.x_ << " " << ll.y_ << " " << ur.x_ << " " << ur.y_ << "\"),("
-       << ll.x_ << "," << ll.y_ << "),align);" << endl;
+       << ll.x() << " " << ll.y() << " " << ur.x() << " " << ur.y() << "\"),("
+       << ll.x() << "," << ll.y() << "),align);" << endl;
   
   // Try to draw image in a separate layer.
   if(level == 0) 
@@ -540,8 +540,8 @@ D_asy("asy", "Asymptote Format", "","asy",
       true,	// if backend supports curves, else 0
       false,	// if backend supports elements with fill and edges
       true,	// if backend supports text, else 0
-      // DriverDescription::png, // support for PNG file images
-      DriverDescription::memoryeps, // prefer EPS files for images
-      DriverDescription::normalopen, true, // supports multiple pages
+      // DriverDescription::imageformat::png, // support for PNG file images
+      DriverDescription::imageformat::memoryeps, // prefer EPS files for images
+      DriverDescription::opentype::normalopen, true, // supports multiple pages
       true  /*clipping */ 
       );

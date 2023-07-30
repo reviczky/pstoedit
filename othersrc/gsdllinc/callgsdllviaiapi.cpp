@@ -60,17 +60,19 @@ GSDLLCALL default_gs_addmess(void * /* cb_data */ , const char* text, int length
 }
 
 static gs_write_callback_funcptr current_write_callback = default_gs_addmess;
+static void* global_cb_data = nullptr;
 
-
-void set_gs_write_callback(gs_write_callback_funcptr new_cb) {
+void set_gs_write_callback(void* cbData, gs_write_callback_funcptr new_cb) {
 	//  cout << "CB set " << endl;
+	global_cb_data = cbData;
 	current_write_callback = new_cb;
 }
 
 
 static char messagebuffer[1000]; // just for local formatting
+
 static void writemessage(const char *msg = messagebuffer) {
-	(void)current_write_callback(0,msg,(int) strlen(msg));
+	(void)current_write_callback(global_cb_data,msg,(int) strlen(msg));
 }
 static int GSDLLCALL std_inHandler(void * /*caller_handle*/, char *  buf , int  len ) // len needs to be int because of gs api
 { 
@@ -188,8 +190,8 @@ public:
 	PFN_gsapi_run_file run_file;
 	PFN_gsapi_exit exit;
 
-	// pointer to the GhostScript instance (but there can only be one anyway)
-	gs_main_instance *minst;
+	// opaque pointer to the GhostScript instance (but there can only be one anyway)
+	void* minst;
 
 	NOCOPYANDASSIGN(GSDLL)
 };
@@ -197,9 +199,9 @@ public:
 
 // can be static - since it is #included into callgs.cpp
 static int
-callgsDLL(int argc, char *argv[])
+callgsDLL(int argc, char *argv[], void * cb_data)
 {
-
+	global_cb_data = cb_data; // for writemessage
 	GSDLL gsapi;
 #ifndef OS_WIN32_WCE
 	/*
@@ -223,8 +225,8 @@ callgsDLL(int argc, char *argv[])
 		return -1;
     }
 	const int e_Quit = -101;  // see ierrors.h
-
-	int code = gsapi.new_instance(&(gsapi.minst), NULL);
+	
+	int code = gsapi.new_instance(&(gsapi.minst), cb_data);
 	if (code < 0) {
 		writemessage("new_instance failed\n");
 		return 1;
@@ -236,7 +238,12 @@ callgsDLL(int argc, char *argv[])
 
 	int exit_code;
 	const char start_string[] = "systemdict /start get exec\n";
-
+	/* 
+	cerr << "args to GS DLL: " << argc << endl;
+	for (int i = 0; i < argc; i++) {
+		cerr << i << ": '" << argv[i] << "'" << endl;
+	}
+    */
 	if (code == 0) 	code = gsapi.run_string(gsapi.minst, start_string, 0, &exit_code);
 
     const int code1 = gsapi.exit(gsapi.minst);

@@ -7,6 +7,21 @@
 <body>
 
     <h1 align="left">Changelog for pstoedit</h1>
+	
+	<h2>New or changed in 4.00:</h2>
+    <ul>
+	    <li>Many changes in internal APIs for supporting a GUI.</li>
+	    <li>First version of QT base GUI. Not yet part of standard build process. 
+        Sources are in QT/PstoeditQtGui directory. Just run "make GUI" in there to build the GUI.</li>
+	    <li>Code cleanup.</li>
+	    <li>Some fixes to pass newer Coverity checks. Src code has again 0 Coverity defects.</li>
+	    <li>Documentation update and cleanup.</li>
+        <li>Fix compilation problem with newer GNU libstdc++.</li>
+        <li>Use unversioned .so libs for the driver plugins. Contributed by the Suse team.</li>
+	    <li>Remove the usage of __DATE__ in source code to allow "reproducible" builds. 
+        Contributed by the Suse team.</li>
+    </ul>
+
 
     <h2>New or changed in 3.78:</h2>
     <ul>

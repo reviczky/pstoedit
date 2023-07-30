@@ -25,3 +25,8 @@ $htmlMacro{'TeX'} 	= 'TeX';
 # LaTeX macros without arguments
 $texiMacro{'LaTeX'} 	= 'LaTeX';
 $texiMacro{'TeX'} 	= 'LaTeX';
+
+# LaTeX macros with single argument
+$manMacro1a{'Anchor'} 	= '\\"';	$manMacro1b{'Anchor'} 	= '';
+$htmlMacro1a{'Anchor'} 	= '<a id="';	$htmlMacro1b{'Anchor'} 	= '"></a>';
+$texiMacro1a{'Anchor'} 	= '\n';	$texiMacro1b{'Anchor'} 	= '';

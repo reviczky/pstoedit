@@ -50,18 +50,17 @@ public:
 		OptionT < bool, BoolTrueExtractor > forcepoly;
 
 		DriverOptions():
-		grid(true,"-grid",0,0,"attempt to snap relevant output to grid (mils) and put failed objects to a different layer",0,0),
-		snapdist(true,"-snapdist",0,0,"grid snap distance ratio (0 < snapdist <= 0.5, default 0.1)",0,0.1),
-		tshiftx(true,"-tshiftx",0,0,"additional x shift measured in target units (mils)",0,0),
-		tshifty(true,"-tshifty",0,0,"additional y shift measured in target units (mils)",0,0),
-                mm(true,"-mm",0,0,"switch to metric units (mm)",0,false),
-		forcepoly(true,"-forcepoly",0,0,"force all objects to be interpreted as polygons",0,false)
+		grid(true,"-grid","double number",0,"attempt to snap relevant output to grid (mils) and put failed objects to a different layer",0,0),
+		snapdist(true,"-snapdist","double number",0,"grid snap distance ratio (0 < snapdist <= 0.5, default 0.1)",0,0.1),
+		tshiftx(true,"-tshiftx","double number",0,"additional x shift measured in target units (mils)",0,0),
+		tshifty(true,"-tshifty","double number",0,"additional y shift measured in target units (mils)",0,0),
+                mm(true,"-mm","",0,"switch to metric units (mm)",0,false),
+		forcepoly(true,"-forcepoly","",0,"force all objects to be interpreted as polygons",0,false)
 		{
 			ADD(grid);
 			ADD(snapdist);
 			ADD(tshiftx);
 			ADD(tshifty);
-			ADD(grid);
 			ADD(mm);
 			ADD(forcepoly);
 		}

@@ -4,7 +4,7 @@
    pstoedll.h : This file describes the interface to query information about
    the drivers available via pstoedit and to call pstoedit via the dll interface
   
-   Copyright (C) 1998 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,19 +32,21 @@ struct DriverDescription_S {
 	const char *	explanation;
 	const char *	suffix;
 	const char *	additionalInfo;
-	int		backendSupportsSubPaths;
-	int		backendSupportsCurveto;
-	int 		backendSupportsMerging; 
-	int 		backendSupportsText;
-	int 		backendSupportsImages;
-	int		backendSupportsMultiplePages;
+	int		        backendSupportsSubPaths;
+	int		        backendSupportsCurveto;
+	int 		    backendSupportsMerging; 
+	int 		    backendSupportsText;
+	int 		    backendSupportsImages;
+	int		        backendSupportsMultiplePages;
+    int             formatGroup;
 };
 
 // interface description for runtime linking and calls via LoadLibrary and GetProcAddress
 // see pstoedit.c for usage under Windows
 
-static const unsigned int pstoeditdllversion = 301;
-/* 301: added the clearPstoeditDriverInfo function to avoid problems with using different malloc/free in server and client. */
+static const unsigned int pstoeditdllversion = 401;
+// 301: added the clearPstoeditDriverInfo function to avoid problems with using different malloc/free in server and client.
+// 401: support for the QT GUI
 
 typedef int  (pstoedit_checkversion_func)  (unsigned int callersversion );
 typedef void (setPstoeditsetDLLUsage_func) (int useDLL_p); /* need to use int instead of bool because of C mode */

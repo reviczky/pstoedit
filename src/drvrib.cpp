@@ -7,7 +7,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -63,13 +63,13 @@ void drvRIB::print_coords()
 		case moveto:{
 				const Point & p = elem.getPoint(0);
 				// outf << "\t\tmoveto ";
-				outf << p.x_ + x_offset << " " << p.y_ + y_offset << " 0 ";
+				outf << p.x() + x_offset << " " << p.y() + y_offset << " 0 ";
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
 				// outf << "\t\tlineto ";
-				outf << p.x_ + x_offset << " " << p.y_ + y_offset << " 0 ";
+				outf << p.x() + x_offset << " " << p.y() + y_offset << " 0 ";
 			}
 			break;
 		case closepath:		// Not supported
@@ -79,7 +79,7 @@ void drvRIB::print_coords()
 			}
 			break;
 		default:
-			errf << "\t\tFatal: unexpected case in drvpdf " << endl;
+			errf << "\t\tFatal: unexpected case in drvrib " << endl;
 			abort();
 			break;
 		}
@@ -122,8 +122,8 @@ static DriverDescriptionT < drvRIB > D_rib("rib", "RenderMan Interface Bytestrea
 										   false,	// if backend supports curves, else 0
 										   false,	// if backend supports elements with fill and edges
 										   false,	// if backend supports text, else 0
-										   DriverDescription::noimage,	// no support for PNG file images
-										   DriverDescription::normalopen, 
+										   DriverDescription::imageformat::noimage,	// no support for PNG file images
+										   DriverDescription::opentype::normalopen, 
 										   false,	// if format supports multiple pages in one file
 										   false  /*clipping */
 										   );

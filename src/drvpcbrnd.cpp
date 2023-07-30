@@ -2,12 +2,12 @@
    drvpcbrnd.cpp : This file is part of pstoedit
    simple backend for pcb-rnd format
 
-   Contributed / Copyright 2018-2020 by: Erich Heinzle a1039181_ATAT_gmail.com
+   Contributed / Copyright 2018 - 2023 by: Erich Heinzle a1039181_ATAT_gmail.com
    pcb-rnd exporter based on original gEDA PCB exporter code by.
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -47,14 +47,14 @@ const double MM100 = (double)100000.0/(double)25.4;
 
 int drvPCBRND::pcbScale_x(const Point & p) const
 {
-	return (int)((double)p.x_ * SCALE + (double)options->tshiftx * unit + (double)0.5);
+	return (int)((double)p.x() * SCALE + (double)options->tshiftx * unit + (double)0.5);
 }
 
 int drvPCBRND::pcbScale_y(const Point & p) const 
 {
 	// return (int)((double)500000.0 - (double)p.y_ * SCALE + (double)options->tshifty * unit + (double)0.5);
 	// patched 7/2011 XXX p.y_ appears to be off by one, why???
-	return (int)((double)currentDeviceHeight * SCALE - ((double)(p.y_) + (double)1.0) * SCALE + (double)options->tshifty * unit + (double)0.5);
+	return (int)((double)currentDeviceHeight * SCALE - ((double)(p.y()) + (double)1.0) * SCALE + (double)options->tshifty * unit + (double)0.5);
 }
 
 int drvPCBRND::pcbScale(const double & f)  
@@ -168,7 +168,7 @@ void drvPCBRND::show_path()
 				if (pathElement(numberofvalidelements-1).getType() == closepath ) numberofvalidelements--; /* ignore closepath */
 				const Point & pl = pathElement(numberofvalidelements-1).getPoint(0);
 				/* Polygons are closed automatically. Skip last element for already closed polygons. */
-				if (p0.x_ == pl.x_ && p0.y_ == pl.y_) numberofvalidelements--;
+				if (p0 == pl) numberofvalidelements--;
 			}
 			/* If snap to grid fails for any of points draw into layer_polygons_nogrid layer */
 			round_success = true;
@@ -236,7 +236,7 @@ void drvPCBRND::show_path()
 
 
 static DriverDescriptionT < drvPCBRND > D_pcbrnd("pcb-rnd", "pcb-rnd format", 
-                                                 "See also: \\URL{http://repo.hu/pcb-rnd} and \\URL{http://www.penguin.cz/\\Tilde utx/pstoedit-pcb/}","lht",
+                                                 "See also: \\URL{http://repo.hu/projects/pcb-rnd} and \\URL{http://www.penguin.cz/\\Tilde utx/pstoedit-pcb/}","lht",
                                                  false,	// if backend supports subpathes
                                                  // if subpathes are supported, the backend must deal with
                                                  // sequences of the following form
@@ -253,6 +253,6 @@ static DriverDescriptionT < drvPCBRND > D_pcbrnd("pcb-rnd", "pcb-rnd format",
                                                  false,	// if backend supports curves
                                                  false,	// if backend supports elements with fill and edges
                                                  false,	// if backend supports text
-                                                 DriverDescription::noimage,	// no support for PNG file images
-                                                 DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+                                                 DriverDescription::imageformat::noimage,	// no support for PNG file images
+                                                 DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
                                                  false); /*clipping */ 

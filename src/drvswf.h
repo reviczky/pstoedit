@@ -6,7 +6,7 @@
    Class declaration for a SWF output driver with no additional attributes
    and methods (minimal interface)
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -39,8 +39,8 @@ public:
 		OptionT < bool, BoolTrueExtractor > cubic;
 		OptionT < bool, BoolTrueExtractor > trace;
 		DriverOptions():
-			cubic(true,"-cubic",nullptr,0,"cubic ???",nullptr,false),
-			trace(true,"-trace",nullptr,0,"trace ???",nullptr,false)
+			cubic(true,"-cubic","",0,"cubic ???",nullptr,false),
+			trace(true,"-trace","",0,"trace ???",nullptr,false)
 		{
 			ADD(cubic);
 			ADD(trace);
@@ -61,8 +61,8 @@ private:
 
 	typedef float coordtype ;
 
-	coordtype swfx(const Point & p) const { return swfscale * (p.x_ + x_offset); }
-	coordtype swfy(const Point & p) const { return swfscale * (currentDeviceHeight + y_offset - p.y_ ); }
+	coordtype swfx(const Point & p) const { return swfscale * (p.x() + x_offset); }
+	coordtype swfy(const Point & p) const { return swfscale * (currentDeviceHeight + y_offset - p.y() ); }
 
 };
 

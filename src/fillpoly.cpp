@@ -101,10 +101,15 @@ static void rotation(HPGL_Mat *const forward,
 
 static constexpr int octant(const double x, const double y)
 {
+   const int x_contrib = (x > 0.0) ? 1 : ((x < 0.0) ? 2 : 0);
+   const int y_contrib = (y > 0.0) ? 3 : ((y < 0.0) ? 6 : 0);
+   return x_contrib + y_contrib;
+   /*
     return (x > 0.0 ? 1 : 0)
          + (x < 0.0 ? 2 : 0)
          + (y > 0.0 ? 3 : 0)
          + (y < 0.0 ? 6 : 0);
+   */
 }
 
 //lint -e835 -e778 // -0
@@ -501,15 +506,15 @@ void drvbase::simulate_fill() {
       switch (elem.getType()) {
       case moveto: {
 		  const Point & p = elem.getPoint(0);
-		  polygon[p_i].x = p.x_;
-		  polygon[p_i].y = p.y_;
+		  polygon[p_i].x = p.x();
+		  polygon[p_i].y = p.y();
 		  p_i++;
 		  break;
 	  }				   
       case lineto: {
 		  const Point & p = elem.getPoint(0);
-		  polygon[p_i].x = p.x_;
-		  polygon[p_i].y = p.y_;
+		  polygon[p_i].x = p.x();
+		  polygon[p_i].y = p.y();
 		  p_i++;
 		  break ;
 	  }

@@ -1502,7 +1502,7 @@ char *yytext;
    Simple parser to parse the intermediate flat PostScript and call the backend
    output routines.
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1950,9 +1950,9 @@ YY_RULE_SETUP
 						delete backend; backend = 0; // 
 						ofstream * outputFilePtr = (ofstream *) &outFile;
 						// not needed here since done in main program convertBackSlashes(nameOfOutputFile);
-						if (driverDesc->backendFileOpenType != DriverDescription::noopen ){ 
+						if (driverDesc->backendFileOpenType != DriverDescription::opentype::noopen ){ 
 							outputFilePtr->close();
-							if (driverDesc->backendFileOpenType == DriverDescription::binaryopen ) { 
+							if (driverDesc->backendFileOpenType == DriverDescription::opentype::binaryopen ) { 
 // old if (defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) ) && !defined(DJGPP)
 #if defined(PSTOEDIT_UNIXLIKE)
 // binary is not available on UNIX, only on PC
@@ -1971,7 +1971,7 @@ YY_RULE_SETUP
 								return 1;
 							} // fail
 						} // backend opens file by itself
-						backend =  driverDesc->CreateBackend(driveroptions,*outputFilePtr,errf,infilename,newFileName.c_str(),globaloptions);
+						backend =  driverDesc->CreateBackend(driveroptions,*outputFilePtr,errf,infilename,newFileName.c_str(),globaloptions, driverOptions);
 						if (!backend->driverOK()) {
 							errf << "Creation of driver for new page failed " << endl;
 							return (1);
@@ -2864,12 +2864,12 @@ YY_RULE_SETUP
 				for (unsigned int s = 0; s <= sections; s++) {
 					const float t = 1.0f * s / sections;
 					const Point pt = PointOnBezier(t, currentpoint, cp1, cp2, ep);
-					backend->addtopath(new Lineto(pt.x_,pt.y_)); 
+					backend->addtopath(new Lineto(pt)); 
 				}
 //				errf << "illegal input received. curveto not expected by this backend\n";
 //				return(1);			
 			}
-			currentpoint = Point(p[2].x_,p[2].y_);
+			currentpoint = p[2];
 			const Point op(origx,origy);
 			backend->setIsPolygon(currentpoint == op); // dynamically track potential polygons
 
@@ -4029,28 +4029,18 @@ void PSFrontEnd::run(bool mergelines)
 void PSFrontEnd::addNumber(float a_number)
 {
   // printf("Adding %f\n",number);
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
  if (nextFreeNumber >= numbers.size()) {
    numbers.push_back(a_number);
  } else { 
    numbers[nextFreeNumber] = a_number;
  }
  nextFreeNumber++;
-#else
- if (nextFreeNumber < maxPoints) { 
-	// cout << "adding number : " << a_number << endl;
-     	numbers[nextFreeNumber++] = a_number; 
-     	// nextFreeNumber always points to the next free number
- } else { 
-   	errf << "Too many numbers on stack. Please increase maxPoints in drvbase.h \n"; 
-   	exit(1); 
- }
- #endif
 }
 
 PSFrontEnd::PSFrontEnd(ostream& outfile_p, 
 		ostream & errstream,
 		PsToEditOptions & globaloptions_p,
+		ProgramOptions* driverOptions_p,
 		const char * infilename_p,
 		const char * outfilename_p,
 		const DriverDescription * driverDesc_p,
@@ -4062,16 +4052,13 @@ PSFrontEnd::PSFrontEnd(ostream& outfile_p,
 	  infilename(infilename_p),
 	  outfilename(outfilename_p),
 	  globaloptions(globaloptions_p),
+	  driverOptions(driverOptions_p),
 	  driverDesc(driverDesc_p),
 	  driveroptions(driveroptions_p),
 	  splitpages(splitpages_p),
 	  backend(backend_p),
 	  currentPageNumber(1),
 	  lineNumber(1),
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
-#else
-	  numbers((float*) 0),
-#endif
       nextFreeNumber(0),
       pathnumber(0),
 	  non_standard_font(false),
@@ -4079,26 +4066,11 @@ PSFrontEnd::PSFrontEnd(ostream& outfile_p,
 	  bblexmode(false),
 	  bboxes_ptr(0)
 {
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
-    // can use default ctor for vector
-#else
-    numbers = new float[maxPoints]; // The number stack
-    if ((numbers == 0)){
-		errf << "new failed in PSFrontEnd::PSFrontEnd " << endl;
-		exit(1);
-    }
-#endif
 }
 
 PSFrontEnd::~PSFrontEnd() {
 #ifdef __INSURE__
 	errf << "Deleting PSFrontEnd object and thus the numbers as well" << endl;
-#endif
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
-// use default dtor
-#else
-	delete [] numbers;
-	numbers = 0;
 #endif
 	
 	yylexcleanup();

@@ -4,7 +4,7 @@
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
    Image Support added by Scott Johnston
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@
 // Used by drvIDRAW::print_coords() for convenience
 #define ADDPOINT(X,Y) do {						\
   if (!newtotalpoints ||						\
-      iscale(X) != iscale(newpointlist[newtotalpoints-1]->x_) ||	\
-      iscale(Y) != iscale(newpointlist[newtotalpoints-1]->y_)){		\
+      iscale(X) != iscale(newpointlist[newtotalpoints-1]->x()) ||	\
+      iscale(Y) != iscale(newpointlist[newtotalpoints-1]->y())){		\
     newpointlist[newtotalpoints++] = new Point(X,Y);			\
     assert(newpointlist[newtotalpoints-1] != nullptr); }		        \
 } while (0)
@@ -759,7 +759,7 @@ void drvIDRAW::print_coords()
 	}
 	if (totalpoints) {
 		firstpoint = pointlist[0];
-		if (firstpoint->x_ == lastpoint->x_ && firstpoint->y_ == lastpoint->y_)
+		if (firstpoint->x() == lastpoint->x() && firstpoint->y() == lastpoint->y())
 			closed = true;
 
 		// Find points on the curve for curved lines
@@ -774,14 +774,14 @@ void drvIDRAW::print_coords()
 			auto newpointlist = new const Point *[pathelts * 3000 / pt_per_cp];	// Allocate a conservative amount
 			assert(newpointlist != nullptr);
 			for (i = 0; i < totalpoints - 3; i += 3) {
-				const float x0 = pointlist[i]->x_;
-				const float y0 = pointlist[i]->y_;
-				const float x1 = pointlist[i + 1]->x_;
-				const float y1 = pointlist[i + 1]->y_;
-				const float x2 = pointlist[i + 2]->x_;
-				const float y2 = pointlist[i + 2]->y_;
-				const float x3 = pointlist[i + 3]->x_;
-				const float y3 = pointlist[i + 3]->y_;
+				const float x0 = pointlist[i]->x();
+				const float y0 = pointlist[i]->y();
+				const float x1 = pointlist[i + 1]->x();
+				const float y1 = pointlist[i + 1]->y();
+				const float x2 = pointlist[i + 2]->x();
+				const float y2 = pointlist[i + 2]->y();
+				const float x3 = pointlist[i + 3]->x();
+				const float y3 = pointlist[i + 3]->y();
 				const float cx = (x1 - x0) * 3;
 				const float cy = (y1 - y0) * 3;
 				const float bx = (x2 - x1) * 3 - cx;
@@ -819,8 +819,8 @@ void drvIDRAW::print_coords()
 			if (totalpoints == 2) {	// Special case for single line
 				print_header("Line");
 				outf << "%I" << endl;
-				outf << iscale(firstpoint->x_) << ' ' << iscale(firstpoint->y_) << ' ';
-				outf << iscale(lastpoint->x_) << ' ' << iscale(lastpoint->y_) << ' ';
+				outf << iscale(firstpoint->x()) << ' ' << iscale(firstpoint->y()) << ' ';
+				outf << iscale(lastpoint->x()) << ' ' << iscale(lastpoint->y()) << ' ';
 				outf << "Line" << endl;
 				outf << "%I 1" << endl;
 				outf << "End" << endl << endl;
@@ -828,8 +828,8 @@ void drvIDRAW::print_coords()
 				print_header("MLine");	// (Should have a special case for Rect)
 				outf << "%I " << totalpoints << endl;
 				for (i = 0; i < totalpoints; i++) {
-					outf << iscale(pointlist[i]->x_) << ' ';
-					outf << iscale(pointlist[i]->y_) << endl;
+					outf << iscale(pointlist[i]->x()) << ' ';
+					outf << iscale(pointlist[i]->y()) << endl;
 				}
 				outf << totalpoints << " MLine" << endl;
 				outf << "%I 1" << endl;
@@ -844,8 +844,8 @@ void drvIDRAW::print_coords()
 			print_header("Poly");	// Output a polygon
 			outf << "%I " << numpoints << endl;
 			for (i = 0; i < numpoints; i++) {
-				outf << iscale(pointlist[i]->x_) << ' ';
-				outf << iscale(pointlist[i]->y_) << endl;
+				outf << iscale(pointlist[i]->x()) << ' ';
+				outf << iscale(pointlist[i]->y()) << endl;
 			}
 			outf << numpoints << " Poly" << endl;
 			outf << "End" << endl << endl;
@@ -855,8 +855,8 @@ void drvIDRAW::print_coords()
 			print_header("BSpl");	// Output a B-spline
 			outf << "%I " << totalpoints << endl;
 			for (i = 0; i < totalpoints; i++) {
-				outf << iscale(pointlist[i]->x_) << ' ';
-				outf << iscale(pointlist[i]->y_) << endl;
+				outf << iscale(pointlist[i]->x()) << ' ';
+				outf << iscale(pointlist[i]->y()) << endl;
 			}
 			outf << totalpoints << " BSpl" << endl;
 			outf << "%I 1" << endl;
@@ -870,8 +870,8 @@ void drvIDRAW::print_coords()
 			print_header("CBSpl");	// Output a closed B-spline
 			outf << "%I " << numpoints << endl;
 			for (i = 0; i < numpoints; i++) {
-				outf << iscale(pointlist[i]->x_) << ' ';
-				outf << iscale(pointlist[i]->y_) << endl;
+				outf << iscale(pointlist[i]->x()) << ' ';
+				outf << iscale(pointlist[i]->y()) << endl;
 			}
 			outf << numpoints << " CBSpl" << endl;
 			outf << "End" << endl << endl;
@@ -1029,7 +1029,7 @@ static DriverDescriptionT < drvIDRAW > D_idraw("idraw", "Interviews draw format 
 											   true,	// if backend supports curves, else 0
 											   true,	// if backend supports elements with fill and edges
 											   true,	// if backend supports text, else 0
-											   DriverDescription::memoryeps,	// no support for PNG file images
-											   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+											   DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+											   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 											   false /*clipping */ );
  

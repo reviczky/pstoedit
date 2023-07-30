@@ -6,7 +6,7 @@
    Class declaration for a LaTeX2e output driver
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -24,13 +24,7 @@
 
 */
 #include "drvbase.h"
-
-#ifdef HAVE_STL
 #include <string>        // C++ string class
-#else
-typedef RSString string;
-#endif
-
 
 #include I_iostream
 
@@ -82,22 +76,21 @@ private:
 
   // Expand the bounding box if a given point is outside it.
   inline void updatebbox (const Point & newpoint) {
-    if (newpoint.x_ < boundingbox[0].x_)
-      boundingbox[0].x_ = newpoint.x_;
-    if (newpoint.y_ < boundingbox[0].y_)
-      boundingbox[0].y_ = newpoint.y_;
-    if (newpoint.x_ > boundingbox[1].x_)
-      boundingbox[1].x_ = newpoint.x_;
-    if (newpoint.y_ > boundingbox[1].y_)
-      boundingbox[1].y_ = newpoint.y_;
+    if (newpoint.x() < boundingbox[0].x())
+      boundingbox[0].set_x(newpoint.x());
+    if (newpoint.y() < boundingbox[0].y())
+      boundingbox[0].set_y(newpoint.y());
+    if (newpoint.x() > boundingbox[1].x())
+      boundingbox[1].set_x(newpoint.x());
+    if (newpoint.y() > boundingbox[1].y())
+      boundingbox[1].set_y(newpoint.y());
   }
 
   // Convert from PostScript points to TeX points ("bp"-->"pt" in TeX
   // terminology).
   static inline void scalepoint (Point & somepoint) {
 	const float adjustment = 72.27f / 72.0f;
-    somepoint.x_ *= adjustment;
-    somepoint.y_ *= adjustment;
+    somepoint *= adjustment;
   }
 
   // Previous position, color, line thickness, and font
@@ -108,7 +101,6 @@ private:
   float prevfontsize;
 };
 
-//#endif // HAVE_STL
 
 #endif
  

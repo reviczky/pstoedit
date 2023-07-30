@@ -10,7 +10,7 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT([pstoedit],[3.78],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
+AC_INIT([pstoedit],[4.00],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([foreign subdir-objects info-in-builddir -Wall])
@@ -39,7 +39,7 @@ LT_INIT([disable-static win32-dll dlopen])
 
 AC_PROG_MAKE_SET
 
-AC_CONFIG_HEADER(src/pstoedit_config.h)
+AC_CONFIG_HEADERS([src/pstoedit_config.h])
 
 dnl Check file command
 dnl FILECMD=""
@@ -162,6 +162,7 @@ if test -n "${LIBPLOTTER_LDFLAGS}" && test -n "${LIBPLOTTER_CFLAGS}"; then
 	     	typedef int Point; 
 		]], [[ ]])],[AC_MSG_RESULT(you seem to have a compatible version )],[LIBPLOTTER_CFLAGS="$LIBPLOTTER_CFLAGS -DOLD_LIBPLOTTER";   
 		    AC_MSG_RESULT(you seem to have an older version - need at least version 2.3)])
+   AC_MSG_RESULT([** libplotter driver is enabled.])
 else
    LIBPLOTTER_LDFLAGS=
    LIBPLOTTER_CFLAGS=
@@ -420,6 +421,7 @@ if test -n "${LIBEMF_CFLAGS}"; then
    if test -n "${libemf_include_dir}"; then
 	 LIBEMF_CFLAGS="-I${libemf_include_dir} ${LIBEMF_CFLAGS}"
    fi
+   AC_MSG_RESULT([** libEMF driver is enabled.])
 else
    AC_MSG_WARN([** Cannot find emf.h. libEMF supports are disabled.])
 fi
@@ -534,7 +536,7 @@ examples/Makefile
 contrib/Makefile contrib/cairo/Makefile
 contrib/java/Makefile contrib/java/java1/Makefile contrib/java/java2/Makefile 
 misc/Makefile misc/swffonts/Makefile 
-os2/Makefile 
+QT/Makefile  QT/PstoeditQtGui/Makefile
 msdev/Makefile othersrc/Makefile othersrc/gsdllinc/Makefile])
 
 AC_OUTPUT

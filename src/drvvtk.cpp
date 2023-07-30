@@ -2,7 +2,7 @@
    drvVTK.cpp : This file is part of pstoedit
    Backend for VTK files, e.g. for ParaView - http://www.paraview.org/
 
-   Copyright (C) 2008 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 2008 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -66,7 +66,7 @@ drvVTK::~drvVTK()
 
 int drvVTK::add_point(const Point & p)
 {
-	pointStream << p.x_ + x_offset << " " <<  p.y_ + y_offset << " " << 0.0f << endl;
+	pointStream << p.x() + x_offset << " " <<  p.y() + y_offset << " " << 0.0f << endl;
 	pointsCount++;
 	return pointsCount;
 }
@@ -169,7 +169,7 @@ static DriverDescriptionT < drvVTK > D_VTK("vtk", "VTK driver: if you do not wan
 											   false,	// backend supports curves
 											   false,	// backend supports elements which are filled and have edges
 											   false,	// backend supports text
-											   DriverDescription::noimage,	// support for PNG file images
-											   DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+											   DriverDescription::imageformat::noimage,	// support for PNG file images
+											   DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 											   false  /*clipping */ 
 											   );

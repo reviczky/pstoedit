@@ -3,7 +3,7 @@
 /*
    pstoedit.h : This file is part of pstoedit
    
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -29,19 +29,9 @@
 #include "cppcomp.h"
 #endif
 
-/* #include <iostream.h>   */
-#ifdef HAVE_STL
 #include <iosfwd>
 //USESTD
-#else
-#if defined (__GNUG__)  && (__GNUC__>=3) 
-/* if we don't define HAVE_STL for g++ > 3.0, then we can use the simple forwards */
-	#include <iostream.h>
-#else
-	class istream;
-	class ostream;
-#endif
-#endif
+
 
 /* end of cplusplus */
 #endif
@@ -65,7 +55,8 @@ int pstoedit(	int argc,
 				std::ostream& errstream,
   				execute_interpreter_function call_PI,
 				whichPI_type whichPI,
-				const DescriptionRegister* const pushinsPtr = 0
+                class ProgramOptions* driverOptions, // if driver specific options are already available then there is no need to parse them from driver option string
+				const DescriptionRegister* const pushinsPtr
 			);
 
 /*
@@ -79,7 +70,8 @@ extern "C" DLLEXPORT
 int pstoeditwithghostscript(int argc,
 							const char * const argv[],
 							std::ostream& errstream,
-							const DescriptionRegister* const pushinsPtr=0
+                            class ProgramOptions* driverOptions,
+							const DescriptionRegister* const pushinsPtr
 							);
 
 #endif
@@ -106,6 +98,20 @@ extern "C" DLLEXPORT
 #endif
 void clearPstoeditDriverInfo_plainC(struct DriverDescription_S * ptr);
 
+#ifdef __cplusplus
+extern "C" DLLEXPORT
+#endif
+void loadpstoeditplugins(const char* progname, std::ostream & errstream, bool verbose);
+
+#ifdef __cplusplus
+extern "C" DLLEXPORT
+#endif
+void unloadpstoeditplugins();
+
+#ifdef __cplusplus
+extern "C" DLLEXPORT
+class ProgramOptions * getProgramOptionsForDriver(const char* driverName);
+#endif
 
 #ifdef __cplusplus
 extern "C" DLLEXPORT 
@@ -123,7 +129,6 @@ void ignoreVersionCheck(void); /* not exported to the DLL interface, just used i
 
 #ifdef __cplusplus
 
-#if defined(_WIN32) || defined(__OS2__)
 #include "cbstream.h"
 extern "C" DLLEXPORT void setPstoeditOutputFunction(void * cbData,write_callback_type* cbFunction);
 
@@ -140,7 +145,14 @@ extern "C" DLLEXPORT int getPstoeditsetDLLUsage();
 
 extern "C" DLLEXPORT class ProgramOptions* getProgramOptions();
 
-#endif
+extern "C" DLLEXPORT
+bool get_gs_versions(int* pver, const char** version_strings, const char* gsregbase, int verbose);
+
+extern "C" DLLEXPORT
+const char * get_pstoedit_version();
+
+extern "C" DLLEXPORT 
+const char* getPstoeditDocDirectory();
 
 #endif
 

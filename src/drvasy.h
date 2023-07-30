@@ -6,7 +6,7 @@
    Backend for Asymptote files
    Contributed by: John Bowman
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
@@ -29,12 +29,8 @@
 #include "drvbase.h"
 
 
-#ifdef HAVE_STL
 #include <string>        // C++ string class
 #include <list>
-#else
-typedef RSString string;
-#endif
 
 class drvASY : public drvbase {
 

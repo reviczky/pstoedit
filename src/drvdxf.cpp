@@ -1,7 +1,7 @@
 /* 
    drvDXF.cpp : This file is part of pstoedit 
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 	DXF Backend Version 0.9 ( LINEs only, no Text, no color, no linewidth )
 	(see if polyaslines )
@@ -1004,8 +1004,8 @@ void drvDXF::show_text(const TextInfo & textinfo)
 
 void drvDXF::printPoint(ostream & out, const Point & p, unsigned short offset, bool with_z)
 {
-	out << " " << offset << "\n" << p.x_* scalefactor << "\n";
-	out << " " << 10 + offset << "\n" << p.y_* scalefactor << "\n";
+	out << " " << offset << "\n" << p.x()* scalefactor << "\n";
+	out << " " << 10 + offset << "\n" << p.y()* scalefactor << "\n";
 	if (with_z) {
 		out << " " << 20 + offset << "\n" << "0.0" << "\n";
 	}
@@ -1724,8 +1724,8 @@ static DriverDescriptionT < drvDXF > D_dxf("dxf", "CAD exchange format version 9
 										   false,	// if backend supports curves, else 0
 										   false,	// if backend supports elements with fill and edges
 										   true,	// if backend supports text, else 0
-										   DriverDescription::noimage,	// no support for PNG file images
-										   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+										   DriverDescription::imageformat::noimage,	// no support for PNG file images
+										   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 										   false /*clipping */ 
 										   );
 
@@ -1745,8 +1745,8 @@ static DriverDescriptionT < drvDXF > D_dxf_14("dxf_14", "CAD exchange format ver
 											 true,	// if backend supports curves, else 0
 											 false,	// if backend supports elements with fill and edges
 											 true,	// if backend supports text, else 0
-											 DriverDescription::noimage,	// no support for PNG file images
-											 DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+											 DriverDescription::imageformat::noimage,	// no support for PNG file images
+											 DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 											 false /*clipping */ 
 											 );
 // same as above.
@@ -1754,7 +1754,7 @@ static DriverDescriptionT < drvDXF > D_dxf_s("dxf_s", "CAD exchange format versi
 	true,	// if backend supports curves, else 0
 	false,	// if backend supports elements with fill and edges
 	true,	// if backend supports text, else 0
-	DriverDescription::noimage,	// no support for PNG file images
-	DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+	DriverDescription::imageformat::noimage,	// no support for PNG file images
+	DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 	false /*clipping */
 );

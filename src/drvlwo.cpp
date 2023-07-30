@@ -7,7 +7,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -134,16 +134,16 @@ void drvLWO::print_coords()
 		case moveto:{
 				const Point & pe = elem.getPoint(0);
 				// outf << "\t\tmoveto ";
-				p->x[p->num] = pe.x_ + x_offset;
-				p->y[p->num] = pe.y_ + y_offset;
+				p->x[p->num] = pe.x() + x_offset;
+				p->y[p->num] = pe.y() + y_offset;
 				p->num++;
 			}
 			break;
 		case lineto:{
 				const Point & pe = elem.getPoint(0);
 				// outf << "\t\tlineto ";
-				p->x[p->num] = pe.x_ + x_offset;
-				p->y[p->num] = pe.y_ + y_offset;
+				p->x[p->num] = pe.x() + x_offset;
+				p->y[p->num] = pe.y() + y_offset;
 				p->num++;
 			}
 			break;
@@ -197,7 +197,7 @@ static DriverDescriptionT < drvLWO > D_lwo("lwo", "LightWave 3D object format", 
 										   false,	// if backend supports curves, else 0
 										   false,	// if backend supports elements with fill and edges
 										   false,	// backend supports text
-										   DriverDescription::noimage,	// no support for PNG file images
-										   DriverDescription::binaryopen, false,	// backend supports multiple pages
+										   DriverDescription::imageformat::noimage,	// no support for PNG file images
+										   DriverDescription::opentype::binaryopen, false,	// backend supports multiple pages
 										   false  /*clipping */ 
 										   );

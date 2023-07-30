@@ -176,10 +176,10 @@ void drvPIC::print_coords()
 				const Point & p = elem.getPoint(0);
 				if (within_line)
 					outf << endl;
-				y = y_coord(p.x_, p.y_);
-				outf << "line from " << x_coord(p.x_, p.y_) << "," << y;
-				move_x = p.x_;
-				move_y = p.y_;
+				y = y_coord(p.x(), p.y());
+				outf << "line from " << x_coord(p.x(), p.y()) << "," << y;
+				move_x = p.x();
+				move_y = p.y();
 				if (y > largest_y)
 					largest_y = y;
 				within_line = 1;
@@ -190,8 +190,8 @@ void drvPIC::print_coords()
 				if (!within_line) {
 					errf << "line from no starting point" << endl;
 				}
-				y = y_coord(p.x_, p.y_);
-				outf << " to " << x_coord(p.x_, p.y_) << "," << y;
+				y = y_coord(p.x(), p.y());
+				outf << " to " << x_coord(p.x(), p.y()) << "," << y;
 				if (y > largest_y)
 					largest_y = y;
 				within_line = 1;
@@ -442,7 +442,7 @@ static DriverDescriptionT < drvPIC > D_PIC("pic", "PIC format for troff et.al.",
 										   USE_SPLINE,	// backend supports curves
 										   true,	// backend supports elements which are filled and have edges 
 										   true,	// backend supports text
-										   DriverDescription::noimage,	// no support for PNG file images
-										   DriverDescription::normalopen, true,	// if format supports multiple pages in one file (wogl? ? ?)
+										   DriverDescription::imageformat::noimage,	// no support for PNG file images
+										   DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file (wogl? ? ?)
 										   false  /*clipping */
 										   );

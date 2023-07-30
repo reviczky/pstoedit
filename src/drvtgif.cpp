@@ -2,7 +2,7 @@
    drvTGIF.cpp : This file is part of pstoedit
    Backend for TGIF
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -92,8 +92,8 @@ void drvTGIF::print_coords()
 		case lineto:
 		case moveto:{
 				const Point & p = pathElement(n).getPoint(0);
-				buffer << p.x_*tgifscale + x_offset;
-				buffer << "," << currentDeviceHeight* tgifscale - p.y_*tgifscale + y_offset;
+				buffer << p.x()*tgifscale + x_offset;
+				buffer << "," << currentDeviceHeight* tgifscale - p.y()*tgifscale + y_offset;
 				if (n != numberOfElementsInPath() - 1) {
 					// it is not the last point, so add a ,
 					buffer << ',';
@@ -106,8 +106,8 @@ void drvTGIF::print_coords()
 			break;
 		case closepath:{
 				const Point & p = pathElement(0).getPoint(0);
-				buffer << p.x_*tgifscale + x_offset;
-				buffer << "," << currentDeviceHeight* tgifscale - p.y_*tgifscale + y_offset;
+				buffer << p.x()*tgifscale + x_offset;
+				buffer << "," << currentDeviceHeight* tgifscale - p.y()*tgifscale + y_offset;
 				if (n != numberOfElementsInPath() - 1) {
 					// it is not the last point, so add a ,
 					buffer << ',';
@@ -383,7 +383,7 @@ static DriverDescriptionT < drvTGIF > D_tgif("tgif", "Tgif .obj format", "","obj
 											 false,	// if backend supports curves, else 0
 											 true,	// if backend supports elements with fill and edges
 											 true,	// if backend supports text, else 0
-											 DriverDescription::noimage,	// no support for PNG file images
-											 DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+											 DriverDescription::imageformat::noimage,	// no support for PNG file images
+											 DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 											 false  /*clipping */ 
 											 );

@@ -69,20 +69,20 @@ void drvSK::print_coords()
 				}
 				first_subpath = 0;
 				start = elem.getPoint(0);
-				outf << "bs(" << start.x_ << "," << start.y_ << ",0)\n";
+				outf << "bs(" << start.x() << "," << start.y() << ",0)\n";
 			}
 			break;
 
 		case lineto:
 			{
 				const Point & p = elem.getPoint(0);
-				outf << "bs(" << p.x_ << "," << p.y_ << ",0)\n";
+				outf << "bs(" << p.x() << "," << p.y() << ",0)\n";
 			}
 			break;
 
 		case closepath:
 			{
-				outf << "bs(" << start.x_ << "," << start.y_ << ",0)\n";
+				outf << "bs(" << start.x() << "," << start.y() << ",0)\n";
 				outf << "bC()\n";
 			}
 			break;
@@ -93,8 +93,8 @@ void drvSK::print_coords()
 				const Point & p2 = elem.getPoint(1);
 				const Point & p3 = elem.getPoint(2);
 
-				outf << "bc(" << p1.x_ << "," << p1.y_ << ","
-					<< p2.x_ << "," << p2.y_ << "," << p3.x_ << "," << p3.y_ << ",0)\n";
+				outf << "bc(" << p1.x() << "," << p1.y() << ","
+					<< p2.x() << "," << p2.y() << "," << p3.x() << "," << p3.y() << ",0)\n";
 			}
 			break;
 
@@ -356,8 +356,8 @@ static DriverDescriptionT < drvSK > D_sampl("sk", "Sketch format","", "sk", true
 											true,	// backend supports curves
 											true,	// backend supports elements which are filled and stroked
 											true,	// backend supports text
-											DriverDescription::memoryeps,	// no support for PNG file images
-											DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+											DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+											DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 											false  /*clipping */
 											);
  

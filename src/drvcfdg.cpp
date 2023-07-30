@@ -3,7 +3,7 @@
    Backend for Context Free Design Grammar files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -37,7 +37,7 @@ drvCFDG::derivedConstructor(drvCFDG): constructBase
 	// Output copyright information
 	outf << "// Converted from PostScript(TM) to CFDG by pstoedit\n"
 	     << "// CFDG backend contributed by Scott Pakin <scott+ps2ed_AT_pakin.org>\n"
-	     << "// pstoedit is Copyright (C) 1993 - 2021 Wolfgang Glunz"
+	     << "// pstoedit is Copyright (C) 1993 - 2023 Wolfgang Glunz"
 	     << " <wglunz35_AT_pstoedit.net>\n\n";
 
 	// Output the CFDG startshape
@@ -116,16 +116,16 @@ void drvCFDG::print_coords()
 		case moveto:{
 				const Point & p = elem.getPoint(0);
 				outf << "  MOVETO ( "
-				     << p.x_ + x_offset
-				     << ", " << p.y_ + y_offset
+				     << p.x() + x_offset
+				     << ", " << p.y() + y_offset
 				     << " )";
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
 				outf << "  LINETO ( "
-				     << p.x_ + x_offset
-				     << ", " << p.y_ + y_offset
+				     << p.x() + x_offset
+				     << ", " << p.y() + y_offset
 				     << " )";
 			}
 			break;
@@ -139,8 +139,8 @@ void drvCFDG::print_coords()
 					const Point & p = elem.getPoint(cp);
 					if (i != 0)
 						outf << ", ";
-					outf << p.x_ + x_offset
-					     << ", " << p.y_ + y_offset;
+					outf << p.x() + x_offset
+					     << ", " << p.y() + y_offset;
 				}
 				outf << " )";
 			}
@@ -221,7 +221,7 @@ static DriverDescriptionT < drvCFDG > D_cfdg("cfdg", "Context Free Design Gramma
 					     true,	// backend supports curves
 					     true,	// backend supports elements which are filled and have edges
 					     false,	// backend does not support text
-					     DriverDescription::noimage,  // no support for PNG file images
-					     DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+					     DriverDescription::imageformat::noimage,  // no support for PNG file images
+					     DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 					     false	// backend does not support clipping
 					     );

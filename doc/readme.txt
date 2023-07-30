@@ -1,5 +1,5 @@
 PSTOEDIT 
-Copyright (C) 1993 - 2019 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 pstoedit converts PostScript(TM) and PDF files to other vector graphic
 formats so that they can be edited graphically. See pstoedit.htm or
@@ -29,20 +29,27 @@ My home address is:
 	81825 Muenchen / Germany  
 	Josef Brueckl Str. 32    
 
-Compiling pstoedit:
--------------------
-You need a C++ compiler, e.g., g++ (newer than 6.0) to compile pstoedit.
+Compiling pstoedit unter Linux:
+-------------------------------
+You need a C++ compiler, e.g., g++ to compile pstoedit.
+
+Enabling additional drivers (optionally):
 
 It is recommended to have libplotter installed. Then you
-get a lot of additional formats for free.
+get a lot of additional formats for free. 
+do "sudo apt-get install libplot-dev" to install libplotter.
 
-If you have a Unix like system, try the following:
+Similarly, to enable the PowerPoint backend, you need libzip.
+do "sudo apt-get install libzip-dev" to install libzip.
+
+And for support of EMF, the libEMF is needed.
+do "sudo apt-get install libemf-dev" to install libEMF.
+
+
+Then just run these commands:
 sh configure; 
 make
-make install; 
-
-
-Support for SWF needs version 0.3 or higher of ming. Version 0.2 does not work
+sudo make install; 
 
 
 There are several test cases included. To run them type `make test'.
@@ -100,7 +107,7 @@ Using pstoedit:
 Before you can use pstoedit you must have a working installation
 of Ghostscript (either GNU or Aladdin).
 
-The rest is described in the manual page in /pstoedit.htm.
+The rest is described in the manual page in pstoedit.htm.
 
 pstoedit works reasonable with PostScript files containing
 	* line drawings
@@ -109,7 +116,9 @@ pstoedit works reasonable with PostScript files containing
 Try to run it on golfer.ps or tiger.ps that comes with Ghostscript, e.g., 
 pstoedit -f <your format> <local path where GhostScript is installed>/examples/tiger.ps tiger.<suffix>
 
-Some features that are no supported by every backend of pstoedit:
+Since versiomn 4.0, there is also a GUI for pstoedit - PstoeditQtGui
+
+Some features that are not supported by every backend of pstoedit:
 	* bitmap images (just for some backends and only a subset of the PostScript image operators)
 	* general fill patterns
 	* clipping (only partially via the -sclip option)

@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2021 Wolfgang Glunz
+   Copyright (C) 1998 - 2023 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -105,8 +105,8 @@ constexpr DWORD32 LittleEndian_Dword32(DWORD32 dw)
 
 // windows structure for standard metafile
 // placeable header (aka Aldus Metafile)
-const DWORD32 PLACEABLEKEY = 0x9AC6CDD7L;
-const short PLACEABLESIZE = 22;
+constexpr DWORD32 PLACEABLEKEY = 0x9AC6CDD7L;
+constexpr short PLACEABLESIZE = 22;
 // see also http://premium.microsoft.com/msdn/library/techart/html/emfdcode.htm
 // regarding alignment (Wo Gl)
 // http://msdn.microsoft.com/en-us/library/windows/desktop/ms534075(v=vs.85).aspx
@@ -367,12 +367,12 @@ drvWMF::~drvWMF()
 {
 	const BBox & psBBox = getCurrentBBox();
 
-	minX = transx(psBBox.ll.x_);
-	minY = transy(psBBox.ur.y_);
-	maxX = transx(psBBox.ur.x_);
-	maxY = transy(psBBox.ll.y_);
+	minX = transx(psBBox.ll.x());
+	minY = transy(psBBox.ur.y());
+	maxX = transx(psBBox.ur.x());
+	maxY = transy(psBBox.ll.y());
 
-	if (Verbose()) errf << "original PostScript Bounding Box   : " << psBBox.ll.x_  << " " << psBBox.ll.y_ << " " << psBBox.ur.x_ << " " << psBBox.ur.y_ << endl;
+	if (Verbose()) errf << "original PostScript Bounding Box   : " << psBBox.ll.x()  << " " << psBBox.ll.y() << " " << psBBox.ur.x() << " " << psBBox.ur.y() << endl;
 	if (Verbose()) errf << "transformed PostScript Bounding Box: " << minX << " " << minY << " " << maxX << " " << maxY << endl;
 
 	
@@ -770,8 +770,8 @@ void drvWMF::drawPoly(polyType type)
 		const basedrawingelement & elem = pathElement(n);
 
 		if (elem.getType() != closepath) {
-			aptlPoints[p].x = transx(elem.getPoint(0).x_);
-			aptlPoints[p].y = transy(elem.getPoint(0).y_);
+			aptlPoints[p].x = transx(elem.getPoint(0).x());
+			aptlPoints[p].y = transy(elem.getPoint(0).y());
 		} else {
 			aptlPoints[p].x = transx(0);
 			aptlPoints[p].y = transy(0);
@@ -1197,14 +1197,16 @@ void drvWMF::show_rectangle(const float llx, const float lly, const float urx, c
 		maxY = yMax;
 		maxStatus = true;
 	}
-
-	if (0 && currentShowType() == drvbase::stroke) {
+#if 0
+	if (currentShowType() == drvbase::stroke) {
 		// wogl - this code is disabled. I don't know why this was this way. 
 		// one cannot use a RECT as Point * and a polyline needs 4 points to make a RECT.
 		// strange ....
 		(void)Polyline(metaDC, (POINT *) & localRect, 2);
 		// but also using a Rectangle isn't correct. 
-	} else {
+	} else 
+#endif
+	{
 		(void)Rectangle(metaDC, transx(llx), transy(lly), transx(urx), transy(ury));
 	}
 	}
@@ -1221,13 +1223,11 @@ void drvWMF::show_image(const PSImage & imageinfo)
 	// but also transformation matrix!
 
 	// scale bounding box
-	lowerLeft.x_ *= getScale();
-	lowerLeft.y_ *= getScale();
-	upperRight.x_ *= getScale();
-	upperRight.y_ *= getScale();
+	lowerLeft *= getScale();
+	upperRight *= getScale();
 
-	const long width  = abs(i_transX(upperRight.x_) - i_transX(lowerLeft.x_));
-	const long height = abs(i_transY(upperRight.y_) - i_transY(lowerLeft.y_));
+	const long width  = abs(i_transX(upperRight.x()) - i_transX(lowerLeft.x()));
+	const long height = abs(i_transY(upperRight.y()) - i_transY(lowerLeft.y()));
 
 	if (Verbose()) {
 		errf << "image.Width:" << imageinfo.width << " image.Height: " << imageinfo.height << endl;
@@ -1235,10 +1235,10 @@ void drvWMF::show_image(const PSImage & imageinfo)
 	}
 	// calculate bounding box
 	//
-	const int xMin = (int) std::min(transx(upperRight.x_), transx(lowerLeft.x_));
-	const int xMax = (int) std::max(transx(upperRight.x_), transx(lowerLeft.x_));
-	const int yMin = (int) std::min(transy(upperRight.y_), transy(lowerLeft.y_));
-	const int yMax = (int) std::max(transy(upperRight.y_), transy(lowerLeft.y_));
+	const int xMin = (int) std::min(transx(upperRight.x()), transx(lowerLeft.x()));
+	const int xMax = (int) std::max(transx(upperRight.x()), transx(lowerLeft.x()));
+	const int yMin = (int) std::min(transy(upperRight.y()), transy(lowerLeft.y()));
+	const int yMax = (int) std::max(transy(upperRight.y()), transy(lowerLeft.y()));
 
 	if (minStatus) {
 		if (xMin < minX)
@@ -1306,12 +1306,12 @@ void drvWMF::show_image(const PSImage & imageinfo)
 			// now transform from device coordinate space to image space
 
 			// apply transformation
-			const Point currPoint = Point(x + lowerLeft.x_,
-										  y + lowerLeft.y_).transform(inverseMatrix);
+			const Point currPoint = Point(x + lowerLeft.x(),
+										  y + lowerLeft.y()).transform(inverseMatrix);
 
 			// round to integers
-			const long sourceX = (long) (currPoint.x_ + .5);
-			const long sourceY = (long) (currPoint.y_ + .5);
+			const long sourceX = (long) (currPoint.x() + .5);
+			const long sourceY = (long) (currPoint.y() + .5);
 
 			// is the pixel out of bounds? If yes, no further processing necessary
 			if (sourceX >= 0L && (unsigned long) sourceX < imageinfo.width &&
@@ -1383,8 +1383,8 @@ void drvWMF::show_image(const PSImage & imageinfo)
 		bmi.bmiHeader.biClrImportant = 0;
 
 		if (!SetDIBitsToDevice(metaDC,
-							  transx(lowerLeft.x_),
-							  transy(upperRight.y_),
+							  transx(lowerLeft.x()),
+							  transy(upperRight.y()),
 							  width, height, 0, 0, 0, height, output, &bmi, DIB_RGB_COLORS)) {
 			errf << "ERROR: Cannot draw bitmap" << endl;
 		}
@@ -1415,8 +1415,8 @@ static DriverDescriptionT < drvWMF > D_wmf("wmf", "MS Windows Metafile", "","wmf
 										   false,	// backend does not support curves (at least for WMF - have to take least common denominator here)
 										   true,	// backend supports elements which are filled and have edges 
 										   true,	// backend supports text
-										   DriverDescription::memoryeps,	// no support for PNG file images
-										   DriverDescription::noopen,	// we open output file ourselves
+										   DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+										   DriverDescription::opentype::noopen,	// we open output file ourselves
 										   false,	// if format supports multiple pages in one file (DEFINETELY not) 
 										   false  /*clipping */ 
 										   );
@@ -1438,8 +1438,8 @@ static DriverDescriptionT < drvWMF > D_emf("emf", "Enhanced MS Windows Metafile"
 										   false,	// backend does not support curves (not yet)
 										   true,	// backend supports elements which are filled and have edges 
 										   true,	// backend supports text
-										   DriverDescription::memoryeps,	// no support for PNG file images
-										   DriverDescription::noopen,	// we open output file ourselves
+										   DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+										   DriverDescription::opentype::noopen,	// we open output file ourselves
 										   false,	// if format supports multiple pages in one file (DEFINETELY not) 
 										   false  /*clipping */
 										   );

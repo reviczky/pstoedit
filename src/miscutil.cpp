@@ -2,7 +2,7 @@
    miscutil.cpp : This file is part of pstoedit
    misc utility functions
 
-   Copyright (C) 1998 - 2021  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2023  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -200,12 +200,7 @@ RSString full_qualified_tempnam(const char *pref)
 	}
 
 #else 
-#if defined (__BCPLUSPLUS__) || defined (__TCPLUSPLUS__)
-/* borland has a prototype that expects a char * as second arg */
-	char *filename = TEMPNAM(nullptr, (char *) pref);
-#else
 	char *filename = TEMPNAM(nullptr, pref);
-#endif
 	// W95: Fkt. tempnam() erzeugt Filename+Pfad
 	// W3.1: es wird nur der Name zurueckgegeben
 #endif
@@ -778,19 +773,8 @@ void RSString::assign(const char *src, const size_t len )
 
 bool fileExists(const char *filename)
 {
-#ifdef HAVE_STL
 	std::ifstream test(filename);
 	return test.is_open();
-#else
-#if defined (__GNUG__)  && (__GNUC__>=3)
-	ifstream test(filename, ios::in );	//lint !e655
-#else
-	ifstream test(filename, ios::in | ios::nocreate);	//lint !e655
-	// MSVC needs ios::nocreate if used for testing whether file exists
-	// also others except the g++ > 3.0 accept this
-#endif
-	return (test ? true : false);
-#endif
 }
 
 
@@ -834,7 +818,7 @@ void FontMapper::readMappingTable(ostream & errstream, const char *filename)
 	while (!inFile.getline(line, linesize).eof()) {
 		linenr++;
 		strcpy_s(save,linesize, line);
-#ifdef HAVE_STL
+ 
 		// Notes regarding ANSI C++ version (from KB)
 		// istream::get( char* pch, int nCount, char delim ) is different in three ways: 
 		// When nothing is read, failbit is set.
@@ -847,7 +831,7 @@ void FontMapper::readMappingTable(ostream & errstream, const char *filename)
 			inFile.clear();
 			continue;
 		}
-#endif
+
 		if (line[0] == '%')
 			continue;
 		char *lineptr = line;
@@ -934,19 +918,21 @@ unsigned int Argv::parseFromString(const char * const argstring) {
 	const char * cp = argstring;
 	while (cp && *cp) { // for all args
 		while (*cp == ' ') cp++; // skip leading space
-		RSString result("");
+		if (!*cp) break;
+		RSString result("");		
 		if (*cp == '"')	{ // handle string arg - read everything until closing "
-				cp++; // skip leading "
-				while (*cp && (*cp != '"')) {
-					result += *cp; 
-					cp++;
-				}
-				if (*cp) cp++; // skip trailing "
+			cp++; // skip leading "
+			while (*cp && (*cp != '"')) {
+				result += *cp; 
+				cp++;
+			}
+			if (*cp) cp++; // skip trailing "
 		} else {
-				while (*cp && (*cp != ' ')) {
-					result += *cp; 
-					cp++;
-				}
+			while (*cp && (*cp != ' ')) {
+				result += *cp; 
+				cp++;
+			}
+			assert(result.length() > 0);
 		}
 		addarg(result);
 		nrOfNewArgs++;

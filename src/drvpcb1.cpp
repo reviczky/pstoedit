@@ -2,7 +2,7 @@
    drvPCB1.cpp : Hans-Jürgen Jahn    (Version 1.0  10.08.02)
    this code is derived from drvSAMPL.cpp, see text below
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -84,15 +84,15 @@ void drvPCB1::print_coords()
 		case moveto: {
 			const Point & p = elem.getPoint(0);
 			pcberrf << "\t\tmoveto ";
-        		pcberrf  << p.x_ + x_offset << " "
-	     			<<  /*   currentDeviceHeight -  */   p.y_ + y_offset << " " ;
+        		pcberrf  << p.x() + x_offset << " "
+	     			<<  /*   currentDeviceHeight -  */   p.y() + y_offset << " " ;
 			}
 			break;
 		case lineto: {
 			const Point & p = elem.getPoint(0);
 			pcberrf << "\t\tlineto ";
-        		pcberrf  << p.x_ + x_offset << " "
-	     			<<  /*   currentDeviceHeight -  */   p.y_ + y_offset << " " ;
+        		pcberrf  << p.x() + x_offset << " "
+	     			<<  /*   currentDeviceHeight -  */   p.y() + y_offset << " " ;
 			}
 			break;
 		case closepath:
@@ -102,8 +102,8 @@ void drvPCB1::print_coords()
 			pcberrf << "\t\tcurveto " ;
 			for (unsigned int cp = 0 ; cp < 3; cp++ ) {
 				const Point & p = elem.getPoint(cp);
-        			pcberrf  << (p.x_ + x_offset) << " "
-	     				<<  /*   currentDeviceHeight -  */   (p.y_ + y_offset) << " " ;
+        			pcberrf  << (p.x() + x_offset) << " "
+	     				<<  /*   currentDeviceHeight -  */   (p.y() + y_offset) << " " ;
 			}
 			}
 			break;
@@ -227,8 +227,8 @@ struct Lpoint
 static Lpoint toLpoint(const Point& p)
 {
    Lpoint lp;
-   lp.x=long(p.x_);   
-   lp.y=long(p.y_);   
+   lp.x=long(p.x());   
+   lp.y=long(p.y());   
    return lp;
 }
 
@@ -435,7 +435,7 @@ bool drvPCB1::filledCircleOut()
 
 
 static DriverDescriptionT<drvPCB1> D_pcb("pcbi","engrave data - insulate/PCB format",
-										 "See \\URL{http://home.vr-web.de/\\Tilde hans-juergen-jahn/software/devpcb.html} for more details.",
+										 "",
 										 "dat",
 								
 		false, // backend supports subpaths
@@ -455,8 +455,8 @@ static DriverDescriptionT<drvPCB1> D_pcb("pcbi","engrave data - insulate/PCB for
 		true, // backend supports curves
 		true, // backend supports elements which are filled and have edges
 		false, // backend supports text
-		DriverDescription::noimage,	// no support for PNG file images
-		DriverDescription::normalopen, 
+		DriverDescription::imageformat::noimage,	// no support for PNG file images
+		DriverDescription::opentype::normalopen, 
 		true,	// if format supports multiple pages in one file
 		false 	/*clipping */
 		);

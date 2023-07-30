@@ -5,7 +5,7 @@
    drvtext.h : This file is part of pstoedit
    Class declaration for a text oriented output driver 
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -43,7 +43,7 @@ public:
 		DriverOptions() :
 			pageheight(true,"-height", "number",0, "page height in terms of characters",nullptr,200),
 			pagewidth(true,"-width", "number",0, "page width in terms of characters",nullptr,150),
-			dumptextpieces(true,"-dump", nullptr, 0,"dump text pieces",nullptr,false)
+			dumptextpieces(true,"-dump", "", 0,"dump text pieces",nullptr,false)
 		{
 			ADD(pageheight);
 			ADD(pagewidth);

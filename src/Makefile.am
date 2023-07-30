@@ -34,6 +34,7 @@ AM_CPPFLAGS=					\
 	${LIBZIP_CFLAGS}			\
         -DDEFAULTGS=$(GS)			\
 	-DPSTOEDITDATADIR="\"$(pkgdatadir)\""	\
+	-DPSTOEDITDOCDIR="\"$(docdir)\""	\
 	-DPSTOEDITLIBDIR="\"$(pkglibdir)\""	\
         ${SPECIAL_CXXFLAGS}
 
@@ -93,7 +94,7 @@ libp2edrvstd_la_SOURCES=			\
 	$(specific_drivers_src)                 \
         $(sample_drivers_src)                   
 libp2edrvstd_la_LIBADD=libpstoedit.la
-libp2edrvstd_la_LDFLAGS=-no-undefined -module
+libp2edrvstd_la_LDFLAGS=-no-undefined -module -avoid-version
 
 #libp2edrvplugins_la_SOURCES=drvmif.cpp drvcgm.cpp drvrtf.cpp drvwwmf.cpp
 #libp2edrvplugins_la_LIBADD=
@@ -102,30 +103,30 @@ libp2edrvstd_la_LDFLAGS=-no-undefined -module
 
 libp2edrvlplot_la_SOURCES=drvlplot.cpp drvlplot.h initlibrary.cpp
 libp2edrvlplot_la_LIBADD=$(LIBPLOTTER_LDFLAGS) libpstoedit.la
-libp2edrvlplot_la_LDFLAGS=-no-undefined -module
+libp2edrvlplot_la_LDFLAGS=-no-undefined -module -avoid-version
 
 libp2edrvpptx_la_SOURCES=drvpptx.cpp drvpptx.h initlibrary.cpp
 libp2edrvpptx_la_LIBADD=$(LIBZIP_LDFLAGS) libpstoedit.la
-libp2edrvpptx_la_LDFLAGS=-no-undefined -module
+libp2edrvpptx_la_LDFLAGS=-no-undefined -module -avoid-version
 
 libp2edrvswf_la_SOURCES=drvswf.cpp drvswf.h initlibrary.cpp
 libp2edrvswf_la_LIBADD=$(LIBMING_LDFLAGS) libpstoedit.la
-libp2edrvswf_la_LDFLAGS=-no-undefined -module
+libp2edrvswf_la_LDFLAGS=-no-undefined -module -avoid-version
 
 # note the __ stand for ++ - automake treats all no alphanums chars as _
 libp2edrvmagick___la_SOURCES=drvmagick++.cpp drvmagick++.h initlibrary.cpp
 libp2edrvmagick___la_LIBADD=${LIBMAGICK_LDFLAGS} libpstoedit.la
-libp2edrvmagick___la_LDFLAGS=-no-undefined -module
+libp2edrvmagick___la_LDFLAGS=-no-undefined -module -avoid-version
 # moved to configure.ac because needed only for g++ libp2edrvmagick___la_CPPFLAGS=$(LIBMAGICK_CFLAGS) $(AM_CPPFLAGS) -Wno-long-long
 
 if USE_EMFBYSOURCE
 libp2edrvwmf_la_SOURCES=emflib.cpp drvwmf.cpp drvwmf.h initlibrary.cpp
 libp2edrvwmf_la_LIBADD=libpstoedit.la 
-libp2edrvwmf_la_LDFLAGS=-no-undefined -module
+libp2edrvwmf_la_LDFLAGS=-no-undefined -module -avoid-version
 else
 libp2edrvwmf_la_SOURCES=drvwmf.cpp drvwmf.h initlibrary.cpp
-libp2edrvwmf_la_LIBADD=$(LIBEMF_LDFLAGS) libpstoedit.la 
-libp2edrvwmf_la_LDFLAGS=-no-undefined -module
+libp2edrvwmf_la_LIBADD=$(LIBEMF_LDFLAGS) libpstoedit.la
+libp2edrvwmf_la_LDFLAGS=-no-undefined -module -avoid-version
 endif
 
 libpstoedit_la_SOURCES =			\

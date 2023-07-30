@@ -5,7 +5,7 @@
    drvDXF.h : This file is part of pstoedit
    Interface for new driver backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -49,20 +49,20 @@ public:
 		OptionT < RSString, RSStringValueExtractor > layernegativfilter;
 
 		DriverOptions():
-			polyaslines(true,"-polyaslines",nullptr,0,"use LINE instead of POLYLINE in DXF",nullptr,false),
-			mm(true,"-mm",nullptr,0,"use mm coordinates instead of points in DXF (mm=pt/72*25.4)",nullptr,false),
-			colorsToLayers(true,"-ctl",nullptr,0,"map colors to layers",nullptr,false),
-			fillToHatch(true, "-filltohatch", nullptr, 0,
+			polyaslines(true,"-polyaslines","",0,"use LINE instead of POLYLINE in DXF",nullptr,false),
+			mm(true,"-mm","",0,"use mm coordinates instead of points in DXF (mm=pt/72*25.4)",nullptr,false),
+			colorsToLayers(true,"-ctl","",0,"map colors to layers",nullptr,false),
+			fillToHatch(true, "-filltohatch", "", 0,
 				"generate hatch objects from fill operations (still experimental) ", nullptr, false),
-			splineaspolyline(true,"-splineaspolyline",nullptr,0,"approximate splines with PolyLines (only for -f dxf_s)",nullptr,false),
-			splineasnurb(true,"-splineasnurb",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
-			splineasbspline(true,"-splineasbspline",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
-			splineassinglespline(true,"-splineassinglespline",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
-			splineasmultispline(true,"-splineasmultispline",nullptr,0,"experimental (only for -f dxf_s)",nullptr,false),
-			splineasbezier(true,"-splineasbezier",nullptr,0,"use Bezier splines in DXF format (only for -f dxf_s)",nullptr,false),
+			splineaspolyline(true,"-splineaspolyline","",0,"approximate splines with PolyLines (only for -f dxf_s)",nullptr,false),
+			splineasnurb(true,"-splineasnurb","",0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineasbspline(true,"-splineasbspline","",0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineassinglespline(true,"-splineassinglespline","",0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineasmultispline(true,"-splineasmultispline","",0,"experimental (only for -f dxf_s)",nullptr,false),
+			splineasbezier(true,"-splineasbezier","",0,"use Bezier splines in DXF format (only for -f dxf_s)",nullptr,false),
 			splineprecision(true,"-splineprecision","number",0,
 				"number of samples to take from spline curve when doing approximation with -splineaspolyline or -splineasmultispline - should be >=2 (default 5)",nullptr,5 ),
-			dumplayernames(true,"-dumplayernames",nullptr,0,"dump all layer names found to standard output",nullptr,false),
+			dumplayernames(true,"-dumplayernames","",0,"dump all layer names found to standard output",nullptr,false),
 			layerpositivfilter(true,"-layers","string",0,"layers to be shown (comma separated list of layer names, no space)",nullptr,(const char *)""),
 			layernegativfilter(true,"-layerfilter","string",0,"layers to be hidden (comma separated list of layer names, no space)",nullptr,(const char *)"")
 

@@ -29,7 +29,9 @@
 
 /* $Id: wgsver.h,v 1.1.2.2 2002/05/27 11:18:32 ghostgum Exp $ */
 /* Functions for finding Ghostscript versions */
-BOOL get_gs_versions(int *pver, const char *gsregpath, int verbose);
+bool get_gs_versions(int *pver, const char** version_strings, const char *gsregpath, int verbose);
 BOOL get_gs_string(int gs_revision, const char *name, char *ptr, int len , const char *gsregpath, int verbose);
-BOOL find_gs(char *gspath, int len, int minver, BOOL bDLL, const char *gsregpath, int verbose);
+
+int keyToVersionInt(const char* versionString);
+BOOL find_gs(char *gspath, int len, int minver, int maxver, BOOL bDLL, const char *gsregpath, int verbose);
 

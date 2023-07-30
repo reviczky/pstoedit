@@ -320,7 +320,6 @@ AWK = @AWK@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
-CPP = @CPP@
 CPPFLAGS = @CPPFLAGS@
 CXX = @CXX@
 CXXCPP = @CXXCPP@
@@ -341,6 +340,7 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FILECMD = @FILECMD@
 GREP = @GREP@
 GROFF = @GROFF@
 GS = @GS@
@@ -479,6 +479,7 @@ AM_CPPFLAGS = \
 	${LIBZIP_CFLAGS}			\
         -DDEFAULTGS=$(GS)			\
 	-DPSTOEDITDATADIR="\"$(pkgdatadir)\""	\
+	-DPSTOEDITDOCDIR="\"$(docdir)\""	\
 	-DPSTOEDITLIBDIR="\"$(pkglibdir)\""	\
         ${SPECIAL_CXXFLAGS}
 
@@ -534,7 +535,7 @@ libp2edrvstd_la_SOURCES = \
         $(sample_drivers_src)                   
 
 libp2edrvstd_la_LIBADD = libpstoedit.la
-libp2edrvstd_la_LDFLAGS = -no-undefined -module
+libp2edrvstd_la_LDFLAGS = -no-undefined -module -avoid-version
 
 #libp2edrvplugins_la_SOURCES=drvmif.cpp drvcgm.cpp drvrtf.cpp drvwwmf.cpp
 #libp2edrvplugins_la_LIBADD=
@@ -542,25 +543,25 @@ libp2edrvstd_la_LDFLAGS = -no-undefined -module
 #libp2edrvplugins_la_CFLAGS=-I../Check/ -I../othersrc/cdlib
 libp2edrvlplot_la_SOURCES = drvlplot.cpp drvlplot.h initlibrary.cpp
 libp2edrvlplot_la_LIBADD = $(LIBPLOTTER_LDFLAGS) libpstoedit.la
-libp2edrvlplot_la_LDFLAGS = -no-undefined -module
+libp2edrvlplot_la_LDFLAGS = -no-undefined -module -avoid-version
 libp2edrvpptx_la_SOURCES = drvpptx.cpp drvpptx.h initlibrary.cpp
 libp2edrvpptx_la_LIBADD = $(LIBZIP_LDFLAGS) libpstoedit.la
-libp2edrvpptx_la_LDFLAGS = -no-undefined -module
+libp2edrvpptx_la_LDFLAGS = -no-undefined -module -avoid-version
 libp2edrvswf_la_SOURCES = drvswf.cpp drvswf.h initlibrary.cpp
 libp2edrvswf_la_LIBADD = $(LIBMING_LDFLAGS) libpstoedit.la
-libp2edrvswf_la_LDFLAGS = -no-undefined -module
+libp2edrvswf_la_LDFLAGS = -no-undefined -module -avoid-version
 
 # note the __ stand for ++ - automake treats all no alphanums chars as _
 libp2edrvmagick___la_SOURCES = drvmagick++.cpp drvmagick++.h initlibrary.cpp
 libp2edrvmagick___la_LIBADD = ${LIBMAGICK_LDFLAGS} libpstoedit.la
-libp2edrvmagick___la_LDFLAGS = -no-undefined -module
+libp2edrvmagick___la_LDFLAGS = -no-undefined -module -avoid-version
 @USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_SOURCES = drvwmf.cpp drvwmf.h initlibrary.cpp
 # moved to configure.ac because needed only for g++ libp2edrvmagick___la_CPPFLAGS=$(LIBMAGICK_CFLAGS) $(AM_CPPFLAGS) -Wno-long-long
 @USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_SOURCES = emflib.cpp drvwmf.cpp drvwmf.h initlibrary.cpp
-@USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_LIBADD = $(LIBEMF_LDFLAGS) libpstoedit.la 
+@USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_LIBADD = $(LIBEMF_LDFLAGS) libpstoedit.la
 @USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_LIBADD = libpstoedit.la 
-@USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_LDFLAGS = -no-undefined -module
-@USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_LDFLAGS = -no-undefined -module
+@USE_EMFBYSOURCE_FALSE@libp2edrvwmf_la_LDFLAGS = -no-undefined -module -avoid-version
+@USE_EMFBYSOURCE_TRUE@libp2edrvwmf_la_LDFLAGS = -no-undefined -module -avoid-version
 libpstoedit_la_SOURCES = \
 	dynload.cpp dynload.h			\
 	callgs.cpp				\

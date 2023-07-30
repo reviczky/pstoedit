@@ -3,7 +3,7 @@
    simple backend for Gschem format.
    Contributed / Copyright 2004 by: Mark Rages 
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -64,16 +64,16 @@ void drvGSCHEM::show_path()
 	  const Point & p1 = pathElement(n-1).getPoint(0);
 		const Point & p = pathElement(n).getPoint(0);
 		outf << "L ";
-		outf << (int)(p1.x_*SCALE) << " " 
-                     << (int)(p1.y_*SCALE) << " " 
-                     << (int)(p.x_*SCALE) << " " 
-                     << (int)(p.y_*SCALE) << " 3 0 0 0 -1 -1\n";
+		outf << (int)(p1.x()*SCALE) << " " 
+                     << (int)(p1.y()*SCALE) << " " 
+                     << (int)(p.x()*SCALE) << " " 
+                     << (int)(p.y()*SCALE) << " 3 0 0 0 -1 -1\n";
 	}
 }
 
 
 static DriverDescriptionT < drvGSCHEM > D_gschem("gschem", "gschem format", 
-												 "See also:  \\URL{http://www.geda.seul.org/tools/gschem/}","gschem", false,	// if backend supports subpaths
+												 "See also:  \\URL{http://wiki.geda-project.org/geda:gaf}","gschem", false,	// if backend supports subpaths
 												   // if subpaths are supported, the backend must deal with
 												   // sequences of the following form
 												   // moveto (start of subpath)
@@ -89,7 +89,7 @@ static DriverDescriptionT < drvGSCHEM > D_gschem("gschem", "gschem format",
 												   false,	// if backend supports curves
 												   false,	// if backend supports elements with fill and edges
 												   false,	// if backend supports text
-												   DriverDescription::noimage,	// no support for PNG file images
-												   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+												   DriverDescription::imageformat::noimage,	// no support for PNG file images
+												   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 												   false /*clipping */ );
  

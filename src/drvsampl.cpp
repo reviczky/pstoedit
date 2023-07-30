@@ -2,7 +2,7 @@
    drvSAMPL.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -54,14 +54,14 @@ void drvSAMPL::print_coords()
 		case moveto:{
 				const Point & p = elem.getPoint(0);
 				outf << "\t\tmoveto ";
-				outf << p.x_ + x_offset << " " << /*   currentDeviceHeight -  */ p.y_ +
+				outf << p.x() + x_offset << " " << /*   currentDeviceHeight -  */ p.y() +
 					y_offset << " ";
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
 				outf << "\t\tlineto ";
-				outf << p.x_ + x_offset << " " << /*   currentDeviceHeight -  */ p.y_ +
+				outf << p.x() + x_offset << " " << /*   currentDeviceHeight -  */ p.y() +
 					y_offset << " ";
 			}
 			break;
@@ -72,7 +72,7 @@ void drvSAMPL::print_coords()
 				outf << "\t\tcurveto ";
 				for (unsigned int cp = 0; cp < 3; cp++) {
 					const Point & p = elem.getPoint(cp);
-					outf << (p.x_ + x_offset) << " " << /*   currentDeviceHeight -  */ (p.y_ +
+					outf << (p.x() + x_offset) << " " << /*   currentDeviceHeight -  */ (p.y() +
 																						y_offset) <<
 						" ";
 				}
@@ -272,7 +272,7 @@ static DriverDescriptionT < drvSAMPL > D_sampl("sample", "sample driver: if you 
 											   true,	// backend supports curves
 											   true,	// backend supports elements which are filled and have edges
 											   true,	// backend supports text
-											   DriverDescription::png,	// support for PNG file images
-											   DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+											   DriverDescription::imageformat::png,	// support for PNG file images
+											   DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 											   true  /*clipping */ 
 											   );

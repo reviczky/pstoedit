@@ -9,7 +9,7 @@
    cppcomp.h : This file is part of pstoedit
    header declaring compiler dependent stuff
 
-   Copyright (C) 1998 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -70,8 +70,6 @@
 	// NOTE: If your compiler or installation does not come with
 	// an installation of the STL, just comment out the next line
 
-	#define HAVE_STL
-	// old - now using STL dynamic vectors #define USE_FIXED_ARRAY 1
 	#define HAVE_TYPENAME
 
 	#define USE_NEWSTRSTREAM
@@ -84,13 +82,9 @@
 
 #endif
 
-#if defined (FORCESTLUSAGE)
-	#define HAVE_STL
-#endif
 
 #if defined (__GNUG__)  && (__GNUC__>=3)
 
-	#define HAVE_STL
 	#define HAVE_TYPENAME
 	#define HAVE_AUTOPTR
 	#define USE_NEWSTRSTREAM
@@ -102,7 +96,6 @@
 		#define HAVE_TYPENAME
 		#if __SUNPRO_CC_COMPAT >= 5
 // SUN's new compiler seems to work with STL (only)
-			#define HAVE_STL
 			#define HAVE_AUTOPTR
 			#ifndef INTERNALBOOL
 				#define INTERNALBOOL
@@ -128,8 +121,6 @@
 // it works, but not a second one) (at least with MSVC 5)
 //
 
-//{
-#ifdef HAVE_STL
 
 #define I_fstream		<fstream>
 #define I_iomanip		<iomanip>
@@ -165,51 +156,6 @@
 // #define USESTD using namespace std;
 #define USESTD using std::cout; using std::cerr; using std::ios;  using std::ofstream; using std::ifstream; using std::ostream; using std::istream; using std::endl; using std::cin; 
 //using std::string;
-
-
-#else
-//} {
-
-// section for non ANSI C++ compilers
-#define I_fstream		<fstream.h>
-#define I_iomanip		<iomanip.h>
-#define I_ios			<ios.h>
-#define I_iostream		<iostream.h>
-
-#define I_istream		<iostream.h>
-#define I_ostream		<iostream.h>
-#define I_streamb		<iostream.h>
-
-
-#if (defined(unix) || defined(__unix__) || defined(_unix) || defined(__unix) || defined(__EMX__) || defined (NetBSD) ) && !defined(DJGPP)
-	#define I_strstream		<strstream.h>
-	// next macro is to avoid usage of the above lengthy || list and because in .fl file __unix__ cannot be used sometimes because m4 
-	// expands this sometimes to ""
-	#define PSTOEDIT_UNIXLIKE
-#else
-	#define I_strstream		<strstrea.h>
-#endif
-
-#define C_istrstream istrstream
-#define C_ostrstream ostrstream
-
-#if defined (__GNUG__) || defined (BOOLDEFINED) || ( defined (_MSC_VER) && _MSC_VER >= 1100) || defined (__BCPLUSPLUS__) && __BCPLUSPLUS__ >= 0x0400 || defined (INTERNALBOOL) || defined (_BOOL_EXISTS)
-	// no need to define bool
-	// 1100 is version 5.0
-	// is for Digital Unix 
-#else
-	typedef int bool;
-	const bool false = 0;
-	const bool true  = 1;
-	#define BOOLDEFINED 1
-#endif
-
-#define I_stdio		<stdio.h>
-#define I_stdlib	<stdlib.h>
-#define USESTD
-
-#endif
-//}
 
 
 #define NOCOPYANDASSIGN(classname) \

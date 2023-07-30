@@ -4,7 +4,7 @@
    psfront.h : This file is part of pstoedit
    contains the class responsible for reading the dumped PostScript format
   
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -41,6 +41,7 @@ public:
 	PSFrontEnd(ostream & outfile_p, 
 			ostream & errstream,
 			PsToEditOptions & globaloptions_p,
+			ProgramOptions * driverOptions_p, // if created from GUI
 			const char * infilename_p = nullptr,
 			const char * outfilename_p = nullptr, 
 			const DriverDescription * driverDesc_p = nullptr, 
@@ -74,17 +75,14 @@ private:
 	const char * 	infilename;	
 	const char * 	outfilename;
 	PsToEditOptions & globaloptions;
+	ProgramOptions* driverOptions;
 	const DriverDescription * driverDesc;
 	const char * 	driveroptions;
 	const bool	splitpages;
 	drvbase *	backend;
 	unsigned int    currentPageNumber;
 	unsigned int    lineNumber;
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
 	std::vector<float> numbers;
-#else
-	float *         numbers; // The number stack [maxpoints]
-#endif
 	unsigned int	nextFreeNumber;
 	unsigned int	pathnumber; // number of path (for debugging)
 	bool 		non_standard_font;
@@ -94,9 +92,9 @@ private:
 	BBox *		bboxes_ptr;
 
 	// Inhibitors (declared, but not defined)
-	PSFrontEnd(const PSFrontEnd &);
-	PSFrontEnd();
-	PSFrontEnd & operator=(const PSFrontEnd&);
+	PSFrontEnd(const PSFrontEnd&) = delete;
+	PSFrontEnd() = delete;
+	PSFrontEnd& operator=(const PSFrontEnd&) = delete;
 };
 
 

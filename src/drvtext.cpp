@@ -3,7 +3,7 @@
    Skeleton for the implementation of text based backends
    for example this could be extended towards an HTML backend.
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -214,7 +214,7 @@ static DriverDescriptionT < drvTEXT > D_text("text", "text in different forms ",
 											 false,	// if backend supports curves, else 0
 											 false,	// if backend supports elements with fill and edges
 											 true,	// if backend supports text, else 0
-											 DriverDescription::noimage,	// no support for PNG file images
-											 DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+											 DriverDescription::imageformat::noimage,	// no support for PNG file images
+											 DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 											 false 	/*clipping */
 											 );

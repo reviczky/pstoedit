@@ -7,7 +7,7 @@
    and methods (minimal interface)
 
    Copyright (C) 1993,1994,1995,1996,1997,1998 Peter Katzmann p.katzmann@thiesen.com 
-   Copyright (C) 2000 - 2021 Glunz (fill support,  improved color handling)
+   Copyright (C) 2000 - 2023 Glunz (fill support,  improved color handling)
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -51,8 +51,8 @@ protected:
 
 			// penColors(0), maxPenColors(0)
 		DriverOptions():
-			penplotter(true,"-penplotter",nullptr, 0, "plotter is pen plotter (i.e. no support for specific line widths)", nullptr,false),
-			pencolorsfromfile(true,"-pencolorsfromfile",nullptr, 0, "read pen colors from file drvhpgl.pencolors in pstoedit's data directory", nullptr,false),
+			penplotter(true,"-penplotter","", 0, "plotter is pen plotter (i.e. no support for specific line widths)", nullptr,false),
+			pencolorsfromfile(true,"-pencolorsfromfile","", 0, "read pen colors from file drvhpgl.pencolors in pstoedit's data directory", nullptr,false),
 			maxPenColors(true,"-pencolors", "number", 0, "maximum number of pen colors to be used by pstoedit (default 0) -" ,nullptr,0),
 			fillinstruction(true,"-filltype", "string", 0, "select fill type e.g. FT 1" ,nullptr,(const char*)"FT1"),
 			/*
@@ -73,10 +73,10 @@ protected:
 			// FT 4 - cross hatching FT 4[,delta,angle]
 			// FT 10 - shading FT 10,[percentage]
 
-			hpgl2 (true,"-hpgl2" ,nullptr, 0, "Use HPGL/2 instead of HPGL/1",nullptr,false),
-			rot90 (true,"-rot90" ,nullptr, 0, "rotate hpgl by 90 degrees",nullptr,false),
-			rot180(true,"-rot180",nullptr, 0, "rotate hpgl by 180 degrees",nullptr,false),
-			rot270(true,"-rot270",nullptr, 0, "rotate hpgl by 270 degrees",nullptr,false)
+			hpgl2 (true,"-hpgl2" ,"", 0, "Use HPGL/2 instead of HPGL/1",nullptr,false),
+			rot90 (true,"-rot90" ,"", 0, "rotate hpgl by 90 degrees",nullptr,false),
+			rot180(true,"-rot180","", 0, "rotate hpgl by 180 degrees",nullptr,false),
+			rot270(true,"-rot270","", 0, "rotate hpgl by 270 degrees",nullptr,false)
 		{
 			ADD( penplotter );
 			ADD( pencolorsfromfile );

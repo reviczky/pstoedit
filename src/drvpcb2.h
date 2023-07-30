@@ -6,7 +6,7 @@
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -46,19 +46,18 @@ public:
 		OptionT < bool, BoolTrueExtractor > forcepoly;
 
 		DriverOptions():
-		grid(true,"-grid",nullptr,0,"attempt to snap relevant output to grid (mils) and put failed objects to a different layer",nullptr,0),
-		snapdist(true,"-snapdist",nullptr,0,"grid snap distance ratio (0 < snapdist <= 0.5, default 0.1)",nullptr,0.1),
-		tshiftx(true,"-tshiftx",nullptr,0,"additional x shift measured in target units (mils)",nullptr,0),
-		tshifty(true,"-tshifty",nullptr,0,"additional y shift measured in target units (mils)",nullptr,0),
-		mm(true,"-mm",nullptr,0,"switch to metric units (mm)",nullptr,false),
-		stdnames(true,"-stdnames",nullptr,0,"use standard layer names instead of descriptive names",nullptr,false),
-		forcepoly(true,"-forcepoly",nullptr,0,"force all objects to be interpreted as polygons",nullptr,false)
+		grid(true,"-grid","double number",0,"attempt to snap relevant output to grid (mils) and put failed objects to a different layer",nullptr,0),
+		snapdist(true,"-snapdist","double number",0,"grid snap distance ratio (0 < snapdist <= 0.5, default 0.1)",nullptr,0.1),
+		tshiftx(true,"-tshiftx","double number",0,"additional x shift measured in target units (mils)",nullptr,0),
+		tshifty(true,"-tshifty","double number",0,"additional y shift measured in target units (mils)",nullptr,0),
+		mm(true,"-mm","",0,"switch to metric units (mm)",nullptr,false),
+		stdnames(true,"-stdnames","",0,"use standard layer names instead of descriptive names",nullptr,false),
+		forcepoly(true,"-forcepoly","",0,"force all objects to be interpreted as polygons",nullptr,false)
 		{
 			ADD(grid);
 			ADD(snapdist);
 			ADD(tshiftx);
 			ADD(tshifty);
-			ADD(grid);
 			ADD(mm);
 			ADD(stdnames);
 			ADD(forcepoly);

@@ -2,7 +2,7 @@
    drvkillu.cpp : This file is part of pstoedit
    Implementation of Kontour output driver.
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    Copyright (C) 1998,1999 Kai-Uwe Sattler, kus_AT_iti.cs.uni-magdeburg.de
 
    This program is free software; you can redistribute it and/or modify
@@ -62,14 +62,14 @@ void drvKontour::print_coords()
 		switch (elem.getType()) {
 		case moveto:{
 				const Point & p = elem.getPoint(0);
-				outf << "<point x=\"" << p.x_ + x_offset
-					<< "\" y=\"" << currentDeviceHeight - p.y_ + y_offset << "\" />\n";
+				outf << "<point x=\"" << p.x() + x_offset
+					<< "\" y=\"" << currentDeviceHeight - p.y() + y_offset << "\" />\n";
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
-				outf << "<point x=\"" << p.x_ + x_offset
-					<< "\" y=\"" << currentDeviceHeight - p.y_ + y_offset << "\" />\n";
+				outf << "<point x=\"" << p.x() + x_offset
+					<< "\" y=\"" << currentDeviceHeight - p.y() + y_offset << "\" />\n";
 			}
 			break;
 		case closepath:
@@ -77,8 +77,8 @@ void drvKontour::print_coords()
 		case curveto:{
 				for (unsigned int cp = 0; cp < 3; cp++) {
 					const Point & p = elem.getPoint(cp);
-					outf << "<point x=\"" << p.x_ + x_offset
-						<< "\" y=\"" << currentDeviceHeight - p.y_ + y_offset << "\" />\n";
+					outf << "<point x=\"" << p.x() + x_offset
+						<< "\" y=\"" << currentDeviceHeight - p.y() + y_offset << "\" />\n";
 				}
 			}
 			break;
@@ -207,8 +207,8 @@ static DriverDescriptionT < drvKontour > D_Kontour("kil", ".kil format for Konto
 															 false,	// backend supports curves
 															 false,	// backend supports elements which are filled and have edges 
 															 true,	// backend supports text
-															 DriverDescription::noimage,	// no support for PNG file images
-															 DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+															 DriverDescription::imageformat::noimage,	// no support for PNG file images
+															 DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 															 false
 															 /*clipping */
 	);

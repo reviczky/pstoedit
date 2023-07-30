@@ -1,7 +1,7 @@
 /*
    psimage.cpp : This file is part of pstoedit.
   
-   Copyright (C) 1997- 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1997- 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
    Support for Image::writeIdrawImage by Scott Johnston
 
@@ -291,10 +291,10 @@ void PSImage::calculateBoundingBox()
 	const Point P4((float) (width - border), 0.0f);
 	const Point P4T = P4.transform(normalizedImageCurrentMatrix);
 
-	ur.x_ = std::max(std::max(P1T.x_, P2T.x_), std::max(P3T.x_, P4T.x_));
-	ur.y_ = std::max(std::max(P1T.y_, P2T.y_), std::max(P3T.y_, P4T.y_));
-	ll.x_ = std::min(std::min(P1T.x_, P2T.x_), std::min(P3T.x_, P4T.x_));
-	ll.y_ = std::min(std::min(P1T.y_, P2T.y_), std::min(P3T.y_, P4T.y_));
+	ur = Point( std::max(std::max(P1T.x(), P2T.x()), std::max(P3T.x(), P4T.x())),
+	            std::max(std::max(P1T.y(), P2T.y()), std::max(P3T.y(), P4T.y())));
+	ll = Point( std::min(std::min(P1T.x(), P2T.x()), std::min(P3T.x(), P4T.x())),
+	            std::min(std::min(P1T.y(), P2T.y()), std::min(P3T.y(), P4T.y())));
 }
 
 
@@ -405,8 +405,8 @@ void PSImage::writeEPSImage(ostream & outi) const
 	outi << "%!PS-Adobe-2.0 EPSF-2.0" << endl;
 	outi << "%%Title: image created by pstoedit" << endl;
 	outi << "%%Creator: pstoedit version " << PACKAGE_VERSION << endl;
-	outi << "%%BoundingBox: " << floor(ll.x_) << " " << floor(ll.y_) << " "
-	     << ceil(ur.x_) << " " << ceil(ur.y_) << endl;
+	outi << "%%BoundingBox: " << floor(ll.x()) << " " << floor(ll.y()) << " "
+	     << ceil(ur.x()) << " " << ceil(ur.y()) << endl;
 	outi << "%%Pages: 1" << endl;
 	outi << "%%EndComments" << endl << endl;
 	outi << "%%Page: 1 1" << endl << endl;
@@ -551,8 +551,8 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 	outi << "image";
 
 	/* unpack 4 bit rgb data, skipping last nybble on odd-width images */
-	unsigned char *udata = nullptr;
 	unsigned char *dataptr = data;
+	unsigned char *udata = data;
 	if (bits == 4) {
 		udata = new unsigned char[nextfreedataitem * 2];
 		assert(udata);
@@ -636,7 +636,11 @@ void PSImage::writeIdrawImage(ostream & outi, float scalefactor) const
 		}
 	}
 
+	if (udata != data) {
+		assert(bits == 4);
+		delete[] udata;
+	}
 	outi << endl << "End " << endl << endl;
 
-	delete[] udata;
+
 }

@@ -2,7 +2,7 @@
    drvFIG.cpp : This file is part of pstoedit
    Based on the skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -201,7 +201,7 @@ unsigned int
 
 void drvFIG::prpoint(ostream & os, const Point & p, bool withspaceatend) const
 {
-	os << (int) (PntFig * p.x_ + 0.5f) << " " << (int) (y_offset - (PntFig * p.y_) + 0.5f);
+	os << (int) (PntFig * p.x() + 0.5f) << " " << (int) (y_offset - (PntFig * p.y()) + 0.5f);
 	if (withspaceatend)
 		os << " ";
 }
@@ -253,20 +253,20 @@ void drvFIG::new_depth()
 void drvFIG::addtobbox(const Point & p)
 {
 	if (loc_bbox_flag == 0) {
-		loc_max_y = p.y_;
-		loc_min_y = p.y_;
-		loc_max_x = p.x_;
-		loc_min_x = p.x_;
+		loc_max_y = p.y();
+		loc_min_y = p.y();
+		loc_max_x = p.x();
+		loc_min_x = p.x();
 		loc_bbox_flag = 1;
 	} else {
-		if (loc_max_y < p.y_)
-			loc_max_y = p.y_;
-		if (loc_min_y > p.y_)
-			loc_min_y = p.y_;
-		if (loc_max_x < p.x_)
-			loc_max_x = p.x_;
-		if (loc_min_x > p.x_)
-			loc_min_x = p.x_;
+		if (loc_max_y < p.y())
+			loc_max_y = p.y();
+		if (loc_min_y > p.y())
+			loc_min_y = p.y();
+		if (loc_max_x < p.x())
+			loc_max_x = p.x();
+		if (loc_min_x > p.x())
+			loc_min_x = p.x();
 	}
 }
 
@@ -899,8 +899,8 @@ void drvFIG::show_image(const PSImage & imageinfo)
 // Calculate BBox
 	addtobbox(ll);
 	addtobbox(ur);
-	const Point fig_ur(PntFig * ur.x_, y_offset - PntFig * ll.y_);
-	const Point fig_ll(PntFig * ll.x_, y_offset - PntFig * ur.y_);
+	const Point fig_ur(PntFig * ur.x(), y_offset - PntFig * ll.y());
+	const Point fig_ll(PntFig * ll.x(), y_offset - PntFig * ur.y());
 
 	// first output link to an external *.eps file into *.fig file
 	buffer << "# image\n";
@@ -911,11 +911,11 @@ void drvFIG::show_image(const PSImage & imageinfo)
 	buffer << objectId << " 0 -1 0.000 0 0 -1 0 0 5\n";
 	buffer << "\t0 " << imageinfo.FileName << "\n";
 
-	buffer << "\t" << (int) fig_ll.x_ << " " << (int) fig_ll.y_ << " "
-		<< (int) fig_ur.x_ << " " << (int) fig_ll.y_ << " "
-		<< (int) fig_ur.x_ << " " << (int) fig_ur.y_ << " "
-		<< (int) fig_ll.x_ << " " << (int) fig_ur.y_ << " "
-		<< (int) fig_ll.x_ << " " << (int) fig_ll.y_;
+	buffer << "\t" << (int) fig_ll.x() << " " << (int) fig_ll.y() << " "
+		<< (int) fig_ur.x() << " " << (int) fig_ll.y() << " "
+		<< (int) fig_ur.x() << " " << (int) fig_ur.y() << " "
+		<< (int) fig_ll.x() << " " << (int) fig_ur.y() << " "
+		<< (int) fig_ll.x() << " " << (int) fig_ll.y();
 	buffer << "\n";
 
 
@@ -939,8 +939,8 @@ void drvFIG::show_image(const PSImage & imageinfo)
 // Calculate BBox
 	addtobbox(ll);
 	addtobbox(ur);
-	const Point fig_ur(PntFig * ur.x_, y_offset - PntFig * ll.y_);
-	const Point fig_ll(PntFig * ll.x_, y_offset - PntFig * ur.y_);
+	const Point fig_ur(PntFig * ur.x(), y_offset - PntFig * ll.y());
+	const Point fig_ll(PntFig * ll.x(), y_offset - PntFig * ur.y());
 
 	// first output link to an external *.eps file into *.fig file
 	buffer << "# image\n";
@@ -951,11 +951,11 @@ void drvFIG::show_image(const PSImage & imageinfo)
 	buffer << objectId << " 0 -1 0.000 0 0 -1 0 0 5\n";
 	buffer << "\t0 " << EPSoutFileName.get() << "\n";
 
-	buffer << "\t" << (int) fig_ll.x_ << " " << (int) fig_ll.y_ << " "
-		<< (int) fig_ur.x_ << " " << (int) fig_ll.y_ << " "
-		<< (int) fig_ur.x_ << " " << (int) fig_ur.y_ << " "
-		<< (int) fig_ll.x_ << " " << (int) fig_ur.y_ << " "
-		<< (int) fig_ll.x_ << " " << (int) fig_ll.y_;
+	buffer << "\t" << (int) fig_ll.x() << " " << (int) fig_ll.y() << " "
+		<< (int) fig_ur.x() << " " << (int) fig_ll.y() << " "
+		<< (int) fig_ur.x() << " " << (int) fig_ur.y() << " "
+		<< (int) fig_ll.x() << " " << (int) fig_ur.y() << " "
+		<< (int) fig_ll.x() << " " << (int) fig_ll.y();
 	buffer << "\n";
 
 
@@ -984,16 +984,16 @@ static const char * const additionalDoku =
 "\\end{verbatim}\n"
 "See also the file examplefigmap.fmp in the misc directory of the pstoedit source distribution for an example font map file for xfig. "
 "Please note that the fontname has to be among those supported by xfig. "
-"See - \\URL{http://www.xfig.org/userman/fig-format.html} for a list of legal font names";
+"See - \\URL{https://mcj.sourceforge.net/fig-format.html} for a list of legal font names";
 
-static DriverDescriptionT < drvFIG > D_fig( "fig", ".fig format for xfig", additionalDoku, "fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images
-										   DriverDescription::normalopen,
+static DriverDescriptionT < drvFIG > D_fig( "fig", ".fig format for xfig", additionalDoku, "fig", false, true, true, true, DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+										   DriverDescription::opentype::normalopen,
 										   false, false /*clipping */ );
 
-static DriverDescriptionT < drvFIG > D_xfig("xfig", ".fig format for xfig", "", "fig", false, true, true, true, DriverDescription::memoryeps,	// no support for PNG file images
-											DriverDescription::normalopen,
+static DriverDescriptionT < drvFIG > D_xfig("xfig", ".fig format for xfig", "", "fig", false, true, true, true, DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+											DriverDescription::opentype::normalopen,
 											false, false /*clipping */ );
 static DriverDescriptionT < drvFIG > D_tfig("tfig", ".fig format for xfig - test only version", "", "fig", false, true, true, true, 
-											DriverDescription::png,	
-											DriverDescription::normalopen,
+											DriverDescription::imageformat::png,	
+											DriverDescription::opentype::normalopen,
 											false, false /*clipping */ );

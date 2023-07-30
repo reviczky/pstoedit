@@ -2,7 +2,7 @@
    drvPDF.cpp : This file is part of pstoedit
    Backend for PDF(TM) format
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -499,15 +499,15 @@ void drvPDF::print_coords()
 		switch (elem.getType()) {
 		case moveto:{
 				const Point & p = elem.getPoint(0);
-				adjustbbox(p.x_ + x_offset, p.y_ + y_offset);
-				buffer << RND3(p.x_ + x_offset) << " " << RND3(p.y_ + y_offset) << " ";
+				adjustbbox(p.x() + x_offset, p.y() + y_offset);
+				buffer << RND3(p.x() + x_offset) << " " << RND3(p.y() + y_offset) << " ";
 				buffer << "m " << endl;
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
-				adjustbbox(p.x_ + x_offset, p.y_ + y_offset);
-				buffer << RND3(p.x_ + x_offset) << " " << RND3(p.y_ + y_offset) << " ";
+				adjustbbox(p.x() + x_offset, p.y() + y_offset);
+				buffer << RND3(p.x() + x_offset) << " " << RND3(p.y() + y_offset) << " ";
 				buffer << "l " << endl;
 			}
 			break;
@@ -517,8 +517,8 @@ void drvPDF::print_coords()
 		case curveto:{
 				for (unsigned int cp = 0; cp < 3; cp++) {
 					const Point & p = elem.getPoint(cp);
-					adjustbbox(p.x_ + x_offset, p.y_ + y_offset);
-					buffer << RND3(p.x_ + x_offset) << " " << RND3(p.y_ + y_offset) << " ";
+					adjustbbox(p.x() + x_offset, p.y() + y_offset);
+					buffer << RND3(p.x() + x_offset) << " " << RND3(p.y() + y_offset) << " ";
 				}
 				buffer << "c " << endl;
 			}
@@ -733,7 +733,7 @@ static DriverDescriptionT < drvPDF > D_pdf("pdf", "Adobe's Portable Document For
 										   1,	// if backend supports curves, else 0
 										   false,	// if backend supports elements with fill and edges
 										   true,	// if backend supports text, else 0
-										   DriverDescription::memoryeps,	// no support for PNG file images
-										   DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+										   DriverDescription::imageformat::memoryeps,	// no support for PNG file images
+										   DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 										   false  /*clipping */
 										   );

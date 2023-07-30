@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2021  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1999 - 2023  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,7 +99,7 @@ void sub_path::clean()
 	{
 		// The moveto is always the first element of the subpath
 		const Point & p = path[0]->getPoint(0);
-		basedrawingelement *newLineto = new Lineto(p.x_, p.y_);
+		basedrawingelement *newLineto = new Lineto(p.x(), p.y());
 		// Now we can delete the path element, we no longer need p (& !!)
 		delete path[0];
 		path[0] = newLineto;
@@ -107,7 +107,7 @@ void sub_path::clean()
 	// Replace a final closepath with a lineto
 	if (path[num_elements - 1]->getType() == closepath) {
 		const Point & p = path[0]->getPoint(0);
-		basedrawingelement *newLineto = new Lineto(p.x_, p.y_);
+		basedrawingelement *newLineto = new Lineto(p.x(), p.y());
 		// Now we can delete the path element, we no longer need p (& !!)
 		delete path[num_elements - 1];
 		path[num_elements - 1] = newLineto;
@@ -117,14 +117,14 @@ void sub_path::clean()
 
 void sub_path::adjust_bbox(const Point & p)
 {
-	if (p.x_ < llx)
-		llx = p.x_;
-	if (p.y_ < lly)
-		lly = p.y_;
-	if (p.x_ > urx)
-		urx = p.x_;
-	if (p.y_ > ury)
-		ury = p.y_;
+	if (p.x() < llx)
+		llx = p.x();
+	if (p.y() < lly)
+		lly = p.y();
+	if (p.x() > urx)
+		urx = p.x();
+	if (p.y() > ury)
+		ury = p.y();
 }
 
 // Read drawingelements
@@ -220,17 +220,17 @@ bool sub_path::point_inside(const Point & p) const
 	const double x1 = -1.0;
 	//lint -esym(578,y1) // under MSVC math.h contains a y1
 	const double y1 = -1.0; 
-	const double x2 = p.x_;
-	const double y2 = p.y_;
+	const double x2 = p.x();
+	const double y2 = p.y();
 
 	// Burkhard: Bugfix 
 
 	for (unsigned int i = 0; i < num_points; i++) {
 		const unsigned int j = (i == num_points - 1) ? 0 : i + 1;
-		const double x3 = points[i].x_;
-		const double y3 = points[i].y_;
-		const double x4 = points[j].x_;
-		const double y4 = points[j].y_;
+		const double x3 = points[i].x();
+		const double y3 = points[i].y();
+		const double x4 = points[j].x();
+		const double y4 = points[j].y();
 
 		// Check wether the lines between (x1,y1)-(x2,y2) and
 		// (x3-y3)-(x4,y4) cross each other
@@ -409,8 +409,8 @@ static float get_min_distance( const basedrawingelement * const * p1,
 			for (unsigned int j = 0; j < size2; j++) {
 				const Point & point2 = end_point(p2[j]);
 				if (p1[i]->getType() != closepath) {
-					const float tmp1 = point1.x_ - point2.x_;
-					const float tmp2 = point1.y_ - point2.y_;
+					const float tmp1 = point1.x() - point2.x();
+					const float tmp2 = point1.y() - point2.y();
 					const float pdistance = tmp1 * tmp1 + tmp2 * tmp2;
 					if (pdistance < ret) {
 						ret = pdistance;
@@ -432,9 +432,9 @@ insert_subpath( basedrawingelement **  parent_path,
 {
 	// First find the point we have to lineto
 	const Point & point1 = end_point(child_path[child_index]);
-	basedrawingelement *first_lineto = new Lineto(point1.x_, point1.y_);
+	basedrawingelement *first_lineto = new Lineto(point1.x(), point1.y());
 	const Point & point2 = end_point(parent_path[parent_index]);
-	basedrawingelement *last_lineto = new Lineto(point2.x_, point2.y_);
+	basedrawingelement *last_lineto = new Lineto(point2.x(), point2.y());
 	// Make a little space
 	{for (unsigned int i = parent_size - 1; i >= parent_index + 1; i--)
 		parent_path[i + child_size + 2] = parent_path[i]; }
@@ -464,7 +464,6 @@ void drvbase::PathInfo::rearrange()
 	list.new_points();			// Make the new point arrays
 	list.clean_children();
 	
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
 	// temp hack to insert some additional space into the STL vector
 	// which might be needed by the code below - since it doesn't check 
 	// the index anymore.
@@ -474,7 +473,7 @@ void drvbase::PathInfo::rearrange()
 		addtopath(new Lineto(0.0f,0.0f),cerr);
 		addtopath(new Lineto(0.0f,0.0f),cerr);
 	}
-#endif
+
 
 	clear();					// Clear the path
 	//  cerr << "Rearranging path" << endl;
@@ -538,7 +537,7 @@ void drvbase::PathInfo::rearrange()
 			&& (path[i + 1]->getType() == lineto)) {
 			const Point & pp1 = path[i]->getPoint(0);
 			const Point & pp2 = path[i + 1]->getPoint(0);
-			if ((pp1.x_ == pp2.x_) && (pp1.y_ == pp2.y_)) {
+			if (pp1 == pp2) {
 				delete path[i];
 				for (unsigned int j = i; j + 1 < numberOfElementsInPath; j++) {
 					path[j] = path[j + 1];

@@ -164,21 +164,21 @@ drvSVM::~drvSVM()
 
     if (Verbose()) 
         errf << "calculated Bounding Box: " 
-             << l_transX(psBBox.ll.x_)
+             << l_transX(psBBox.ll.x())
              << " " 
-             << l_transY(psBBox.ur.y_) 
+             << l_transY(psBBox.ur.y()) 
              << " "
-             << l_transX(psBBox.ur.x_)
+             << l_transX(psBBox.ur.x())
              << " " 
-             << l_transY(psBBox.ll.y_) << endl;
+             << l_transY(psBBox.ll.y()) << endl;
 
     // pref mapmode
     fakeVersionCompat(outf, 1, 0x1b);
     writePod(outf, (uInt16)0); // map unit: 100th mm
     writePod(outf, 
-             (Int32)l_transX(psBBox.ll.x_)); // origin x
+             (Int32)l_transX(psBBox.ll.x())); // origin x
     writePod(outf, 
-             (Int32)l_transY(psBBox.ur.y_)); // origin y
+             (Int32)l_transY(psBBox.ur.y())); // origin y
 
     // convert between pt and 100th mm (factor 35.14598)
     writePod(outf, (Int32)3514598); // scale x numerator
@@ -189,9 +189,9 @@ drvSVM::~drvSVM()
 
 	// pref size
     writePod(outf, (Int32)abs(
-                 l_transX(psBBox.ll.x_) - l_transX(psBBox.ur.x_)) + 1 ); // prefsize x
+                 l_transX(psBBox.ll.x()) - l_transX(psBBox.ur.x())) + 1 ); // prefsize x
     writePod(outf, (Int32)abs(
-                 l_transY(psBBox.ll.y_) - l_transY(psBBox.ur.y_)) + 1 ); // prefsize y
+                 l_transY(psBBox.ll.y()) - l_transY(psBBox.ur.y())) + 1 ); // prefsize y
 
 	// action count
     writePod(outf, (uInt32)actionCount);
@@ -403,8 +403,8 @@ void drvSVM::show_path()
         {
             const Point& p( elem.getPoint(0) );
             currPolygon.push_back( 
-                std::make_pair( (Int32)l_transX(p.x_),
-                                (Int32)l_transY(p.y_) ));
+                std::make_pair( (Int32)l_transX(p.x()),
+                                (Int32)l_transY(p.y()) ));
             currPolygonFlags.push_back(0);
         }
         break;
@@ -430,20 +430,20 @@ void drvSVM::show_path()
         {
             const Point& c1( elem.getPoint(0) );
             currPolygon.push_back( 
-                std::make_pair( (Int32)l_transX(c1.x_),
-                                (Int32)l_transY(c1.y_) ));
+                std::make_pair( (Int32)l_transX(c1.x()),
+                                (Int32)l_transY(c1.y()) ));
             currPolygonFlags.push_back(2);
 
             const Point& c2( elem.getPoint(1) );
             currPolygon.push_back( 
-                std::make_pair( (Int32)l_transX(c2.x_),
-                                (Int32)l_transY(c2.y_) ));
+                std::make_pair( (Int32)l_transX(c2.x()),
+                                (Int32)l_transY(c2.y()) ));
             currPolygonFlags.push_back(2);
 
             const Point& p2( elem.getPoint(2) );
             currPolygon.push_back( 
-                std::make_pair( (Int32)l_transX(p2.x_),
-                                (Int32)l_transY(p2.y_) ));
+                std::make_pair( (Int32)l_transX(p2.x()),
+                                (Int32)l_transY(p2.y()) ));
             currPolygonFlags.push_back(0);
         }
         break;
@@ -785,10 +785,10 @@ void drvSVM::show_image(const PSImage& imageinfo)
 	Point lowerLeft, upperRight;
 	imageinfo.getBoundingBox(lowerLeft, upperRight);
 
-	const Int32 width  = abs(l_transX(upperRight.x_) - 
-                             l_transX(lowerLeft.x_));
-	const Int32 height = abs(l_transY(upperRight.y_) - 
-                             l_transY(lowerLeft.y_));
+	const Int32 width  = abs(l_transX(upperRight.x()) - 
+                             l_transX(lowerLeft.x()));
+	const Int32 height = abs(l_transY(upperRight.y()) - 
+                             l_transY(lowerLeft.y()));
 
 	// calc long-padded size of scanline 
 	const long int scanlineLen = ((width * 3) + 3) & ~3L;
@@ -841,12 +841,12 @@ void drvSVM::show_image(const PSImage& imageinfo)
 
 		for (long int x=0; x < width; x++) {
 			// now transform from device coordinate space to image space
-			const Point& currPoint( Point(x + lowerLeft.x_,
-										  y + lowerLeft.y_).transform(inverseMatrix) );
+			const Point& currPoint( Point(x + lowerLeft.x(),
+										  y + lowerLeft.y()).transform(inverseMatrix) );
 
 			// round to integers
-			const long int sourceX = (long int) (currPoint.x_ + .5);
-			const long int sourceY = (long int) (currPoint.y_ + .5);
+			const long int sourceX = (long int) (currPoint.x() + .5);
+			const long int sourceY = (long int) (currPoint.y() + .5);
 
 			// is the pixel within source bitmap bounds?
 			if (sourceX >= 0L && (unsigned long) sourceX < imageinfo.width &&
@@ -1027,9 +1027,9 @@ void drvSVM::show_image(const PSImage& imageinfo)
 
     // output position
     writePod(outf,
-             (Int32)l_transX(lowerLeft.x_));
+             (Int32)l_transX(lowerLeft.x()));
     writePod(outf,
-             (Int32)l_transY(upperRight.y_));
+             (Int32)l_transY(upperRight.y()));
 
     // output scale
     writePod(outf,
@@ -1052,8 +1052,8 @@ static DriverDescriptionT < drvSVM > D_svm("svm",
 										   true,	// backend does support curves
 										   true,	// backend supports elements which are filled and have edges 
 										   true,	// backend supports text
-										   DriverDescription::memoryeps,  // no support for PNG file images
-										   DriverDescription::normalopen, // we open output file ourselves
+										   DriverDescription::imageformat::memoryeps,  // no support for PNG file images
+										   DriverDescription::opentype::normalopen, // we open output file ourselves
 										   false,	// if format supports multiple pages in one file (DEFINETELY not) 
 										   true     // clipping
 										   );

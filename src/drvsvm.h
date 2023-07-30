@@ -46,8 +46,8 @@ public:
 		OptionT < bool, BoolTrueExtractor> emulateNarrowFonts;
 
 		DriverOptions() :
-		mapToArial(true,"-m",nullptr,0,"map to Arial",nullptr,false),
-		emulateNarrowFonts(true,"-nf",nullptr,0,"emulate narrow fonts",nullptr,false)
+		mapToArial(true,"-m","",0,"map to Arial",nullptr,false),
+		emulateNarrowFonts(true,"-nf","",0,"emulate narrow fonts",nullptr,false)
 		{
 			ADD(mapToArial);
 			ADD(emulateNarrowFonts);

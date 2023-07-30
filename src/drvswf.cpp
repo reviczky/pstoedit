@@ -2,7 +2,7 @@
    drvSWF.cpp : This file is part of pstoedit
    Skeleton for the implementation of new backends
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -716,11 +716,11 @@ static DriverDescriptionT < drvSWF > D_SWF("swf",	//
 										   true,	// backend supports elements which are filled and have edges
 										   true,	// backend supports text
 #if defined(HAVE_LIBMINGUTIL) || ( defined(USE_PNG) && USE_PNG )
-										   DriverDescription::png,	// backend supports Images
+										   DriverDescription::imageformat::png,	// backend supports Images
 #else
-   										   DriverDescription::noimage,	// no support for Images
+   										   DriverDescription::imageformat::noimage,	// no support for Images
 #endif
-										   DriverDescription::noopen,	// we open output file ourselves
+										   DriverDescription::opentype::noopen,	// we open output file ourselves
 										   true,	// if format supports multiple pages in one file
 										   false	/*clipping */
 										   );

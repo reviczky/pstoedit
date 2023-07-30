@@ -5,7 +5,7 @@
    pstoeditoptions.h : This file is part of pstoedit
    definition of program options
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -99,14 +99,14 @@ inline ostream & Option< const char *, constcharstringValueExtractor>::writevalu
 class DLLEXPORT ArgvExtractor {
 public:
 	static bool getvalue(const char *optname, const char *instring, unsigned int &currentarg, Argv  &result) {
-	if (instring) {
-		result.addarg(instring);
-		currentarg++;
-		return true;
-	} else {
-		cout << "missing string argument for " << optname << " option" << endl;
-		return false;
-	}
+		if (instring) {
+			result.addarg(instring);
+			currentarg++;
+			return true;
+		} else {
+			cout << "missing string argument for " << optname << " option" << endl;
+			return false;
+		}
 	}
 	static const char *gettypename() { return "string"; }
 	static unsigned int gettypeID() { return argv_ty; }
@@ -125,8 +125,8 @@ public:
 	const unsigned int g_t, t_t, d_t, b_t, h_t;
 
 	// cannot be const  because it needs to be changed on non UNIX systems (convertBackSlashes)
-	char *nameOfInputFile  ; //= 0;
-	char *nameOfOutputFile ; //= 0;	// can contain %d for page splitting
+	char * nameOfInputFile  ; //= 0;
+	char * nameOfOutputFile ; //= 0;	// can contain %d for page splitting
 
 	OptionT < RSString, RSStringValueExtractor> nameOfIncludeFile ;// = 0;	// name of an option include file
 	OptionT < RSString, RSStringValueExtractor> replacementfont;// = "Courier";
@@ -165,7 +165,7 @@ public:
 	OptionT < bool, BoolTrueExtractor > useBBfrominput; //= false;
 	OptionT < bool, BoolTrueExtractor > simulateSubPaths ;//= false;
 	OptionT < bool, BoolTrueExtractor > simulateFill ;//= false;
-	OptionT < RSString, RSStringValueExtractor> unmappablecharstring ;//= 0;
+	OptionT < char, CharacterValueExtractor> unmappablecharstring ;//= 0;
 	OptionT < bool, BoolTrueExtractor > dontloadplugins ;//= false;
 	OptionT < bool, BoolTrueExtractor > nobindversion ;//= false;	// use old NOBIND instead of DELAYBIND
 #if WITHRDB
@@ -192,7 +192,7 @@ public:
 	OptionT < RSString, RSStringValueExtractor > outputPageSize;//("");
 	OptionT < bool, BoolTrueExtractor > fromgui;
 	OptionT < bool, BoolTrueExtractor > showdialog;
-	OptionT < RSString, RSStringValueExtractor> GSToUse ;
+	
 
 //	OptionT < double, DoubleValueExtractor >  magnification ;//= 1.0f;
 	OptionT < bool, BoolTrueExtractor > showdrvhelp ;//= false;
@@ -210,6 +210,7 @@ public:
 	OptionT < Argv, ArgvExtractor > psArgs;				// Pass through arguments to PostScript interpreter
 	OptionT < int, IntValueExtractor > psLanguageLevel;
 	OptionT < RSString, RSStringValueExtractor> drivername ;//= 0; // cannot be const char * because it is changed in pstoedit.cpp
+	OptionT < RSString, RSStringValueExtractor> GSToUse;
 	OptionT < RSString, RSStringValueExtractor > gsregbase;
 
 	int verbose() const { return verboselevel() ? verboselevel() : verboseflag(); }
@@ -222,13 +223,13 @@ private:
 	g_t(add_category("General options")),
 	t_t(add_category("Text and font handling related options")),
 	d_t(add_category("Drawing related options")),
-	b_t(add_category("Debug options")),
+	b_t(add_category("Diagnostic and debug options")),
 	h_t(add_category("Hidden options")),
 
 	nameOfInputFile(nullptr),
 	nameOfOutputFile(nullptr),	// can contain %d for page splitting
 
-	nameOfIncludeFile	(true, "-include","name of a PostScript file to be included",g_t,"name of PostScript file to be included",
+	nameOfIncludeFile	(true, "-include","filename",g_t,"name of PostScript file to be included",
 		"This option allows specifying an additional PostScript file that will be "
 		"executed just before the normal input is read. This is helpful for "
 		"including specific page settings or for disabling potentially unsafe "
@@ -253,21 +254,22 @@ private:
 	withdisplay			(true, "-dis",noArgument,b_t,"let Ghostscript display the file during conversion",
 		"Open a display during processing by Ghostscript. Some files "
 		"only work correctly this way.",
-		false),
+		false, true /* hide in GUI */),
 
 	pngimage	        (true, "-pngimage","filename",t_t,
 	                     "for debugging purpose mainly. Write result of processing also to a PNG file",
-						 UseDefaultDoku,emptyString),
+						 UseDefaultDoku,emptyString, true /* hide from GUI */),
 
 	quiet				(true, "-q",noArgument,b_t,"quiet mode - do not write startup message",
 		UseDefaultDoku,
-		false),
+		false,
+		true /* hide in GUI */),
 	noquit				(true, "-nq",noArgument,b_t,"do not quit Ghostscript after PostScript processing - for debugging only",
 		"no exit from the PostScript interpreter. Normally Ghostscript "
 		"exits after processing the pstoedit input-file. For debugging it can be "
 		"useful to avoid this. If you do, you will have to type quit at the "
 		"\\verb+GS>+ prompt to exit from Ghostscript.",
-		false),
+		false, true /* hide in GUI */),
 	nocurves			(true, "-nc",noArgument,d_t,"normally curves are shown as curves if the output format does support it. This options forces curves to be always converted to line segments.",
 		"no curves.\n"
 		"Normally pstoedit tries to keep curves from the input and transfers them to "
@@ -276,7 +278,8 @@ private:
 		"also \\Opt{-flat} option). However, in some cases the user might wish to "
 		"have this behavior also for output formats that originally support curves. This "
 		"can be forced via the \\Opt{-nc} option.",
-		false),		//
+		false,
+		true /* hide in GUI */),		//
 /*
 	nosubpaths			(true, "-nsp",noArgument,d_t,"normally subpaths are used if the output format support them. This option turns off subpaths.",
 		UseDefaultDoku,
@@ -320,8 +323,8 @@ private:
 
 	DrawGlyphBitmaps		(true, "-dgbm",noArgument,t_t,"experimental - draw also bitmaps generated by fonts/glyphs",
 		UseDefaultDoku,
-		false),
-
+		false,
+		true /* hide in GUI */),
 
 	correctdefinefont	(true, "-correctdefinefont",noArgument,t_t,"apply some \"corrective\" actions to definefont - use this for ChemDraw generated PostScript files",
 		"Some PostScript files, e.g. such as generated by ChemDraw, "
@@ -363,7 +366,7 @@ private:
 		UseDefaultDoku,
 		0.0f),
 
-	centered		(true,"-centered","number",g_t,"center image before scaling or shifting",
+	centered		(true,"-centered", noArgument ,g_t,"center image before scaling or shifting",
 		UseDefaultDoku,
 		false),
 
@@ -371,7 +374,7 @@ private:
 		UseDefaultDoku,
 		0.0f),
 
-	pagenumberformat		(true, "-pagenumberformat","page number format specification",g_t,"format specification for page numbers in file name if -split is used. "
+	pagenumberformat		(true, "-pagenumberformat","page number format specification",g_t,"format specification for page numbers in filename if -split is used. "
 		"The specification is used to create the page number using sprintf. "
 		"The specification shall not include the leading \\% nor the trailing d. "
 		"Default is empty string which results in formatting the page number using \\%d. "
@@ -420,10 +423,11 @@ private:
 		"in order to show all the places that could not be mapped correctly. The default "
 		"for this is a \"\\#\". Using the \\Opt{-uchar} option it is possible to specify another character "
 		"to be used instead. If you want to use a space, use -uchar \" \".",
-		emptyString),
+		'#'),
 	dontloadplugins		(true, "-dontloadplugins",noArgument,h_t,"internal option - not relevant for normal user",
 		UseDefaultDoku,
-		false),
+		false,
+		true /* hide in GUI */),
 	nobindversion		(true, "-nb",noArgument,b_t,"use old NOBIND instead of DELAYBIND - try this if Ghostscript has problems",
 		"Since version 3.10 \\Prog{pstoedit} uses the "
 		"\\texttt{-dDELAYBIND} option when calling Ghostscript. Previously the "
@@ -438,7 +442,7 @@ private:
 	reallydelaybindversion	(true, "-rdb",noArgument,b_t,"use REALLYDELAYBIND option for gs, instead of the former DELAYBIND which is not supported anymore since gs 9.2x",
 		"Since version 3.10 \\Prog{pstoedit} uses the "
 		"\\texttt{-dDELAYBIND} option when calling Ghostscript. But in version 9.22 of "
-		"GhostScript, that option is not supported anymore because of security reasons. " 
+		"Ghostscript, that option is not supported anymore because of security reasons. " 
 		"As a fallback, that version provides the REALLYDELAYBIND option "
 		"and pstoedit can use this if you supply the \\Opt{-rdb} option. "
 		"Use this with caution as it might open security risks, e.g. a PostScript file "
@@ -504,10 +508,12 @@ private:
 		false),
 	fake_date_and_version(true, "-fakedateandversion", noArgument, b_t, "Just for regression testing - uses a constant date and version string.",
 		UseDefaultDoku,
-		false),
+		false,
+		true /* hide in GUI */),
 	pscover				(true, "-pscover",noArgument,h_t,"perform coverage statistics about the pstoedit PostScript proloque - for debug and test only",
 		UseDefaultDoku,
-		false),
+		false,
+		true /* hide in GUI */),
 	nofontreplacement	(true, "-nfr",noArgument,t_t,"do not replace non standard encoded fonts with a replacement font",
 		"In normal mode pstoedit replaces bitmap fonts with a font as defined by the \\Opt{-df} option. This is done, because most output formats cannot handle such fonts. This behavior can be "
 		"switched off using the \\Opt{-nfr} option but then it strongly depends on the application reading the generated file whether the file is usable and correctly interpreted or not. Any problems are then out of control of pstoedit.",
@@ -528,7 +534,7 @@ private:
 		"simple text file containing lines in the following format:" LINEBREAK "\n"
 		"\n\n"
 		"\\verb+document_font_name    target_font_name+" LINEBREAK "\n"
-		"Lines beginning with \\verb+%+ are considerd comments." LINEBREAK "\n"
+		"Lines beginning with \\verb+%+ are considered comments." LINEBREAK "\n"
 		"For font names with spaces use the "
 		"\\verb+\"font name with spaces\"+ notation.\n"
 		"\n"
@@ -543,12 +549,9 @@ private:
 		"installation directory is:"
 		"\n\n"
 		"\\begin{itemize}\n"
-		"\n"
 		"  \\item MS Windows: The same directory where the \\Prog{pstoedit} executable is located\n"
-		"\n"
 		"  \\item Unix:" LINEBREAK "\n"
 		"  The default installation directory. If it fails, then $<$\\emph{The directory where the pstoedit executable is located}$>$\\verb+/../lib/+\n"
-		"\n"
 		"\\end{itemize}\n"
 		"\n"
 		"The mpost.fmp in the misc directory of the pstoedit distribution is a sample "
@@ -575,15 +578,15 @@ private:
 		emptyString),
 	fromgui				(true, "-fromgui",noArgument,h_t,"internal - not for normal user",
 		UseDefaultDoku,
-		false),
+		false,
+		true /* hide in GUI */),
 	showdialog			(true, "-showdialog",noArgument,h_t,"internal - not for normal user",
 		UseDefaultDoku,
-		false),
-	GSToUse				(true, "-gs","path to the Ghostscript executable/DLL",g_t,"tells pstoedit which Ghostscript executable/DLL to use - overwrites the internal search heuristic",
-	UseDefaultDoku,emptyString),
+		false,
+		true /* hide in GUI */),
 	showdrvhelp			(true, "-help",noArgument,g_t,"show the help information",
 		UseDefaultDoku,
-		false) ,
+		false, true /* hide in GUI */),
 	showdocu_long			(true, "-doculong",noArgument,h_t,"show help information in TeX format - long version",
 		UseDefaultDoku,
 		false) ,
@@ -604,7 +607,8 @@ private:
 		"interpreter frontend) by first running \\textbf{pstoedit} \\Opt{-f dump} "
 		"\\Arg{infile} \\Arg{dumpfile} and then running \\textbf{pstoedit} "
 		"\\OptArg{-f}{~format}  \\Opt{-bo} \\Arg{dumpfile} \\Arg{outfile}.",
-		false),	// used for easier debugging of backends
+		false,
+		true /* hide in GUI */),	// used for easier debugging of backends
 	psArgs				(true, "-psarg","argument string",g_t,"additional arguments to be passed to Ghostscript directly",
 		"The string given with this option is passed "
 		"directly to Ghostscript when Ghostscript is called to process the "
@@ -615,7 +619,8 @@ private:
 		"this way has an effect only if the \\Opt{-dis} option is given.) "
 		"If you want to pass multiple options to Ghostscript you can use multiple "
 		"-psarg options \\Opt{-psarg opt1} \\Opt{-psarg opt2} \\Opt{-psarg opt2}. "
-		"See the Ghostscript manual for other possible options."
+		"See the Ghostscript manual for other possible options.",
+		OptionBase::ctorToUseForValue::useDefaultCtor
 		),
 
 	psLanguageLevel		(true, "-pslanguagelevel","PostScript Language Level 1, 2, or 3 to be used.", g_t,
@@ -639,6 +644,10 @@ private:
 		" from the suffix of the output filename. However, in a lot of cases, this is not a unique "
 		"mapping and hence pstoedit demands the \\Opt{-f} option.",
 		emptyString),
+	GSToUse(true, "-gs", "either full path to the Ghostscript executable/DLL or - for Windows - just a version number (e.g. 10.01.0), "
+		"in which case the version is used to look up the path from the registry.", g_t, 
+		"tells pstoedit which Ghostscript executable/DLL to use - overwrites the internal search heuristic",
+				UseDefaultDoku, emptyString),
 	gsregbase (true, "-gsregbase", "Ghostscript base registry path", g_t,
 	  "use this registry key as a subkey to search for Ghostscript",
 	  "registry path to use as a base path when searching Ghostscript interpreter.\n"
@@ -647,7 +656,8 @@ private:
 	  "and \\verb+GS_DLL / GS_LIB+ values. Example: \"-gsregbase MyCompany\" means "
 	  "that HKLM/Software/MyCompany/GPL Ghostscript would be searched "
 	  "instead of HKLM/Software/GPL Ghostscript.",
-	  emptyString)
+	  emptyString,
+	  true /* hide in GUI */)
 	{
 
 #define MAKESTRING(x) #x
@@ -715,14 +725,11 @@ private:
 	ADD(explicitFontMapFile);
 	ADD(outputPageSize);
 	ADD(fromgui);
-#ifdef HAVE_DIALOG
-	ADD(showdialog);
-#endif
 //	ADD(magnification);
 	ADD(showdrvhelp) ;
 	ADD(showdocu_long) ;
 	ADD(showdocu_short) ;
-	ADD(GSToUse);
+
 	ADD(dumphelp);
 	ADD(listdrivers);
 	ADD(backendonly);	
@@ -730,6 +737,7 @@ private:
 	ADD(psLanguageLevel);
 
 	ADD(drivername);
+	ADD(GSToUse);
 	ADD(gsregbase);
 }
 
@@ -738,11 +746,8 @@ private:
 		delete [] nameOfInputFile ;
 		delete [] nameOfOutputFile  ;	
 	}
-
-	virtual bool hideFromDoku(const OptionBase& opt) const { return opt.propsheet == h_t; }
-
-//		AutoDeleter < char >DeleterFordrivername(drivername, true);
-
+	virtual bool hideSheetFromGui(unsigned int sheet) const { return (sheet == h_t); }
+	virtual bool hideFromDoku(const OptionBase& opt) const { return (opt.propsheet == h_t); }
 };
 
 #endif

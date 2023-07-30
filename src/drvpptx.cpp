@@ -3,7 +3,7 @@
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -20,7 +20,6 @@
     Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 */
-#if 1
 
 #ifdef _MSC_VER
 // avoid this warning
@@ -35,10 +34,12 @@
 #include I_stdlib
 #include I_iomanip
 #include <cfloat>
+#include <memory>
 #include <time.h>
 
 #include <errno.h>
 #include <algorithm>
+#include <climits>
 
 #ifdef _MSC_VER
 // MS VC++ Windows
@@ -524,7 +525,7 @@ outzip(nullptr)
   slidef << std::fixed << std::setprecision(0);
 
   // Seed the random-number generator.
-  srandom((unsigned int) time(nullptr)*getpid());
+  srandom(static_cast<unsigned int> ( time(nullptr)*getpid()));
 
   // Create a zip archive for holding PresentationML data.
   create_pptx();
@@ -776,8 +777,8 @@ void drvPPTX::create_pptx()
 void drvPPTX::print_coords(const BBox & pathBBox)
 {
   // Output a list of coordinates in the shape's coordinate system.
-  const long int xshift_emu = -xtrans(pathBBox.ll.x_);
-  const long int yshift_emu = -ytrans(pathBBox.ur.y_);
+  const long int xshift_emu = -xtrans(pathBBox.ll.x());
+  const long int yshift_emu = -ytrans(pathBBox.ur.y());
   for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
     const basedrawingelement & elem = pathElement(n);
     switch (elem.getType()) {
@@ -786,7 +787,7 @@ void drvPPTX::print_coords(const BBox & pathBBox)
         const Point & p = elem.getPoint(0);
         slidef << "                <a:moveTo>\n"
                << "                  <a:pt "
-               << pt2emu(p.x_, p.y_, xshift_emu, yshift_emu) << "/>\n"
+               << pt2emu(p.x(), p.y(), xshift_emu, yshift_emu) << "/>\n"
                << "                </a:moveTo>\n";
       }
       break;
@@ -795,7 +796,7 @@ void drvPPTX::print_coords(const BBox & pathBBox)
         const Point & p = elem.getPoint(0);
         slidef << "                <a:lnTo>\n"
                << "                  <a:pt "
-               << pt2emu(p.x_, p.y_, xshift_emu, yshift_emu) << "/>\n"
+               << pt2emu(p.x(), p.y(), xshift_emu, yshift_emu) << "/>\n"
                << "                </a:lnTo>\n";
       }
       break;
@@ -805,7 +806,7 @@ void drvPPTX::print_coords(const BBox & pathBBox)
         for (unsigned int cp = 0; cp < 3; cp++) {
           const Point & p = elem.getPoint(cp);
           slidef << "                  <a:pt "
-                 << pt2emu(p.x_, p.y_, xshift_emu, yshift_emu) << "/>\n";
+                 << pt2emu(p.x(), p.y(), xshift_emu, yshift_emu) << "/>\n";
         }
         slidef << "                </a:cubicBezTo>\n";
       }
@@ -826,8 +827,8 @@ void drvPPTX::open_page()
   // Determine how much to offset the current page to center its
   // graphics within the slide.
   const BBox pageBBox = getCurrentBBox();
-  center_offset.x_ = (slideBBox.ur.x_ - slideBBox.ll.x_ - (pageBBox.ur.x_ - pageBBox.ll.x_)) / 2.0f;
-  center_offset.y_ = (slideBBox.ur.y_ - slideBBox.ll.y_ - (pageBBox.ur.y_ - pageBBox.ll.y_)) / 2.0f;
+  center_offset = Point((slideBBox.ur.x() - slideBBox.ll.x() - (pageBBox.ur.x() - pageBBox.ll.x())) / 2.0f,
+                             (slideBBox.ur.y() - slideBBox.ll.y() - (pageBBox.ur.y() - pageBBox.ll.y())) / 2.0f);
 
   // Output OOXML header boilerplate.
   slidef << "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n"
@@ -1022,7 +1023,7 @@ void drvPPTX::get_font_props(const TextInfo & textinfo,
 }
 
 static unsigned short read_ushort(ifstream& eotfile) {
-  unsigned char charvals[4];
+  unsigned char charvals[4] = { 0 };
   eotfile.read((char *)charvals, 2);        
   const unsigned short rsl = charvals[1]<<8 | charvals[0]; // coverity [var_assign_alias]
   // not sure why rsl is regared as tainted here.
@@ -1031,14 +1032,20 @@ static unsigned short read_ushort(ifstream& eotfile) {
 
 static RSString read_len_and_string(ifstream& eotfile) {
   const unsigned short size = read_ushort(eotfile); // length
-  auto name = new char[size];
-  eotfile.read(name, size);       // string
-  for (unsigned short i = 0; i < size/2; i++)
-    // Cheesy conversion from Unicode to ASCII
-    name[i] = name[i*2];
-  RSString rsl(name, size/2);
-  delete[] name;
-  return rsl;
+  if (size < USHRT_MAX) { // Coverity wants a check for size
+      auto name = new char[size];
+      eotfile.read(name, size);       // string
+      for (unsigned short i = 0; i < size / 2; i++) {
+         // Cheesy conversion from Unicode to ASCII
+          name[i] = name[i * 2];
+      }
+      const RSString rsl(name, size / 2);
+      delete[] name;
+      return rsl;
+  } else { 
+      return RSString(""); 
+  }
+ 
 }
 
 // Fabricate a TextInfo structure from an EOT file header.
@@ -1105,18 +1112,16 @@ void drvPPTX::eot2texinfo(const string& eotfilename, TextInfo & textinfo)
 float drvPPTX::angle_between(Point first, Point second)
 {
   // Normalize each vector.
-  float scale = pythagoras(first.x_, first.y_);
-  first.x_ /= scale;
-  first.y_ /= scale;
-  scale = pythagoras(second.x_, second.y_);
-  second.x_ /= scale;
-  second.y_ /= scale;
+  const float scale_f = pythagoras(first.x(), first.y());
+  first = first / scale_f;
+  const float scale_s = pythagoras(second.x(), second.y());
+  second = second / scale_s;
 
   // Determine the direction of the rotation.
-  const float direction = first.x_*second.y_ - first.y_*second.x_;
+  const float direction = first.x()*second.y() - first.y()*second.x();
 
   // Determine the rotation itself.
-  float angle = acos(first.x_*second.x_ + first.y_*second.y_) * 180.0f/(float)M_PI;
+  float angle = acos(first.x()*second.x() + first.y()*second.y()) * 180.0f/(float)M_PI;
   if (direction < 0)
     angle = -angle;
   return angle;
@@ -1153,8 +1158,8 @@ void drvPPTX::parse_xform_matrix(const float * origMatrix,
     *rotation = fmodf(*rotation + 180.0f, 360.0f);
 
   // Compute the scaling.
-  *xscale = pythagoras(xunit_xform.x_, xunit_xform.y_);
-  *yscale = pythagoras(yunit_xform.x_, yunit_xform.y_);
+  *xscale = pythagoras(xunit_xform.x(), xunit_xform.y());
+  *yscale = pythagoras(yunit_xform.x(), yunit_xform.y());
 }
 
 void drvPPTX::show_text(const TextInfo & textinfo)
@@ -1188,8 +1193,8 @@ void drvPPTX::show_text(const TextInfo & textinfo)
   Point text_ul(textinfo.x(), textinfo.y() + text_height);   // Unrotated upper left
   Point text_c = text_pivot + Point(text_width/2.0f, text_height/2.0f);   // Unrotated center
   if (flipH) {
-    text_ul.x_ -= text_width;
-    text_c.x_ -= text_width;
+    text_ul = Point(text_ul.x() - text_width, text_ul.y());
+    text_c  = Point(text_c.x()  - text_width, text_c.y());
   }
 
   // Rotate the upper-left corner and center around the original
@@ -1207,7 +1212,7 @@ void drvPPTX::show_text(const TextInfo & textinfo)
   if (flipH)
     slidef << " flipH=\"1\"";
   slidef << ">\n";
-  slidef << "            <a:off " << pt2emu(text_ofs.x_, text_ofs.y_) << "/>\n";
+  slidef << "            <a:off " << pt2emu(text_ofs.x(), text_ofs.y()) << "/>\n";
   slidef << "            <a:ext " << pt2emu(text_width, text_height,
                                             0, 0, "cx", "cy", true) << "/>\n"
          << "          </a:xfrm>\n"
@@ -1350,8 +1355,9 @@ Point drvPPTX::pathCentroid()
 
   // Otherwise, we compute the area bounded by the knots.
   float area = 0.0f;
-  for (unsigned int n = 0; n < numKnots; n++)
-    area += allKnots[n].x_*allKnots[n+1].y_ - allKnots[n+1].x_*allKnots[n].y_;
+  for (unsigned int n = 0; n < numKnots; n++) {
+    area += allKnots[n].x()*allKnots[n+1].y() - allKnots[n+1].x()*allKnots[n].y();
+  }
   area /= 2.0f;
 
   Point result;
@@ -1359,22 +1365,21 @@ Point drvPPTX::pathCentroid()
   // average all of the knot coordinates and return that.
   if ((numKnots > 0) && (movetos > 1 || area == 0.0f)) {
     Point centroid;
-    for (unsigned int n = 0; n < numKnots; n++)
+    for (unsigned int n = 0; n < numKnots; n++){
       centroid += allKnots[n];
-    centroid.x_ /= numKnots;
-    centroid.y_ /= numKnots;
+    }
+    centroid = centroid / static_cast<float>(numKnots);
     result = centroid;
   } else if (area > 0.0f) {
 
     // Finally, we compute the centroid of the polygon.
     Point p;
     for (unsigned int n = 0; n < numKnots; n++) {
-      const float partial = allKnots[n].x_*allKnots[n+1].y_ - allKnots[n+1].x_*allKnots[n].y_;
-      p.x_ += (allKnots[n].x_ + allKnots[n+1].x_)*partial;
-      p.y_ += (allKnots[n].y_ + allKnots[n+1].y_)*partial;
+      const float partial = allKnots[n].x()*allKnots[n+1].y() - allKnots[n+1].x()*allKnots[n].y();
+      p = p + Point( (allKnots[n].x() + allKnots[n+1].x())*partial,
+                     (allKnots[n].y() + allKnots[n+1].y())*partial);
     }
-    p.x_ /= area*6.0f;
-    p.y_ /= area*6.0f;
+    p = p / area*6.0f;
     result = p;
   } 
   return result;
@@ -1383,12 +1388,10 @@ Point drvPPTX::pathCentroid()
 // Rotate point PT by ANGLE degrees around point PIVOT.
 Point drvPPTX::rotate_pt_around  (const Point & pt, float angle, const Point & pivot)
 {
-  Point shiftedPt = pt;
-  shiftedPt.x_ -= pivot.x_;   // Shift the pivot to the origin.
-  shiftedPt.y_ -= pivot.y_;
+  const Point shiftedPt = pt - pivot;   // Shift the pivot to the origin.
   const float angle_rad = angle * (float)M_PI / 180.0f;
-  const Point rotatedPt(shiftedPt.x_*cosf(angle_rad) - shiftedPt.y_*sinf(angle_rad),  // Rotate the shifted point.
-                  shiftedPt.x_*sinf(angle_rad) + shiftedPt.y_*cosf(angle_rad));
+  const Point rotatedPt(shiftedPt.x()*cosf(angle_rad) - shiftedPt.y()*sinf(angle_rad),  // Rotate the shifted point.
+                  shiftedPt.x()*sinf(angle_rad) + shiftedPt.y()*cosf(angle_rad));
   return rotatedPt + pivot;   // Shift back to the original pivot.
 }
 
@@ -1396,11 +1399,11 @@ void drvPPTX::print_connections(const BBox & pathBBox)
 {
   // Output shape connection sites (knots and centroid).
   const Point centroid = pathCentroid();
-  const long int xshift_emu = -xtrans(pathBBox.ll.x_);
-  const long int yshift_emu = -ytrans(pathBBox.ur.y_);
+  const long int xshift_emu = -xtrans(pathBBox.ll.x());
+  const long int yshift_emu = -ytrans(pathBBox.ur.y());
   slidef << "            <a:cxnLst>\n"
          << "              <a:cxn ang=\"0\">\n"
-         << "                <a:pos " << pt2emu(centroid.x_, centroid.y_,
+         << "                <a:pos " << pt2emu(centroid.x(), centroid.y(),
                                                 xshift_emu, yshift_emu) << "/>\n"
          << "              </a:cxn>\n";
   for (unsigned int n = 0; n < numberOfElementsInPath(); n++) {
@@ -1408,9 +1411,9 @@ void drvPPTX::print_connections(const BBox & pathBBox)
     if (elem.getNrOfPoints() == 0)
       continue;
     const Point & p = elem.getPoint(elem.getNrOfPoints() - 1);
-    const float angle = atan2f(centroid.y_ - p.y_, p.x_ - centroid.x_);
+    const float angle = atan2f(centroid.y() - p.y(), p.x() - centroid.x());
     slidef << "              <a:cxn ang=\"" << angle*60000.0*180.0/M_PI << "\">\n"
-           << "                <a:pos " << pt2emu(p.x_, p.y_,
+           << "                <a:pos " << pt2emu(p.x(), p.y(),
                                                   xshift_emu, yshift_emu) << "/>\n"
            << "              </a:cxn>\n";
   }
@@ -1512,7 +1515,7 @@ void drvPPTX::print_dash()
 {
   // Parse a PostScript dash pattern.
   istringstream dashStr(dashPattern());
-  float *pattern = new float[2*string(dashPattern()).length()];   // Very generous allocation but expected to be short
+  auto pattern = new float[2*string(dashPattern()).length()];   // Very generous allocation but expected to be short
   size_t patternLen = 0;    // Number of floats in the above
   string oneToken;
   dashStr >> oneToken;   // "["
@@ -1561,10 +1564,9 @@ void drvPPTX::show_path()
   // tight due to the way we process curves, but that's not a show
   // stopper.
   BBox pathBBox;
-  pathBBox.ll.x_ = FLT_MAX;
-  pathBBox.ll.y_ = FLT_MAX;
-  pathBBox.ur.x_ = -FLT_MAX;
-  pathBBox.ur.y_ = -FLT_MAX;
+  pathBBox.ll = Point(FLT_MAX, FLT_MAX);
+  pathBBox.ur = Point(-FLT_MAX, -FLT_MAX);
+
   Point prevPoint;
   for (unsigned int e = 0; e < numberOfElementsInPath(); e++) {
     // Non-curves are handled by considering each knot in the
@@ -1574,10 +1576,10 @@ void drvPPTX::show_path()
     if (elem.getType() != curveto)
       for (unsigned int p = 0; p < numPoints; p++) {
         const Point thisPt = elem.getPoint(p);
-        pathBBox.ll.x_ = std::min(pathBBox.ll.x_, thisPt.x_);
-        pathBBox.ll.y_ = std::min(pathBBox.ll.y_, thisPt.y_);
-        pathBBox.ur.x_ = std::max(pathBBox.ur.x_, thisPt.x_);
-        pathBBox.ur.y_ = std::max(pathBBox.ur.y_, thisPt.y_);
+        pathBBox.ll = Point(std::min(pathBBox.ll.x(), thisPt.x()),
+                            std::min(pathBBox.ll.y(), thisPt.y()));
+        pathBBox.ur = Point(std::max(pathBBox.ur.x(), thisPt.x()),
+                            std::max(pathBBox.ur.y(), thisPt.y()));
       }
 
     // Rather than attempt to compute the true bounding box of a
@@ -1589,10 +1591,10 @@ void drvPPTX::show_path()
       for (float t = 0.0f; t <= 1.0f; t += 1.0f/numSamples) {
         const Point bPoint = PointOnBezier(t, prevPoint, elem.getPoint(0),
                                      elem.getPoint(1), elem.getPoint(2));
-        pathBBox.ll.x_ = std::min(pathBBox.ll.x_, bPoint.x_);
-        pathBBox.ll.y_ = std::min(pathBBox.ll.y_, bPoint.y_);
-        pathBBox.ur.x_ = std::max(pathBBox.ur.x_, bPoint.x_);
-        pathBBox.ur.y_ = std::max(pathBBox.ur.y_, bPoint.y_);
+        pathBBox.ll = Point(std::min(pathBBox.ll.x(), bPoint.x()),
+                            std::min(pathBBox.ll.y(), bPoint.y()));
+        pathBBox.ur = Point(std::max(pathBBox.ur.x(), bPoint.x()),
+                            std::max(pathBBox.ur.y(), bPoint.y()));
       }
     }
 
@@ -1605,9 +1607,9 @@ void drvPPTX::show_path()
   // offset and size).
   slidef << "        <p:spPr>\n"
          << "          <a:xfrm>\n";
-  slidef << "            <a:off " << pt2emu(pathBBox.ll.x_, pathBBox.ur.y_) << "/>\n";
-  slidef << "            <a:ext " << pt2emu(pathBBox.ur.x_ - pathBBox.ll.x_,
-                                            pathBBox.ur.y_ - pathBBox.ll.y_,
+  slidef << "            <a:off " << pt2emu(pathBBox.ll.x(), pathBBox.ur.y()) << "/>\n";
+  slidef << "            <a:ext " << pt2emu(pathBBox.ur.x() - pathBBox.ll.x(),
+                                            pathBBox.ur.y() - pathBBox.ll.y(),
                                             0, 0, "cx", "cy", true) << "/>\n"
          << "          </a:xfrm>\n";
 
@@ -1619,8 +1621,8 @@ void drvPPTX::show_path()
 
   // Define the coordinate system for the shape within its frame.
   slidef << "            <a:pathLst>\n"
-         << "              <a:path " << pt2emu(pathBBox.ur.x_ - pathBBox.ll.x_,
-                                               pathBBox.ur.y_ - pathBBox.ll.y_,
+         << "              <a:path " << pt2emu(pathBBox.ur.x() - pathBBox.ll.x(),
+                                               pathBBox.ur.y() - pathBBox.ll.y(),
                                                0, 0, "w", "h", true) << ">\n";
   // Output all of the shape's lines and curves.
   print_coords(pathBBox);
@@ -1743,7 +1745,7 @@ void drvPPTX::show_image(const PSImage & imageinfo)
   const float cx = imageinfo.width*xscale;
   const float cy = imageinfo.height*yscale;
   slidef << ">\n"
-         << "            <a:off " << pt2emu(ofs.x_, ofs.y_) << "/>\n";
+         << "            <a:off " << pt2emu(ofs.x(), ofs.y()) << "/>\n";
   slidef << "            <a:ext " << pt2emu(cx, cy, 0, 0, "cx", "cy", true) << "/>\n"
          << "          </a:xfrm>\n"
          << "          <a:prstGeom prst=\"rect\"/>\n"
@@ -1798,10 +1800,8 @@ D_pptx("pptx",
        true,   // backend supports curves
        true,   // backend supports elements which are filled and have edges
        true,   // backend supports text
-       DriverDescription::png,         // support for PNG images
-       DriverDescription::noopen,      // we create the output file ourself
+       DriverDescription::imageformat::png,         // support for PNG images
+       DriverDescription::opentype::noopen,      // we create the output file ourself
        true,   // if format supports multiple pages in one file
        false  // clipping
        );
-
-#endif

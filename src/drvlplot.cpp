@@ -1045,10 +1045,10 @@ void drvplot::print_coords()
 			{
 				const Point & p = elem.getPoint(0);
 				if (currently_at_lastpoint)
-					(void)plotter->fcont(p.x_ + x_offset, p.y_ + y_offset);
+					(void)plotter->fcont(p.x() + x_offset, p.y() + y_offset);
 				else
-					(void)plotter->fline(lastpoint.x_ + x_offset,
-								   lastpoint.y_ + y_offset, p.x_ + x_offset, p.y_ + y_offset);
+					(void)plotter->fline(lastpoint.x() + x_offset,
+								   lastpoint.y() + y_offset, p.x() + x_offset, p.y() + y_offset);
 				lastpoint = p;
 				currently_at_lastpoint = true;
 				last_was_endpath = false;
@@ -1061,10 +1061,10 @@ void drvplot::print_coords()
 				const Point & p3 = elem.getPoint(1);
 				const Point & p4 = elem.getPoint(2);
 
-				(void)plotter->fbezier3(p1.x_ + x_offset, p1.y_ + y_offset,
-								  p2.x_ + x_offset, p2.y_ + y_offset,
-								  p3.x_ + x_offset, p3.y_ + y_offset,
-								  p4.x_ + x_offset, p4.y_ + y_offset);
+				(void)plotter->fbezier3(p1.x() + x_offset, p1.y() + y_offset,
+								  p2.x() + x_offset, p2.y() + y_offset,
+								  p3.x() + x_offset, p3.y() + y_offset,
+								  p4.x() + x_offset, p4.y() + y_offset);
 				lastpoint = p4;
 				currently_at_lastpoint = true;
 				last_was_endpath = false;
@@ -1074,7 +1074,7 @@ void drvplot::print_coords()
 			if (currently_at_lastpoint)
 				/* have drawn at least one segment */
 			{
-				(void)plotter->fcont(firstpoint.x_ + x_offset, firstpoint.y_ + y_offset);
+				(void)plotter->fcont(firstpoint.x() + x_offset, firstpoint.y() + y_offset);
 				(void)plotter->endpath();
 				currently_at_lastpoint = true;
 				last_was_endpath = true;
@@ -1266,21 +1266,21 @@ void drvplot::show_image(const PSImage& /*imageinfo*/)
 	// not implemented
 }
 
-static DriverDescriptionT < drvplot > D_plot_meta_a("gmfa", "ASCII GNU metafile ", "", "meta", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plot_meta_a("gmfa", "ASCII GNU metafile", "", "meta", false,	// backend does not support subpaths
 													true,	// backend supports curves
 													true,	// backend supports filled elements with edges 
 													true,	// backend supports text
-													DriverDescription::noimage,
-													DriverDescription::normalopen, true,	// format supports multiple pages in one file
+													DriverDescription::imageformat::noimage,
+													DriverDescription::opentype::normalopen, true,	// format supports multiple pages in one file
 													false  /*clipping */
 													);
 
-static DriverDescriptionT < drvplot > D_plot_meta_b("gmfb", "binary GNU metafile ", "", "meta", false,	// backend does not support subpaths
+static DriverDescriptionT < drvplot > D_plot_meta_b("gmfb", "binary GNU metafile", "", "meta", false,	// backend does not support subpaths
 													true,	// backend supports curves
 													true,	// backend supports filled elements with edges 
 													true,	// backend supports text
-													DriverDescription::noimage,
-													DriverDescription::binaryopen, true,	// format supports multiple pages in one file
+													DriverDescription::imageformat::noimage,
+													DriverDescription::opentype::binaryopen, true,	// format supports multiple pages in one file
 													false  /*clipping */
 													);
 
@@ -1289,8 +1289,8 @@ static DriverDescriptionT < drvplot > D_plot("plot", "GNU libplot output types, 
 											 true,	// backend supports curves
 											 true,	// backend supports filled elements with edges 
 											 true,	// backend supports text
-											 DriverDescription::noimage,
-											 DriverDescription::normalopen,	// may close, reopen as binary
+											 DriverDescription::imageformat::noimage,
+											 DriverDescription::opentype::normalopen,	// may close, reopen as binary
 											 true,	// format supports multiple pages in one file
 											 false  /*clipping */
 											 );
@@ -1304,8 +1304,8 @@ static DriverDescriptionT < drvplot > D_plotpnm("plot-pnm", "pnm via GNU libplot
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
-												DriverDescription::noimage,
-												DriverDescription::normalopen,	// may close, reopen as binary
+												DriverDescription::imageformat::noimage,
+												DriverDescription::opentype::normalopen,	// may close, reopen as binary
 												true,	// format supports multiple pages in one file
 												false /*clipping */ 
 												);
@@ -1319,8 +1319,8 @@ static DriverDescriptionT < drvplot > D_plotcgm("plot-cgm", "cgm via GNU libplot
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
-												DriverDescription::noimage,
-												DriverDescription::normalopen,	// may close, reopen as binary
+												DriverDescription::imageformat::noimage,
+												DriverDescription::opentype::normalopen,	// may close, reopen as binary
 												true,	// format supports multiple pages in one file
 												false  /*clipping */
 												);
@@ -1330,8 +1330,8 @@ static DriverDescriptionT < drvplot > D_plotai("plot-ai", "ai via GNU libplot","
 											   true,	// backend supports curves
 											   true,	// backend supports filled elements with edges 
 											   true,	// backend supports text
-											   DriverDescription::noimage,
-											   DriverDescription::normalopen,	// may close, reopen as binary
+											   DriverDescription::imageformat::noimage,
+											   DriverDescription::opentype::normalopen,	// may close, reopen as binary
 											   true,	// format supports multiple pages in one file
 											   false   /*clipping */
 											   );
@@ -1341,8 +1341,8 @@ static DriverDescriptionT < drvplot > D_plotsvg("plot-svg", "svg via GNU libplot
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
-												DriverDescription::noimage,
-												DriverDescription::normalopen,	// may close, reopen as binary
+												DriverDescription::imageformat::noimage,
+												DriverDescription::opentype::normalopen,	// may close, reopen as binary
 												true,	// format supports multiple pages in one file
 												false  /*clipping */
 												);
@@ -1352,8 +1352,8 @@ static DriverDescriptionT < drvplot > D_plotps("plot-ps", "ps via GNU libplot", 
 											   true,	// backend supports curves
 											   true,	// backend supports filled elements with edges 
 											   true,	// backend supports text
-											   DriverDescription::noimage,
-											   DriverDescription::normalopen,	// may close, reopen as binary
+											   DriverDescription::imageformat::noimage,
+											   DriverDescription::opentype::normalopen,	// may close, reopen as binary
 											   true,	// format supports multiple pages in one file
 											   false /*clipping */ 
 											   );
@@ -1362,8 +1362,8 @@ static DriverDescriptionT < drvplot > D_plotfig("plot-fig", "fig via GNU libplot
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
-												DriverDescription::noimage,
-												DriverDescription::normalopen,	// may close, reopen as binary
+												DriverDescription::imageformat::noimage,
+												DriverDescription::opentype::normalopen,	// may close, reopen as binary
 												true,	// format supports multiple pages in one file
 												false  /*clipping */
 												);
@@ -1372,8 +1372,8 @@ static DriverDescriptionT < drvplot > D_plotpcl("plot-pcl", "pcl via GNU libplot
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
-												DriverDescription::noimage,
-												DriverDescription::normalopen,	// may close, reopen as binary
+												DriverDescription::imageformat::noimage,
+												DriverDescription::opentype::normalopen,	// may close, reopen as binary
 												true,	// format supports multiple pages in one file
 												false  /*clipping */
 												);
@@ -1382,8 +1382,8 @@ static DriverDescriptionT < drvplot > D_plothpgl("plot-hpgl", "hpgl via GNU libp
 												 true,	// backend supports curves
 												 true,	// backend supports filled elements with edges 
 												 true,	// backend supports text
-												 DriverDescription::noimage,
-												 DriverDescription::normalopen,	// may close, reopen as binary
+												 DriverDescription::imageformat::noimage,
+												 DriverDescription::opentype::normalopen,	// may close, reopen as binary
 												 true,	// format supports multiple pages in one file
 												 false  /*clipping */ 
 												 );
@@ -1392,8 +1392,8 @@ static DriverDescriptionT < drvplot > D_plottek("plot-tek", "tek via GNU libplot
 												true,	// backend supports curves
 												true,	// backend supports filled elements with edges 
 												true,	// backend supports text
-												DriverDescription::noimage,
-												DriverDescription::normalopen,	// may close, reopen as binary
+												DriverDescription::imageformat::noimage,
+												DriverDescription::opentype::normalopen,	// may close, reopen as binary
 												true,	// format supports multiple pages in one file
 												false /*clipping */ 
 												);
@@ -1403,8 +1403,8 @@ static DriverDescriptionT < drvplot > D_plotX("plot-X", "X via GNU libplot", "",
 											  true,	// backend supports curves
 											  true,	// backend supports filled elements with edges 
 											  true,	// backend supports text
-											  DriverDescription::noimage,
-											  DriverDescription::normalopen,	// may close, reopen as binary
+											  DriverDescription::imageformat::noimage,
+											  DriverDescription::opentype::normalopen,	// may close, reopen as binary
 											  true,	// format supports multiple pages in one file
 											  false /*clipping */
 											  );

@@ -5,7 +5,7 @@
    callbackBuffer : This file is part of pstoedit
    streambuf that writes the data to a user defineable call back function
 
-   Copyright (C) 1998 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -40,11 +40,6 @@ The GNU C++ Iostream Library
 #include I_streamb
 USESTD
 
-#if !defined(HAVE_STL) && !defined(__GNUG__)
-// this should be defined for all ANSI compilers in iostream
-// but this is also already defined in old GNU compilers
-typedef int streamsize; // oder long ?? MSVC likes int
-#endif
 #if defined(_WIN32) || defined(__OS2__)
 typedef int (__stdcall write_callback_type) (void * cb_data, const char* text, int length);
 // length is int and not unsigned long because of gs-api
@@ -56,7 +51,8 @@ class DLLEXPORT callbackBuffer : public std::streambuf {
 public:
 	callbackBuffer(void * cb_data_p, write_callback_type* wcb) : 
 		cb_data(cb_data_p), write_callback(wcb) {}
-	write_callback_type * set_callback(void * cb_data_p,write_callback_type* new_cb);
+    ~callbackBuffer() { set_callback(nullptr, nullptr); }
+	write_callback_type * set_callback(void * cb_data_p, write_callback_type* new_cb);
 	int write_to_callback(const char* text, size_t length);
 
 protected:
@@ -69,7 +65,6 @@ protected:
     std::streamsize xsputn(const char* text, std::streamsize n);
 
 private:
-	
 	void * cb_data;
 	write_callback_type * write_callback;
 	callbackBuffer(const callbackBuffer &) = delete; // not defined

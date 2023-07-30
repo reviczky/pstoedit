@@ -2,7 +2,7 @@
    drvJAVA.cpp : This file is part of pstoedit
    backend to generate a Java(TM) applet
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -113,15 +113,15 @@ void drvJAVA::print_coords()
 		case moveto:{
 				const Point & p = elem.getPoint(0);
 				outf << "\tp.addPoint(";
-				outf << (int) (p.x_ + x_offset) << ","
-					<< (int) (currentDeviceHeight - p.y_ + y_offset) << ");";
+				outf << (int) (p.x() + x_offset) << ","
+					<< (int) (currentDeviceHeight - p.y() + y_offset) << ");";
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
 				outf << "\tp.addPoint(";
-				outf << (int) (p.x_ + x_offset) << ","
-					<< (int) (currentDeviceHeight - p.y_ + y_offset) << ");";
+				outf << (int) (p.x() + x_offset) << ","
+					<< (int) (currentDeviceHeight - p.y() + y_offset) << ");";
 			}
 			break;
 		case closepath:
@@ -204,8 +204,8 @@ void drvJAVA::show_path()
 			for (unsigned int t = 0; t < numberOfElementsInPath(); t++) {
 				const Point & p = pathElement(t).getPoint(0);
 				outf << "\tl.addPoint(";
-				outf << (int) (p.x_ + x_offset) << ","
-					<< (int) (currentDeviceHeight - p.y_ + y_offset) << ");\n ";
+				outf << (int) (p.x() + x_offset) << ","
+					<< (int) (currentDeviceHeight - p.y() + y_offset) << ");\n ";
 			}
 			outf << "\tcurrentpage.theObjects.addElement(l);" << endl;
 		}
@@ -221,8 +221,8 @@ void drvJAVA::show_path()
 				const basedrawingelement & elem = pathElement(0);
 				const Point & p = elem.getPoint(0);
 				outf << "\tp.addPoint(";
-				outf << (int) (p.x_ + x_offset) << ","
-					<< (int) (currentDeviceHeight - p.y_ + y_offset) << ");\n ";
+				outf << (int) (p.x() + x_offset) << ","
+					<< (int) (currentDeviceHeight - p.y() + y_offset) << ");\n ";
 			}
 			outf << "\tcurrentpage.theObjects.addElement(p);" << endl;
 		}
@@ -252,6 +252,6 @@ static DriverDescriptionT < drvJAVA > D_java("java1", "java 1 applet source code
 											 false,	// if backend supports curves, else 0
 											 false,	// if backend supports elements with fill and edges
 											 true,	// if backend supports text, else 0
-											 DriverDescription::noimage,	// no support for PNG file images
-											 DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+											 DriverDescription::imageformat::noimage,	// no support for PNG file images
+											 DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 											 false /*clipping */ );

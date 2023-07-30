@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -89,10 +89,13 @@ drvbase::drvbase(const char *driveroptions_p, ostream & theoutStream,
 				 const char *nameOfInputFile_p,
 				 const char *nameOfOutputFile_p,
 				 PsToEditOptions & globaloptions_p, 
+				 ProgramOptions* driverOptions_p,
 				 const DriverDescription & driverdesc_p)
 :								// constructor
 driverdesc(driverdesc_p), 
-DOptions_ptr(driverdesc_p.createDriverOptions()),
+// if options are passed in already filled, use those.
+DOptions_ptr(driverOptions_p ? driverOptions_p : driverdesc_p.createDriverOptions()),
+canDeleteDriverOptions(driverOptions_p == nullptr), // if options get passed in, we do not delete them
 outf(theoutStream),
 errf(theerrStream),
 inFileName(nameOfInputFile_p ? nameOfInputFile_p : ""),
@@ -113,8 +116,6 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 	// default for textInfo_ and lasttextInfo_
 {
 
-	
-
 	// verbose = (getenv("PSTOEDITVERBOSE") != 0);
 
 	if (verbose) {
@@ -133,7 +134,6 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 	}
 	// preparse driveroptions and build d_argc and d_argv
 	if (driveroptions_p) {
-#if 1
 		Argv driverargs;
 		(void) driverargs.parseFromString(driveroptions_p);
 		d_argc = driverargs.argc;
@@ -145,34 +145,7 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 			d_argc++;
 		}
 		d_argv[d_argc] = nullptr;
-#else
-		driveroptions = cppstrdup(driveroptions_p);
-		//C_istrstream optstream(driveroptions, strlen(driveroptions));
-		C_istrstream optstream(driveroptions); //, strlen(driveroptions));
-		const long startOfStream = optstream.tellg();
-		char currentarg[100];
-		// first count number of arguments
-		while (!optstream.eof()) {
-			(void) optstream.width(sizeof(currentarg));
-			optstream >> currentarg;
-			d_argc++;
-		}
-		d_argv = new const char *[d_argc + 2];  // 1 more for the argv[0]
-		// now fill d_args array;
-		(void) optstream.seekg(startOfStream);	// reposition to start
-		optstream.clear();
-		// fill argv[0] with driver name (to be similar with Unix)
-		d_argv[0] = cppstrdup(driverdesc_p.symbolicname);
-		d_argc = 1;
-		while (!optstream.eof()) {
-			optstream >> currentarg;
-			if (strlen(currentarg) > 0) {
-				d_argv[d_argc] = cppstrdup(currentarg);
-				d_argc++;
-			}
-		}
-		d_argv[d_argc] = 0;
-#endif
+
 		if (verbose) {
 			errf << "got " << d_argc << " driver argument(s)" << endl;
 			for (unsigned int i = 0; i < d_argc; i++) {
@@ -189,7 +162,7 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 	   if (d_argc>0) {		//debug errf << "DOptions_ptr: " << (void*) DOptions_ptr << endl;
 			const unsigned int remaining = DOptions_ptr->parseoptions(errf,d_argc,d_argv);
 			if ((remaining > 0) && !DOptions_ptr->expectUnhandled) {
-				errf << "the following " << remaining  << " options could not be handled by the driver: " << endl;
+				errf << "the following " << remaining  << " option(s) could not be handled by the driver: " << endl;
 				for (unsigned int i = 0; i < remaining; i++) {
 					errf << DOptions_ptr->unhandledOptions[i] << endl;
 				}
@@ -199,9 +172,6 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 	   cerr << "DOptions_ptr is nullptr - program flow error - contact author." << endl;
 	}
 	
-
-//  bboxes = new BBox[maxPages];
-
 	// init segment info for first segment
 	// all others will be updated with each newsegment
 
@@ -209,14 +179,6 @@ saveRestoreInfo(nullptr), currentSaveLevel(&saveRestoreInfo), page_empty(true), 
 	currentPath = &PI1;
 	lastPath = &PI2;
 	outputPath = currentPath;
-
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
-#else
-	if ((PI1.path == 0) || (PI2.path == 0) || (clippath.path == 0)) {
-		errf << "new failed in drvbase::drvbase " << endl;
-		exit(1);
-	}
-#endif
 
 	textInfo_.thetext.assign("");
 	setCurrentFontName("Courier", true);
@@ -252,8 +214,10 @@ drvbase::~drvbase()
 //	delete[]outBaseName;
 //	outBaseName = nullptr;
 //	Pdriverdesc = nullptr;
-
-	delete DOptions_ptr;
+	if (canDeleteDriverOptions) {
+		delete DOptions_ptr; // for GUI we cannot delete it here.
+	}
+	
 	DOptions_ptr = nullptr;
 
 	if (currentSaveLevel->previous != nullptr) {
@@ -733,7 +697,7 @@ or
 	unsigned int start_horic_test;
 	unsigned int start_vert_test;
 
-	if (points[0].x_ == points[1].x_) {
+	if (points[0].x() == points[1].x()) {
 		start_horic_test = 0;
 		start_vert_test = 1;
 	} else {
@@ -743,7 +707,7 @@ or
 
 	{
 		for (unsigned int i = start_horic_test; i < 4; i++, i++)
-			if (points[i].x_ != points[(i + 1) % 4].x_) {
+			if (points[i].x() != points[(i + 1) % 4].x()) {
 				// cout << "F1" << endl;
 				return false;
 			}
@@ -751,7 +715,7 @@ or
 
 	{
 		for (unsigned int i = start_vert_test; i < 4; i++, i++)
-			if (points[i].y_ != points[(i + 1) % 4].y_) {
+			if (points[i].y() != points[(i + 1) % 4].y()) {
 				// cout << "F2" << endl;
 				return false;
 			}
@@ -1161,24 +1125,24 @@ void drvbase::dumpPath(bool doFlushText)
 				if (is_a_rectangle()) {
 					const float llx =
 						std::min(std::min
-							(pathElement(0).getPoint(0).x_,
-							 pathElement(1).getPoint(0).x_),
-							std::min(pathElement(2).getPoint(0).x_, pathElement(3).getPoint(0).x_));
+							(pathElement(0).getPoint(0).x(),
+							 pathElement(1).getPoint(0).x()),
+							std::min(pathElement(2).getPoint(0).x(), pathElement(3).getPoint(0).x()));
 					const float urx =
 						std::max(std::max
-							(pathElement(0).getPoint(0).x_,
-							 pathElement(1).getPoint(0).x_),
-							std::max(pathElement(2).getPoint(0).x_, pathElement(3).getPoint(0).x_));
+							(pathElement(0).getPoint(0).x(),
+							 pathElement(1).getPoint(0).x()),
+							std::max(pathElement(2).getPoint(0).x(), pathElement(3).getPoint(0).x()));
 					const float lly =
 						std::min(std::min
-							(pathElement(0).getPoint(0).y_,
-							 pathElement(1).getPoint(0).y_),
-							std::min(pathElement(2).getPoint(0).y_, pathElement(3).getPoint(0).y_));
+							(pathElement(0).getPoint(0).y(),
+							 pathElement(1).getPoint(0).y()),
+							std::min(pathElement(2).getPoint(0).y(), pathElement(3).getPoint(0).y()));
 					const float ury =
 						std::max(std::max
-							(pathElement(0).getPoint(0).y_,
-							 pathElement(1).getPoint(0).y_),
-							std::max(pathElement(2).getPoint(0).y_, pathElement(3).getPoint(0).y_));
+							(pathElement(0).getPoint(0).y(),
+							 pathElement(1).getPoint(0).y()),
+							std::max(pathElement(2).getPoint(0).y(), pathElement(3).getPoint(0).y()));
 
 					show_rectangle(llx, lly, urx, ury);
 				} else {
@@ -1224,7 +1188,6 @@ void drvbase::addtopath(basedrawingelement * newelement) {
 void drvbase::PathInfo::addtopath(basedrawingelement * newelement,
 	                              ostream & errf)
 {
-#if defined(HAVE_STL) && !defined(USE_FIXED_ARRAY)
         if (numberOfElementsInPath < path.size()) {
 	      path[numberOfElementsInPath] = newelement;
         } else {
@@ -1232,22 +1195,6 @@ void drvbase::PathInfo::addtopath(basedrawingelement * newelement,
         }
 		numberOfElementsInPath++;
 		unused(&errf);
-#else
-		if (numberOfElementsInPath < maxElements) {
-			path[numberOfElementsInPath] = newelement;
-#ifdef DEBUG
-			cout << "pathelement " << 
-				numberOfElementsInPath << " added " << *newelement << endl;
-#endif
-			numberOfElementsInPath++;
-		} else {
-			errf <<
-				"Fatal: number of path elements exceeded. Increase maxElements in drvbase.h"
-				<< endl;
-			exit(1);
-		}
-#endif
-
 }
 
 void drvbase::PathInfo::clear()
@@ -1288,7 +1235,7 @@ ostream & operator << (ostream & out, const basedrawingelement & elem)
 {
 	out << "type: " << (int) elem.getType() << " params: ";
 	for (unsigned int i = 0; i < elem.getNrOfPoints(); i++) {
-		out << elem.getPoint(i).x_ << " " << elem.getPoint(i).y_ << " ";
+		out << elem.getPoint(i).x() << " " << elem.getPoint(i).y() << " ";
 	}
 	out << endl;
 	return out;
@@ -1298,10 +1245,8 @@ ColorTable::ColorTable(const char *const *defaultColors, const unsigned int numb
 defaultColors_(defaultColors),
 numberOfDefaultColors_(numberOfDefaultColors), makeColorName_(makeColorName)
 {
-//dbg   cerr << " Constructing a color table with " << numberOfDefaultColors << " default colors" << endl;
 	for (unsigned int i = 0; i < maxcolors; i++)
 		newColors[i] = nullptr;
-//dbg   cerr << 1/(1/numberOfDefaultColors) << endl;
 }
 
 ColorTable::~ColorTable()
@@ -1445,7 +1390,7 @@ void DescriptionRegister::explainformats(ostream & out, bool withdetails) const
 					groupname += " ";
 				}
 				if (withdetails) {
-					out << "\\subsubsection{" << groupname << "}" << endl;
+					out << "\\subsection{" << groupname << "}" << endl;
 					out << "This group consists of the following variants:" << endl;
 					out << "\\begin{description}" << endl;
 					for (size_t v = 0; rp[i]->variant(v); v++) {
@@ -1456,41 +1401,46 @@ void DescriptionRegister::explainformats(ostream & out, bool withdetails) const
 					}
 					out << "\\end{description}" << endl;
 					// long explanation is attached only to first instance
-					if (strlen(rp[i]->long_explanation) > 0) { out << rp[i]->long_explanation << endl << endl; }
-
-					options->showhelp(out, withdetails, withdetails);
+					if (strlen(rp[i]->long_explanation) > 0) { 
+						out << rp[i]->long_explanation << endl << endl; 
+					}
+					options->showhelp(out, "The following driver specific options are available in this group: ", rp[i]->symbolicname,
+						               true /* for tex */, true /* details */, ProgramOptions::allSheets);
 					out << "%%// end of options" << endl;
 				} else {
-				  out << groupname << "\t(" << rp[i]->filename << ")" << endl;
-			 	  for (size_t v = 0; rp[i]->variant(v); v++) {
-					  const DriverDescription * d = rp[i]->variant(v);
-					  out << '\t' << d->symbolicname << ":\t";
-					  if (strlen(d->symbolicname) < 7) {
-						  out << '\t';
-					  }
-					  out << "\t." << d->suffix << ":\t";
-					  out << d->short_explanation << " " << d->additionalInfo();
-					  if (d->checkfunc) {
-						  if (!(d->checkfunc())) {
+					out << groupname << "\t(" << rp[i]->filename << ")" << endl;
+			 		for (size_t v = 0; rp[i]->variant(v); v++) {
+						const DriverDescription * d = rp[i]->variant(v);
+						out << '\t' << d->symbolicname << ":\t";
+						if (strlen(d->symbolicname) < 7) {
+							out << '\t';
+						}
+						out << "\t." << d->suffix << ":\t";
+						out << d->short_explanation << " " << d->additionalInfo();
+						if (d->checkfunc) {
+							if (!(d->checkfunc())) {
 							  out << " (no valid key found)";
-						  }
-					  }
-					  out << endl;
-				  }
-				  if (options->numberOfOptions()) {
-					  out << "This group supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
-				  }
-				  options->showhelp(out, withdetails, withdetails);
-				  out << "-------------------------------------------" << endl;
+							}
+						}
+						out << endl;
+					}
+					if (options->numberOfOptions()) {
+						options->showhelp(out, "This group supports the following additional options: "
+								       "(to be specified using -f \"format:-option1 -option2\")", rp[i]->symbolicname,
+							              false /* for tex */, false /* details */, ProgramOptions::allSheets);
+					}
+					out << "-------------------------------------------" << endl;
 				}
 				delete options;
 			} 	
 		} else {
+			// no variants - single driver in a group
 			ProgramOptions* options = rp[i]->createDriverOptions();
 			if (withdetails) {
-				out << "\\subsubsection{" << rp[i]->symbolicname << " - " << rp[i]->short_explanation << "}" << endl;
+				out << "\\subsection{" << rp[i]->symbolicname << " - " << rp[i]->short_explanation << "}" << endl;
 				if (strlen(rp[i]->long_explanation) > 0) { out << rp[i]->long_explanation << endl << endl; }
-				options->showhelp(out, withdetails, withdetails);		
+				options->showhelp(out, "The following driver specific options are available: ", rp[i]->symbolicname,
+					               true /* for tex */, true /* details */, ProgramOptions::allSheets);
 				out << "%%// end of options" << endl;
 			} else {
 				out << '\t' << rp[i]->symbolicname << ":\t";
@@ -1507,10 +1457,10 @@ void DescriptionRegister::explainformats(ostream & out, bool withdetails) const
 				}
 				out << "\t(" << rp[i]->filename << ")" << endl;
 				if (options->numberOfOptions()) {
-					out << "This format supports the following additional options: (specify using -f \"format:-option1 -option2\")" << endl;
+					options->showhelp(out, "This format supports the following additional options: "
+							       "(to be specified using -f \"format:-option1 -option2\")", rp[i]->symbolicname,
+							       false, false, ProgramOptions::allSheets);
 				}
-
-				options->showhelp(out, withdetails, withdetails);
 				out << "-------------------------------------------" << endl;
 			}
 			delete options;
@@ -1561,7 +1511,6 @@ void DescriptionRegister::registerDriver(DriverDescription * xp)
 	ind++;
 }
 
-// int Rinit::ref = 0;
 DLLEXPORT DescriptionRegister *globalRp = nullptr; 
 
 extern "C" DLLEXPORT DescriptionRegister * getglobalRp()
@@ -1618,46 +1567,12 @@ const char * DriverDescription::additionalInfo() const {
 	return ((checkfunc != nullptr) ? (checkfunc()? "" : "(license key needed, see pstoedit manual)") : "");
 }
 
-#if 0
-// not needed - pure virtual
-drvbase *DriverDescription::
-CreateBackend(const char *const driveroptions_P, ostream & theoutStream,
-			  ostream & theerrStream, const char *const nameOfInputFile,
-			  const char *const nameOfOutputFile, 
-			  const PsToEditOptions & globaloptions) const
-{
-	unused(driveroptions_P);
-	unused(&theoutStream);
-	unused(&theerrStream);
-	unused(nameOfInputFile);
-	unused(nameOfOutputFile);
-	unused(&globaloptions);
-	return 0;
-}
-#endif
-
-#if 0
-// def BUGGYGPP
-//
-// GNU g++ causes a seg fault, when the singleton instance is destroyed triggered by a dlclose()
-// so we have to live with this small memory leak due to the allocation on the heap
-//
-// This problem is now solved by the removal of the dtor for this class.
-//
-DescriptionRegister & DescriptionRegister::getInstance()
-{
-	static DescriptionRegister * theSingleInstance = new DescriptionRegister;
-	globalRp = theSingleInstance;
-	return *theSingleInstance;
-}
-#else
 DescriptionRegister & DescriptionRegister::getInstance()
 {
 	static DescriptionRegister theSingleInstance;
 	globalRp = &theSingleInstance;
 	return theSingleInstance;
 }
-#endif
 
 //
 // SINGLETONSONHEAP might be useful if problems occur during the unloading of libpstoedit.so

@@ -2,7 +2,7 @@
    drvMAGICK.cpp : This file is part of pstoedit
    driver for Magick++ API.
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -25,7 +25,7 @@
 
 // needs for linking : CORE_RL_Magick++_.lib CORE_RL_magick_.lib 
 
-#if defined(HAVE_STL) && defined(HAVE_MAGIC)
+#if defined(HAVE_MAGIC)
 // Magick++ can only be compiled with STL
 
 #include "drvmagick++.h"
@@ -139,15 +139,15 @@ void drvMAGICK::create_vpath(VPathList &vpath)
 		switch (elem.getType()) {
 		case moveto:{
 				const ::Point & p = elem.getPoint(0);
-				const Magick::Coordinate coord(p.x_ + x_offset,
-											   currentDeviceHeight - p.y_ + y_offset);
+				const Magick::Coordinate coord(p.x() + x_offset,
+											   currentDeviceHeight - p.y() + y_offset);
 				vpath.push_back(PathMovetoAbs(coord));
 			}
 			break;
 		case lineto:{
 				const ::Point & p = elem.getPoint(0);
-				const Magick::Coordinate coord(p.x_ + x_offset,
-											   currentDeviceHeight - p.y_ + y_offset);
+				const Magick::Coordinate coord(p.x() + x_offset,
+											   currentDeviceHeight - p.y() + y_offset);
 				vpath.push_back(PathLinetoAbs(coord));
 			}
 			break;
@@ -161,9 +161,9 @@ void drvMAGICK::create_vpath(VPathList &vpath)
 				vpath.
 					push_back(PathCurvetoAbs
 							  (PathCurvetoArgs
-							   (p0.x_ + x_offset, currentDeviceHeight - p0.y_ + y_offset,
-								p1.x_ + x_offset, currentDeviceHeight - p1.y_ + y_offset,
-								p2.x_ + x_offset, currentDeviceHeight - p2.y_ + y_offset)));
+							   (p0.x() + x_offset, currentDeviceHeight - p0.y() + y_offset,
+								p1.x() + x_offset, currentDeviceHeight - p1.y() + y_offset,
+								p2.x() + x_offset, currentDeviceHeight - p2.y() + y_offset)));
 			}
 			break;
 		default:
@@ -410,8 +410,8 @@ static DriverDescriptionT < drvMAGICK > D_magick("magick", "MAGICK driver compat
 												 true,	// backend supports curves
 												 true,	// backend supports elements which are filled and have edges
 												 true,	// backend supports text
-												 DriverDescription::png,// support for PNG file images
-												 DriverDescription::noopen, false,	// if format supports multiple pages in one file
+												 DriverDescription::imageformat::png,// support for PNG file images
+												 DriverDescription::opentype::noopen, false,	// if format supports multiple pages in one file
 												 true 	/*clipping */
 												 );
 

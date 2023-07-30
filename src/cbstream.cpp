@@ -3,7 +3,7 @@
    callbackBuffer : This file is part of pstoedit
    streambuf that writes the data to a user defineable call back function
 
-   Copyright (C) 1998 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -28,10 +28,6 @@ The GNU C++ Iostream Library
 
 
 */
-
-#if defined(_WIN32) || defined(__OS2__)
-// this code is only needed under WIN32
-// ...and under OS/2
 
 #include "cppcomp.h"
 
@@ -118,7 +114,5 @@ int main(int argc, char **argv)
 	cerr << "Hello world!\n";
 	return 0;
 }
-
-#endif
 
 #endif

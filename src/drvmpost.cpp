@@ -3,7 +3,7 @@
    Backend for MetaPost files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_geocities.com
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_geocities.com
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -65,7 +65,7 @@ constructBase,
 	outf << "% Converted from PostScript(TM) to MetaPost by pstoedit\n"
 		<<
 		"% MetaPost backend contributed by Scott Pakin <scott+ps2ed_AT_pakin.org>\n"
-		<< "% pstoedit is Copyright (C) 1993 - 2021 Wolfgang Glunz" <<
+		<< "% pstoedit is Copyright (C) 1993 - 2023 Wolfgang Glunz" <<
 		" <wglunz35_AT_pstoedit.net>\n\n";
 
 	/*
@@ -112,7 +112,7 @@ void drvMPOST::print_coords()
 						outf << "--";
 					else
 						outf << "fill ";
-					outf << '(' << (p.x_ + x_offset) << ',' << (p.y_ + y_offset)
+					outf << '(' << (p.x() + x_offset) << ',' << (p.y() + y_offset)
 						<< ')';
 					withinpath = true;
 					pointsOnLine++;
@@ -135,12 +135,12 @@ void drvMPOST::print_coords()
 						break;
 					}
 					const Point & p0 = elem.getPoint(0);
-					outf << "..controls (" << (p0.x_ + x_offset)
-						<< ',' << (p0.y_ + y_offset) << ") and (";
+					outf << "..controls (" << (p0.x() + x_offset)
+						<< ',' << (p0.y() + y_offset) << ") and (";
 					const Point & pt1 = elem.getPoint(1);
-					outf << (pt1.x_ + x_offset) << ',' << (pt1.y_ + y_offset) << ")..(";
+					outf << (pt1.x() + x_offset) << ',' << (pt1.y() + y_offset) << ")..(";
 					const Point & pt2 = elem.getPoint(2);
-					outf << (pt2.x_ + x_offset) << ',' << (pt2.y_ + y_offset) << ')';
+					outf << (pt2.x() + x_offset) << ',' << (pt2.y() + y_offset) << ')';
 					pointsOnLine += 3;
 					withinpath = true;
 				}
@@ -172,7 +172,7 @@ void drvMPOST::print_coords()
 						outf << prevDashPattern << ';' << endl;
 					outf << "draw ";
 					const Point & p = elem.getPoint(0);
-					outf << '(' << (p.x_ + x_offset) << ',' << (p.y_ + y_offset)
+					outf << '(' << (p.x() + x_offset) << ',' << (p.y() + y_offset)
 						<< ')';
 					withinpath = true;
 					pointsOnLine = 1;	// Contrast with the case where fillmode is set
@@ -188,7 +188,7 @@ void drvMPOST::print_coords()
 						cerr << "lineto without a moveto; ignoring" << endl;
 						break;
 					}
-					outf << '(' << (p.x_ + x_offset) << ',' << (p.y_ + y_offset)
+					outf << '(' << (p.x() + x_offset) << ',' << (p.y() + y_offset)
 						<< ')';
 					withinpath = true;
 					pointsOnLine++;
@@ -212,12 +212,12 @@ void drvMPOST::print_coords()
 						break;
 					}
 					const Point & p0 = elem.getPoint(0);
-					outf << "..controls (" << (p0.x_ + x_offset)
-						<< ',' << (p0.y_ + y_offset) << ") and (";
+					outf << "..controls (" << (p0.x() + x_offset)
+						<< ',' << (p0.y() + y_offset) << ") and (";
 					const Point & pt1 = elem.getPoint(1);
-					outf << (pt1.x_ + x_offset) << ',' << (pt1.y_ + y_offset) << ")..(";
+					outf << (pt1.x() + x_offset) << ',' << (pt1.y() + y_offset) << ")..(";
 					const Point & pt2 = elem.getPoint(2);
-					outf << (pt2.x_ + x_offset) << ',' << (pt2.y_ + y_offset) << ')';
+					outf << (pt2.x() + x_offset) << ',' << (pt2.y() + y_offset) << ')';
 					pointsOnLine += 3;
 					withinpath = true;
 				}
@@ -432,7 +432,7 @@ static DriverDescriptionT < drvMPOST > D_mpost("mpost", "MetaPost format", "","m
 											   true,	// if backend supports curves, else 0
 											   false,	// if backend supports elements with fill and edges
 											   true,	// if backend supports text, else 0
-											   DriverDescription::noimage,	// no support for PNG file images
-											   DriverDescription::normalopen, true,	// if format supports multiple pages in one file
+											   DriverDescription::imageformat::noimage,	// no support for PNG file images
+											   DriverDescription::opentype::normalopen, true,	// if format supports multiple pages in one file
 											   false  /*clipping */ 
 											   );

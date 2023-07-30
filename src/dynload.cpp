@@ -2,7 +2,7 @@
    dynload.h : This file is part of pstoedit
    declarations for dynamic loading of drivers
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -271,15 +271,21 @@ public:
 	PluginVector():curindex(0u) {
 		for (unsigned int i = 0; i < maxPlugins; i++)
 			pluginPtr[i] = nullptr;
-	} ~PluginVector() {
+	} 
+	~PluginVector() {
+		clear();
+	}
+	void add(DynLoader * newelem) {
+//		cout << "adding plugin (o) " << endl;
+//		cerr << "adding plugin (e) " << endl;
+		pluginPtr[curindex] = newelem;
+		curindex++;
+	}
+	void clear() {
 		for (unsigned int i = 0; i < maxPlugins; i++) {
 			delete pluginPtr[i];
 			pluginPtr[i] = nullptr;
 		}
-	}
-	void add(DynLoader * newelem) {
-		pluginPtr[curindex] = newelem;
-		curindex++;
 	}
 	DynLoader *pluginPtr[maxPlugins];
 	unsigned int curindex;
@@ -288,6 +294,11 @@ public:
 };
 
 static PluginVector LoadedPlugins;
+
+extern "C" DLLEXPORT
+void unloadpstoeditplugins() {
+	LoadedPlugins.clear();
+}
 
 static bool loadaPlugin(const char *filename, ostream & errstream, bool verbose)
 {
@@ -526,12 +537,9 @@ bool loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 
 #else
 // no shared libs
-#ifdef HAVE_STL
 #include <iosfwd>
 using namespace std;
-#else
-class ostream;
-#endif
+
 bool loadPlugInDrivers(const char *pluginDir, ostream & errstream, bool verbose)
 {
 	if (verbose) {

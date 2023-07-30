@@ -3,7 +3,7 @@
    simple backend for CNC g code format.
    Contributed / Copyright 2008 by: Lawrence Glaister VE7IT 
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -97,19 +97,19 @@ void drvGCODE::show_path()
 		case moveto:{
 				const Point & p = elem.getPoint(0);
 				outf << "\nG00 Z#1000\n";
-				outf << "G00 X[#1003*" << p.x_ << "] Y[#1004*" << p.y_ << "]\n";
+				outf << "G00 X[#1003*" << p.x() << "] Y[#1004*" << p.y() << "]\n";
 				outf << "G01 Z#1002\n";
 				currentPoint = p;
 			}
 			break;
 		case lineto:{
 				const Point & p = elem.getPoint(0);
-				outf << "G01 X[#1003*" << p.x_ << "] Y[#1004*" << p.y_ << "]\n";
+				outf << "G01 X[#1003*" << p.x() << "] Y[#1004*" << p.y() << "]\n";
 				currentPoint = p;
 			}
 			break;
 		case closepath:
-				outf << "G01 X[#1003*" << firstPoint.x_ << "] Y[#1004*" << firstPoint.y_ << "]\n";
+				outf << "G01 X[#1003*" << firstPoint.x() << "] Y[#1004*" << firstPoint.y() << "]\n";
 			break;
 
 		case curveto:{
@@ -120,7 +120,7 @@ void drvGCODE::show_path()
 			// fitpoints should be somewhere between 5 and 50 for reasonable page size plots
 			// we compute distance between current point and endpoint and use that to help
 			// pick the number of segments to use.
-			const float dist = (float) pythagoras((float)(ep.x_ - currentPoint.x_),(float)(ep.y_ - currentPoint.y_)); 
+			const float dist = (float) pythagoras((float)(ep.x() - currentPoint.x()),(float)(ep.y() - currentPoint.y())); 
 			unsigned int fitpoints = (unsigned int)(dist / 10.0);
 			if ( fitpoints < 5 ) fitpoints = 5;
 			if ( fitpoints > 50 ) fitpoints = 50;
@@ -128,7 +128,7 @@ void drvGCODE::show_path()
 			for (unsigned int s = 1; s < fitpoints; s++) {
 				const float t = 1.0f * s / (fitpoints - 1);
 				const Point pt = PointOnBezier(t, currentPoint, cp1, cp2, ep);
-				outf << " G01 X[#1003*" << pt.x_ << "] Y[#1004*" << pt.y_ << "]\n";
+				outf << " G01 X[#1003*" << pt.x() << "] Y[#1004*" << pt.y() << "]\n";
 			}
 			currentPoint = ep;
 
@@ -160,7 +160,7 @@ static DriverDescriptionT < drvGCODE > D_gcode("gcode", "emc2 gcode format",
 												   true,	// if backend supports curves
 												   false,	// if backend supports elements with fill and edges
 												   false,	// if backend supports text
-												   DriverDescription::noimage,	// no support for PNG file images
-												   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+												   DriverDescription::imageformat::noimage,	// no support for PNG file images
+												   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 												   false /*clipping */ );
  

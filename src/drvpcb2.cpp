@@ -4,7 +4,7 @@
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2021 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
    (for the skeleton and the rest of pstoedit)
 
     This program is free software; you can redistribute it and/or modify
@@ -40,14 +40,14 @@ const double MM100 = (double)100000.0/(double)25.4;
 
 int drvPCB2::pcbScale_x(const Point & p) const
 {
-	return (int)((double)p.x_ * SCALE + (double)options->tshiftx * unit + (double)0.5);
+	return (int)((double)p.x() * SCALE + (double)options->tshiftx * unit + (double)0.5);
 }
 
 int drvPCB2::pcbScale_y(const Point & p) const 
 {
 	// return (int)((double)500000.0 - (double)p.y_ * SCALE + (double)options->tshifty * unit + (double)0.5);
 	// patched 7/2011 XXX p.y_ appears to be off by one, why???
-	return (int)((double)currentDeviceHeight * SCALE - ((double)(p.y_) + (double)1.0) * SCALE + (double)options->tshifty * unit + (double)0.5);
+	return (int)((double)currentDeviceHeight * SCALE - ((double)(p.y()) + (double)1.0) * SCALE + (double)options->tshifty * unit + (double)0.5);
 }
 
 int drvPCB2::pcbScale(const double & f)  
@@ -168,7 +168,7 @@ void drvPCB2::show_path()
 				if (pathElement(numberofvalidelements-1).getType() == closepath ) numberofvalidelements--; // closepath can be ignored
 				const Point & pl = pathElement(numberofvalidelements-1).getPoint(0);
 				/* Polygons are closed automatically. Skip last element for already closed polygons. */
-				if (p0.x_ == pl.x_ && p0.y_ == pl.y_) numberofvalidelements--;
+				if (p0 == pl) numberofvalidelements--;
 			}
 			/* If snap to grid fails for any of points draw into layer_polygons_nogrid layer */
 			round_success = true;
@@ -197,41 +197,38 @@ void drvPCB2::show_path()
 				Point try1_p1, try1_p2, try2_p1, try2_p2, pad_p1, pad_p2, pad_p1_corr, pad_p2_corr;
 				double lensq, widsq, try1_lensq, try2_lensq; 
 				/* Try1: line in direcion of vertices 0->1 */
-				try1_p1.x_ = (pathElement(1).getPoint(0).x_ + pathElement(2).getPoint(0).x_) / 2;
-				try1_p2.x_ = (pathElement(3).getPoint(0).x_ + pathElement(0).getPoint(0).x_) / 2;
-				try1_p1.y_ = (pathElement(1).getPoint(0).y_ + pathElement(2).getPoint(0).y_) / 2;
-				try1_p2.y_ = (pathElement(3).getPoint(0).y_ + pathElement(0).getPoint(0).y_) / 2;
-				try1_lensq = sqr(try1_p1.x_ - try1_p2.x_) + sqr(try1_p1.y_ - try1_p2.y_);
+				try1_p1 = Point( (pathElement(1).getPoint(0).x() + pathElement(2).getPoint(0).x()) / 2,			
+								(pathElement(1).getPoint(0).y() + pathElement(2).getPoint(0).y()) / 2);
+				try1_p2 = Point( (pathElement(3).getPoint(0).x() + pathElement(0).getPoint(0).x()) / 2,
+								(pathElement(3).getPoint(0).y() + pathElement(0).getPoint(0).y()) / 2);
+				try1_lensq = sqr(try1_p1.x() - try1_p2.x()) + sqr(try1_p1.y() - try1_p2.y());
 				/* Try1: line in direcion of vertices 1->2 */
-				try2_p1.x_ = (pathElement(0).getPoint(0).x_ + pathElement(1).getPoint(0).x_) / 2;
-				try2_p2.x_ = (pathElement(2).getPoint(0).x_ + pathElement(3).getPoint(0).x_) / 2;
-				try2_p1.y_ = (pathElement(0).getPoint(0).y_ + pathElement(1).getPoint(0).y_) / 2;
-				try2_p2.y_ = (pathElement(2).getPoint(0).y_ + pathElement(3).getPoint(0).y_) / 2;
-				try2_lensq = sqr(try2_p1.x_ - try2_p2.x_) + sqr(try2_p1.y_ - try2_p2.y_);
+				try2_p1 = Point((pathElement(0).getPoint(0).x() + pathElement(1).getPoint(0).x()) / 2,
+								(pathElement(0).getPoint(0).y() + pathElement(1).getPoint(0).y()) / 2);
+				try2_p2 = Point((pathElement(2).getPoint(0).x() + pathElement(3).getPoint(0).x()) / 2,
+								 (pathElement(2).getPoint(0).y() + pathElement(3).getPoint(0).y()) / 2);
+				try2_lensq = sqr(try2_p1.x() - try2_p2.x()) + sqr(try2_p1.y() - try2_p2.y());
 				/* Use the longer line from these two */
 				/* FIXME: what to do for square */
 				if (try1_lensq > try2_lensq) {
-					pad_p1.x_ = try1_p1.x_;
-					pad_p2.x_ = try1_p2.x_;
-					pad_p1.y_ = try1_p1.y_;
-					pad_p2.y_ = try1_p2.y_;
+					pad_p1 = try1_p1;
+					pad_p2 = try1_p2;
 					lensq = try1_lensq;
 					widsq = try2_lensq;
 				} else {
-					pad_p1.x_ = try2_p1.x_;
-					pad_p2.x_ = try2_p2.x_;
-					pad_p1.y_ = try2_p1.y_;
-					pad_p2.y_ = try2_p2.y_;
+					pad_p1 = try2_p1;
+					pad_p2 = try2_p2;
 					lensq = try2_lensq;
 					widsq = try1_lensq;
 				}
 				/* pcb adds line width to lenght. Subtract it. */
 				const double lwidth = sqrt(widsq);
 				const double lratio = sqrt(widsq/lensq/4);
-				pad_p1_corr.x_ = (float)(pad_p1.x_ - lratio*(pad_p1.x_-pad_p2.x_));
-				pad_p2_corr.x_ = (float)(pad_p2.x_ + lratio*(pad_p1.x_-pad_p2.x_));
-				pad_p1_corr.y_ = (float)(pad_p1.y_ - lratio*(pad_p1.y_-pad_p2.y_));
-				pad_p2_corr.y_ = (float)(pad_p2.y_ + lratio*(pad_p1.y_-pad_p2.y_));
+				pad_p1_corr = Point((float)(pad_p1.x() - lratio*(pad_p1.x()-pad_p2.x())),				
+				 (float)(pad_p1.y() - lratio*(pad_p1.y()-pad_p2.y())));
+
+				pad_p2_corr = Point((float)(pad_p2.x() + lratio*(pad_p1.x()-pad_p2.x())),
+				(float)(pad_p2.y() + lratio*(pad_p1.y()-pad_p2.y())));
 				round_success = true;
 				try_grid_snap (pcbScale_x(pad_p1_corr), round_success);
 				try_grid_snap (pcbScale_y(pad_p1_corr), round_success);
@@ -303,7 +300,7 @@ static DriverDescriptionT < drvPCB2 > D_pcb("pcb", "pcb format",
 												   false,	// if backend supports curves
 												   false,	// if backend supports elements with fill and edges
 												   false,	// if backend supports text
-												   DriverDescription::noimage,	// no support for PNG file images
-												   DriverDescription::normalopen, false,	// if format supports multiple pages in one file
+												   DriverDescription::imageformat::noimage,	// no support for PNG file images
+												   DriverDescription::opentype::normalopen, false,	// if format supports multiple pages in one file
 												   false /*clipping */ );
  

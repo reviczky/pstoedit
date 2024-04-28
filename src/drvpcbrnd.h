@@ -10,7 +10,7 @@
    Contributed / Copyright 2004 by: Mark Rages 
    Contributed / Copyright 2008 by: Stanislav Brabec sbrabec_AT_suse.cz
 
-   Copyright (C) 1993 - 2018 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,12 +32,8 @@
 #include I_strstream
 
 class drvPCBRND : public drvbase {
-
 public:
-
 	derivedConstructor(drvPCBRND);
-	//(const char * driveroptions_P,ostream & theoutStream,ostream & theerrStream ); // Constructor
-
 	~drvPCBRND(); // Destructor
 
 	class DriverOptions : public ProgramOptions {
@@ -69,22 +65,26 @@ public:
 #include "drvfuncs.h"
  
 private:
-        int lineNumber;
-        int polygonNumber;
+    int lineNumber;
+    int polygonNumber;
+	static bool bOnSegmentAC(const Point & a, const Point & b, const Point & c);
+	static int orientation(const Point & a, const Point & b, const Point & c);
+	static bool foundIntersection(const Point & a, const Point & b, const Point & c, const Point & d);
+	bool isSimplePolygon() const;
 	int pcbScale_x(const Point & p) const;
 	int pcbScale_y(const Point & p) const;
-	static int pcbScale(const double & f) ;
+	static int pcbScale(const double & f);
 	void try_grid_snap(int value, bool & success) const;
 	static int _grid_snap (int value, double grid) ;
 	int grid_snap(int value, bool success) const;
 	void gen_preamble();
-        void gen_footer();
+    void gen_footer();
 
 	C_ostrstream layer_polygons, layer_polygons_nogrid;
-        C_ostrstream layer_polygon_outlines, layer_polygon_outlines_nogrid;
+    C_ostrstream layer_polygon_outlines, layer_polygon_outlines_nogrid;
 	C_ostrstream layer_lines, layer_lines_nogrid;
-        C_ostrstream layer_spare;
+    C_ostrstream layer_spare;
 	double unit, grid;
-        const char * unitText;
+    const char * unitText;
 };
 #endif

@@ -4,7 +4,7 @@
    miscutil.h : This file is part of pstoedit
    header declaring misc utility functions
 
-   Copyright (C) 1998 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1998 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -74,8 +74,6 @@ inline char *cppstrdup(const char * const src, const size_t addon = 0)
 	return cppstrndup(src,strlen(src),addon);
 }
 
-// DLLEXPORT char * cppstrdup(const char * src, unsigned int addon = 0);
-// DLLEXPORT char * cppstrndup(const char * src, unsigned int length, unsigned int addon = 0);
 DLLEXPORT unsigned short hextoint(const char hexchar) ;
 
 // A temporary file, that is automatically removed after usage

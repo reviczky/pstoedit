@@ -5,7 +5,7 @@
    drvcairo.h : This file is part of pstoedit
    Class declaration for the cairo driver.
    
-   Copyright (C) 2009 - 2023 Dan McMahill dan_AT_mcmahill_DOT_net
+   Copyright (C) 2009 - 2024 Dan McMahill dan_AT_mcmahill_DOT_net
    
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by

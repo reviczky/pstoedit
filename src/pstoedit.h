@@ -3,7 +3,7 @@
 /*
    pstoedit.h : This file is part of pstoedit
    
-   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -100,8 +100,13 @@ void clearPstoeditDriverInfo_plainC(struct DriverDescription_S * ptr);
 
 #ifdef __cplusplus
 extern "C" DLLEXPORT
-#endif
 void loadpstoeditplugins(const char* progname, std::ostream & errstream, bool verbose);
+#endif
+
+#ifdef __cplusplus
+extern "C" DLLEXPORT
+#endif
+void loadpstoeditplugins_plainC(const char* progname, int verbose);
 
 #ifdef __cplusplus
 extern "C" DLLEXPORT

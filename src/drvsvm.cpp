@@ -820,15 +820,16 @@ void drvSVM::show_image(const PSImage& imageinfo)
 		 imageinfo.normalizedImageCurrentMatrix[5]) / matrixScale
 	};
 
-    if (Verbose()) 
-        errf << "Image matrix: " 
-             << "0: " << imageinfo.normalizedImageCurrentMatrix[0] << " "
-             << "1: " << imageinfo.normalizedImageCurrentMatrix[1] << " "
-             << "2: " << imageinfo.normalizedImageCurrentMatrix[2] << " "
-             << "3: " << imageinfo.normalizedImageCurrentMatrix[3] << " "
-             << "4: " << imageinfo.normalizedImageCurrentMatrix[4] << " "
-             << "5: " << imageinfo.normalizedImageCurrentMatrix[5] << " "
-             << endl;
+        if (Verbose()) {
+           errf << "Image matrix: " 
+                << "0: " << imageinfo.normalizedImageCurrentMatrix[0] << " "
+                << "1: " << imageinfo.normalizedImageCurrentMatrix[1] << " "
+                << "2: " << imageinfo.normalizedImageCurrentMatrix[2] << " "
+                << "3: " << imageinfo.normalizedImageCurrentMatrix[3] << " "
+                << "4: " << imageinfo.normalizedImageCurrentMatrix[4] << " "
+                << "5: " << imageinfo.normalizedImageCurrentMatrix[5] << " "
+                << endl;
+	}
 
     // TODO(F2): interpolate
     // TODO(P3): avoid transformation _at all_ if scale and transform suffices

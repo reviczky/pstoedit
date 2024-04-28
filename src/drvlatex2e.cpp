@@ -3,7 +3,7 @@
    Backend for Latex2E files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
 
-   Copyright (C) 1993 - 2023	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
+   Copyright (C) 1993 - 2024	Wolfgang Glunz, <wglunz35_AT_pstoedit.net>, 
 							Scott Pakin, <scott+ps2ed_AT_pakin.org>
 
     This program is free software; you can redistribute it and/or modify
@@ -229,17 +229,18 @@ void drvLATEX2E::show_text(const TextInfo & textinfo)
 	buffer.setf(ios::fixed, ios::floatfield);	// TeX can't deal with scientific notation.
 
 	// Set the font and font size if (and only if) it's changed.
-	std::string fontname(textinfo.currentFontName.c_str());
-	if (fontname[0] != '{' && fontname != prevfontname) {
+	const std::string fontname(textinfo.currentFontName.c_str());
+	if (fontname != prevfontname) {
+	   if (fontname[0] != '{') {
 		errf << "Font \"" << fontname
 			<<
 			"\" is not of the form \"{encoding}{family}{series}{shape}\".\n"
 			<<
 			"(You may need to use the -fontmap option to point pstoedit to latex2e.fmp.)" << endl;
-		prevfontname = fontname;
-	} else if (fontname != prevfontname) {
+	   } else {
 		buffer << "  \\usefont" << fontname << endl;
-		prevfontname = fontname;
+	   }
+	   prevfontname = fontname;
 	}
 	const float fontsize = textinfo.currentFontSize * 72.27f / 72.0f;
 	if (fontsize != prevfontsize) {

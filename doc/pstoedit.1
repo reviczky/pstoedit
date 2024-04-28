@@ -1,7 +1,7 @@
 .\" *********************************** start of \input{version.tex}
 .\" *********************************** end of \input{version.tex}
 '\" t
-.\" Manual page created with latex2man.local on Sun Jun 18 17:07:22 2023
+.\" Manual page created with latex2man.local on Thu Mar 28 15:37:25 2024
 .\" NOTE: This file is generated, DO NOT EDIT.
 .de Vb
 .ft CW
@@ -12,7 +12,7 @@
 
 .fi
 ..
-.TH "PSTOEDIT" "1" "18 June 2023" "Conversion Tools " "Conversion Tools "
+.TH "PSTOEDIT" "1" "28 March 2024" "Conversion Tools " "Conversion Tools "
 .SH NAME
 
 pstoedit
@@ -118,7 +118,7 @@ By this the GUI is always up to date with respect to the options and formats pro
 .PP
 .SS RELEASE LEVEL
 .PP
-This man\-page documents release 4.00 of pstoedit\&.
+This man\-page documents release 4.01 of pstoedit\&.
 .PP
 .SS USE
 .PP
@@ -635,7 +635,7 @@ gs:
 any device that Ghostscript provides \- use gs:format, e.g. gs:pdfwrite. 
 .PP
 No format specific options 
-.SS FORMAT GROUP: GMFA GMFB PLOT PLOT\-PNM PLOT\-CGM PLOT\-AI PLOT\-SVG PLOT\-PS PLOT\-FIG PLOT\-PCL PLOT\-HPGL PLOT\-TEK 
+.SS FORMAT GROUP: GMFA GMFB PLOT PLOT\-CGM PLOT\-AI PLOT\-SVG PLOT\-PS PLOT\-FIG PLOT\-PCL PLOT\-HPGL PLOT\-TEK 
 This group consists of the following variants: 
 .TP
 gmfa: 
@@ -646,9 +646,6 @@ binary GNU metafile.
 .TP
 plot: 
 GNU libplot output types, e.g. plot:\-plotformat X. 
-.TP
-plot\-pnm: 
-pnm via GNU libplot. 
 .TP
 plot\-cgm: 
 cgm via GNU libplot. 
@@ -680,28 +677,285 @@ The following driver specific options are available in this group:
  \"option\-gmfa\-plotformat
 plotutil format to generate 
 .PP
-.SS PPTX \- PRESENTATIONML (POWERPOINT) FORMAT
-This is the format used internally by Microsoft PowerPoint. LibreOffice can also read/write PowerPoint files albeit with some lack of functionality. 
+.SS MAGICK \- MAGICK DRIVER COMPATIBLE WITH VERSION 7.0.7 OF IMAGEMAGICK.
+This driver uses the C++ API of ImageMagick or GraphicsMagick to finally produce different output formats. The output format is determined automatically by Image\-/GraphicsMagick based on the suffix of the output filename. So an output file test.png will force the creation of an image in PNG format. This binary of pstoedit was compiled against version 7.0.7 of ImageMagick. 
+.PP
+No format specific options 
+.SS SWF \- SWF DRIVER: 
+The following driver specific options are available: 
+.TP
+[\fB\-cubic\fP]
+ \"option\-swf\-cubic
+cubic ??? 
+.PP
+.TP
+[\fB\-trace\fP]
+ \"option\-swf\-trace
+trace ??? 
+.PP
+.SS FORMAT GROUP: SVG XAML 
+This group consists of the following variants: 
+.TP
+svg: 
+Scalable Vector Graphics. 
+.TP
+xaml: 
+eXtensible Application Markup Language. 
+.PP
+The following driver specific options are available in this group: 
+.TP
+[\fB\-localdtd\fP]
+ \"option\-svg\-localdtd
+use local DTD 
+.PP
+.TP
+[\fB\-standalone\fP]
+ \"option\-svg\-standalone
+create stand\-alone type svg 
+.PP
+.TP
+[\fB\-withdtd\fP]
+ \"option\-svg\-withdtd
+write DTD 
+.PP
+.TP
+[\fB\-withgrouping\fP]
+ \"option\-svg\-withgrouping
+write also ordinary save/restores as SVG group 
+.PP
+.TP
+[\fB\-nogroupedpath\fP]
+ \"option\-svg\-nogroupedpath
+do not write a group around paths 
+.PP
+.TP
+[\fB\-noviewbox\fP]
+ \"option\-svg\-noviewbox
+do not write a view box 
+.PP
+.TP
+[\fB\-texmode\fP]
+ \"option\-svg\-texmode
+TeX mode 
+.PP
+.TP
+[\fB\-imagetofile\fP]
+ \"option\-svg\-imagetofile
+write raster images to separate files instead of embedding them 
+.PP
+.TP
+[\fB\-notextrendering\fP]
+ \"option\-svg\-notextrendering
+do not write textrendering attribute 
+.PP
+.TP
+[\fB\-border\fP\fI number\fP]
+ \"option\-svg\-border
+additional border to draw around bare bounding box (in percent of width and height) 
+.PP
+.TP
+[\fB\-title\fP\fI string\fP]
+ \"option\-svg\-title
+text to use as title for the generated document 
+.PP
+.SS FORMAT GROUP: CGMB1 CGMB CGMT 
+This group consists of the following variants: 
+.TP
+cgmb1: 
+CGM Binary format (V1). 
+.TP
+cgmb: 
+CGM Binary format (V3). 
+.TP
+cgmt: 
+CGM Textual format. 
+.PP
+No format specific options 
+.SS MIF \- (FRAME)MAKER INTERMEDIATE FORMAT
+The following driver specific options are available: 
+.TP
+[\fB\-nopage\fP]
+ \"option\-mif\-nopage
+do not add a separate Page entry 
+.PP
+.SS RTF \- RICH TEXT FORMAT
+No format specific options 
+.SS FORMAT GROUP: WEMF WEMFC WEMFNSS 
+This group consists of the following variants: 
+.TP
+wemf: 
+Wogl\&'s version of EMF. 
+.TP
+wemfc: 
+Wogl\&'s version of EMF with experimental clip support. 
+.TP
+wemfnss: 
+Wogl\&'s version of EMF \- no subpaths. 
+.PP
+The following driver specific options are available in this group: 
+.TP
+[\fB\-df\fP]
+ \"option\-wemf\-df
+write info about font processing 
+.PP
+.TP
+[\fB\-dumpfontmap\fP]
+ \"option\-wemf\-dumpfontmap
+write info about font mapping 
+.PP
+.TP
+[\fB\-size:psbbox\fP]
+ \"option\-wemf\-size:psbbox
+use the bounding box as calculated by the PostScript frontend as size 
+.PP
+.TP
+[\fB\-size:fullpage\fP]
+ \"option\-wemf\-size:fullpage
+set the size to that of the full page 
+.PP
+.TP
+[\fB\-size:automatic\fP]
+ \"option\-wemf\-size:automatic
+let MS Windows calculate the bounding box (default) 
+.PP
+.TP
+[\fB\-keepimages\fP]
+ \"option\-wemf\-keepimages
+debug option \- keep the embedded bitmaps as external files 
+.PP
+.TP
+[\fB\-useoldpolydraw\fP]
+ \"option\-wemf\-useoldpolydraw
+do not use MS Windows\&' PolyDraw but an emulation of it \- sometimes needed for certain programs reading the EMF files 
+.PP
+.TP
+[\fB\-donotusepolydraw\fP]
+ \"option\-wemf\-donotusepolydraw
+use lineto and moveto instead of polydraw when drawing a path 
+.PP
+.TP
+[\fB\-OO\fP]
+ \"option\-wemf\-OO
+generate OpenOffice compatible EMF file 
+.PP
+.SS FORMAT GROUP: HPGL PCL 
+This group consists of the following variants: 
+.TP
+hpgl: 
+HPGL code. 
+.TP
+pcl: 
+PCL code. 
+.PP
+The following driver specific options are available in this group: 
+.TP
+[\fB\-penplotter\fP]
+ \"option\-hpgl\-penplotter
+plotter is pen plotter (i.e. no support for specific line widths) 
+.PP
+.TP
+[\fB\-pencolorsfromfile\fP]
+ \"option\-hpgl\-pencolorsfromfile
+read pen colors from file drvhpgl.pencolors in pstoedit\&'s data directory 
+.PP
+.TP
+[\fB\-pencolors\fP\fI number\fP]
+ \"option\-hpgl\-pencolors
+maximum number of pen colors to be used by pstoedit (default 0) \- 
+.PP
+.TP
+[\fB\-filltype\fP\fI string\fP]
+ \"option\-hpgl\-filltype
+select fill type e.g. FT 1 
+.PP
+.TP
+[\fB\-hpgl2\fP]
+ \"option\-hpgl\-hpgl2
+Use HPGL/2 instead of HPGL/1 
+.PP
+.TP
+[\fB\-rot90\fP]
+ \"option\-hpgl\-rot90
+rotate hpgl by 90 degrees 
+.PP
+.TP
+[\fB\-rot180\fP]
+ \"option\-hpgl\-rot180
+rotate hpgl by 180 degrees 
+.PP
+.TP
+[\fB\-rot270\fP]
+ \"option\-hpgl\-rot270
+rotate hpgl by 270 degrees 
+.PP
+.SS PCB\-RND \- PCB\-RND FORMAT
+See also: \fBhttp://repo.hu/projects/pcb\-rnd\fP
+and \fBhttp://www.penguin.cz/~utx/pstoedit\-pcb/\fP
 .PP
 The following driver specific options are available: 
 .TP
-[\fB\-colors\fP\fI string\fP]
- \"option\-pptx\-colors
-"original" to retain original colors (default), "theme" to convert randomly to theme colors, or "theme\-lum" also to vary luminance 
+[\fB\-grid\fP\fI double number\fP]
+ \"option\-pcb\-rnd\-grid
+attempt to snap relevant output to grid (mils) and put failed objects to a different layer 
 .PP
 .TP
-[\fB\-fonts\fP\fI string\fP]
- \"option\-pptx\-fonts
-use "windows" fonts (default), "native" fonts, or convert to the "theme" font 
+[\fB\-snapdist\fP\fI double number\fP]
+ \"option\-pcb\-rnd\-snapdist
+grid snap distance ratio (0 < snapdist <= 0.5, default 0.1) 
 .PP
 .TP
-[\fB\-embed\fP\fI string\fP]
- \"option\-pptx\-embed
-embed fonts, specified as a comma\-separated list of EOT\-format font files 
+[\fB\-tshiftx\fP\fI double number\fP]
+ \"option\-pcb\-rnd\-tshiftx
+additional x shift measured in target units (mils) 
 .PP
-.SS GCODE \- EMC2 GCODE FORMAT
-See also: \fBhttp://linuxcnc.org/\fP
+.TP
+[\fB\-tshifty\fP\fI double number\fP]
+ \"option\-pcb\-rnd\-tshifty
+additional y shift measured in target units (mils) 
 .PP
+.TP
+[\fB\-mm\fP]
+ \"option\-pcb\-rnd\-mm
+switch to metric units (mm) 
+.PP
+.TP
+[\fB\-forcepoly\fP]
+ \"option\-pcb\-rnd\-forcepoly
+force all objects to be interpreted as polygons 
+.PP
+.SS PIC \- PIC FORMAT FOR TROFF ET.AL.
+The following driver specific options are available: 
+.TP
+[\fB\-troff\fP]
+ \"option\-pic\-troff
+troff mode (default is groff) 
+.PP
+.TP
+[\fB\-landscape\fP]
+ \"option\-pic\-landscape
+landscape output 
+.PP
+.TP
+[\fB\-portrait\fP]
+ \"option\-pic\-portrait
+portrait output 
+.PP
+.TP
+[\fB\-keepfont\fP]
+ \"option\-pic\-keepfont
+print unrecognized literally 
+.PP
+.TP
+[\fB\-text\fP]
+ \"option\-pic\-text
+try not to make pictures from running text 
+.PP
+.TP
+[\fB\-debug\fP]
+ \"option\-pic\-debug
+enable debug output 
+.PP
+.SS ASY \- ASYMPTOTE FORMAT
 No format specific options 
 .SS CAIRO \- CAIRO DRIVER
 generates compilable c code for rendering with cairo 
@@ -722,11 +976,9 @@ sets the base name for the generated functions and variables. e.g. myfig
  \"option\-cairo\-header
 sets the output file name for the generated C header file. e.g. myfig.h 
 .PP
-.SS LWO \- LIGHTWAVE 3D OBJECT FORMAT
-No format specific options 
-.SS RIB \- RENDERMAN INTERFACE BYTESTREAM
-No format specific options 
-.SS RPL \- REAL3D PROGRAMMING LANGUAGE FORMAT
+.SS CFDG \- CONTEXT FREE DESIGN GRAMMAR
+Context Free Design Grammar, usable by Context Free Art (http://www.contextfreeart.org/) 
+.PP
 No format specific options 
 .SS FORMAT GROUP: DXF DXF_14 DXF_S 
 This group consists of the following variants: 
@@ -794,7 +1046,7 @@ use Bezier splines in DXF format (only for \-f dxf_s)
 .TP
 [\fB\-splineprecision\fP\fI number\fP]
  \"option\-dxf\-splineprecision
-number of samples to take from spline curve when doing approximation with \-splineaspolyline or \-splineasmultispline \- should be =2 (default 5) 
+number of samples to take from spline curve when doing approximation with \-splineaspolyline or \-splineasmultispline \- should be >= 2 (default 5) 
 .PP
 .TP
 [\fB\-dumplayernames\fP]
@@ -810,295 +1062,6 @@ layers to be shown (comma separated list of layer names, no space)
 [\fB\-layerfilter\fP\fI string\fP]
  \"option\-dxf\-layerfilter
 layers to be hidden (comma separated list of layer names, no space) 
-.PP
-.SS JAVA1 \- JAVA 1.PPLET SOURCE CODE
-The following driver specific options are available: 
-.TP
-[\fBjava_class_name\fP\fI string\fP]
- \"option\-java1java_class_name
-name of java class to generate 
-.PP
-.SS JAVA2 \- JAVA 2 SOURCE CODE
-The following driver specific options are available: 
-.TP
-[\fBjava_class_name\fP\fI string\fP]
- \"option\-java2java_class_name
-name of java class to generate 
-.PP
-.SS PDF \- ADOBE\&'S PORTABLE DOCUMENT FORMAT
-No format specific options 
-.SS KIL \- .KIL FORMAT FOR KONTOUR
-No format specific options 
-.SS TEXT \- TEXT IN DIFFERENT FORMS 
-The following driver specific options are available: 
-.TP
-[\fB\-height\fP\fI number\fP]
- \"option\-text\-height
-page height in terms of characters 
-.PP
-.TP
-[\fB\-width\fP\fI number\fP]
- \"option\-text\-width
-page width in terms of characters 
-.PP
-.TP
-[\fB\-dump\fP]
- \"option\-text\-dump
-dump text pieces 
-.PP
-.SS SK \- SKETCH FORMAT
-No format specific options 
-.SS MPOST \- METAPOST FORMAT
-No format specific options 
-.SS ASY \- ASYMPTOTE FORMAT
-No format specific options 
-.SS MMA \- MATHEMATICA GRAPHICS
-The following driver specific options are available: 
-.TP
-[\fB\-eofillfills\fP]
- \"option\-mma\-eofillfills
-Filling is used for eofill (default is not to fill) 
-.PP
-.SS LATEX2E \- LaTeX2E PICTURE FORMAT
-The following driver specific options are available: 
-.TP
-[\fB\-integers\fP]
- \"option\-latex2e\-integers
-round all coordinates to the nearest integer 
-.PP
-.SS NOIXML \- NEMETSCHEK NOI XML FORMAT
-Nemetschek Object Interface XML format 
-.PP
-The following driver specific options are available: 
-.TP
-[\fB\-r\fP\fI string\fP]
- \"option\-noixml\-r
-Allplan resource file 
-.PP
-.TP
-[\fB\-bsl\fP\fI number\fP]
- \"option\-noixml\-bsl
-Bezier Split Level (default 3) 
-.PP
-.SS PIC \- PIC FORMAT FOR TROFF ET.AL.
-The following driver specific options are available: 
-.TP
-[\fB\-troff\fP]
- \"option\-pic\-troff
-troff mode (default is groff) 
-.PP
-.TP
-[\fB\-landscape\fP]
- \"option\-pic\-landscape
-landscape output 
-.PP
-.TP
-[\fB\-portrait\fP]
- \"option\-pic\-portrait
-portrait output 
-.PP
-.TP
-[\fB\-keepfont\fP]
- \"option\-pic\-keepfont
-print unrecognized literally 
-.PP
-.TP
-[\fB\-text\fP]
- \"option\-pic\-text
-try not to make pictures from running text 
-.PP
-.TP
-[\fB\-debug\fP]
- \"option\-pic\-debug
-enable debug output 
-.PP
-.SS FORMAT GROUP: HPGL PCL 
-This group consists of the following variants: 
-.TP
-hpgl: 
-HPGL code. 
-.TP
-pcl: 
-PCL code. 
-.PP
-The following driver specific options are available in this group: 
-.TP
-[\fB\-penplotter\fP]
- \"option\-hpgl\-penplotter
-plotter is pen plotter (i.e. no support for specific line widths) 
-.PP
-.TP
-[\fB\-pencolorsfromfile\fP]
- \"option\-hpgl\-pencolorsfromfile
-read pen colors from file drvhpgl.pencolors in pstoedit\&'s data directory 
-.PP
-.TP
-[\fB\-pencolors\fP\fI number\fP]
- \"option\-hpgl\-pencolors
-maximum number of pen colors to be used by pstoedit (default 0) \- 
-.PP
-.TP
-[\fB\-filltype\fP\fI string\fP]
- \"option\-hpgl\-filltype
-select fill type e.g. FT 1 
-.PP
-.TP
-[\fB\-hpgl2\fP]
- \"option\-hpgl\-hpgl2
-Use HPGL/2 instead of HPGL/1 
-.PP
-.TP
-[\fB\-rot90\fP]
- \"option\-hpgl\-rot90
-rotate hpgl by 90 degrees 
-.PP
-.TP
-[\fB\-rot180\fP]
- \"option\-hpgl\-rot180
-rotate hpgl by 180 degrees 
-.PP
-.TP
-[\fB\-rot270\fP]
- \"option\-hpgl\-rot270
-rotate hpgl by 270 degrees 
-.PP
-.SS PCBI \- ENGRAVE DATA \- INSULATE/PCB FORMAT
-No format specific options 
-.SS PCB \- PCB FORMAT
-See also: \fBhttp://pcb.sourceforge.net\fP
-and \fBhttp://www.penguin.cz/~utx/pstoedit\-pcb/\fP
-.PP
-The following driver specific options are available: 
-.TP
-[\fB\-grid\fP\fI double number\fP]
- \"option\-pcb\-grid
-attempt to snap relevant output to grid (mils) and put failed objects to a different layer 
-.PP
-.TP
-[\fB\-snapdist\fP\fI double number\fP]
- \"option\-pcb\-snapdist
-grid snap distance ratio (0 < snapdist <= 0.5, default 0.1) 
-.PP
-.TP
-[\fB\-tshiftx\fP\fI double number\fP]
- \"option\-pcb\-tshiftx
-additional x shift measured in target units (mils) 
-.PP
-.TP
-[\fB\-tshifty\fP\fI double number\fP]
- \"option\-pcb\-tshifty
-additional y shift measured in target units (mils) 
-.PP
-.TP
-[\fB\-mm\fP]
- \"option\-pcb\-mm
-switch to metric units (mm) 
-.PP
-.TP
-[\fB\-stdnames\fP]
- \"option\-pcb\-stdnames
-use standard layer names instead of descriptive names 
-.PP
-.TP
-[\fB\-forcepoly\fP]
- \"option\-pcb\-forcepoly
-force all objects to be interpreted as polygons 
-.PP
-.SS PCBFILL \- PCB FORMAT WITH FILLS
-See also: \fBhttp://pcb.sourceforge.net\fP
-.PP
-No format specific options 
-.SS PCB\-RND \- PCB\-RND FORMAT
-See also: \fBhttp://repo.hu/projects/pcb\-rnd\fP
-and \fBhttp://www.penguin.cz/~utx/pstoedit\-pcb/\fP
-.PP
-The following driver specific options are available: 
-.TP
-[\fB\-grid\fP\fI double number\fP]
- \"option\-pcb\-rnd\-grid
-attempt to snap relevant output to grid (mils) and put failed objects to a different layer 
-.PP
-.TP
-[\fB\-snapdist\fP\fI double number\fP]
- \"option\-pcb\-rnd\-snapdist
-grid snap distance ratio (0 < snapdist <= 0.5, default 0.1) 
-.PP
-.TP
-[\fB\-tshiftx\fP\fI double number\fP]
- \"option\-pcb\-rnd\-tshiftx
-additional x shift measured in target units (mils) 
-.PP
-.TP
-[\fB\-tshifty\fP\fI double number\fP]
- \"option\-pcb\-rnd\-tshifty
-additional y shift measured in target units (mils) 
-.PP
-.TP
-[\fB\-mm\fP]
- \"option\-pcb\-rnd\-mm
-switch to metric units (mm) 
-.PP
-.TP
-[\fB\-forcepoly\fP]
- \"option\-pcb\-rnd\-forcepoly
-force all objects to be interpreted as polygons 
-.PP
-.SS GSCHEM \- GSCHEM FORMAT
-See also: \fBhttp://wiki.geda\-project.org/geda:gaf\fP
-.PP
-No format specific options 
-.SS CFDG \- CONTEXT FREE DESIGN GRAMMAR
-Context Free Design Grammar, usable by Context Free Art (http://www.contextfreeart.org/) 
-.PP
-No format specific options 
-.SS TK \- TK AND/OR TK.PPLET SOURCE CODE
-The following driver specific options are available: 
-.TP
-[\fB\-R\fP]
- \"option\-tk\-R
-swap HW 
-.PP
-.TP
-[\fB\-I\fP]
- \"option\-tk\-I
-no impress 
-.PP
-.TP
-[\fB\-n\fP\fI string\fP]
- \"option\-tk\-n
-tagnames 
-.PP
-.SS VTK \- VTK DRIVER: IF YOU DO NOT WANT TO SEE THIS, UNCOMMENT THE CORRESPONDING LINE IN MAKEFILE AND MAKE AGAIN
-this is a long description for the VTKe driver 
-.PP
-The following driver specific options are available: 
-.TP
-[\fB\-VTKeoption\fP\fI integer\fP]
- \"option\-vtk\-VTKeoption
-just an example 
-.PP
-.SS SVM \- STARVIEW/OPENOFFICE.ORG METAFILE
-StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.0 and above. 
-.PP
-The following driver specific options are available: 
-.TP
-[\fB\-m\fP]
- \"option\-svm\-m
-map to Arial 
-.PP
-.TP
-[\fB\-nf\fP]
- \"option\-svm\-nf
-emulate narrow fonts 
-.PP
-.SS GNUPLOT \- GNUPLOT FORMAT
-No format specific options 
-.SS TGIF \- TGIF .OBJ FORMAT
-The following driver specific options are available: 
-.TP
-[\fB\-ta\fP]
- \"option\-tgif\-ta
-text as attribute 
 .PP
 .SS FORMAT GROUP: FIG XFIG TFIG 
 This group consists of the following variants: 
@@ -1150,7 +1113,136 @@ do not scale fonts for xfig. Use this if you also use this option with xfig
  \"option\-fig\-depth
 set the page depth in inches (default 11) 
 .PP
+.SS GCODE \- EMC2 GCODE FORMAT
+See also: \fBhttp://linuxcnc.org/\fP
+.PP
+No format specific options 
+.SS GNUPLOT \- GNUPLOT FORMAT
+No format specific options 
+.SS GSCHEM \- GSCHEM FORMAT
+See also: \fBhttp://wiki.geda\-project.org/geda:gaf\fP
+.PP
+No format specific options 
 .SS IDRAW \- INTERVIEWS DRAW FORMAT (EPS)
+No format specific options 
+.SS JAVA1 \- JAVA 1.PPLET SOURCE CODE
+The following driver specific options are available: 
+.TP
+[\fBjava_class_name\fP\fI string\fP]
+ \"option\-java1java_class_name
+name of java class to generate 
+.PP
+.SS JAVA2 \- JAVA 2 SOURCE CODE
+The following driver specific options are available: 
+.TP
+[\fBjava_class_name\fP\fI string\fP]
+ \"option\-java2java_class_name
+name of java class to generate 
+.PP
+.SS KIL \- .KIL FORMAT FOR KONTOUR
+No format specific options 
+.SS LATEX2E \- LaTeX2E PICTURE FORMAT
+The following driver specific options are available: 
+.TP
+[\fB\-integers\fP]
+ \"option\-latex2e\-integers
+round all coordinates to the nearest integer 
+.PP
+.SS LWO \- LIGHTWAVE 3D OBJECT FORMAT
+No format specific options 
+.SS MMA \- MATHEMATICA GRAPHICS
+The following driver specific options are available: 
+.TP
+[\fB\-eofillfills\fP]
+ \"option\-mma\-eofillfills
+Filling is used for eofill (default is not to fill) 
+.PP
+.SS MPOST \- METAPOST FORMAT
+No format specific options 
+.SS NOIXML \- NEMETSCHEK NOI XML FORMAT
+Nemetschek Object Interface XML format 
+.PP
+The following driver specific options are available: 
+.TP
+[\fB\-r\fP\fI string\fP]
+ \"option\-noixml\-r
+Allplan resource file 
+.PP
+.TP
+[\fB\-bsl\fP\fI number\fP]
+ \"option\-noixml\-bsl
+Bezier Split Level (default 3) 
+.PP
+.SS PCBI \- ENGRAVE DATA \- INSULATE/PCB FORMAT
+No format specific options 
+.SS PCB \- PCB FORMAT
+See also: \fBhttp://pcb.sourceforge.net\fP
+and \fBhttp://www.penguin.cz/~utx/pstoedit\-pcb/\fP
+.PP
+The following driver specific options are available: 
+.TP
+[\fB\-grid\fP\fI double number\fP]
+ \"option\-pcb\-grid
+attempt to snap relevant output to grid (mils) and put failed objects to a different layer 
+.PP
+.TP
+[\fB\-snapdist\fP\fI double number\fP]
+ \"option\-pcb\-snapdist
+grid snap distance ratio (0 < snapdist <= 0.5, default 0.1) 
+.PP
+.TP
+[\fB\-tshiftx\fP\fI double number\fP]
+ \"option\-pcb\-tshiftx
+additional x shift measured in target units (mils) 
+.PP
+.TP
+[\fB\-tshifty\fP\fI double number\fP]
+ \"option\-pcb\-tshifty
+additional y shift measured in target units (mils) 
+.PP
+.TP
+[\fB\-mm\fP]
+ \"option\-pcb\-mm
+switch to metric units (mm) 
+.PP
+.TP
+[\fB\-stdnames\fP]
+ \"option\-pcb\-stdnames
+use standard layer names instead of descriptive names 
+.PP
+.TP
+[\fB\-forcepoly\fP]
+ \"option\-pcb\-forcepoly
+force all objects to be interpreted as polygons 
+.PP
+.SS PCBFILL \- PCB FORMAT WITH FILLS
+See also: \fBhttp://pcb.sourceforge.net\fP
+.PP
+No format specific options 
+.SS PDF \- ADOBE\&'S PORTABLE DOCUMENT FORMAT
+No format specific options 
+.SS PPTX \- PRESENTATIONML (POWERPOINT) FORMAT
+This is the format used internally by Microsoft PowerPoint. LibreOffice can also read/write PowerPoint files albeit with some lack of functionality. 
+.PP
+The following driver specific options are available: 
+.TP
+[\fB\-colors\fP\fI string\fP]
+ \"option\-pptx\-colors
+"original" to retain original colors (default), "theme" to convert randomly to theme colors, or "theme\-lum" also to vary luminance 
+.PP
+.TP
+[\fB\-fonts\fP\fI string\fP]
+ \"option\-pptx\-fonts
+use "windows" fonts (default), "native" fonts, or convert to the "theme" font 
+.PP
+.TP
+[\fB\-embed\fP\fI string\fP]
+ \"option\-pptx\-embed
+embed fonts, specified as a comma\-separated list of EOT\-format font files 
+.PP
+.SS RIB \- RENDERMAN INTERFACE BYTESTREAM
+No format specific options 
+.SS RPL \- REAL3D PROGRAMMING LANGUAGE FORMAT
 No format specific options 
 .SS SAMPLE \- SAMPLE DRIVER: IF YOU DO NOT WANT TO SEE THIS, UNCOMMENT THE CORRESPONDING LINE IN MAKEFILE AND MAKE AGAIN
 This is a long description for the sample driver 
@@ -1161,41 +1253,115 @@ The following driver specific options are available:
  \"option\-sample\-sampleoption
 just an example 
 .PP
-.SS EMF \- ENHANCED MS WINDOWS METAFILE
+.SS SK \- SKETCH FORMAT
+No format specific options 
+.SS SVM \- STARVIEW/OPENOFFICE.ORG METAFILE
+StarView/OpenOffice.org metafile, readable from OpenOffice.org 1.0/StarOffice 6.0 and above. 
+.PP
 The following driver specific options are available: 
 .TP
 [\fB\-m\fP]
- \"option\-emf\-m
+ \"option\-svm\-m
 map to Arial 
 .PP
 .TP
 [\fB\-nf\fP]
- \"option\-emf\-nf
+ \"option\-svm\-nf
+emulate narrow fonts 
+.PP
+.SS TEXT \- TEXT IN DIFFERENT FORMS 
+The following driver specific options are available: 
+.TP
+[\fB\-height\fP\fI number\fP]
+ \"option\-text\-height
+page height in terms of characters 
+.PP
+.TP
+[\fB\-width\fP\fI number\fP]
+ \"option\-text\-width
+page width in terms of characters 
+.PP
+.TP
+[\fB\-dump\fP]
+ \"option\-text\-dump
+dump text pieces 
+.PP
+.SS TGIF \- TGIF .OBJ FORMAT
+The following driver specific options are available: 
+.TP
+[\fB\-ta\fP]
+ \"option\-tgif\-ta
+text as attribute 
+.PP
+.SS TK \- TK AND/OR TK.PPLET SOURCE CODE
+The following driver specific options are available: 
+.TP
+[\fB\-R\fP]
+ \"option\-tk\-R
+swap HW 
+.PP
+.TP
+[\fB\-I\fP]
+ \"option\-tk\-I
+no impress 
+.PP
+.TP
+[\fB\-n\fP\fI string\fP]
+ \"option\-tk\-n
+tagnames 
+.PP
+.SS VTK \- VTK DRIVER: IF YOU DO NOT WANT TO SEE THIS, UNCOMMENT THE CORRESPONDING LINE IN MAKEFILE AND MAKE AGAIN
+this is a long description for the VTKe driver 
+.PP
+The following driver specific options are available: 
+.TP
+[\fB\-VTKeoption\fP\fI integer\fP]
+ \"option\-vtk\-VTKeoption
+just an example 
+.PP
+.SS FORMAT GROUP: WMF EMF 
+This group consists of the following variants: 
+.TP
+wmf: 
+MS Windows Metafile. 
+.TP
+emf: 
+Enhanced MS Windows Metafile. 
+.PP
+The following driver specific options are available in this group: 
+.TP
+[\fB\-m\fP]
+ \"option\-wmf\-m
+map to Arial 
+.PP
+.TP
+[\fB\-nf\fP]
+ \"option\-wmf\-nf
 emulate narrow fonts 
 .PP
 .TP
 [\fB\-drawbb\fP]
- \"option\-emf\-drawbb
+ \"option\-wmf\-drawbb
 draw bounding box 
 .PP
 .TP
 [\fB\-p\fP]
- \"option\-emf\-p
+ \"option\-wmf\-p
 prune line ends 
 .PP
 .TP
 [\fB\-nfw\fP]
- \"option\-emf\-nfw
+ \"option\-wmf\-nfw
 Newer versions of MS Windows (2000, XP, Vista, 7, \&.\&.\&.) will not accept WMF/EMF files generated when this option is set and the input contains text. But if this option is not set, then the WMF/EMF driver will estimate interletter spacing of text using a very coarse heuristic. This may result in ugly looking output. On the other hand, OpenOffice can still read EMF/WMF files where pstoedit delegates the calculation of the inter letter spacing to the program reading the WMF/EMF file. So if the generated WMF/EMF file shall never be processed under MS Windows, use this option. If WMF/EMF files with high precision text need to be generated under *nix the only option is to use the \-pta option of pstoedit. However that causes every text to be split into single characters which makes the text hard to edit afterwards. Hence the \-nfw option provides a sort of compromise between portability and nice to edit but still nice looking text. Again \- this option has no meaning when pstoedit is executed under MS Windows anyway. In that case the output is portable but nevertheless not split and still looks fine. 
 .PP
 .TP
 [\fB\-winbb\fP]
- \"option\-emf\-winbb
+ \"option\-wmf\-winbb
 let the MS Windows API calculate the Bounding Box (MS Windows only) 
 .PP
 .TP
 [\fB\-OO\fP]
- \"option\-emf\-OO
+ \"option\-wmf\-OO
 generate OpenOffice compatible EMF file 
 .PP
 .\" *********************************** end of \input{driverhelp.tex}

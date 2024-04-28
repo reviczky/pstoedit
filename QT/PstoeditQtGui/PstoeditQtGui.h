@@ -1,4 +1,25 @@
+/*
+   PstoeditQtGUI.h : This file is part of pstoedit. Implementation of the QT GUI.
+  
+   Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
 #pragma once
+
 
 #include <QtWidgets/QMainWindow>
 #include <QFormLayout>
@@ -65,7 +86,7 @@ class PstoeditQtGui : public QMainWindow
 public:
     PstoeditQtGui(int argc_p, char ** argv_p, std::ostream& logStream_p, std::ostream* debugStream_p, QWidget* parent = Q_NULLPTR);
     ~PstoeditQtGui() { }
-    bool Verbose() { return verbose; }
+    bool Verbose() const { return verbose; }
     bool checkGhostscript();
     void setProgramOptions(ProgramOptions* param);
     void mapoptionstodialog();
@@ -94,15 +115,15 @@ private:
   
   
     // Actions used in menues
-    void OpenGUIHelpDocument() ;
-   // void CheckForUpdates();
-    void About();
-    void SupportPstoeditDevelopmentandMaintenance();
+    void OpenGUIHelpDocument() const;
+    void About() ;
+    void SupportPstoeditDevelopmentandMaintenance() const;
+    void Get_Support_or_open_a_Ticket() const;
  
 
     QNetworkAccessManager HTTPmanager;
     void ReplyFinished(class QNetworkReply* reply);
-    void CheckForUpdates();
+    void CheckForUpdates() ;
 
     Ui::PstoeditQtGuiClass ui;
     bool verbose = false;

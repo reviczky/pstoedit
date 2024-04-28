@@ -475,6 +475,7 @@ uninstall-am:
 GUI:    PstoeditQtGui.pro
 	qmake6 -o Makefile.qt PstoeditQtGui.pro
 	make -f Makefile.qt
+	make -f Makefile.qt clean
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.

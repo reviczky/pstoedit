@@ -4,7 +4,7 @@
 
    Copyright (C) 1996,1997 Jens Weber, rz47b7_AT_PostAG.DE
    Copyright (C) 1998 Thorsten Behrens and Bjoern Petersen
-   Copyright (C) 1998 - 2023 Wolfgang Glunz
+   Copyright (C) 1998 - 2024 Wolfgang Glunz
    Copyright (C) 2000 Thorsten Behrens
 
     This program is free software; you can redistribute it and/or modify
@@ -478,13 +478,12 @@ drvWMF::~drvWMF()
 
 		// add placeable header to standard metafile
 
-		PLACEABLEHEADER pHd;
 		FILE *inFile = nullptr;
-		WORD checksum;
 		const auto inFile_err = fopen_s(&inFile, tempName.c_str(), "rb");
 		if (!inFile_err) {
 			if (outFile != nullptr) {
 				// setup header
+		                PLACEABLEHEADER pHd;
 				pHd.key = LittleEndian_Dword32(PLACEABLEKEY);
 				pHd.hmf = LittleEndian_Word(0);
 				pHd.left = LittleEndian_Word((WORD) minX);
@@ -495,7 +494,7 @@ drvWMF::~drvWMF()
 				pHd.reserved = LittleEndian_Dword32(0);
 
 				// calculate checksum
-				checksum = 0;
+				WORD checksum = 0;
 				WORD *checksumField = (WORD *) & pHd;
 				for (unsigned int i = 0; i < 10; i++)
 					checksum ^= checksumField[i];

@@ -7,27 +7,46 @@
 <body>
 
     <h1 align="left">Changelog for pstoedit</h1>
-	
-	<h2>New or changed in 4.00:</h2>
+
+    <h2>New or changed in 4.01:</h2>
     <ul>
-	    <li>Many changes in internal APIs for supporting a GUI.</li>
-	    <li>First version of QT base GUI. Not yet part of standard build process. 
-        Sources are in QT/PstoeditQtGui directory. Just run "make GUI" in there to build the GUI.</li>
-	    <li>Code cleanup.</li>
-	    <li>Some fixes to pass newer Coverity checks. Src code has again 0 Coverity defects.</li>
-	    <li>Documentation update and cleanup.</li>
+        <li>Add creation of startmenu and desktop shortcuts in Windows installer.</li>
+        <li>Include some minor header patches for support of autotrace.</li>
+        <li>Improvements to the pcb-rnd driver contributed by Erich Heinzle. 
+            Limit polygon exports to pcb-rnd subcircuits to only those paths which are not self intersecting.</li>
+        <li>Fixed a bug found on MacOS reported by Sean Molenaar.</li>
+        <li>Some minor improvements to the GUI.</li>
+        <li>Some minor code cleanups to reduce warnings from clang compiler.</li>
+        <li>Some code changes to address a warning from AddressSanitizer.</li>
+        <li>Enable installation with winget.</li>
+    </ul>
+
+    <h2>New or changed in 4.00:</h2>
+    <ul>
+        <li>Many changes in internal APIs for supporting a GUI.</li>
+        <li>
+            First version of QT base GUI. Not yet part of standard build process.
+            Sources are in QT/PstoeditQtGui directory. Just run "make GUI" in there to build the GUI.
+        </li>
+        <li>Code cleanup.</li>
+        <li>Some fixes to pass newer Coverity checks. Src code has again 0 Coverity defects.</li>
+        <li>Documentation update and cleanup.</li>
         <li>Fix compilation problem with newer GNU libstdc++.</li>
         <li>Use unversioned .so libs for the driver plugins. Contributed by the Suse team.</li>
-	    <li>Remove the usage of __DATE__ in source code to allow "reproducible" builds. 
-        Contributed by the Suse team.</li>
+        <li>
+            Remove the usage of __DATE__ in source code to allow "reproducible" builds.
+            Contributed by the Suse team.
+        </li>
     </ul>
 
 
     <h2>New or changed in 3.78:</h2>
     <ul>
         <li>Bug fix. pstoedit did not find older versions of GhostScript under Windows.</li>
-        <li>Support for mawk in creation of pstoedit.ph header file. mawk is often used on build 
-	    servers in place of gawk.</li>
+        <li>
+            Support for mawk in creation of pstoedit.ph header file. mawk is often used on build
+            servers in place of gawk.
+        </li>
     </ul>
 
     <h2>New or changed in 3.77:</h2>

@@ -3,7 +3,7 @@
   Backend for Asymptote files
   Contributed by: John Bowman
 
-  Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_geocities.com
+  Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_geocities.com
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -73,7 +73,7 @@ drvASY::derivedConstructor(drvASY):
   // Output copyright information
   outf << "// Converted from PostScript(TM) to Asymptote by pstoedit\n"
        << "// Asymptote 1.00 (or later) backend contributed by John Bowman\n"
-       << "// pstoedit is Copyright (C) 1993 - 2023 Wolfgang Glunz"
+       << "// pstoedit is Copyright (C) 1993 - 2024 Wolfgang Glunz"
        << " <wglunz35_AT_pstoedit.net>\n\n";
 	
   outf << "import pstoedit;" << endl;
@@ -338,7 +338,7 @@ void drvASY::show_text(const TextInfo & textinfo)
   
   // Change fonts
   std::string thisFontName(textinfo.currentFontName.c_str());
-  std::string thisFontWeight(textinfo.currentFontWeight.c_str());
+  const std::string thisFontWeight(textinfo.currentFontWeight.c_str());
 
   const double ps2tex=72.27/72.0;
     
@@ -356,7 +356,7 @@ void drvASY::show_text(const TextInfo & textinfo)
       else if(thisFontWeight == string("Condensed")) outf << "\"c\"";
       outf << ");" << endl;
     }
-    prevFontName = thisFontName;
+    prevFontName = thisFontName.c_str();
     prevFontWeight = thisFontWeight;
   }
 	

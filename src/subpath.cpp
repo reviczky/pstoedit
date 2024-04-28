@@ -4,7 +4,7 @@
          don't support subpaths
 
    Copyright (C) 1999 Burkhard Plaum plaum_AT_ipf.uni-stuttgart.de
-   Copyright (C) 1999 - 2023  Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1999 - 2024  Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -470,8 +470,8 @@ void drvbase::PathInfo::rearrange()
 	// TBD - fix this.
 	const int additional_space = 4;
 	for (int s = 0; s < additional_space; s++) {
-		addtopath(new Lineto(0.0f,0.0f),cerr);
-		addtopath(new Lineto(0.0f,0.0f),cerr);
+		addtopath(new Lineto(0.0f,0.0f));
+		addtopath(new Lineto(0.0f,0.0f));
 	}
 
 

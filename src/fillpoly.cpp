@@ -403,11 +403,10 @@ static void strokedfill(const HPGL_Pt polygon[],
         return;
 
     auto poly = new HPGL_Pt2[numpoints + 1]; // (HPGL_Pt2*) malloc((size_t)(numpoints + 1) * sizeof poly[0]);
-    if (!poly)
-        return;
+    if (!poly) return;
 
     /* TODO: Center of rotation (center)? Fill startpoint (move)? */
-	HPGL_Pt2  center, move;
+    HPGL_Pt2  center, move;
     center.x = polygon[0].x;
     center.y = polygon[0].y;
     move.x = -polygon[0].x;

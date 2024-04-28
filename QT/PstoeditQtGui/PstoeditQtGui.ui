@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1026</width>
+    <width>1013</width>
     <height>490</height>
    </rect>
   </property>
@@ -60,7 +60,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>982</width>
+             <width>969</width>
              <height>368</height>
             </rect>
            </property>
@@ -83,7 +83,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1026</width>
+     <width>1013</width>
      <height>22</height>
     </rect>
    </property>
@@ -93,6 +93,7 @@
     </property>
     <addaction name="actionOpen_Help_Manual"/>
     <addaction name="actionAbout"/>
+    <addaction name="actionGet_Support_or_open_a_Ticket"/>
     <addaction name="actionSupport_Pstoedit_Development_and_Maintenance"/>
     <addaction name="actionCheck_for_Updates"/>
     <addaction name="actionAbout_Qt"/>
@@ -149,6 +150,11 @@
   <action name="actionAbout_Qt">
    <property name="text">
     <string>About Qt</string>
+   </property>
+  </action>
+  <action name="actionGet_Support_or_open_a_Ticket">
+   <property name="text">
+    <string>Get Support or open a Ticket</string>
    </property>
   </action>
  </widget>

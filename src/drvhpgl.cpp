@@ -5,7 +5,7 @@
    Copyright (C) 1993 - 2001 Peter Katzmann p.katzmann_AT_thiesen.com
    Copyright (C) 2001  Peter Kuhlemann kuhlemannp_AT_genrad.com
    Copyright (C) 2002 - 2003 Peter Kuhlemann peter.kuhlemann_AT_teradyne.com
-   Copyright (C) 2000 - 2023 Glunz (fill support,  improved color handling)
+   Copyright (C) 2000 - 2024 Glunz (fill support,  improved color handling)
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation; either version 2 of the License, or

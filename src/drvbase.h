@@ -5,7 +5,7 @@
    driver classes/backends. All virtual functions have to be implemented by
    the specific driver class. See drvSAMPL.cpp
   
-   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -284,8 +284,7 @@ protected:
 			// the path content is deleted by clear
 			clear();
 		}
-		void addtopath(basedrawingelement * newelement,
-			           ostream & errf);
+		void addtopath(basedrawingelement * newelement);
 		void clear();
 		void copyInfo(const PathInfo & p);
 			// copies the whole path state except the path array

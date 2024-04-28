@@ -1,3 +1,24 @@
+/*
+   PstoeditQtGUI.cpp : This file is part of pstoedit. Implementation of the QT GUI.
+  
+   Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
+
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program; if not, write to the Free Software
+    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+
+*/
+
 #include "PstoeditQtGui.h"
 #include <QSpinBox>
 #include <QCheckBox>
@@ -44,6 +65,7 @@ PstoeditQtGui::PstoeditQtGui(int argc_p, char ** argv_p, std::ostream& logStream
 	QObject::connect(ui.actionSelectFiles, &QAction::triggered, this, &PstoeditQtGui::getInputFiles);
 	QObject::connect(ui.actionOpen_Help_Manual, &QAction::triggered, this, &PstoeditQtGui::OpenGUIHelpDocument);
 	QObject::connect(ui.actionCheck_for_Updates, &QAction::triggered, this, &PstoeditQtGui::CheckForUpdates);
+	QObject::connect(ui.actionGet_Support_or_open_a_Ticket, &QAction::triggered, this, &PstoeditQtGui::Get_Support_or_open_a_Ticket);
 	QObject::connect(ui.actionSupport_Pstoedit_Development_and_Maintenance, &QAction::triggered, this, &PstoeditQtGui::SupportPstoeditDevelopmentandMaintenance);
 	QObject::connect(ui.actionAbout, &QAction::triggered, this, &PstoeditQtGui::About);
 	QObject::connect(ui.actionAbout_Qt, &QAction::triggered, this, &QApplication::aboutQt);
@@ -63,7 +85,7 @@ PstoeditQtGui::PstoeditQtGui(int argc_p, char ** argv_p, std::ostream& logStream
 		if (lastSlash) {
 			*lastSlash = '\0';
 		}
-		if (strlen(path_to_exe)) {
+		if (path_to_exe && strlen(path_to_exe)) {
 		  abs_path = std::filesystem::absolute(path_to_exe);
 		} else {
 		  abs_path = std::filesystem::current_path(); 
@@ -503,7 +525,7 @@ void PstoeditQtGui::setProgramOptions(ProgramOptions* param) {
 	verbose = (verboseOption && (GetValueOfOption(verboseOption) == "1"));
 }
 
-void PstoeditQtGui::OpenGUIHelpDocument() {
+void PstoeditQtGui::OpenGUIHelpDocument() const {
 	QString helpfileURL = UrlOfPstoeditHtml;
 	helpfileURL += QString("#GUI");
 	QDesktopServices::openUrl(QUrl(helpfileURL, QUrl::TolerantMode));
@@ -521,6 +543,10 @@ void PstoeditQtGui::ReplyFinished(QNetworkReply* reply) {
 		std::stringstream message;
 		message << "New version " << answer.toStdString().c_str() << " is available. Your version is " << current_version << endl;
 		message << "Get new version from https://sourceforge.net/projects/pstoedit/files/pstoedit/" << endl;
+		QMessageBox::information(this, QString("Pstoedit"), message.str().c_str());
+	} else if (latest_version < current_version) {
+		std::stringstream message;
+		message << "Your version " << current_version << " is newer than the released version " << answer.toStdString().c_str() << endl;
 		QMessageBox::information(this, QString("Pstoedit"), message.str().c_str());
 	} else {
 		QMessageBox::information(this, QString("Pstoedit"), QString("Your version is up to date."));
@@ -541,7 +567,7 @@ void PstoeditQtGui::About() {
 	message << "**About pstoedit**\n\n"
 		       "Pstoedit version: ";
 	message << get_pstoedit_version() << "  \n" ;
-	message <<	"Copyright (C) 1993 - 2023 Wolfgang Glunz " << "  \n"
+	message <<	"Copyright (C) 1993 - 2024 Wolfgang Glunz " << "  \n"
 				"All rights reserved" << "  \n"
 				"Pstoedit home page:  [www.pstoedit.com](http://www.pstoedit.com \"pstoedit home page\")" << "  \n"
 				"Refer to license.txt for conditions of distribution and use.\n\n"
@@ -555,7 +581,12 @@ void PstoeditQtGui::About() {
 	aboutBox.exec();
 };
 
-void PstoeditQtGui::SupportPstoeditDevelopmentandMaintenance() {
-	QDesktopServices::openUrl(QUrl("http://www.pstoedit.com/pstoedit_donate.htm", QUrl::TolerantMode));
+void PstoeditQtGui::SupportPstoeditDevelopmentandMaintenance() const {
+	QDesktopServices::openUrl(QUrl("https://wglunz.users.sourceforge.net/pstoedit_donate.htm", QUrl::StrictMode));
+};
+
+void PstoeditQtGui::Get_Support_or_open_a_Ticket() const {
+	// QDesktopServices::openUrl(QUrl("https://pstoedit.sourceforge.io", QUrl::StrictMode));
+	QDesktopServices::openUrl(QUrl("https://sourceforge.net/projects/pstoedit/", QUrl::StrictMode));
 };
 

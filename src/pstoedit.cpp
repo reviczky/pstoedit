@@ -2,7 +2,7 @@
    pstoedit.cpp : This file is part of pstoedit
    main control procedure
 
-   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -327,6 +327,11 @@ extern FILE *yyin;				// used by lexer
 						// otherwise we could declare it locally where it is used
 
 
+extern "C" DLLEXPORT void loadpstoeditplugins_plainC(const char *progname, int verbose)
+{
+  return loadpstoeditplugins(progname, cerr, (bool) verbose);
+}
+
 static void usage(ostream & outstream, bool forTeX, bool withdetails, bool withcategories )
 {
 	if (withcategories) {
@@ -436,7 +441,7 @@ int pstoedit(int argc, const char *const argv[], ostream & errstream,
 		errstream "built: " << __DATE__ << " - " 
 #endif
 		errstream << buildtype << " - " << compversion << ")"
-		" : Copyright (C) 1993 - 2023 Wolfgang Glunz\n";
+		" : Copyright (C) 1993 - 2024 Wolfgang Glunz\n";
 	}
 
 	//  handling of derived parameters
@@ -636,13 +641,17 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 	{
 		// extract driver specific options from part after the : in the driver name
 		RSString drivername (generalOptions.drivername.value); // make a copy because it gets modified below. 
-		char *driveroptions_string = strchr(const_cast<char*>(drivername.c_str()), ':'); //lint !e1773
-		if (driveroptions_string) {
-			*driveroptions_string = '\0';	// replace : with 0 to separate drivername
-			// copy back the drivername - above we "hacked" into the string without adjusting internal state
-			const RSString tmp(drivername.c_str());
-			drivername = tmp;
-			driveroptions_string++;
+		RSString driveroptions("");
+		{
+			char *drivername_copy = cppstrdup(drivername.c_str());
+			char *driveroptions_string = strchr(drivername_copy, ':'); //lint !e1773
+			if (driveroptions_string) {
+				*driveroptions_string = '\0';	// replace : with 0 to separate drivername
+				driveroptions_string++;
+				driveroptions = RSString(driveroptions_string); // part post :
+				drivername    = RSString(drivername_copy);  // first part
+			}
+			delete [] drivername_copy;
 		}
 		//errstream << "DEBUG: " << drivername << endl;
 
@@ -657,7 +666,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			errstream << "The driver for the selected format cannot write to standard output because it writes binary data" << endl;
 			return 1;
 		}
-		if (driveroptions_string && strequal(driveroptions_string, "-help") ) {
+		if (driveroptions == "-help") {
 			ProgramOptions* dummy = currentDriverDesc->createDriverOptions();
 			if (dummy->numberOfOptions() ) {
 				dummy->showhelp(diag, "The driver for this output format supports the following additional options: "
@@ -702,25 +711,25 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			RSString gsdevice;
 			if (is_gs_shortcut) {
 				// extract gs driver from part after the '-' in the driver name if available
-				RSString drivernamecopy(drivername);
-				char* gsdevice_string = strchr(const_cast<char*>(drivernamecopy.c_str()), '-'); //lint !e1773
+				const char* gsdevice_string = strchr(drivername.c_str(), '-'); //lint !e1773
 				if (gsdevice_string) {
 					gsdevice = RSString(gsdevice_string + 1);
-					if (drvbase::Verbose()) {
-						errstream << "using gs device:" << gsdevice << endl;
-					}
 				} else {
 					errstream << "unexpected flow in " << __FILE__ << ":" << __LINE__ << endl;
 					assert(false);
 					return 1;
 				}
 			} else {
-				if (!driveroptions_string) {
+				if (driveroptions == "") {
 					errstream <<
 						"The gs output driver needs a gs-device as argument, e.g. gs:pdfwrite" << endl;
 					return 1;
 				}
-				gsdevice = RSString(driveroptions_string);
+				//errstream << "DEBUG: driveroptions: " << driveroptions << endl;
+				gsdevice = RSString(driveroptions.c_str());
+			}
+			if (drvbase::Verbose()) {
+				errstream << "using gs device:" << gsdevice << endl;
 			}
 			assert(gsdevice != "");
 			// special handling of direct Ghostscript drivers
@@ -855,7 +864,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					}			// fail
 				}				// backend opens file by itself
 				outputdriver =
-					currentDriverDesc->CreateBackend(driveroptions_string,
+					currentDriverDesc->CreateBackend(driveroptions.c_str(),
 													 *outputFilePtr,
 													 errstream,
 													 generalOptions.nameOfInputFile,
@@ -869,7 +878,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				} else {
 					outputFilePtr = &cout;
 					outputdriver =
-						currentDriverDesc->CreateBackend(driveroptions_string,
+						currentDriverDesc->CreateBackend(driveroptions.c_str(),
 														 *outputFilePtr,
 														 errstream,
 														 generalOptions.nameOfInputFile,
@@ -1183,7 +1192,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					inFileStream << "/pstoedit.preps2ai where not { \n"
 						// first run through this file (before ps2ai.ps)
 						"	/jout true def \n" "	/joutput pstoedit.outputfilename def \n";
-					if (driveroptions_string && strequal(driveroptions_string, "-88")) {
+					if (driveroptions == "-88") {
 						inFileStream << "	/jtxt3 false cdef\n";
 					}
 					inFileStream << "	/pstoedit.textastext where { pop pstoedit.textastext not {/joutln true def } if } if \n" "	/pstoedit.preps2ai false def \n" "}{ \n" "	pop\n"	// second run (after ps2ai.ps)
@@ -1373,7 +1382,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 									  driverOptions,
 									  generalOptions.nameOfInputFile,
 									  generalOptions.nameOfOutputFile,
-									  currentDriverDesc, driveroptions_string, generalOptions.splitpages, outputdriver);
+									  currentDriverDesc, driveroptions.c_str(), generalOptions.splitpages, outputdriver);
 					//	if (options.verbose())
 					//		errstream << "now reading BoundingBoxes from file " << bbfilename << endl;
 						/* outputdriver-> */ 

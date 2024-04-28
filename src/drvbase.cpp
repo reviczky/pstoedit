@@ -2,7 +2,7 @@
    drvbase.cpp : This file is part of pstoedit
    Basic, driver independent output routines
 
-   Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+   Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
     This program is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -1179,22 +1179,20 @@ void drvbase::removeFromElementFromPath()
 
 void drvbase::addtopath(basedrawingelement * newelement) {
 	if (newelement) {
-	   currentPath->addtopath(newelement, errf);
+	        currentPath->addtopath(newelement);
 	} else {
 		errf << "Fatal: newelement is nullptr in addtopath " << endl;
 		exit(1);
 	}
 }
-void drvbase::PathInfo::addtopath(basedrawingelement * newelement,
-	                              ostream & errf)
+void drvbase::PathInfo::addtopath(basedrawingelement * newelement)
 {
         if (numberOfElementsInPath < path.size()) {
-	      path[numberOfElementsInPath] = newelement;
+	   path[numberOfElementsInPath] = newelement;
         } else {
-          path.push_back(newelement);
+           path.push_back(newelement);
         }
-		numberOfElementsInPath++;
-		unused(&errf);
+	numberOfElementsInPath++;
 }
 
 void drvbase::PathInfo::clear()

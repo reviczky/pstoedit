@@ -5,3 +5,4 @@ EXTRA_DIST+=resource.h pstoeditlogo-medium.ico PstoeditQtGuiMain.cpp
 GUI:    PstoeditQtGui.pro
 	qmake6 -o Makefile.qt PstoeditQtGui.pro
 	make -f Makefile.qt
+	make -f Makefile.qt clean

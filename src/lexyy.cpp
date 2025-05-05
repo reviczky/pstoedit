@@ -27,8 +27,8 @@
 #define FLEXINT_H
 
 /* C99 systems have <inttypes.h>. Non-C99 systems may or may not. */
-
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
+#if (defined(__cplusplus) || defined(c_plusplus)) || \
+    ( defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L )
 
 /* C99 says to define __STDC_LIMIT_MACROS before including stdint.h,
  * if you want the limit (max/min) macros for int types. 
@@ -1798,6 +1798,7 @@ YY_DECL
 
 		if ( ! YY_CURRENT_BUFFER ) {
 			yyensure_buffer_stack ();
+			assert(yy_buffer_stack);
 			YY_CURRENT_BUFFER_LVALUE =
 				yy_create_buffer( yyin, YY_BUF_SIZE );
 		}
@@ -2442,17 +2443,18 @@ YY_RULE_SETUP
 //cerr << "effective length " << strlen(cp) << endl;
 				do {
 					const char chigh = *cp;
-					const unsigned int high = hextoint(*cp);
 					// cout << "scanned1 " << (int) *cp << endl;
 					cp++;
 					if (*cp == '\0') {
-						cerr << "data format error (not a hex number) in line " << lineNumber << " " << secondlineno << endl;
-						return(1);
+						cerr << "data format error (not a valid hex number) in line " << lineNumber << " " << secondlineno << endl;
+						return 1;
 					}
 					const char clow = *cp;
-					const unsigned int low = hextoint(*cp);
 					// cout << "scanned2 " << (int) *cp << endl;
 					cp++; 
+
+					const unsigned int high = hextoint(chigh);
+					const unsigned int low  = hextoint(clow);
 					if ( backend->imageInfo.nextfreedataitem < size ) {
 						backend->imageInfo.data[backend->imageInfo.nextfreedataitem] = (unsigned char) (high * 16 + low);
 //						cerr << backend->imageInfo.nextfreedataitem << ":" << chigh<< clow << endl;
@@ -3121,6 +3123,7 @@ case YY_STATE_EOF(READBBOX):
 				yy_cp = (yy_c_buf_p);
 				yy_bp = (yytext_ptr) + YY_MORE_ADJ;
 				goto yy_find_action;
+			default: ; // nothing - keep compiler silent
 			}
 		break;
 		}

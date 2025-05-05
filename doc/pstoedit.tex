@@ -395,7 +395,7 @@ If you like pstoedit - please express so also at Facebook \URL{https://www.faceb
   \item Kai-Uwe Sattler \Email{kus\_AT\_iti.cs.uni-magdeburg.de} implemented the
      output format driver for Kontour.
   \item Scott Pakin, \Email{scott+ps2ed\_AT\_pakin.org} provided the MetaPost and \LaTeX2e\ and MS PowerPoint output format driver.
-  \item The MS PowerPoint driver uses the libzip library - \URL{http://www.nih.at/libzip}. Under MS Windows, this library is linked into the provided binary statically. Thanks to the whole libzip team.
+  \item The MS PowerPoint driver (pptx) uses the libzip library - \URL{https://libzip.org}. Under MS Windows, libzip and libz are linked statically into the driver DLL. Thanks to the whole libzip team. The libzip license is explained here \URL{https://libzip.org/license}.
   \item Burkhard Plaum \Email{plaum\_AT\_IPF.Uni-Stuttgart.de} added support for
      complex filled paths for the XFIG output format driver.
   \item Bernhard Herzog \Email{herzog\_AT\_online.de} contributed the output format driver for
@@ -416,9 +416,9 @@ If you like pstoedit - please express so also at Facebook \URL{https://www.faceb
   \item Dave \Email{dave\_AT\_opaque.net} for providing the libming which is a multiplatform library for generating SWF files.
   \item Masatake Yamoto for the introduction of autoconf, automake and libtool into pstoedit
   \item Bob Friesenhahn for his help and the building of the Magick++ API to ImageMagick.
-  \item But most important: Peter Deutsch \Email{ghost\_AT\_aladdin.com} and Russell
-     Lang \Email{gsview\_AT\_ghostgum.com.au} for their help and answers regarding
-     Ghostscript and gsview.
+  \item Barak Pearlmutter from Debian for his upfront testing of new versions.
+  \item But most important: Peter Deutsch, Ken Sharp, Chris Liddell from the GhostScript team at Artifex, and Russell
+        Lang \Email{gsview\_AT\_ghostgum.com.au} for their help and answers regarding Ghostscript and gsview.
 \end{itemize}
 
 \section{LEGAL NOTICES}

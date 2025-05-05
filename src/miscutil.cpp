@@ -226,12 +226,23 @@ RSString full_qualified_tempnam(const char *pref)
 #endif
 }
 
-unsigned short hextoint(const char hexchar)
+unsigned short hextoint(const char hc)
 {
+	if ((hc >= '0') && (hc <= '9')) { // numeric
+		return (hc - '0');
+	} else if ((hc >= 'A') && (hc <= 'F')) { // upper case hex
+		return (hc - 'A' + 10);
+	} else if ((hc >= 'a') && (hc <= 'f')) {// lower case hex
+		return (hc - 'a' + 10);
+	} 
+	assert(false && "hc is not a hex character");
+	return 0;
+#if 0
 	char h = hexchar;
 	if (h >= 'a' && h <='f') h += 'A' - 'a'; // normalize lowercase to uppercase
 	const unsigned short r = ( h <= '9' ) ? (h - '0') : (h + 10 - 'A' ) ; //lint !e732
 	return r;
+#endif
 }
 #if defined(_WIN32)
 const bool regdebug = false;

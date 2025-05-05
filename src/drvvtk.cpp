@@ -153,7 +153,7 @@ void drvVTK::show_image(const PSImage & )
 	errf << "\t\tFatal: unexpected case in drvVTK - show_image " << endl;
 }
 
-static DriverDescriptionT < drvVTK > D_VTK("vtk", "VTK driver: if you do not want to see this, uncomment the corresponding line in makefile and make again", "this is a long description for the VTKe driver","vtk", false,	// backend supports subpaths
+static DriverDescriptionT < drvVTK > D_VTK("vtk", "VTK driver", "this is a long description for the VTKe driver","vtk", false,	// backend supports subpaths
 											   // if subpaths are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)

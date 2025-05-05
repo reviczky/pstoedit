@@ -286,8 +286,8 @@ static BOOL get_gs_string_product(int gs_revision, const char *name,
 		);
 	}
 	if (verbose) {
-		fprintf(stdout, "DOT: %s\n", dotversion);
-		cerr << "DOT : " << dotversion << endl;
+		fprintf(stdout, "dotted version: %s\n", dotversion);
+		cerr << "dotted version: " << dotversion << endl;
 	}
 	
 	if (strlen(gsregbase))

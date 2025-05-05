@@ -5,3 +5,6 @@ SUBDIRS += msdev QT
 #SUBDIRS += os2 
 m4datadir = $(datadir)/aclocal
 m4data_DATA = m4/pstoedit.m4
+LIBTOOL_DEPS = @LIBTOOL_DEPS@
+libtool: $(LIBTOOL_DEPS)
+	$(SHELL) ./config.status libtool

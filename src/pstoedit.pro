@@ -94,6 +94,11 @@ currentdict /pstoedit.ashexstring known not
 	/pstoedit.ashexstring true def % false means clear text
 } 
 if
+currentdict /pstoedit.usefinddevice known not 
+{ 
+	/pstoedit.usefinddevice false def % true means use the standard operators
+} 
+if
 currentdict /pstoedit.checkfontnames known not
 { 
 	/pstoedit.checkfontnames true def
@@ -959,6 +964,13 @@ def
 	-printalways
 } 
 def
+/P2EVTRACE { %nc
+	pstoedit.verbosemode { %nc
+		pstack
+	} if
+	pop % the argument string
+} 
+def
 /onechar 1 -string def
 /inttosinglechar 
 { %nc 
@@ -1006,19 +1018,6 @@ def
 		/pstoedit.dpiscale 1 store
 	 psexit } 
 	ifelse
- psexit } 
-def
-/setdummydevice 
-{ 1347 psentry
-	(NOTE: THIS IS A DEBUG VERSION. PLEASE REMOVE CALL TO setdummydevice\n) print
-	mark
-	/OutputFile (dummy.png)
-	/HWResolution [ 72 72 ]
-	/PageSize [ 1000 1000 ]
-	(pswrite)
-	finddevice 
-	putdeviceprops
-	setdevice
  psexit } 
 def
 /pstoedit.initialize 
@@ -3128,11 +3127,7 @@ pstoedit.withimages
 		/pstoedit.image.imageproc 0 store
 		/processAsFILEimage_core 
 		{ 4125 psentry
-			pstoedit.verbosemode 
-			{ 4127 psentry
-				(vor processAsFILEImage ) pstack pop
-			 psexit } 
-			if
+			(before processAsFILEImage ) P2EVTRACE 
 			/pstoedit.image.filesuffix exch store 
 			/pstoedit.image.imageproc exch store
 			pstoedit.image.nr cvi 1 add 100 -string cvs pstoedit.image.nr copy pop
@@ -3172,11 +3167,7 @@ pstoedit.withimages
 				(\%fileimage:end\n) -print
 			 psexit } 
 			if
-			pstoedit.verbosemode 
-			{ 4181 psentry
-				(after dump1 ) pstack pop 
-			 psexit } 
-			if
+			(after dump1 ) P2EVTRACE 
 			(0) pstoedit.writesaverestore  copy pop
 			pstoedit.verbosemode 
 			{ 4205 psentry
@@ -3211,23 +3202,22 @@ pstoedit.withimages
 				{ 4236 psentry
 					(opening image file:) print
 					pstoedit.image.outputfile print (\n) print
+					pstoedit.image.width pstoedit.image.height pstack pop pop
 				 psexit } 
 				if
-				false % true - use setpagedevice
+				pstoedit.usefinddevice not % default dont use finddevice anymore use setpagedevice instead
 				{ 4242 psentry
+					currentcolorspace 
 					<<
 					/OutputFile pstoedit.image.outputfile
-					/OutputDevice 
-					pstoedit.imagedevicename cvn
+					/OutputDevice pstoedit.imagedevicename cvn
 					/HWResolution [ 72 72 ]
 					/PageSize [ pstoedit.image.width pstoedit.image.height ]
 					>>	
-					pstoedit.verbosemode 
-					{ 4253 psentry
-						(before setpage device ) pstack pop	
-					 psexit } 
-					if
+					(before setpage device ) P2EVTRACE
 					setpagedevice	
+					(after  setpage device ) P2EVTRACE 
+					setcolorspace 
 				 psexit } 
 				{ 4260 psentry
 					mark
@@ -3235,29 +3225,13 @@ pstoedit.withimages
 					/HWResolution [ 72 72 ]
 					/PageSize [ pstoedit.image.width pstoedit.image.height ]
 					pstoedit.imagedevicename
-					finddevice 
+					finddevice % in processAsFILEimage_core
 					pstoedit.verbosemode 
-					{ 4271 psentry
-						(after finddevice ) pstack pop 
-					 psexit } 
-					if
+					(after finddevice ) P2EVTRACE
 					putdeviceprops
 					setdevice
 				 psexit } 
 				ifelse
-			 psexit } 
-			if
-			false 
-			{ 4283 psentry
-				pstoedit.imagedevicename
-				finddevice 
-				setdevice
-				<<
-				/OutputFile pstoedit.image.outputfile
-				/HWResolution [ 72 72 ]
-				/PageSize [ pstoedit.image.width pstoedit.image.height ]
-				>>
-				setpagedevice
 			 psexit } 
 			if
 			false 
@@ -3275,33 +3249,15 @@ pstoedit.withimages
 			 psexit } 
 			if
 			pstoedit.image.width pstoedit.image.height scale
-			pstoedit.verbosemode 
-			{ 4360 psentry
-				(vor pstoedit.image.imageproc ) pstack pop
-			 psexit } 
-			if
+			(before pstoedit.image.imageproc ) P2EVTRACE
 			pstoedit.image.imageproc %wogl -colorimage
-			pstoedit.verbosemode 
-			{ 4369 psentry
-				(nach pstoedit.image.imageproc ) pstack pop
-			 psexit } 
-			if
-			false {
-			  0 .endpage 
-			  .doneshowpage 
-			  1 true .outputpage 
-			  pop
-			} {
-			  -showpage
-			} ifelse
+			(after pstoedit.image.imageproc ) P2EVTRACE 
+			(image showpage) P2EVTRACE
+			-showpage
 			pstoedit.image.saveobject2 -restore
 			pstoedit.image.saveobject1 -restore
 			(1) pstoedit.writesaverestore copy pop
-			pstoedit.verbosemode 
-			{ 4403 psentry
-				(%end dealing with dumping image to file\n)  print 
-			 psexit } 
-			if
+			(%end dealing with dumping image to file\n)  P2EVTRACE 
 		 psexit } 
 		def
 		/processAsFILEimage_errhandling 
@@ -3705,7 +3661,7 @@ pstoedit.withimages
 				dup /filetype eq /pstoedit.image.isfile exch store
 				/dicttype eq 
 				{ 4948 psentry
-					(Level 2 version of image and imagemask not supported for this backend (due to lack of support for bitmaps on intermediate files)\n) true printwarning
+					(Level 2 version of image and imagemask not supported or implemented (yet) for this backend \n) true printwarning
 					pstoedit.image.realproc
 				 psexit } 
 				{ 4953 psentry
@@ -3921,7 +3877,7 @@ pstoedit.delaybindversion
 	 psexit } 
 	if
 	systemdict readonly pop
-		pstoedit.currentglobalvalue pstoedit.setglobal 
+	pstoedit.currentglobalvalue pstoedit.setglobal 
  psexit } 
 { 5211 psentry
 		pstoedit.currentglobalvalue pstoedit.setglobal 
@@ -4057,93 +4013,3 @@ pstoedit.somethingprinted cvi 1 eq
  psexit } 
 if
 pstoedit.quit
-false 
-{ 5423 psentry
-	/saaaaaa 
-	{ 5425 psentry
-		pstoedit.image.nr cvi 1 add 100 -string cvs pstoedit.image.nr copy pop
-		/pstoedit.image.outputfile pstoedit.nameOfOutputFilewithoutpercentD (_l2i) concatstrings 
-		pstoedit.image.nr cvi 20 -string cvs concatstrings pstoedit.imagefilesuffix concatstrings store
-		/pstoedit.image.stringprefix (%fileimage:) store
-		pstoedit.escapetext not 
-		{ 5434 psentry
-			(\%fileimage:begin\n) -print
-			-gsave
-			pstoedit.image.mat matrix invertmatrix concat
-			matrix currentmatrix matrix defaultmatrix matrix invertmatrix matrix concatmatrix
-			(% DC ) -print 
-			{ 5440 psentry
-				printTOS 
-			 psexit } 
-			forall (\n) -print
-			pstoedit.image.stringprefix printdumponly (normalized image currentmatrix\n) printdumponly  
-			-grestore
-			(% DC ) -print pstoedit.image.mat  
-			{ 5448 psentry
-				printTOS 
-			 psexit } 
-			forall (\n) -print
-			pstoedit.image.stringprefix -print (imagematrix\n) -print
-			pstoedit.image.stringprefix -print (filename ) -print
-			pstoedit.image.outputfile -print  (\n) -print
-			(% DC ) printdumponly pstoedit.image.width  printTOS (\n) -print
-			pstoedit.image.stringprefix printdumponly 
-			(width\n) printdumponly 
-			(% DC ) printdumponly pstoedit.image.height printTOS (\n) -print
-			pstoedit.image.stringprefix printdumponly 
-			(height\n) printdumponly 
-			(\%fileimage:end\n) -print
-		 psexit } 
-		if
-		gsave
-		true 
-		{ 5476 psentry
-			mark
-			/OutputFile pstoedit.image.outputfile
-			/HWResolution [ 72 72 ]
-			/PageSize [ pstoedit.image.width pstoedit.image.height ]
-			pstoedit.imagedevicename
-			finddevice 
-			putdeviceprops
-			setdevice
-		 psexit } 
-		if
-		false 
-		{ 5494 psentry
-			pstoedit.imagedevicename
-			finddevice 
-			setdevice
-			<<
-			/OutputFile pstoedit.image.outputfile
-			/HWResolution [ 72 72 ]
-			/PageSize [ pstoedit.image.width pstoedit.image.height ]
-			>>
-			setpagedevice
-		 psexit } 
-		if
-		pstoedit.image.mat 3 get 0 -lt 
-		{ 5520 psentry
-			pstoedit.image.mat 5 get 0 eq 
-			{ 5522 psentry
-				(Info: correcting image matrix - did not follow PS conventions\n) print
-				pstoedit.image.mat 5 pstoedit.image.mat 3 get -1 mul put
-			 psexit } 
-			if
-		 psexit } 
-		if
-		(debug 2v ) dumpcurrentCTM
-		pstoedit.image.mat concat 
-		(debug 2n ) dumpcurrentCTM
-		pstoedit.image.dotranslate 
-		{ 5537 psentry
-			1  -1 scale 
-			0 pstoedit.image.height -1 mul translate
-		 psexit } 
-		if  
-		-image %pstoedit.realproc  %% it probably does not make sense to use imagemask on the virtual device
-		0 .endpage .doneshowpage 1 true .outputpage pop
-		-grestore  %% Hier wird offenbar das gerestore mit output aufgerufen. Wieso ist unklar.
-	 psexit } 
-	def
- psexit } 
-if

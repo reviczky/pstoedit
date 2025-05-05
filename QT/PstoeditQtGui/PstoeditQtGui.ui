@@ -17,6 +17,9 @@
    <iconset resource="PstoeditQtGui.qrc">
     <normaloff>:/PstoeditQtGui/pstoeditlogo-medium.ico</normaloff>:/PstoeditQtGui/pstoeditlogo-medium.ico</iconset>
   </property>
+  <property name="styleSheet">
+   <string notr="true"/>
+  </property>
   <widget class="QWidget" name="centralWidget">
    <property name="minimumSize">
     <size>

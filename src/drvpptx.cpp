@@ -541,6 +541,11 @@ outzip(nullptr)
   page_images = 0;
 }
 
+ inline zip_int64_t ZIP_ADD(zip_t* a, const char * n, zip_source_t* s) {
+    const zip_flags_t empty_flags = 0;
+    return zip_file_add(a, n, s, empty_flags);
+}
+ 
 drvPPTX::~drvPPTX()
 {
   // Embed fonts in the PPTX file if asked to do so.
@@ -550,7 +555,7 @@ drvPPTX::~drvPPTX()
          iter != eotlist.end();
          ++iter) {
       const char * const eotFileName = iter->c_str();
-      struct zip_source *font_file = zip_source_file(outzip, eotFileName, 0, -1);
+      zip_source_t *font_file = zip_source_file(outzip, eotFileName, 0, -1);
       if (font_file == nullptr) {
 	    RSString errmessage("ERROR: Failed to embed font file ");
 	    errmessage += eotFileName ;
@@ -563,7 +568,7 @@ drvPPTX::~drvPPTX()
       }
       ostringstream full_eot_filename;
       full_eot_filename << "ppt/fonts/font" << fontNum << ".fntdata";
-      if (zip_add(outzip, full_eot_filename.str().c_str(), font_file) == -1) {
+      if (ZIP_ADD(outzip, full_eot_filename.str().c_str(), font_file) == -1) {
 		RSString errmessage("ERROR: Failed to embed font file ");
 		errmessage += eotFileName ;
 		errmessage += " as " ;
@@ -711,13 +716,21 @@ drvPPTX::~drvPPTX()
     errorMessage(errmessage.c_str());
     abort();
   }
+
+  // remove temporary image files
+  if (!options->keepImageFiles) {
+      for (auto const& tmpfilename : temporary_image_files) {
+          //std::cout << "in dtor: " << tmpfilename << endl;
+          (void)remove(tmpfilename.c_str());
+      }
+  }
 }
 
 // Create a file in a PPTX package from given contents.
 void drvPPTX::create_pptx_file(const char * relname, const char * contents)
 {
   // Convert the file contents into a data source.
-  struct zip_source * file_source = zip_source_buffer(outzip, strdup(contents), strlen(contents), 1);
+  zip_source_t * file_source = zip_source_buffer(outzip, strdup(contents), strlen(contents), 1);
   if (file_source == nullptr) {
     RSString errmessage("ERROR: Failed to create data for ");
     errmessage += relname ;
@@ -729,7 +742,7 @@ void drvPPTX::create_pptx_file(const char * relname, const char * contents)
   }
 
   // Add the data source to the PPTX file.
-  if (zip_add(outzip, relname, file_source) == -1) {
+  if (ZIP_ADD(outzip, relname, file_source) == -1) {
     RSString errmessage("ERROR: Failed to insert ");
     errmessage += relname ;
     errmessage += " into " ;
@@ -750,15 +763,20 @@ void drvPPTX::create_pptx()
   int ziperr;
   outzip = zip_open(outFileName.c_str(), ZIP_CREATE, &ziperr);
   if (outzip == nullptr) {
+#if 1
+    zip_error_t error;
+    zip_error_init_with_code(&error, ziperr);
+#else
     char reason[101];
     zip_error_to_str(reason, 100, ziperr, errno);
-	RSString errmessage("ERROR: Failed to create ");
-	errmessage += outFileName ;
-	errmessage += " (" ;
-	errmessage += reason ;
-	errmessage += ")" ;
-
+#endif
+    RSString errmessage("ERROR: Failed to create ");
+    errmessage += outFileName ;
+    errmessage += " (" ;
+    errmessage += zip_error_strerror(&error);
+    errmessage += ")" ;
     errorMessage(errmessage.c_str());
+    zip_error_fini(&error);
     abort();
   }
   RSString comment("Created by pstoedit's pptx driver from PostScript input ");
@@ -864,11 +882,11 @@ void drvPPTX::close_page()
 
   // Add the current slide to the PPTX file.
   const char * const slideContents_c = strdup(slidef.str().c_str());
-  struct zip_source * slideContents = zip_source_buffer(outzip, slideContents_c, strlen(slideContents_c), 1);
+  zip_source_t * slideContents = zip_source_buffer(outzip, slideContents_c, strlen(slideContents_c), 1);
   ostringstream slideFileName;
   slideFileName << "ppt/slides/slide" << currentPageNumber << ".xml";
   char * const slideFileName_c = strdup(slideFileName.str().c_str());  // libzip seems to store a pointer to this.
-  if (zip_add(outzip, slideFileName_c, slideContents) == -1) {
+  if (ZIP_ADD(outzip, slideFileName_c, slideContents) == -1) {
     RSString errmessage("ERROR: Failed to store ");
     errmessage += slideFileName_c ;
     errmessage += " in " ;
@@ -1348,7 +1366,7 @@ Point drvPPTX::pathCentroid()
       continue;
     allKnots[numKnots++] = elem.getPoint(elem.getNrOfPoints() - 1);
   }
-  if (allKnots[numKnots - 1] == allKnots[0])
+  if ((numKnots > 1) && ( allKnots[numKnots - 1] == allKnots[0] ) )
     numKnots--;
   else
     allKnots[numKnots] = allKnots[0];
@@ -1754,7 +1772,11 @@ void drvPPTX::show_image(const PSImage & imageinfo)
          << "      </p:pic>\n";
 
   // Embed the image in the PPTX file.
-  struct zip_source *img_file = zip_source_file(outzip, imageinfo.FileName.c_str(), 0, -1);
+#ifndef ZIP_LENGTH_TO_END
+  // is defined from version 1.10.1
+  #define ZIP_LENGTH_TO_END -1
+#endif
+  zip_source_t* img_file = zip_source_file(outzip, imageinfo.FileName.c_str(), 0, ZIP_LENGTH_TO_END);
   if (img_file == nullptr) {
     RSString errmessage("ERROR: Failed to embed image file ");
     errmessage += imageinfo.FileName;
@@ -1766,7 +1788,7 @@ void drvPPTX::show_image(const PSImage & imageinfo)
   }
   ostringstream img_filename;
   img_filename << "ppt/media/image" << total_images << ".png";
-  if (zip_add(outzip, img_filename.str().c_str(), img_file) == -1) {
+  if (ZIP_ADD(outzip, img_filename.str().c_str(), img_file) == -1) {
 	RSString errmessage("ERROR: Failed to embed image file ");
 	errmessage += imageinfo.FileName;
 	errmessage +=" as ";
@@ -1777,12 +1799,13 @@ void drvPPTX::show_image(const PSImage & imageinfo)
     errorMessage(errmessage.c_str());
     abort();
   }
+  temporary_image_files.push_back(imageinfo.FileName);
 }
 
 static DriverDescriptionT < drvPPTX >
 D_pptx("pptx",
        "PresentationML (PowerPoint) format",
-       "This is the format used internally by Microsoft PowerPoint.  LibreOffice can also read/write PowerPoint files albeit with some lack of functionality.",
+       "This is the format used internally by Microsoft PowerPoint. LibreOffice can also read/write PowerPoint files albeit with some lack of functionality.",
        "pptx",
        true,   // backend supports subpaths
        // if subpaths are supported, the backend must deal with

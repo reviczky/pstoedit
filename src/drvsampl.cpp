@@ -256,7 +256,7 @@ void drvSAMPL::show_image(const PSImage & imageinfo)
 	}
 }
 
-static DriverDescriptionT < drvSAMPL > D_sampl("sample", "sample driver: if you do not want to see this, uncomment the corresponding line in makefile and make again", "This is a long description for the sample driver","sam", true,	// backend supports subpaths
+static DriverDescriptionT < drvSAMPL > D_sampl("sample", "sample driver", "This is a long description for the sample driver","sam", true,	// backend supports subpaths
 											   // if subpaths are supported, the backend must deal with
 											   // sequences of the following form
 											   // moveto (start of subpath)

@@ -10,7 +10,13 @@ dnl       as those are all the systems I have access to.
 dnl ------------------------------------------------------------------------
 
 dnl Initialize Autoconf. 
-AC_INIT([pstoedit],[4.01],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
+AC_INIT([pstoedit],[4.02],[wglunz35_AT_pstoedit.net],[],[http://www.pstoedit.com])
+
+dnl Check Ghostscript
+AC_CHECK_PROGS([GS],[gs],[false])
+AS_IF([test x"${GS}" = xfalse],[AC_MSG_ERROR([** Cannot find ghostscript.  If it is already installed, Check PATH.])])
+dnl AC_PREFIX_PROGRAM(gs)
+
 AC_LANG(C++)
 dnl AC_CONFIG_AUX_DIR(config)
 AM_INIT_AUTOMAKE([foreign subdir-objects info-in-builddir -Wall])
@@ -36,6 +42,8 @@ AM_PROG_AR
 AC_PROG_INSTALL
 dnl there is no need to build the static libs if shared libs are available
 LT_INIT([disable-static win32-dll dlopen])
+LT_LANG([C++])
+AC_SUBST([LIBTOOL_DEPS])
 
 AC_PROG_MAKE_SET
 
@@ -49,11 +57,8 @@ dnl    AC_MSG_ERROR([** Cannot find file command which is needed for libtool. Pl
 dnl    exit 1
 dnl fi
 
-dnl Check Ghostscript
-AC_CHECK_PROGS([GS],[gs],[false])
-AS_IF([test x"${GS}" = xfalse],[AC_MSG_ERROR([** Cannot find ghostscript.  If it is already installed, Check PATH.])])
 
-PKG_PROG_PKG_CONFIG
+PKG_PROG_PKG_CONFIG([1.8.0])
 
 AC_C_BIGENDIAN([CPPFLAGS="$CPPFLAGS -D_BIG_ENDIAN"], [CPPFLAGS="$CPPFLAGS -D_LITTLE_ENDIAN"])
 
@@ -85,7 +90,6 @@ dnl emf, magick, libplot, swf
 
 # When doc regeneration is enabled, these are needed:
 AC_CHECK_PROGS([PDFLATEX],[pdflatex],[false])
-AC_CHECK_PROGS([LATEX2MAN],[latex2man],[false])
 # Note that this controls *generation* of documentation.  It is
 # installed in any case, and included in the "make dist" distribution
 # tarball.  As a consequence, at "make dist" time these files must
@@ -95,11 +99,10 @@ AC_CHECK_PROGS([LATEX2MAN],[latex2man],[false])
 AC_MSG_CHECKING([enable_docs])
 # Check the option
 AC_ARG_ENABLE([docs],
-       [AS_HELP_STRING([--enable-docs],[rebuild LaTeX-format documentation (default=yes iff pdflatex and latex2man are found)])],,
+       [AS_HELP_STRING([--enable-docs],[rebuild LaTeX-format documentation (default=yes iff pdflatex is found)])],,
        [enable_docs=yes])
 # Disable the option if the necessary executables seem unavailable:
-AS_IF([test "x${PDFLATEX}" = xfalse],[enable_docs=no],
-      [test "x${LATEX2MAN}" = xfalse],[enable_docs=no])
+AS_IF([test "x${PDFLATEX}" = xfalse],[enable_docs=no])
 AC_MSG_RESULT([$enable_docs])
 # Tell automake whether to try to regenerate docs
 AM_CONDITIONAL([DOCS], [test x${enable_docs} = xyes])
@@ -117,6 +120,9 @@ AC_ARG_WITH([emf],
 AC_ARG_WITH([magick],
 [AS_HELP_STRING([--with-magick],[enable/disable magick++ interface (default: enabled - use --without-magick to disable)])],
 [with_magick=$withval],[with_magick=yes])
+AC_ARG_WITH([gui],
+[AS_HELP_STRING([--with-gui],[enable/disable the QT GUI (default: enabled - use --without-gui to disable)])],
+[with_gui=$withval],[with_gui=yes])
 AC_ARG_WITH([libplot],
 [AS_HELP_STRING([--with-libplot],[enable/disable libplot interface (default: enabled - use --without-libplot to disable)])],
 [with_libplot=$withval],[with_libplot=yes])
@@ -138,6 +144,8 @@ else
 	HAVE_PLUGINSRC=false;
 	AM_CONDITIONAL(HAVE_PLUGINSRC, false)
 fi
+
+
 
 if test "${with_libplot}" = "yes" ; then
 dnl
@@ -177,6 +185,47 @@ else
 fi
 
 CPPFLAGS=${OLD_CPPFLAGS}
+
+if test "${with_gui}" = "yes" ; then
+dnl
+dnl QT GUI
+dnl
+HAVE_QT=no
+AC_CHECK_PROG([QMAKE6FOUND],[qmake6],[true],[false])
+
+if test "${QMAKE6FOUND}"; then
+   QHEADERS=`qmake6 -query QT_INSTALL_HEADERS`
+   echo "QHEADERS=$QHEADERS"
+   QHEADERDIR=`echo "$QHEADERS" | sed s/-I//g`
+   if test -f "$QHEADERDIR/QtWidgets/QMainWindow" ; then
+     HAVE_QT=yes;
+     AC_MSG_RESULT(you seem to have QT headers)
+     AC_MSG_RESULT([** separate GUI enabled.])
+   else
+     AC_MSG_RESULT(you do no have QT headers. Cannot build the GUI.)
+   fi
+
+dnl   CPPFLAGS="$CPPFLAGS -I$QHEADERS"
+dnl   echo "WWWWW CPPFLAGS=$CPPFLAGS"
+dnl   AC_PREPROC_IFELSE([AC_LANG_PROGRAM([[
+dnl		#include <QtWidgets/QMainWindow>
+dnl		]], [[ ]])],
+dnl	[HAVE_QT=yes;AC_MSG_RESULT(you seem to have QT headers)],
+dnl      [HAVE_QT=no;AC_MSG_RESULT(you do no have QT headers)])
+dnl   AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+dnl		#include <QtWidgets/QMainWindow>
+dnl		]], [[ ]])],
+dnl		[HAVE_QT=yes;AC_MSG_RESULT(you seem to have QT headers );AC_MSG_RESULT([** QT GUI is enabled.])],
+dnl		[AC_MSG_RESULT(QT headers not found)])
+dnl    CPPFLAGS=${OLD_CPPFLAGS}
+else
+   AC_MSG_WARN([** QT GUI is disabled.])
+fi
+   AM_CONDITIONAL(HAVE_QT, test "$HAVE_QT" = yes)
+else
+   AC_MSG_WARN([QT GUI disabled by configure argument .])
+   AM_CONDITIONAL(HAVE_QT, false )
+fi
 
 
 
@@ -512,6 +561,7 @@ AC_ARG_ENABLE([wrapper],
               [AS_HELP_STRING([--enable-wrapper=PROGRAM],
                           [Wrap (i.e. prefix) compiler invocations with PROGRAM (e.g. \"insure\" or \"purify\")])],
               [CXX="$enableval $CXX"])
+
 AC_SUBST(SPECIAL_CXXFLAGS)
 
 dnl

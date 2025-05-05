@@ -20,7 +20,7 @@ FORMS += \
 
 RESOURCES += PstoeditQtGui.qrc
 
-LIBS +=  -Wl,-rpath,`pwd`/../../../src/.libs/ -L ../../../src/.libs -lpstoedit
+LIBS +=  -Wl,-rpath,`pwd`/../../src/.libs/ -L ../../src/.libs -lpstoedit
 
 INCLUDEPATH += ../../src
 

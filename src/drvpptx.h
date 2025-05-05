@@ -5,6 +5,7 @@
    drvooxml.h : This file is part of pstoedit
    Backend for Office Open XML files
    Contributed by: Scott Pakin <scott+ps2ed_AT_pakin.org>
+   Thie code uses the libzip library from https://libzip.org
 
    Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
@@ -27,6 +28,7 @@
 #include "drvbase.h"
 #include I_strstream
 #include <set>
+#include <list>
 using std::set;
 using std::string;
 
@@ -39,6 +41,7 @@ public:
                 OptionT < RSString, RSStringValueExtractor > colortype;
                 OptionT < RSString, RSStringValueExtractor > fonttype;
                 OptionT < RSString, RSStringValueExtractor > embeddedfonts;
+                OptionT < bool, BoolTrueExtractor> keepImageFiles;
         DriverOptions():
                 colortype(true, "-colors", "string", 0,
                           "\"original\" to retain original colors (default), \"theme\" to convert randomly to theme colors, or \"theme-lum\" also to vary luminance",
@@ -48,11 +51,15 @@ public:
                            nullptr, "windows"),
                   embeddedfonts(true, "-embed", "string", 0,
                                 "embed fonts, specified as a comma-separated list of EOT-format font files",
-                                nullptr, "")
+                                nullptr, ""),
+                  keepImageFiles(true, "-keepimagefiles", "", 0,
+                                "do not remove the temporary PNG image files.",
+                                nullptr, false)
                 {
                         ADD(colortype);
                         ADD(fonttype);
                         ADD(embeddedfonts);
+                        ADD(keepImageFiles);
                 }
         }*options;
 
@@ -148,6 +155,8 @@ private:
 
         // Map a PostScript core font to a Windows name + PANOSE characterization.
         Mapper<FontMapping /*, RSString, RSString*/ > ps2win;
+
+        std::list<RSString> temporary_image_files;
 };
 
 #endif

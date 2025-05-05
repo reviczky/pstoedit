@@ -1146,16 +1146,18 @@ void drvbase::dumpPath(bool doFlushText)
 
 					show_rectangle(llx, lly, urx, ury);
 				} else {
-					if (globaloptions.simulateSubPaths)
+					if (globaloptions.simulateSubPaths) {
 						dumpRearrangedPaths();
-					else
+					} else {
 						show_or_convert_path();
+					}
 				}
 			} else {			/* PolyLine */
-				if (globaloptions.simulateSubPaths)
+				if (globaloptions.simulateSubPaths) {
 					dumpRearrangedPaths();
-				else
+				} else {
 					show_or_convert_path();
+				}
 			}
 		}
 		// cleanup
@@ -1228,7 +1230,6 @@ void drvbase::PathInfo::copyInfo(const PathInfo & p)
 	colorName = p.colorName;
 	dashPattern = p.dashPattern;
 }
-
 ostream & operator << (ostream & out, const basedrawingelement & elem)
 {
 	out << "type: " << (int) elem.getType() << " params: ";
@@ -1359,14 +1360,43 @@ const DriverDescription *DescriptionRegister:: getDriverDescForSuffix(const char
 	return founditem;
 }
 
+//	enum class opentype {noopen, normalopen, binaryopen};
+ostream & operator << (ostream & out, const DriverDescription::opentype & t)
+{
+	static const char * names[] = {"noopen", "normalopen", "binaryopen"};
+	out << names[(int)t];
+	return out;
+}
+//	enum class imageformat { noimage, png, bmp, eps, memoryeps }; // format to be used for transfer of raster images
+ostream & operator << (ostream & out, const DriverDescription::imageformat & f)
+{
+	static const char * names[] = {"noimage", "png", "bmp", "eps", "memoryeps"};
+	out << names[(int)f];
+	return out;
+}
+
+
 void DescriptionRegister::listdrivers(ostream &out) const
 {
+	out << "symbolic name;suffix;short description;additional info;#of variants;"
+		"supports subpaths;supports curveto;supports merging;supports text;"
+		"supported image format;file open type;supports multiple pages;"
+		"supports clipping;loaded from" << endl;
 	unsigned int i = 0;
 	while (rp[i] != nullptr) {
-		out << rp[i]->symbolicname << ",";
-		out << rp[i]->suffix << ",";
-		out << rp[i]->short_explanation << "," << rp[i]->additionalInfo();
-		out << "\t(" << rp[i]->filename << ")" << endl;
+		out << rp[i]->symbolicname << ";";
+		out << rp[i]->suffix << ";";
+		out << rp[i]->short_explanation << ";" << rp[i]->additionalInfo() << ";";
+		out << rp[i]->variants() << ";";
+		out << rp[i]->backendSupportsSubPaths << ";";
+		out << rp[i]->backendSupportsCurveto << ";";
+		out << rp[i]->backendSupportsMerging  << ";";
+		out << rp[i]->backendSupportsText << ";";
+		out << rp[i]->backendDesiredImageFormat << ";";
+		out << rp[i]->backendFileOpenType << ";";
+		out << rp[i]->backendSupportsMultiplePages << ";";
+		out << rp[i]->backendSupportsClipping << ";";
+		out << rp[i]->filename << endl;
 		i++;
 	}
 }

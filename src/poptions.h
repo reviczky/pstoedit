@@ -132,11 +132,11 @@ private:
 template <class ValueType, class ExtractorType >
 class OptionT : public OptionBase {
 public:
-	OptionT < ValueType, ExtractorType > (bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue, bool hideInGui_p = false)	:
+	OptionT /* < ValueType, ExtractorType > */ (bool optional_p, const char *flag_p, const char *argname_p, unsigned int propsheet_p, const char *description_p, const char * TeXhelp_p, const ValueType & initialvalue, bool hideInGui_p = false)	:
 		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p, hideInGui_p),
 		value(initialvalue) {
 	};
-	OptionT < ValueType, ExtractorType >(bool optional_p, const char* flag_p, const char* argname_p, unsigned int propsheet_p, const char* description_p, const char* TeXhelp_p, ctorToUseForValue , bool hideInGui_p = false) :
+	OptionT /* < ValueType, ExtractorType > */ (bool optional_p, const char* flag_p, const char* argname_p, unsigned int propsheet_p, const char* description_p, const char* TeXhelp_p, ctorToUseForValue , bool hideInGui_p = false) :
 		OptionBase(optional_p, flag_p, argname_p, propsheet_p, description_p, TeXhelp_p, hideInGui_p),
         value() // use default init for value
 	{

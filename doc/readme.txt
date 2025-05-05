@@ -1,5 +1,5 @@
 PSTOEDIT 
-Copyright (C) 1993 - 2023 Wolfgang Glunz, wglunz35_AT_pstoedit.net
+Copyright (C) 1993 - 2024 Wolfgang Glunz, wglunz35_AT_pstoedit.net
 
 pstoedit converts PostScript(TM) and PDF files to other vector graphic
 formats so that they can be edited graphically. See pstoedit.htm or
@@ -45,6 +45,7 @@ do "sudo apt-get install libzip-dev" to install libzip.
 And for support of EMF, the libEMF is needed.
 do "sudo apt-get install libemf-dev" to install libEMF.
 
+See the file pstoedit.linux.prerequisites.txt for more prerequisites you might need to install before under Linux
 
 Then just run these commands:
 sh configure; 
@@ -61,45 +62,10 @@ When building pstoedit under cygwin/Linux you may need to set LDFLAGS to /usr/lo
 Under some systems (e.g. cygwin) it is not possible to link static libraries (.a) into a dynamic library (.so/.dll). In this case, you need to have also a shared version of the relevant libs, e.g. of libEMF. In order to get a shared version, you normally need to set the option "--enabled-shared" during the "configure" run for the library.
 
 
-Installing pstoedit under Windows 9x/NT/2000/XP/Vista/Windows 7:
-------------------------------------------------------
+Installing pstoedit under Windows 
+---------------------------------
 
-best use the pstoeditsetup.exe which is available for 32 and 64 bit environments.
-
-
-
-Installing pstoedit under OS/2:
--------------------------------
-
-See the readme.os2 in the os2 directory. There you also find a makefile 
-for OS/2.
-
-pstoedit and the -dSAFER option of Ghostscript:
------------------------------------------------
-Ghostscript provides an option -dSAFER that disables all file access
-functions of PostScript. Some administrators even install a wrapper
-like to following instead of gs directly
-#!/bin/sh
-gs.real -dSAFER $*
-
-So when a user uses gs he/she actually runs this script. However,
-pstoedit needs to have access to files for its operation. So
-it is not possible to use this wrapper for gs in combination with pstoedit.
-You would get an error message like "Error: /invalidfileaccess in (w)".
-
-As an alternative the following can be done:
-1. Install the binary of pstoedit as pstoedit.real
-2. Create the following wrapper and name it pstoedit
-#!/bin/sh
-GS=gs.real
-export GS
-pstoedit.real -include /??????/local/safer.ps $*
-
-A template for safer.ps can be found in the misc subdirectory.
-This way pstoedit can open all the files it needs (the input file and an
-output file). After that then -- via the included file -- all file
-operations are disabled and the input file is processed. Any file operation
-that is executed be the user's PostScript file is disabled this way.
+Best use the  pstoedit_gui_setup_x64.exe for installation.
 
 
 Using pstoedit:

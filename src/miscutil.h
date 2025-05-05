@@ -104,7 +104,7 @@ private:
 //#ifdef NOTYETFULLYBASEDONSTL
 #include <string>
 typedef std::string RSString;
-inline bool string_contains(const RSString & s, const RSString & substr) { return s.find(substr) !=RSString::npos; }
+inline bool string_contains(const RSString & s, const RSString & substr) { return s.find(substr) != RSString::npos; }
 #define DONOTIMPLEMENTRSSTRING
 // FIXME
 
@@ -177,7 +177,8 @@ public:
 	T * firstEntry;
 
 private: 
-	NOCOPYANDASSIGN(Mapper<T>)
+	Mapper(const Mapper<T>&) = delete;
+	const Mapper<T> & operator=(const Mapper<T>&) = delete;
 };
 
 //lint -esym(1712,KeyValuePair) // no default ctor
@@ -198,9 +199,8 @@ public:
 		KeyValuePair<K,V> * nextEntry;
 
 private: 
-#define COMMA ,
-		NOCOPYANDASSIGN(KeyValuePair<K COMMA V>) 
-#undef COMMA
+	KeyValuePair(const KeyValuePair<K, V>&) = delete;
+	const KeyValuePair<K, V> & operator=(const KeyValuePair<K, V>&) = delete;
 };
 
 

@@ -1,7 +1,7 @@
 EXTRA_DIST=pstoedit.pro ps_pro_to_ph.awk get_D_and_I_options.sh
 
 if HAVE_PLUGINSRC
-# LIBPLUGINS_ENTRY=libp2edrvplugins.la
+#LIBPLUGINS_ENTRY=libp2edrvplugins.la
 endif
 
 if HAVE_LIBPLOTTER
@@ -96,10 +96,12 @@ libp2edrvstd_la_SOURCES=			\
 libp2edrvstd_la_LIBADD=libpstoedit.la
 libp2edrvstd_la_LDFLAGS=-no-undefined -module -avoid-version
 
-#libp2edrvplugins_la_SOURCES=drvmif.cpp drvcgm.cpp drvrtf.cpp drvwwmf.cpp
-#libp2edrvplugins_la_LIBADD=
-#libp2edrvplugins_la_LDFLAGS=
-#libp2edrvplugins_la_CFLAGS=-I../Check/ -I../othersrc/cdlib
+#libp2edrvplugins_la_SOURCES=drvmif.cpp drvcgm.cpp cdlib.cpp drvrtf.cpp drvwwmf.cpp
+# do not run make dist with these enabled
+#libp2edrvplugins_la_SOURCES=drvmif.cpp drvcgm.cpp cdlib.cpp drvrtf.cpp 
+#libp2edrvplugins_la_LIBADD=libpstoedit.la
+#libp2edrvplugins_la_LDFLAGS=-no-undefined -module -avoid-version
+#libp2edrvplugins_la_CPPFLAGS=-I../check/ -I../othersrc/cdlib
 
 libp2edrvlplot_la_SOURCES=drvlplot.cpp drvlplot.h initlibrary.cpp
 libp2edrvlplot_la_LIBADD=$(LIBPLOTTER_LDFLAGS) libpstoedit.la

@@ -175,6 +175,7 @@ public:
 	OptionT < double, DoubleValueExtractor > flatness ;//= 1.0f;		// used for setflat
 	OptionT < bool, BoolTrueExtractor > simulateClipping ;//= false;	// simulate clipping most useful in combination with -dt
 	OptionT < bool, BoolTrueExtractor > usePlainStrings; //= false;
+	OptionT < bool, BoolTrueExtractor > useFindDevice; //= false;
 	OptionT < bool, BoolTrueExtractor > useRGBcolors ;//= false;
 	OptionT < bool, BoolTrueExtractor > useAGL ;//= false;
 	OptionT < bool, BoolTrueExtractor > noclip ;//= false;
@@ -278,12 +279,12 @@ private:
 		"also \\Opt{-flat} option). However, in some cases the user might wish to "
 		"have this behavior also for output formats that originally support curves. This "
 		"can be forced via the \\Opt{-nc} option.",
-		false,
-		true /* hide in GUI */),		//
+		false),
 /*
 	nosubpaths			(true, "-nsp",noArgument,d_t,"normally subpaths are used if the output format support them. This option turns off subpaths.",
 		UseDefaultDoku,
-		false),	*/
+		false),	
+*/
 	mergelines			(true, "-mergelines",noArgument,d_t,"merge adjacent paths if one is a stroke and the other is a fill. This depends on the capabilities of the selected output format",
 		"Some output formats permit the representation of filled "
 		"polygons with edges that are in a different color than the fill color. "
@@ -478,6 +479,9 @@ private:
 		"the \\Opt{-dt} option.",
 		false),	// simulate clipping
 	usePlainStrings		(true, "-ups",noArgument,b_t,"write text as plain string instead of hex string in intermediate format - normally useful for trouble shooting and debugging only.",
+		UseDefaultDoku,
+		false),
+	useFindDevice(true, "-usefinddevice", noArgument, b_t, "use the ghostscript internal finddevice operator during image handling instead of standard operators - normally useful for trouble shooting and debugging only.",
 		UseDefaultDoku,
 		false),
 	useRGBcolors		(true, "-rgb",noArgument,g_t,"use RGB colors instead of CMYK",
@@ -709,6 +713,7 @@ private:
 	ADD(flatness);		
 	ADD(simulateClipping);	
 	ADD(usePlainStrings);	
+	ADD(useFindDevice);
 	ADD(useRGBcolors);
 	ADD(useAGL);
 	ADD(noclip);
@@ -748,6 +753,7 @@ private:
 	}
 	virtual bool hideSheetFromGui(unsigned int sheet) const { return (sheet == h_t); }
 	virtual bool hideFromDoku(const OptionBase& opt) const { return (opt.propsheet == h_t); }
+	NOCOPYANDASSIGN(PsToEditOptions)
 };
 
 #endif

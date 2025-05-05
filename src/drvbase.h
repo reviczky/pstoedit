@@ -118,7 +118,6 @@ public:
 	friend ostream & operator<<(ostream & out,const BBox &bb) {
 		return out << "LL: " << bb.ll << " UR: " << bb.ur ;
 	}
- 
 };
 
 // image needs Point !
@@ -412,7 +411,6 @@ public:
 
 	static bool use_fake_version_and_date; // for regression testing only
 	static const char * VersionString();
-	static void set_VersionString(const char * v);
 	static RSString DateString();
 
 	void		setdefaultFontName(const char * n) {defaultFontName = n;}
@@ -672,9 +670,9 @@ private:
 
 
 	// = INHIBITORS (declared, but not defined)
-	drvbase(); // avoid default ctor
-	drvbase(const drvbase &);
-	drvbase & operator=(const drvbase&);
+	drvbase() = delete; // avoid default ctor
+	drvbase(const drvbase &) = delete;
+	drvbase & operator=(const drvbase&) = delete;
 
 };
 
@@ -690,7 +688,7 @@ public:
 
 private:
 	NOCOPYANDASSIGN(DashPattern)
-	DashPattern();
+	DashPattern() = delete;
 };
 
 typedef const char * (*makeColorNameType)(float r, float g, float b);
@@ -716,6 +714,7 @@ private:
     const makeColorNameType makeColorName_ ;
 
 	NOCOPYANDASSIGN(ColorTable)
+	ColorTable() = delete;
 };
 
 
@@ -922,8 +921,8 @@ private:
 //lint -esym(1712,DriverDescription) // no default ctor
 class DLLEXPORT DriverDescription {
 public:
-	enum class opentype {noopen, normalopen, binaryopen};
-	enum class imageformat { noimage, png, bmp, eps, memoryeps }; // format to be used for transfer of raster images
+	enum class opentype {noopen=0, normalopen, binaryopen};
+	enum class imageformat { noimage=0, png, bmp, eps, memoryeps }; // format to be used for transfer of raster images
 
 	DriverDescription(const char * const s_name, 
 			const char * const short_expl, 
@@ -1000,7 +999,7 @@ public:
 			const bool 	backendSupportsCurveto_p,
 			const bool 	backendSupportsMerging_p, // merge a separate outline and filling of a polygon -> 1. element
 			const bool 	backendSupportsText_p,
-			const imageformat  backendDesiredImageFormat_p, // supports images from a PNG files
+			const DriverDescription::imageformat  backendDesiredImageFormat_p, // supports images from a PNG files
 			const DriverDescription::opentype  backendFileOpenType_p,
 			const bool	backendSupportsMultiplePages_p,
 			const bool	backendSupportsClipping_p,
@@ -1066,8 +1065,8 @@ public:
 	}
 
 private: 
-
-	NOCOPYANDASSIGN(DriverDescriptionT<T>)
+	DriverDescriptionT(const DriverDescriptionT<T>&) = delete;
+	const DriverDescriptionT<T> & operator=(const DriverDescriptionT<T>&) = delete;
 };
 
 #if !( (defined (__GNUG__)  && (__GNUC__>=3) ) || defined (_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1900) )

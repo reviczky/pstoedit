@@ -64,6 +64,10 @@ PsToEditOptions& PsToEditOptions::theOptions() // singleton
 
 #include "psfront.h"
 
+#ifndef _MSC_VER
+// for iterating over shared libraries
+#include <link.h>
+#endif
 
 extern const char *defaultPIoptions(ostream & errstream, int verbose);	// in callgs.cpp
 
@@ -159,6 +163,7 @@ private:	// yes these are private, library users should use the public interface
 	void show_path() override {	}
 	void show_rectangle(const float /* llx */ , const float /* lly */ , const float /* urx */ ,
 						const float /* ury */ ) override {	}
+	NOCOPYANDASSIGN(drvNOBACKEND)
 };
 // *INDENT-ON*
 
@@ -270,6 +275,17 @@ ProgramOptions* getProgramOptionsForDriver(const char* driverName) {
 
 
 #ifndef UPPVERSION
+#ifndef _MSC_VER
+static int dl_iterate_callback(struct dl_phdr_info *info, size_t size, void *data){
+	if (size && info && strstr(info->dlpi_name, "libpstoedit.so.")) {
+//		cout << "found libpstoedit.so in " << info->dlpi_name << endl;
+		*((RSString*)data) = info->dlpi_name;
+		return 1;
+	}
+	return 0;
+}
+#endif
+
 extern "C" DLLEXPORT
 void loadpstoeditplugins(const char *progname, ostream & errstream, bool verbose)
 {
@@ -294,7 +310,7 @@ void loadpstoeditplugins(const char *progname, ostream & errstream, bool verbose
 		pluginsloaded |= loadPlugInDrivers(szExePath, errstream,verbose);
 	  }
 	  // now try also $exepath/../lib/pstoedit
-      if (szExePath[0]) {
+          if (szExePath[0]) {
          // it is not an empty string
 #if COMPILEDFOR64BIT 
 	    strcat_s(szExePath,1000,"/../lib64/pstoedit");
@@ -306,6 +322,24 @@ void loadpstoeditplugins(const char *progname, ostream & errstream, bool verbose
 	    }
 	  }
 	}
+#ifndef _MSC_VER
+	if (!pluginsloaded) {
+	  // finally try the directory where libpstoedit.so.0 was found
+	  // libpstoedit.so.0
+          RSString pathname_of_libpstoedit("");
+          int found = dl_iterate_phdr( dl_iterate_callback, &pathname_of_libpstoedit);
+	  if (found && pathname_of_libpstoedit != "") {
+	    char * fullfilename = cppstrdup(pathname_of_libpstoedit.c_str());
+	    char * dirname = strrchr(fullfilename, directoryDelimiter);
+	    if (dirname) {
+		*dirname = '\0';
+		pluginsloaded |= loadPlugInDrivers(fullfilename, errstream,verbose);
+	    }
+	    delete [] fullfilename;
+	  }
+	}
+#endif
+
 #ifdef PSTOEDITLIBDIR
 	if (!pluginsloaded) {
 		struct stat s;
@@ -365,6 +399,14 @@ ProgramOptions* getProgramOptions() {
 	return &PsToEditOptions::theOptions();
 }
 
+static RSString suffixOfFilename(const char* filename) {
+	const char* suffix = strrchr(filename,'.');
+	if (suffix) {
+		return RSString(suffix + 1);
+	} else {
+		return "";
+	}
+}
 
 extern "C" DLLEXPORT
 int pstoedit(int argc, const char *const argv[], ostream & errstream,
@@ -566,8 +608,6 @@ int pstoedit(int argc, const char *const argv[], ostream & errstream,
 			commandline.addarg("-dDELAYBIND");
 		}
 		commandline.addarg("-dWRITESYSTEMDICT");
-
-
 		if (generalOptions.verbose()) {
 			commandline.addarg("-dESTACKPRINT");
 			//commandline.addarg("-sDEBUG=true");
@@ -585,7 +625,6 @@ Ghostscript now automatically encapsulates EPS files, so that EPS files will dis
 To set the page size to match the EPS bounding box, use -dEPSCrop. To scale an EPS to fit the current page size, use -dEPSFitPage. If neither of these options are used and the EPS file does not fit within the current page, a warning will be generated.
 To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename) (r) file cvs exec not (filename) run.
 */
-
 
 		for (unsigned int psi = 0; psi < generalOptions.psArgs().argc; psi++) {
 			if (strlen(generalOptions.psArgs().argv[psi])) {
@@ -609,25 +648,26 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 		}
 		return gsresult; // for gstest
 	}
+
 	if (generalOptions.drivername.value.length() == 0) {
-		// try to find driver according to suffix of input file
+		// try to find driver according to suffix of output file
 		if (!generalOptions.nameOfOutputFile) {
 			errstream << "No output format specified (-f option) and format could not be deduced from suffix of output file since no output filename was given" << endl;
 			shortusage(diag);
 			return 1;
 		} else {
-			const char * suffixOfInputFile = strrchr(generalOptions.nameOfOutputFile,'.');
-			if (!suffixOfInputFile) {
+			const RSString suffixOfOutputFile = suffixOfFilename(generalOptions.nameOfOutputFile);
+			if (suffixOfOutputFile == "") {
 				errstream << "No output format specified (-f option) and format could not be deduced from suffix of output file since no suffix was found" << endl;
 				shortusage(diag);
 				return 1;
 			} else {
-				const DriverDescription *suffixDriverDesc = getglobalRp()->getDriverDescForSuffix((suffixOfInputFile+1)); // +1 == skip "."
+				const DriverDescription *suffixDriverDesc = getglobalRp()->getDriverDescForSuffix(suffixOfOutputFile.c_str()); 
 				if (suffixDriverDesc) {
 					errstream << "No explicit output format specified - using " << suffixDriverDesc->symbolicname << " as derived from suffix of output file" << endl;
 					generalOptions.drivername = suffixDriverDesc->symbolicname;
 				} else {
-					errstream << "No output format specified (-f option) and format could not be uniquely deduced from suffix " << suffixOfInputFile << " of output file" << endl;
+					errstream << "No output format specified (-f option) and format could not be uniquely deduced from suffix " << suffixOfOutputFile << " of output file" << endl;
 					// usage(errstream);
 					getglobalRp()->explainformats(diag); // ,true);
 					return 1;
@@ -755,6 +795,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 			commandline.addarg("-dBATCH");
 			RSString tempbuffer("-sDEVICE=") ; 
 			tempbuffer += gsdevice; // e.g., pdfwrite ;
+			// we shouldn't need the --permit-devices since we have the -sDEVICE= option
 			commandline.addarg(tempbuffer.c_str() );
 			for (unsigned int psi = 0; psi < generalOptions.psArgs().argc; psi++) {
 				if (strlen(generalOptions.psArgs().argv[psi])) {
@@ -778,6 +819,7 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					      << " executed command : " << commandline << endl;
 			}
 			return gsresult;
+			// end case for gs devices
 		} else {
 			//
 			// standard case - neither gstest, nor a gs device
@@ -986,6 +1028,9 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				if (generalOptions.usePlainStrings) {
 					inFileStream << "/pstoedit.ashexstring false def" << endl;
 				}
+				if (generalOptions.useFindDevice) {
+					inFileStream << "/pstoedit.usefinddevice true def" << endl;
+				}
 				if (generalOptions.t2fontsast1) {
 					inFileStream << "/pstoedit.t2fontsast1 true def" << endl;
 				} else {
@@ -1107,6 +1152,54 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					writeFileName(inFileStream, generalOptions.nameOfIncludeFile.value.c_str());
 					inFileStream << ") def" << endl;
 				}
+				int gs_revision = 0; 
+				{
+					// retrieve revision of ghostscript
+					Argv commandline;
+					const char* gstocall = whichPI_func(errstream, generalOptions.verbose(),
+						generalOptions.gsregbase.value.c_str(), generalOptions.GSToUse.value.c_str());
+					if (gstocall == nullptr) {
+						return 3;
+					}
+					commandline.addarg(gstocall);
+					// -dNODISPLAY -sstdout=v.txt -q -c revision 100 string cvs print quit
+					commandline.addarg("-dNODISPLAY");
+					commandline.addarg("-sstdout=" + gsout);
+					commandline.addarg("-q");
+					commandline.addarg("-c");
+					commandline.addarg("revision");
+					commandline.addarg("100");
+					commandline.addarg("string");
+					commandline.addarg("cvs");
+					commandline.addarg("print");
+					commandline.addarg("quit");
+
+					if (generalOptions.verbose()) {
+						errstream << "now calling the interpreter via: " << commandline << endl;
+					}
+					gsresult = call_PI_func(commandline.argc, commandline.argv);
+					if (gsresult != 0)  {
+						errstream << "PostScript/PDF Interpreter finished. Return status " << gsresult
+							<< " executed command : " << commandline << endl;
+					}
+					ifstream versionfile(gsout);
+					
+					versionfile >> gs_revision;
+					if (generalOptions.verbose()) {
+						errstream << "Revision of PostScript Interpreter: " << gs_revision << endl;
+					}
+				}
+
+				const RSString suffixOfInputFile = suffixOfFilename(generalOptions.nameOfInputFile);
+				if ((gs_revision > 9561 ) &&
+					((suffixOfInputFile == "pdf") || (suffixOfInputFile == "PDF")) ) {
+			       // since version 9.56.1 of GhostScript, the PDF interpreter is completely written in C and not longer works with the PostScript
+				   // level hooking that pstoedit uses
+					errstream << "Warning: PDF files cannot be converted anymore when using versions of GhostScript newer than 9.56.1." << endl;
+					errstream << "The generated output file will contain no image data." << endl;
+				}
+
+				const char * permit_devices = nullptr;
 
 				switch (currentDriverDesc->backendDesiredImageFormat) {
 					case DriverDescription::imageformat::noimage :
@@ -1115,18 +1208,21 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 							inFileStream << "/pstoedit.backendSupportsFileImages true def" << endl;
 							inFileStream << "/pstoedit.withimages true def" << endl;
 							inFileStream << "/pstoedit.imagedevicename (bmp16m) def" << endl;
+							permit_devices="--permit-devices=bmp16m";
 							inFileStream << "/pstoedit.imagefilesuffix (.bmp)   def" << endl;
 							break;
 					case DriverDescription::imageformat::png :
 							inFileStream << "/pstoedit.backendSupportsFileImages true def" << endl;
 							inFileStream << "/pstoedit.withimages true def" << endl;
 							inFileStream << "/pstoedit.imagedevicename (png16m) def" << endl;
+							permit_devices="--permit-devices=png16m";
 							inFileStream << "/pstoedit.imagefilesuffix (.png)   def" << endl;
 							break;
 					case DriverDescription::imageformat::eps :
 							inFileStream << "/pstoedit.backendSupportsFileImages true def" << endl;
 							inFileStream << "/pstoedit.withimages true def" << endl;
 							inFileStream << "/pstoedit.imagedevicename (epswrite) def" << endl;
+							permit_devices="--permit-devices=epswrite";
 							inFileStream << "/pstoedit.imagefilesuffix (.eps)   def" << endl;
 							break;
 					case DriverDescription::imageformat::memoryeps :
@@ -1246,6 +1342,10 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				if (pioptions && (strlen(pioptions) > 0)) {
 					commandline.addarg(pioptions);
 				}
+				if (permit_devices && (gs_revision >= 10040)) {
+					// since 10.04.0 we need to add the permit_devices option. Earlier this is no known.
+					commandline.addarg(permit_devices);
+				}
 				if (!generalOptions.verbose())
 					commandline.addarg("-q");
 				if (drivername != "ps2ai") {	// not for ps2ai
@@ -1277,6 +1377,9 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 					if (generalOptions.pngimage.value.length()) {
 						commandline.addarg("-dNOPAUSE");
 						commandline.addarg("-dBATCH");
+						if (gs_revision >= 10400) {
+							commandline.addarg("--permit-devices=png16m");
+						}
 						commandline.addarg("-sDEVICE=png16m");
 						RSString tempbuffer = "-sOutputFile=";
 						tempbuffer += generalOptions.pngimage.value;
@@ -1287,10 +1390,6 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				}
 				commandline.addarg("-dDELAYSAFER");
 				commandline.addarg("-dNOEPS"); // otherwise EPSF files create implicit showpages and a save/restore pair which disturbs the setPageSize handling
-
-				//layer commandline.addarg("-dDEBUG");
-				//layer commandline.addarg("pdf_cslayer.ps");
-
 
 				for (unsigned int psi = 0; psi < generalOptions.psArgs().argc; psi++) {
 					if (strlen(generalOptions.psArgs().argv[psi])) {
@@ -1312,9 +1411,9 @@ To get the pre 8.00 behaviour, either use -dNOEPS or run the file with (filename
 				} else {
 					commandline.addarg(gsinfilename.c_str());
 				}
-				if (generalOptions.verbose())
+				if (generalOptions.verbose()) {
 					errstream << "now calling the interpreter via: " << commandline << endl;
-				// gsresult = system(commandline);
+				}
 				gsresult = call_PI_func(commandline.argc, commandline.argv);
 				if (gsresult != 0) {
 					errstream << "PostScript/PDF Interpreter finished. Return status " << gsresult
